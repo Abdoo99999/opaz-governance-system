@@ -9,13 +9,20 @@ import ComplianceMonitor from "@/components/ComplianceMonitor";
 import ImprovementPlan from "@/components/ImprovementPlan";
 import Reports from "@/components/Reports";
 import Login from "@/components/Login";
+import { useToast } from '@/hooks/use-toast';
+
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentView, setCurrentView] = useState('dashboard');
+  const { toast } = useToast();
 
   const handleLogin = () => {
     setIsLoggedIn(true);
+    toast({
+        title: "Login Successful",
+        description: "Welcome to the OIA Governance System.",
+    });
   };
 
   const handleNavigate = (view: string) => {
