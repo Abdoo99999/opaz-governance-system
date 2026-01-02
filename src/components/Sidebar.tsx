@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart } from 'lucide-react';
+import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ const menuItems = [
   { name: 'سجل الشركات', icon: Building2, path: '/companies' },
   { name: 'تقييم النضج', icon: ClipboardCheck, path: '/maturity-assessment' },
   { name: 'مراقب الامتثال', icon: ShieldAlert, path: '/compliance-monitor' },
+  { name: 'خطة التحسين', icon: Kanban, path: '/improvement-plan' },
   { name: 'التقارير', icon: LineChart, path: '/reports' },
 ];
 
