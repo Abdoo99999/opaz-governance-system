@@ -1,0 +1,106 @@
+"use client";
+
+import React, { useRef, useState } from 'react';
+import { Paperclip, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import type { Indicator } from '@/lib/data/indicators';
+
+interface IndicatorCardProps {
+    indicator: Indicator;
+    score?: number;
+    file?: File | null;
+    onScoreChange: (indicatorId: number, score: number) => void;
+    onFileChange: (indicatorId: number, file: File | null) => void;
+}
+
+const scoreColors = [
+    '#FF3B3B', // 1 - Red (Danger)
+    '#FFA500', // 2 - Orange
+    '#FFD700', // 3 - Yellow
+    '#20B2AA', // 4 - Teal
+    '#00E096', // 5 - Neon Green (Success)
+];
+
+const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const evidenceRequired = (score ?? 0) > 3;
+
+    const handleFileClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0] || null;
+        onFileChange(indicator.id, selectedFile);
+    };
+
+    return (
+        <motion.div
+            id={`indicator-${indicator.id}`}
+            className="glass p-6"
+            variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.4 }}
+        >
+            {/* Header */}
+            <div className="flex items-start justify-between gap-4 mb-6">
+                <Badge className="bg-gold-500 text-royal-900 text-lg font-bold">
+                    Indicator #{indicator.id}
+                </Badge>
+                <h3 className="flex-1 text-xl font-bold text-right leading-relaxed">
+                    {indicator.text_ar}
+                </h3>
+            </div>
+            
+            {/* Scoring */}
+            <div className="mb-6">
+                <p className="text-gray-400 text-right mb-3 text-sm">حدد مستوى النضج (1 = الأدنى, 5 = الأعلى):</p>
+                <div className="flex justify-center items-center gap-2 md:gap-4 bg-black/20 p-3 rounded-lg">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                        <motion.button
+                            key={value}
+                            onClick={() => onScoreChange(indicator.id, value)}
+                            className="w-12 h-12 md:w-16 md:h-16 text-2xl font-bold rounded-lg border-2 transition-all duration-200"
+                            style={{
+                                borderColor: score === value ? scoreColors[value - 1] : 'rgba(255, 255, 255, 0.2)',
+                                backgroundColor: score === value ? scoreColors[value - 1] : 'transparent',
+                                color: score === value ? '#001220' : 'white',
+                                boxShadow: score === value ? `0 0 15px ${scoreColors[value - 1]}` : 'none'
+                            }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            {value}
+                        </motion.button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Evidence Upload */}
+            <div>
+                 <div className="flex items-center justify-end gap-3 text-sm">
+                    {evidenceRequired && !file && <span className="text-yellow-400">مطلوب إرفاق دليل</span>}
+                    {evidenceRequired && file && <span className="text-green-400 flex items-center gap-1"><CheckCircle size={16}/> الدليل مرفق</span>}
+                     <Button variant="outline" onClick={handleFileClick} className="bg-transparent border-white/20 hover:bg-white/10 text-white">
+                        <Paperclip className="ml-2 h-4 w-4" />
+                        {file ? 'تغيير الدليل' : 'إرفاق دليل'}
+                    </Button>
+                </div>
+                 <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelected}
+                    className="hidden"
+                />
+                 {file && (
+                    <div className="text-right mt-2 text-xs text-gray-400">
+                        ملف مرفق: {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                    </div>
+                )}
+            </div>
+        </motion.div>
+    );
+};
+
+export default IndicatorCard;
