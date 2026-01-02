@@ -6,7 +6,7 @@ import { AXES, INDICATORS, Indicator } from '@/lib/data/indicators';
 import IndicatorCard from './IndicatorCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,13 +23,17 @@ import { useLanguage } from '@/context/LanguageContext';
 type Scores = { [key: number]: number };
 type Files = { [key: number]: File | null };
 
-const Assessment: React.FC = () => {
+interface AssessmentProps {
+    onNavigate: (view: string) => void;
+}
+
+const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     const [activeAxis, setActiveAxis] = useState(AXES[0].id);
     const [scores, setScores] = useState<Scores>({});
     const [files, setFiles] = useState<Files>({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [showValidationModal, setShowValidationModal] = useState(false);
-    const [showSuccess, setShowSuccess] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [isAssessmentComplete, setIsAssessmentComplete] = useState(false);
     const { t, language } = useLanguage();
 
     const indicatorsForAxis = useMemo(() => INDICATORS.filter(ind => ind.axisId === activeAxis), [activeAxis]);
@@ -51,10 +55,12 @@ const Assessment: React.FC = () => {
     };
 
     const handleScoreChange = (indicatorId: number, score: number) => {
+        if (isAssessmentComplete) return;
         setScores(prev => ({ ...prev, [indicatorId]: score }));
     };
 
     const handleFileChange = (indicatorId: number, file: File | null) => {
+        if (isAssessmentComplete) return;
         setFiles(prev => ({ ...prev, [indicatorId]: file }));
     };
 
@@ -69,23 +75,19 @@ const Assessment: React.FC = () => {
     };
 
     const handleSubmit = () => {
-        setIsSubmitting(true);
         const missing = getMissingIndicators();
         if (missing.length > 0) {
             setShowValidationModal(true);
         } else {
-            setShowSuccess(true);
-            // In a real app, you'd redirect after the animation
-            setTimeout(() => {
-                console.log("Assessment Submitted!", { scores, files });
-            }, 3000);
+            setShowSuccessModal(true);
+            setIsAssessmentComplete(true);
+            console.log("Assessment Submitted!", { scores, files });
         }
     };
     
     const handleJumpToIndicator = (indicator: Indicator) => {
         setActiveAxis(indicator.axisId);
         setShowValidationModal(false);
-        // Optional: scroll to the indicator card after jumping
         setTimeout(() => {
             document.getElementById(`indicator-${indicator.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100); 
@@ -144,8 +146,8 @@ const Assessment: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                             <Button variant="outline" className="text-white border-white/20 hover:bg-white/10">{t('assessment.saveDraft')}</Button>
-                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400">{t('assessment.submitFinal')}</Button>
+                             <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete}>{t('assessment.saveDraft')}</Button>
+                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete}>{t('assessment.submitFinal')}</Button>
                         </div>
                     </div>
                 </header>
@@ -168,11 +170,21 @@ const Assessment: React.FC = () => {
                                     file={files[indicator.id]}
                                     onScoreChange={handleScoreChange}
                                     onFileChange={handleFileChange}
+                                    isLocked={isAssessmentComplete}
                                 />
                             ))}
                         </motion.div>
                     </AnimatePresence>
                 </div>
+
+                {isAssessmentComplete && (
+                     <div className="sticky bottom-0 z-10 p-4 bg-royal-900/80 backdrop-blur-sm border-t border-white/10 flex items-center justify-between">
+                        <span className="font-bold text-success">{t('assessment.locked')}</span>
+                        <Button onClick={() => onNavigate('compliance-monitor')} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                             {t('assessment.nextCompliance')} <ArrowRight className="mr-2 h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
             </main>
             
             {/* Validation Modal */}
@@ -205,19 +217,30 @@ const Assessment: React.FC = () => {
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Success Confetti */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <Confetti active={showSuccess} config={confettiConfig} />
-            </div>
-            {showSuccess && (
-                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-                    <motion.div initial={{opacity: 0, scale: 0.8}} animate={{opacity: 1, scale: 1}} className="text-center">
-                        <CheckCircle className="w-24 h-24 text-success mx-auto mb-4" />
-                        <h2 className="text-3xl font-bold">{t('assessment.successTitle')}</h2>
-                        <p className="text-gray-300">{t('assessment.successDesc')}</p>
-                    </motion.div>
-                 </div>
-            )}
+            {/* Success Modal */}
+             <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+                <AlertDialogContent className="glass text-white text-center">
+                    <AlertDialogHeader>
+                        <div className="mx-auto">
+                            <Confetti active={showSuccessModal} config={confettiConfig} />
+                            <CheckCircle className="w-24 h-24 text-success mx-auto mb-4" />
+                        </div>
+                        <AlertDialogTitle className="text-3xl font-bold">{t('assessment.successTitle')}</AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-300 pt-2">
+                            {t('assessment.successDescManual')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="sm:justify-center pt-4">
+                        <Button variant="outline" onClick={() => setShowSuccessModal(false)} className="text-white border-white/20 hover:bg-white/10">
+                            {t('assessment.stayHere')}
+                        </Button>
+                        <Button onClick={() => onNavigate('reports')} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                            {t('assessment.viewResults')}
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
         </div>
     );
 };

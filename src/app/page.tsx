@@ -47,7 +47,7 @@ export default function Home() {
       case 'companies':
         return <CompanyRegistry />;
       case 'maturity-assessment':
-        return <Assessment />;
+        return <Assessment onNavigate={handleNavigate} />;
       case 'compliance-monitor':
         return <ComplianceMonitor />;
       case 'improvement-plan':

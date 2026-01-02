@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import type { Indicator } from '@/lib/data/indicators';
 import { useLanguage } from '@/context/LanguageContext';
+import { cn } from '@/lib/utils';
 
 interface IndicatorCardProps {
     indicator: Indicator;
@@ -14,6 +15,7 @@ interface IndicatorCardProps {
     file?: File | null;
     onScoreChange: (indicatorId: number, score: number) => void;
     onFileChange: (indicatorId: number, file: File | null) => void;
+    isLocked?: boolean;
 }
 
 const scoreColors = [
@@ -24,12 +26,13 @@ const scoreColors = [
     '#00E096', // 5 - Neon Green (Success)
 ];
 
-const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange }) => {
+const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange, isLocked }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const evidenceRequired = (score ?? 0) > 3;
     const { t, language } = useLanguage();
 
     const handleFileClick = () => {
+        if (isLocked) return;
         fileInputRef.current?.click();
     };
 
@@ -41,7 +44,7 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
     return (
         <motion.div
             id={`indicator-${indicator.id}`}
-            className="glass p-6"
+            className={cn("glass p-6", isLocked && "opacity-70 pointer-events-none")}
             variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
             transition={{ duration: 0.4 }}
         >
@@ -70,8 +73,9 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
                                 color: score === value ? '#001220' : 'white',
                                 boxShadow: score === value ? `0 0 15px ${scoreColors[value - 1]}` : 'none'
                             }}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: isLocked ? 1 : 1.1 }}
+                            whileTap={{ scale: isLocked ? 1 : 0.95 }}
+                            disabled={isLocked}
                         >
                             {value}
                         </motion.button>
@@ -84,7 +88,7 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
                  <div className="flex items-center justify-end gap-3 text-sm">
                     {evidenceRequired && !file && <span className="text-yellow-400">{t('assessment.evidenceRequired')}</span>}
                     {evidenceRequired && file && <span className="text-green-400 flex items-center gap-1"><CheckCircle size={16}/> {t('assessment.evidenceAttached')}</span>}
-                     <Button variant="outline" onClick={handleFileClick} className="bg-transparent border-white/20 hover:bg-white/10 text-white">
+                     <Button variant="outline" onClick={handleFileClick} className="bg-transparent border-white/20 hover:bg-white/10 text-white" disabled={isLocked}>
                         <Paperclip className="ml-2 h-4 w-4" />
                         {file ? t('assessment.changeEvidence') : t('assessment.attachEvidence')}
                     </Button>
@@ -94,6 +98,7 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
                     ref={fileInputRef}
                     onChange={handleFileSelected}
                     className="hidden"
+                    disabled={isLocked}
                 />
                  {file && (
                     <div className="text-right mt-2 text-xs text-gray-400">

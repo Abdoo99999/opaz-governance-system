@@ -53,6 +53,11 @@ export const translations = {
         gotIt: "حسناً، فهمت",
         successTitle: "تم الاعتماد بنجاح!",
         successDesc: "جاري تحويلك لصفحة التقارير...",
+        successDescManual: "تم اعتماد التقييم بنجاح. يمكنك الآن مراجعة النتائج أو استكمال العمل.",
+        viewResults: "عرض النتائج",
+        stayHere: "البقاء هنا",
+        locked: "التقييم معتمد ومغلق",
+        nextCompliance: "التالي: مراقبة الامتثال والمخاطر"
     },
     compliance: {
         statutoryTitle: "الامتثال النظامي والتشريعي",
@@ -260,6 +265,11 @@ export const translations = {
         gotIt: "Okay, I understand",
         successTitle: "Submitted Successfully!",
         successDesc: "Redirecting to the reports page...",
+        successDescManual: "Assessment submitted successfully. You can now review the results or continue your work.",
+        viewResults: "View Results",
+        stayHere: "Stay Here",
+        locked: "Assessment Locked",
+        nextCompliance: "Next: Compliance & Risk"
     },
     compliance: {
         statutoryTitle: "Statutory Compliance",
