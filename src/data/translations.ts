@@ -13,15 +13,23 @@ export const translations = {
       logout: "تسجيل الخروج"
     },
     dashboard: {
-      strategicRadar: "الرادار الاستراتيجي",
+      strategicRadar: "رادار الأداء الاستراتيجي",
       portfolioHealth: "صحة المحفظة",
-      maturityGauge: "مقياس النضج",
+      maturityGauge: "مقياس النضج العام",
       riskMap: "خارطة المخاطر",
       sectorPerf: "أداء القطاعات",
       omanization: "نسبة التعمين",
       compliance: "حالة الامتثال",
       urgentAlerts: "تنبيهات عاجلة",
-      totalAssets: "إجمالي الأصول"
+      totalAssets: "إجمالي الأصول",
+      nationalWorkforce: "من إجمالي القوى العاملة",
+      activeRisks: "مخاطر نشطة مسجلة",
+      overallScore: "متوسط نتيجة التقييم",
+      complianceRisk: "الامتثال والمخاطر",
+      maturityPath: "مسار النضج الاستراتيجي",
+      maturityScore: "مستوى النضج",
+      compliant: "ممتثل",
+      nonCompliant: "غير ممتثل",
     },
     registry: {
       title: "سجل الشركات",
@@ -235,15 +243,23 @@ export const translations = {
       logout: "Logout"
     },
     dashboard: {
-      strategicRadar: "Strategic Radar",
+      strategicRadar: "Strategic Performance Radar",
       portfolioHealth: "Portfolio Health",
-      maturityGauge: "Maturity Gauge",
+      maturityGauge: "Overall Maturity Gauge",
       riskMap: "Risk Map",
       sectorPerf: "Sector Performance",
       omanization: "Omanization Rate",
       compliance: "Compliance Status",
       urgentAlerts: "Urgent Alerts",
-      totalAssets: "Total Assets"
+      totalAssets: "Total Assets",
+      nationalWorkforce: "of total workforce",
+      activeRisks: "Active risks logged",
+      overallScore: "Overall assessment score",
+      complianceRisk: "Compliance & Risk",
+      maturityPath: "Strategic Maturity Path",
+      maturityScore: "Maturity Score",
+      compliant: "Compliant",
+      nonCompliant: "Non-Compliant",
     },
     registry: {
         title: "Company Registry",
@@ -445,5 +461,3 @@ export const translations = {
     }
   }
 };
-
-    

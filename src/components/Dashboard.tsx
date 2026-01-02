@@ -4,11 +4,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
   Legend,
+  Line,
+  LineChart,
   Pie,
   PieChart,
   PolarAngleAxis,
@@ -26,7 +30,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle, Users, Target } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
@@ -62,12 +66,13 @@ const radarDataTemplate = AXES.map(axis => ({
     fullMark: 150 
 }));
 
-const sectorPerformanceData = [
-  { name: 'Energy', performance: 4000, name_ar: 'الطاقة' },
-  { name: 'Logistics', performance: 3000, name_ar: 'اللوجستيات' },
-  { name: 'Tourism', performance: 2000, name_ar: 'السياحة' },
-  { name: 'Tech', performance: 2780, name_ar: 'التقنية' },
-  { name: 'Mining', performance: 1890, name_ar: 'التعدين' },
+const maturityPathData = [
+  { year: '2025', score: 3.2 },
+  { year: '2026', score: 3.5 },
+  { year: '2027', score: 3.9 },
+  { year: '2028', score: 4.2 },
+  { year: '2029', score: 4.6 },
+  { year: '2030', score: 5.0 },
 ];
 
 
@@ -194,15 +199,28 @@ const Dashboard = () => {
     }
     return t('menu.dashboard');
   }, [selectedCompany, language, t]);
+  
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="p-4 glass text-white rounded-lg">
+          <p className="label font-bold text-lg">{`${t('dashboard.maturityScore')}: ${payload[0].value}`}</p>
+          <p className="intro text-gray-300">{label}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 text-white">
-       <header className="flex items-center justify-between mb-8">
+    <div className="p-4 md:p-6 lg:p-8 text-white space-y-8">
+       <header className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{dashboardTitle}</h1>
       </header>
 
       {/* KPIs Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0}>
               <Card className={`${cardBaseClasses}`}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -254,9 +272,9 @@ const Dashboard = () => {
       </div>
 
       {/* Main Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Strategic Radar */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4} className="lg:col-span-3">
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
           <Card className={cardBaseClasses}>
             <CardHeader>
               <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
@@ -264,10 +282,16 @@ const Dashboard = () => {
             <CardContent>
               <ResponsiveContainer width="100%" height={350}>
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                  <defs>
+                    <radialGradient id="radarFill">
+                      <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
+                      <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
+                    </radialGradient>
+                  </defs>
                   <PolarGrid stroke="rgba(255,255,255,0.2)" />
                   <PolarAngleAxis dataKey="subject" tick={{ fill: '#fff', fontSize: 14 }} />
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                  <Radar name="Performance" dataKey="A" stroke="#D4AF37" fill="#D4AF37" fillOpacity={0.6} />
+                  <Radar name="Performance" dataKey="A" stroke="#E5C565" strokeWidth={2} fill="url(#radarFill)" />
                   <Tooltip contentStyle={{ backgroundColor: '#001A33', border: '1px solid #D4AF37' }} />
                 </RadarChart>
               </ResponsiveContainer>
@@ -276,49 +300,77 @@ const Dashboard = () => {
         </motion.div>
         
         {/* Compliance and Risk */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5} className="lg:col-span-2">
-          <div className="grid grid-rows-2 gap-6 h-full">
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+          <div className="grid grid-rows-1 gap-6 h-full">
              <Card className={cardBaseClasses}>
                 <CardHeader>
-                  <CardTitle>{t('dashboard.compliance')}</CardTitle>
+                  <CardTitle>{t('dashboard.complianceRisk')}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={120}>
-                    <PieChart>
-                      <Pie data={complianceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
-                        <Cell key="compliant" fill="#00E096" />
-                        <Cell key="non-compliant" fill="#FF3B3B" />
-                      </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: '#001A33' }} />
-                      <Legend iconType="circle" wrapperStyle={{fontSize: '14px'}}/>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-              <Card className={cardBaseClasses}>
-                <CardHeader>
-                  <CardTitle>{t('dashboard.riskMap')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                   <ResponsiveContainer width="100%" height={120}>
-                    <ScatterChart>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                      <XAxis type="number" dataKey="x" name={t('compliance.probability')} unit="" tick={{ fill: '#fff' }} domain={[0, 5]} />
-                      <YAxis type="number" dataKey="y" name={t('compliance.impact')} unit="" tick={{ fill: '#fff' }} domain={[0, 5]}/>
-                      <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
-                      <Scatter name="Risks" data={riskMapData} fill="#FF3B3B" />
-                    </ScatterChart>
-                  </ResponsiveContainer>
+                <CardContent className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col items-center justify-center">
+                    <ResponsiveContainer width="100%" height={150}>
+                      <PieChart>
+                        <Pie data={complianceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
+                          <Cell key="compliant" fill="#00E096" />
+                          <Cell key="non-compliant" fill="#FF3B3B" />
+                        </Pie>
+                        <Tooltip contentStyle={{ backgroundColor: '#001A33' }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}}/>
+                  </div>
+                   <div className="flex flex-col items-center justify-center">
+                     <ResponsiveContainer width="100%" height={150}>
+                      <ScatterChart margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                        <XAxis type="number" dataKey="x" name={t('compliance.probability')} unit="" tick={{ fill: '#fff' }} domain={[0, 5]} />
+                        <YAxis type="number" dataKey="y" name={t('compliance.impact')} unit="" tick={{ fill: '#fff' }} domain={[0, 5]}/>
+                        <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
+                        <Scatter name="Risks" data={riskMapData} fill="#FF3B3B" />
+                      </ScatterChart>
+                    </ResponsiveContainer>
+                    <p className="text-sm text-gray-300 mt-2">{t('dashboard.riskMap')}</p>
+                   </div>
                 </CardContent>
               </Card>
           </div>
         </motion.div>
       </div>
 
+       {/* Strategic Path Chart */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+            <Card className={cardBaseClasses}>
+                <CardHeader>
+                    <CardTitle className="text-gold-400 flex items-center gap-2">
+                        <Target />
+                        {t('dashboard.maturityPath')}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart
+                            data={maturityPathData}
+                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                            <defs>
+                                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#E5C565" stopOpacity={0.8}/>
+                                    <stop offset="95%" stopColor="#E5C565" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                            <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
+                            <YAxis domain={[0, 5]} tick={{ fill: '#A0A0A0' }} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Area type="monotone" dataKey="score" stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </motion.div>
+
     </div>
   );
 };
 
 export default Dashboard;
-
-import { Users } from 'lucide-react';
