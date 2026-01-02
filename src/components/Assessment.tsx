@@ -36,6 +36,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     const { selectedCompanyId, getSelectedCompany } = useCompany();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
+    const [activeAxis, setActiveAxis] = useState(AXES[0].id);
 
     const getStorageKey = (companyId: string) => `oia_assessment_${companyId}`;
 
@@ -96,8 +97,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
             description: `تم حفظ بيانات تقييم شركة ${selectedCompany?.name_ar}`,
         });
     };
-
-    const [activeAxis, setActiveAxis] = useState(AXES[0].id);
 
     const indicatorsForAxis = useMemo(() => INDICATORS.filter(ind => ind.axisId === activeAxis), [activeAxis]);
     const totalCompleted = useMemo(() => Object.keys(scores).length, [scores]);
@@ -327,7 +326,5 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
 };
 
 export default Assessment;
-
-    
 
     

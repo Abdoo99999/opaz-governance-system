@@ -152,11 +152,13 @@ const ComplianceMonitor: React.FC = () => {
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white h-full flex flex-col">
             <header className="flex items-center justify-between mb-6">
-                {selectedCompany && (
-                    <Badge className="bg-blue-900/50 border-blue-600 text-blue-300">
-                        {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
-                    </Badge>
-                )}
+                 <div className="flex items-center gap-4">
+                    {selectedCompany && (
+                        <Badge className="bg-blue-900/50 border-blue-600 text-blue-300">
+                            {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
+                        </Badge>
+                    )}
+                 </div>
                 <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                     <Save className="ml-2 h-5 w-5" />
                     {t('compliance.saveButton')}
