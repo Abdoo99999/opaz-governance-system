@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban } from 'lucide-react';
+import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Separator } from './ui/separator';
 
 const menuItems = [
   { name: 'لوحة القيادة', icon: LayoutDashboard, view: 'dashboard' },
@@ -12,15 +13,17 @@ const menuItems = [
   { name: 'مراقب الامتثال', icon: ShieldAlert, view: 'compliance-monitor' },
   { name: 'خطة التحسين', icon: Kanban, view: 'improvement-plan' },
   { name: 'التقارير', icon: LineChart, view: 'reports' },
+  { name: 'الإعدادات', icon: Settings, view: 'settings' },
 ];
 
 interface SidebarProps {
   isOpen: boolean;
   currentView: string;
   onNavigate: (view: string) => void;
+  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLogout }) => {
 
   return (
     <div
@@ -63,6 +66,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate }) =>
             ))}
           </ul>
         </nav>
+        <div className="px-4 pb-4">
+            <Separator className="my-4 bg-white/10" />
+             <button
+                  onClick={onLogout}
+                  className="flex items-center w-full py-3 px-4 rounded-md transition-colors duration-200 text-gray-400 hover:text-red-500 hover:bg-red-500/10"
+                >
+                  <LogOut className="w-6 h-6 ml-4" />
+                  <span className={cn("font-medium transition-opacity duration-300", !isOpen && 'opacity-0')}>
+                    تسجيل الخروج
+                  </span>
+                </button>
+        </div>
       </div>
     </div>
   );

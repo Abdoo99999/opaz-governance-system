@@ -8,6 +8,7 @@ import Assessment from "@/components/Assessment";
 import ComplianceMonitor from "@/components/ComplianceMonitor";
 import ImprovementPlan from "@/components/ImprovementPlan";
 import Reports from "@/components/Reports";
+import Settings from "@/components/Settings";
 import Login from "@/components/Login";
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,6 +22,14 @@ export default function Home() {
     toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "أهلاً بك في نظام حوكمة جهاز الاستثمار العماني.",
+    });
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentView('dashboard'); // Reset to default view on logout
+    toast({
+        title: "تم تسجيل الخروج بنجاح",
     });
   };
 
@@ -42,6 +51,8 @@ export default function Home() {
         return <ImprovementPlan />;
       case 'reports':
         return <Reports />;
+      case 'settings':
+        return <Settings />;
       default:
         return <Dashboard />;
     }
@@ -52,7 +63,7 @@ export default function Home() {
   }
 
   return (
-    <AppLayout currentView={currentView} onNavigate={handleNavigate}>
+    <AppLayout currentView={currentView} onNavigate={handleNavigate} onLogout={handleLogout}>
       {renderView()}
     </AppLayout>
   );
