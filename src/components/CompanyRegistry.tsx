@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,20 +10,17 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import CompanyForm from './CompanyForm';
 import { useLanguage } from '@/context/LanguageContext';
+import { useToast } from '@/hooks/use-toast';
+import { COMPANIES } from '@/data/companies';
+import type { Company } from '@/data/companies';
 
 
-const companiesData = [
-    { name: 'OQ', sector: 'Energy', omanization: 85, risk: 'Low' },
-    { name: 'Asyad', sector: 'Logistics', omanization: 78, risk: 'Medium' },
-    { name: 'Omran', sector: 'Tourism', omanization: 92, risk: 'Low' },
-    { name: 'Ithca', sector: 'Technology', omanization: 60, risk: 'High' },
-    { name: 'Nama', sector: 'Utilities', omanization: 88, risk: 'Medium' },
-    { name: 'Food and Dairy Group (FDO)', sector: 'Food Security', omanization: 75, risk: 'Low' },
-    { name: 'Minerals Development Oman (MDO)', sector: 'Mining', omanization: 80, risk: 'Medium' },
-    { name: 'Oman Aviation Group', sector: 'Aviation', omanization: 70, risk: 'High' },
-    { name: 'Fisheries Development Oman (FDO)', sector: 'Fisheries', omanization: 95, risk: 'Low' },
-    { name: 'Oman Logistics Company (Khazaen)', sector: 'Logistics', omanization: 82, risk: 'Medium' },
-];
+const initialCompaniesData = COMPANIES.map(c => ({
+    ...c,
+    omanization: 70 + Math.floor(Math.random() * 25), // 70-95%
+    risk: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
+}));
+
 
 const riskVariant: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
     'Low': 'default',
@@ -34,7 +31,18 @@ const riskVariant: { [key: string]: "default" | "secondary" | "destructive" | "o
 const CompanyRegistry: React.FC = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState<any>(null);
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const { toast } = useToast();
+
+    const [companies, setCompanies] = useState(() => {
+        if (typeof window === 'undefined') return initialCompaniesData;
+        const savedCompanies = localStorage.getItem('oia_companies_registry');
+        return savedCompanies ? JSON.parse(savedCompanies) : initialCompaniesData;
+    });
+
+    useEffect(() => {
+        localStorage.setItem('oia_companies_registry', JSON.stringify(companies));
+    }, [companies]);
 
     const handleAddCompany = () => {
         setSelectedCompany(null);
@@ -46,9 +54,59 @@ const CompanyRegistry: React.FC = () => {
         setIsFormOpen(true);
     };
 
+    const handleSaveCompany = (formData: any) => {
+        setCompanies(prevCompanies => {
+            const isNew = !selectedCompany;
+            if (isNew) {
+                const newCompany = {
+                    id: formData.companyName.toLowerCase().replace(/ /g, '_'),
+                    name_en: formData.companyName,
+                    name_ar: formData.companyName, // Assuming name is same for simplicity
+                    ...formData,
+                    omanization: formData.omaniEmployees / formData.totalEmployees * 100,
+                    risk: 'Medium' // Default risk
+                };
+                return [...prevCompanies, newCompany];
+            } else {
+                return prevCompanies.map(c => 
+                    c.id === selectedCompany.id 
+                    ? { 
+                        ...c, 
+                        ...formData,
+                        name_en: formData.companyName,
+                        name_ar: formData.companyName, // Assuming name is same for simplicity
+                        omanization: formData.omaniEmployees / formData.totalEmployees * 100,
+                      } 
+                    : c
+                );
+            }
+        });
+        
+        toast({
+            title: t('common.saveSuccessTitle'),
+            description: `${t('common.saveSuccessDesc')} ${formData.companyName}`,
+        });
+
+        setIsFormOpen(false);
+        setSelectedCompany(null);
+    };
+
     const handleCloseForm = () => {
         setIsFormOpen(false);
+        setSelectedCompany(null);
     };
+    
+    const handleDeleteCompany = (companyId: string) => {
+        // Add confirmation dialog before deleting
+        if (window.confirm(t('common.deleteConfirm'))) {
+            setCompanies(prev => prev.filter(c => c.id !== companyId));
+            toast({
+                title: t('common.deleteSuccessTitle'),
+                variant: 'destructive',
+            });
+        }
+    };
+
 
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white">
@@ -62,7 +120,11 @@ const CompanyRegistry: React.FC = () => {
                         transition={{ duration: 0.5, ease: 'easeInOut' }}
                         className="absolute inset-0 z-50 bg-royal-900"
                     >
-                        <CompanyForm company={selectedCompany} onClose={handleCloseForm} />
+                        <CompanyForm 
+                            company={selectedCompany} 
+                            onClose={handleCloseForm}
+                            onSave={handleSaveCompany} 
+                        />
                     </motion.div>
                 ) : (
                     <motion.div
@@ -89,16 +151,16 @@ const CompanyRegistry: React.FC = () => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {companiesData.map((company, index) => (
-                                <Card key={index} className="bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+                            {companies.map((company) => (
+                                <Card key={company.id} className="bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between mb-4">
-                                            <h2 className="text-xl font-bold">{company.name}</h2>
+                                            <h2 className="text-xl font-bold">{language === 'ar' ? company.name_ar : company.name_en}</h2>
                                             <div className="flex items-center gap-2">
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white" onClick={() => handleEditCompany(company)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500" onClick={() => handleDeleteCompany(company.id)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -107,7 +169,7 @@ const CompanyRegistry: React.FC = () => {
                                         <div className="mb-2">
                                             <div className="flex justify-between items-center text-xs text-gray-300 mb-1">
                                                 <span>{t('dashboard.omanization')}</span>
-                                                <span>{company.omanization}%</span>
+                                                <span>{company.omanization.toFixed(0)}%</span>
                                             </div>
                                             <Progress value={company.omanization} className="h-2" />
                                         </div>
@@ -127,3 +189,5 @@ const CompanyRegistry: React.FC = () => {
 };
 
 export default CompanyRegistry;
+
+    

@@ -11,16 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { Building, Wallet, Landmark, Users, ArrowLeft } from 'lucide-react';
+import { Building, Wallet, Landmark, Users, ArrowLeft, Save } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
+import { COMPANIES } from '@/data/companies';
 
-const companies = ['OQ', 'Asyad', 'Omran', 'Ithca', 'Nama', 'FDO', 'MDO', 'Oman Aviation Group', 'Fisheries Development Oman', 'Oman Logistics Company'];
-const sectors = ['Energy', 'Logistics', 'Tourism', 'Technology', 'Utilities', 'Food Security', 'Mining', 'Aviation', 'Fisheries'];
+const sectors = [...new Set(COMPANIES.map(c => c.sector))];
 const legalForms = ['Holding', 'SAOC', 'SAOG'];
 
 const formSchema = z.object({
@@ -28,23 +28,31 @@ const formSchema = z.object({
     code: z.string(),
     sector: z.string().min(1, 'Sector is required'),
     legalForm: z.string().min(1, 'Legal form is required'),
-    authorizedCapital: z.number().positive(),
-    financialYearEnd: z.date(),
+    authorizedCapital: z.number().positive('Must be a positive number'),
+    financialYearEnd: z.date({ required_error: "A date is required." }),
     lastROI: z.number(),
     usoObligations: z.boolean(),
-    boardAppointmentDate: z.date(),
+    boardAppointmentDate: z.date({ required_error: "A date is required." }),
     expiryDate: z.date(),
-    boardMembers: z.number().int().positive(),
-    independentMembers: z.number().int().positive(),
-    totalEmployees: z.number().int().positive(),
-    omaniEmployees: z.number().int().positive(),
+    boardMembers: z.number().int().positive('Must be a positive number'),
+    independentMembers: z.number().int().positive('Must be a positive number'),
+    totalEmployees: z.number().int().positive('Must be a positive number'),
+    omaniEmployees: z.number().int().positive('Must be a positive number'),
+}).refine(data => data.independentMembers <= data.boardMembers, {
+    message: "Independent members cannot exceed total members",
+    path: ["independentMembers"],
+}).refine(data => data.omaniEmployees <= data.totalEmployees, {
+    message: "Omani employees cannot exceed total employees",
+    path: ["omaniEmployees"],
 });
+
 
 type CompanyFormValues = z.infer<typeof formSchema>;
 
 interface CompanyFormProps {
-    company?: Partial<CompanyFormValues>;
+    company?: Partial<CompanyFormValues> & { name_en?: string, name_ar?: string };
     onClose: () => void;
+    onSave: (data: CompanyFormValues) => void;
 }
 
 const cardVariants = {
@@ -58,20 +66,25 @@ const cardVariants = {
 
 const inputStyles = "h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white";
 
-const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
-    const { t } = useLanguage();
+const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) => {
+    const { t, language } = useLanguage();
     const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<CompanyFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            ...company,
-            code: company?.companyName ? `OIA-${company.companyName.toUpperCase()}` : '',
+            companyName: company?.name_en || '',
+            code: company?.code || '',
+            sector: company?.sector || '',
+            legalForm: company?.legalForm || '',
             authorizedCapital: company?.authorizedCapital || 0,
+            financialYearEnd: company?.financialYearEnd ? new Date(company.financialYearEnd) : new Date(),
             lastROI: company?.lastROI || 0,
+            usoObligations: company?.usoObligations || false,
+            boardAppointmentDate: company?.boardAppointmentDate ? new Date(company.boardAppointmentDate) : new Date(),
+            expiryDate: company?.expiryDate ? new Date(company.expiryDate) : new Date(),
             boardMembers: company?.boardMembers || 0,
             independentMembers: company?.independentMembers || 0,
             totalEmployees: company?.totalEmployees || 0,
             omaniEmployees: company?.omaniEmployees || 0,
-            usoObligations: company?.usoObligations || false,
         },
     });
 
@@ -79,10 +92,16 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
     const watchBoardAppointmentDate = watch('boardAppointmentDate');
     const watchTotalEmployees = watch('totalEmployees');
     const watchOmaniEmployees = watch('omaniEmployees');
+    
+    const companyOptions = COMPANIES.map(c => ({ value: c.name_en, label: language === 'ar' ? c.name_ar : c.name_en }));
 
     useEffect(() => {
         if (watchCompanyName) {
-            setValue('code', `OIA-${watchCompanyName.toUpperCase().replace(/\s/g, '')}`);
+            const selectedCompanyData = COMPANIES.find(c => c.name_en === watchCompanyName);
+            if(selectedCompanyData) {
+                setValue('code', `OIA-${selectedCompanyData.id.toUpperCase()}`);
+                setValue('sector', selectedCompanyData.sector);
+            }
         }
     }, [watchCompanyName, setValue]);
 
@@ -96,11 +115,6 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
 
     const omanizationPercentage = (watchTotalEmployees > 0) ? (watchOmaniEmployees / watchTotalEmployees) * 100 : 0;
 
-    const onSubmit = (data: CompanyFormValues) => {
-        console.log(data);
-        onClose();
-    };
-
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white h-full overflow-y-auto">
             <header className="flex items-center justify-between mb-8">
@@ -109,9 +123,10 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                     {t('common.back')}
                 </Button>
                 <h1 className="text-3xl font-bold">
-                    {company ? `${t('common.edit')} ${company.companyName}` : t('registry.addNew')}
+                    {company ? `${t('common.edit')} ${language === 'ar' ? company.name_ar : company.name_en}` : t('registry.addNew')}
                 </h1>
-                <Button onClick={handleSubmit(onSubmit)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                <Button onClick={handleSubmit(onSave)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                    <Save className="ml-2 h-4 w-4"/>
                     {t('common.save')}
                 </Button>
             </header>
@@ -134,7 +149,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <SelectTrigger className={inputStyles}><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
                                             <SelectContent className="bg-royal-900 text-white border-white/20">
-                                                {companies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                                {companyOptions.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     )}
@@ -143,22 +158,11 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                             </div>
                             <div>
                                 <label>{t('companyForm.identity.code')}</label>
-                                <Input {...register('code')} readOnly className={inputStyles} />
+                                <Input {...register('code')} readOnly className={cn(inputStyles, "bg-royal-900/80")} />
                             </div>
                              <div>
                                 <label>{t('companyForm.identity.sector')}</label>
-                                <Controller
-                                    name="sector"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger className={inputStyles}><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
-                                            <SelectContent className="bg-royal-900 text-white border-white/20">
-                                                {sectors.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
+                                <Input {...register('sector')} readOnly className={cn(inputStyles, "bg-royal-900/80")} />
                             </div>
                             <div>
                                 <label>{t('companyForm.identity.legalForm')}</label>
@@ -174,6 +178,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                         </Select>
                                     )}
                                 />
+                                 {errors.legalForm && <p className="text-red-500 text-sm mt-1">{errors.legalForm.message}</p>}
                             </div>
                         </CardContent>
                     </Card>
@@ -190,6 +195,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                            <div>
                                 <label>{t('companyForm.financial.capital')}</label>
                                 <Input type="number" {...register('authorizedCapital', { valueAsNumber: true })} className={inputStyles} />
+                                {errors.authorizedCapital && <p className="text-red-500 text-sm mt-1">{errors.authorizedCapital.message}</p>}
                             </div>
                             <div>
                                 <label>{t('companyForm.financial.yearEnd')}</label>
@@ -210,6 +216,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                         </Popover>
                                     )}
                                 />
+                                 {errors.financialYearEnd && <p className="text-red-500 text-sm mt-1">{errors.financialYearEnd.message}</p>}
                             </div>
                              <div>
                                 <label>{t('companyForm.financial.roi')}</label>
@@ -258,6 +265,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                         </Popover>
                                     )}
                                 />
+                                {errors.boardAppointmentDate && <p className="text-red-500 text-sm mt-1">{errors.boardAppointmentDate.message}</p>}
                             </div>
                              <div>
                                 <label>{t('companyForm.board.expiryDate')}</label>
@@ -273,10 +281,12 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                 <div>
                                     <label>{t('companyForm.board.members')}</label>
                                     <Input type="number" {...register('boardMembers', { valueAsNumber: true })} className={inputStyles} />
+                                     {errors.boardMembers && <p className="text-red-500 text-sm mt-1">{errors.boardMembers.message}</p>}
                                 </div>
                                 <div>
                                     <label>{t('companyForm.board.independent')}</label>
                                     <Input type="number" {...register('independentMembers', { valueAsNumber: true })} className={inputStyles} />
+                                    {errors.independentMembers && <p className="text-red-500 text-sm mt-1">{errors.independentMembers.message}</p>}
                                 </div>
                             </div>
                         </CardContent>
@@ -295,10 +305,12 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                 <div>
                                     <label>{t('companyForm.hr.totalEmployees')}</label>
                                     <Input type="number" {...register('totalEmployees', { valueAsNumber: true })} className={inputStyles} />
+                                    {errors.totalEmployees && <p className="text-red-500 text-sm mt-1">{errors.totalEmployees.message}</p>}
                                 </div>
                                 <div>
                                     <label>{t('companyForm.hr.omanis')}</label>
                                     <Input type="number" {...register('omaniEmployees', { valueAsNumber: true })} className={inputStyles} />
+                                    {errors.omaniEmployees && <p className="text-red-500 text-sm mt-1">{errors.omaniEmployees.message}</p>}
                                 </div>
                             </div>
                             <div className="pt-4">
@@ -317,3 +329,5 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
 };
 
 export default CompanyForm;
+
+    

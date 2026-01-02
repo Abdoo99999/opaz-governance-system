@@ -213,7 +213,11 @@ export const translations = {
       editingFor: "جاري التعديل لـ",
       selectAllCompanies: "عرض كل الشركات",
       selectCompanyToStart: "اختر شركة للبدء",
-      selectCompanyToStartDesc: "يرجى اختيار شركة من القائمة أعلاه لعرض أو تعديل بياناتها."
+      selectCompanyToStartDesc: "يرجى اختيار شركة من القائمة أعلاه لعرض أو تعديل بياناتها.",
+      saveSuccessTitle: "تم الحفظ بنجاح",
+      saveSuccessDesc: "تم حفظ بيانات الشركة:",
+      deleteConfirm: "هل أنت متأكد من رغبتك في حذف هذه الشركة؟ لا يمكن التراجع عن هذا الإجراء.",
+      deleteSuccessTitle: "تم الحذف بنجاح"
     }
   },
   en: {
@@ -429,9 +433,15 @@ export const translations = {
       editingFor: "Editing for",
       selectAllCompanies: "All Companies View",
       selectCompanyToStart: "Select a Company to Begin",
-      selectCompanyToStartDesc: "Please select a company from the dropdown above to view or edit its data."
+      selectCompanyToStartDesc: "Please select a company from the dropdown above to view or edit its data.",
+      saveSuccessTitle: "Saved Successfully",
+      saveSuccessDesc: "Company data has been saved for:",
+      deleteConfirm: "Are you sure you want to delete this company? This action cannot be undone.",
+      deleteSuccessTitle: "Deleted Successfully"
     }
   }
 };
+
+    
 
     
