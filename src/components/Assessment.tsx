@@ -97,12 +97,12 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
         });
     };
 
+    const [activeAxis, setActiveAxis] = useState(AXES[0].id);
+
     const indicatorsForAxis = useMemo(() => INDICATORS.filter(ind => ind.axisId === activeAxis), [activeAxis]);
     const totalCompleted = useMemo(() => Object.keys(scores).length, [scores]);
     const globalProgress = (totalCompleted / INDICATORS.length) * 100;
     
-    const [activeAxis, setActiveAxis] = useState(AXES[0].id);
-
     const confettiConfig = {
         angle: 90,
         spread: 360,
@@ -327,5 +327,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
 };
 
 export default Assessment;
+
+    
 
     
