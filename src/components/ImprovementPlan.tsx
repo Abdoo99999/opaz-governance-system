@@ -30,7 +30,8 @@ type Priority = 'Critical' | 'High' | 'Medium' | 'Low';
 
 export interface Task {
   id: number;
-  title: string;
+  title_en: string;
+  title_ar: string;
   indicatorId?: number;
   dueDate: string;
   priority: Priority;
@@ -41,13 +42,13 @@ export interface Task {
 }
 
 export const initialTasks: Task[] = [
-  { id: 1, title: 'Update the Whistleblowing Policy to include anonymous reporting.', indicatorId: 45, dueDate: '2024-08-15', priority: 'High', assignedTo: 'Fatma Al-Said', avatar: 'https://picsum.photos/seed/101/100/100', status: 'todo', axisId: 9 },
-  { id: 2, title: 'Appoint an independent Audit Committee member.', indicatorId: 7, dueDate: '2024-07-30', priority: 'Critical', assignedTo: 'Ali Al-Habsi', avatar: 'https://picsum.photos/seed/102/100/100', status: 'todo', axisId: 2 },
-  { id: 3, title: 'Formalize and document the CEO succession plan.', indicatorId: 18, dueDate: '2024-09-01', priority: 'High', assignedTo: 'Yusuf Al-Harthy', avatar: 'https://picsum.photos/seed/103/100/100', status: 'in-progress', axisId: 4 },
-  { id: 4, title: 'Publish the Annual ESG Report on the company website.', indicatorId: 42, dueDate: '2024-08-20', priority: 'Medium', assignedTo: 'Maryam Al-Balushi', avatar: 'https://picsum.photos/seed/104/100/100', status: 'in-progress', axisId: 9 },
-  { id: 5, title: 'Implement a cybersecurity risk assessment framework.', indicatorId: 48, dueDate: '2024-10-01', priority: 'Critical', assignedTo: 'John Doe', avatar: 'https://picsum.photos/seed/105/100/100', status: 'todo', axisId: 10 },
-  { id: 6, title: 'Conduct mandatory Code of Conduct training for all employees.', dueDate: '2024-07-25', priority: 'Medium', assignedTo: 'Sara Al-Amri', avatar: 'https://picsum.photos/seed/106/100/100', status: 'done', axisId: 9 },
-  { id: 7, title: 'Review and update the Delegation of Authority matrix.', indicatorId: 3, dueDate: '2024-09-15', priority: 'Low', assignedTo: 'Ahmed Al-Farsi', avatar: 'https://picsum.photos/seed/107/100/100', status: 'todo', axisId: 1 },
+  { id: 1, title_en: 'Update the Whistleblowing Policy to include anonymous reporting.', title_ar: 'تحديث سياسة الإبلاغ عن المخالفات لتشمل الإبلاغ المجهول.', indicatorId: 45, dueDate: '2024-08-15', priority: 'High', assignedTo: 'Fatma Al-Said', avatar: 'https://picsum.photos/seed/101/100/100', status: 'todo', axisId: 9 },
+  { id: 2, title_en: 'Appoint an independent Audit Committee member.', title_ar: 'تعيين عضو مستقل في لجنة المراجعة.', indicatorId: 7, dueDate: '2024-07-30', priority: 'Critical', assignedTo: 'Ali Al-Habsi', avatar: 'https://picsum.photos/seed/102/100/100', status: 'todo', axisId: 2 },
+  { id: 3, title_en: 'Formalize and document the CEO succession plan.', title_ar: 'إضفاء الطابع الرسمي على خطة تعاقب الرئيس التنفيذي وتوثيقها.', indicatorId: 18, dueDate: '2024-09-01', priority: 'High', assignedTo: 'Yusuf Al-Harthy', avatar: 'https://picsum.photos/seed/103/100/100', status: 'in-progress', axisId: 4 },
+  { id: 4, title_en: 'Publish the Annual ESG Report on the company website.', title_ar: 'نشر تقرير الاستدامة السنوي على موقع الشركة.', indicatorId: 42, dueDate: '2024-08-20', priority: 'Medium', assignedTo: 'Maryam Al-Balushi', avatar: 'https://picsum.photos/seed/104/100/100', status: 'in-progress', axisId: 9 },
+  { id: 5, title_en: 'Implement a cybersecurity risk assessment framework.', title_ar: 'تطبيق إطار عمل لتقييم مخاطر الأمن السيبراني.', indicatorId: 48, dueDate: '2024-10-01', priority: 'Critical', assignedTo: 'John Doe', avatar: 'https://picsum.photos/seed/105/100/100', status: 'todo', axisId: 10 },
+  { id: 6, title_en: 'Conduct mandatory Code of Conduct training for all employees.', title_ar: 'إجراء تدريب إلزامي على مدونة قواعد السلوك لجميع الموظفين.', dueDate: '2024-07-25', priority: 'Medium', assignedTo: 'Sara Al-Amri', avatar: 'https://picsum.photos/seed/106/100/100', status: 'done', axisId: 9 },
+  { id: 7, title_en: 'Review and update the Delegation of Authority matrix.', title_ar: 'مراجعة وتحديث مصفوفة تفويض الصلاحيات.', indicatorId: 3, dueDate: '2024-09-15', priority: 'Low', assignedTo: 'Ahmed Al-Farsi', avatar: 'https://picsum.photos/seed/107/100/100', status: 'todo', axisId: 1 },
 ];
 
 const priorityConfig: Record<Priority, { variant: 'destructive' | 'secondary' | 'default', className: string }> = {
@@ -58,7 +59,7 @@ const priorityConfig: Record<Priority, { variant: 'destructive' | 'secondary' | 
 };
 
 const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId: number, newStatus: Status) => void; onOpenDetails: (task: Task) => void }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const nextStatus = task.status === 'todo' ? 'in-progress' : 'done';
     
     return (
@@ -75,7 +76,7 @@ const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId
                 <Badge className={cn('text-white', priorityConfig[task.priority].className)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
                 <span className="text-xs text-gray-400">{task.dueDate}</span>
             </div>
-            <h4 className="font-bold text-base mb-3 text-right">{task.title}</h4>
+            <h4 className="font-bold text-base mb-3 text-right">{language === 'ar' ? task.title_ar : task.title_en}</h4>
             {task.indicatorId && <p className="text-xs text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
             
             <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
@@ -95,7 +96,11 @@ const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId
                         className="text-gold-400 hover:bg-gold-500/10 hover:text-gold-300"
                     >
                         {t(task.status === 'todo' ? 'improvement.start' : 'improvement.finish')}
-                        {task.status === 'todo' ? <ArrowRight className="mr-2 h-4 w-4" /> : <Check className="mr-2 h-4 w-4" />}
+                        {language === 'ar' ? (
+                            task.status === 'todo' ? <ArrowRight className="mr-2 h-4 w-4" /> : <Check className="mr-2 h-4 w-4" />
+                        ) : (
+                            task.status === 'todo' ? <ArrowRight className="ml-2 h-4 w-4" /> : <Check className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 )}
             </div>
@@ -139,7 +144,7 @@ const TaskDetailsModal = ({ task, isOpen, onClose }: { task: Task | null; isOpen
             <DialogContent className="glass text-white max-w-2xl">
                 <DialogHeader>
                     <Badge className={cn('text-white w-fit mb-2', priorityConfig[task.priority].className)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
-                    <DialogTitle className="text-gold-400 text-2xl">{task.title}</DialogTitle>
+                    <DialogTitle className="text-gold-400 text-2xl">{language === 'ar' ? task.title_ar : task.title_en}</DialogTitle>
                     <DialogDescription className="text-gray-300 pt-2">
                         {t('improvement.dueDate')} {task.dueDate} • {t('improvement.assignedTo')} {task.assignedTo}
                     </DialogDescription>
@@ -256,4 +261,3 @@ export default function ImprovementPlan() {
     );
 }
 
-    
