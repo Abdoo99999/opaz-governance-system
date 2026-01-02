@@ -1,13 +1,25 @@
+
 "use client";
 
-import React, { useRef, useState } from 'react';
-import { Paperclip, CheckCircle } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Paperclip, CheckCircle, Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import type { Indicator } from '@/lib/data/indicators';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface IndicatorCardProps {
     indicator: Indicator;
@@ -16,6 +28,8 @@ interface IndicatorCardProps {
     onScoreChange: (indicatorId: number, score: number) => void;
     onFileChange: (indicatorId: number, file: File | null) => void;
     isLocked?: boolean;
+    onEdit: () => void;
+    onDelete: () => void;
 }
 
 const scoreColors = [
@@ -26,10 +40,10 @@ const scoreColors = [
     '#00E096', // 5 - Neon Green (Success)
 ];
 
-const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange, isLocked }) => {
+const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange, isLocked, onEdit, onDelete }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const evidenceRequired = (score ?? 0) > 3;
-    const { t, language } = useLanguage();
+    const { t } = useLanguage();
 
     const handleFileClick = () => {
         if (isLocked) return;
@@ -44,17 +58,45 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
     return (
         <motion.div
             id={`indicator-${indicator.id}`}
-            className={cn("glass p-6", isLocked && "opacity-70 pointer-events-none")}
+            className={cn("glass p-6 relative", isLocked && "opacity-70 pointer-events-none")}
             variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
             transition={{ duration: 0.4 }}
         >
+            {/* Edit/Delete Buttons */}
+             <div className="absolute top-3 left-3 flex gap-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gold-400" onClick={onEdit}>
+                    <Pencil className="h-4 w-4" />
+                </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500">
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="glass text-white">
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>{t('assessment.deleteIndicatorTitle')}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-300 pt-2">
+                                {t('assessment.deleteIndicatorDesc')}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel className="text-white border-white/20">{t('common.cancel')}</AlertDialogCancel>
+                            <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                {t('common.delete')}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </div>
+
             {/* Header */}
             <div className="flex items-start justify-between gap-4 mb-6">
                 <Badge className="bg-gold-500 text-royal-900 text-lg font-bold">
                     {t('assessment.indicator')} #{indicator.id}
                 </Badge>
                 <h3 className="flex-1 text-xl font-bold text-right leading-relaxed">
-                    {language === 'ar' ? indicator.text_ar : indicator.text_en}
+                    {t(indicator.text_ar)}
                 </h3>
             </div>
             
@@ -111,3 +153,5 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
 };
 
 export default IndicatorCard;
+
+    

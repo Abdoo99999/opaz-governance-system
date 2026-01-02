@@ -62,10 +62,21 @@ export const translations = {
         gotIt: "حسناً، فهمت",
         successTitle: "تم الاعتماد بنجاح!",
         successDesc: "تم اعتماد التقييم بنجاح. يمكنك الآن مراجعة النتائج أو استكمال العمل.",
+        saveSuccessDesc: "تم حفظ بيانات تقييم شركة",
         viewResults: "عرض النتائج",
         stayHere: "البقاء هنا",
         locked: "التقييم معتمد ومغلق",
-        nextCompliance: "التالي: مراقبة الامتثال والمخاطر"
+        nextCompliance: "التالي: مراقبة الامتثال والمخاطر",
+        addIndicator: "إضافة مؤشر جديد",
+        editIndicator: "تعديل المؤشر",
+        indicatorTextAr: "نص المؤشر (بالعربية)",
+        indicatorTextEn: "نص المؤشر (بالانجليزية)",
+        axis: "المحور",
+        indicatorAdded: "تمت إضافة المؤشر بنجاح.",
+        indicatorUpdated: "تم تحديث المؤشر بنجاح.",
+        indicatorDeleted: "تم حذف المؤشر.",
+        deleteIndicatorTitle: "هل أنت متأكد؟",
+        deleteIndicatorDesc: "سيتم حذف هذا المؤشر بشكل نهائي. لا يمكن التراجع عن هذا الإجراء."
     },
     compliance: {
         saveButton: "حفظ سجل الامتثال والمخاطر",
@@ -219,6 +230,7 @@ export const translations = {
       selectPlaceholder: "اختر...",
       pickDate: "اختر تاريخ",
       cancel: "إلغاء",
+      delete: "حذف",
       view: "عرض",
       editingFor: "جاري التعديل لـ",
       selectAllCompanies: "عرض كل الشركات",
@@ -227,7 +239,9 @@ export const translations = {
       saveSuccessTitle: "تم الحفظ بنجاح",
       saveSuccessDesc: "تم حفظ بيانات الشركة:",
       deleteConfirm: "هل أنت متأكد من رغبتك في حذف هذه الشركة؟ لا يمكن التراجع عن هذا الإجراء.",
-      deleteSuccessTitle: "تم الحذف بنجاح"
+      deleteSuccessTitle: "تم الحذف بنجاح",
+      errorTitle: "خطأ",
+      fillAllFields: "يرجى تعبئة جميع الحقول المطلوبة."
     }
   },
   en: {
@@ -292,10 +306,21 @@ export const translations = {
         gotIt: "Okay, I understand",
         successTitle: "Submitted Successfully!",
         successDesc: "Assessment submitted successfully. You can now review the results or continue your work.",
+        saveSuccessDesc: "Assessment data saved for",
         viewResults: "View Results",
         stayHere: "Stay Here",
         locked: "Assessment Locked",
-        nextCompliance: "Next: Compliance & Risk"
+        nextCompliance: "Next: Compliance & Risk",
+        addIndicator: "Add New Indicator",
+        editIndicator: "Edit Indicator",
+        indicatorTextAr: "Indicator Text (Arabic)",
+        indicatorTextEn: "Indicator Text (English)",
+        axis: "Axis",
+        indicatorAdded: "Indicator added successfully.",
+        indicatorUpdated: "Indicator updated successfully.",
+        indicatorDeleted: "Indicator deleted.",
+        deleteIndicatorTitle: "Are you sure?",
+        deleteIndicatorDesc: "This will permanently delete the indicator. This action cannot be undone."
     },
     compliance: {
         saveButton: "Save Compliance & Risks",
@@ -449,6 +474,7 @@ export const translations = {
       selectPlaceholder: "Select...",
       pickDate: "Pick a date",
       cancel: "Cancel",
+      delete: "Delete",
       view: "View",
       editingFor: "Editing for",
       selectAllCompanies: "All Companies View",
@@ -457,7 +483,11 @@ export const translations = {
       saveSuccessTitle: "Saved Successfully",
       saveSuccessDesc: "Company data has been saved for:",
       deleteConfirm: "Are you sure you want to delete this company? This action cannot be undone.",
-      deleteSuccessTitle: "Deleted Successfully"
+      deleteSuccessTitle: "Deleted Successfully",
+      errorTitle: "Error",
+      fillAllFields: "Please fill all required fields."
     }
   }
 };
+
+    

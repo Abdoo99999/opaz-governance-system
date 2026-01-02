@@ -3,20 +3,33 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AXES, INDICATORS, Indicator } from '@/lib/data/indicators';
+import { AXES, INDICATORS as initialIndicators, Indicator } from '@/lib/data/indicators';
 import IndicatorCard from './IndicatorCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle, ArrowRight, Save } from 'lucide-react';
+import { CheckCircle, AlertTriangle, ArrowRight, Save, Plus, Pencil, Trash2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from '@/lib/utils';
 import Confetti from 'react-dom-confetti';
 import { useLanguage } from '@/context/LanguageContext';
@@ -36,13 +49,20 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     const { selectedCompanyId, getSelectedCompany } = useCompany();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
+    
+    const [indicators, setIndicators] = useState<Indicator[]>(() => {
+        if (typeof window === 'undefined') return initialIndicators;
+        const savedIndicators = localStorage.getItem('oia_indicators_data');
+        return savedIndicators ? JSON.parse(savedIndicators) : initialIndicators;
+    });
+
     const [activeAxis, setActiveAxis] = useState(AXES[0].id);
 
-    const getStorageKey = (companyId: string) => `oia_assessment_${companyId}`;
+    const getAssessmentStorageKey = (companyId: string) => `oia_assessment_${companyId}`;
 
     const [scores, setScores] = useState<Scores>(() => {
         if (typeof window === 'undefined' || selectedCompanyId === 'all') return {};
-        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
+        const saved = localStorage.getItem(getAssessmentStorageKey(selectedCompanyId));
         return saved ? JSON.parse(saved).scores : {};
     });
     
@@ -50,13 +70,15 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     
     const [isAssessmentComplete, setIsAssessmentComplete] = useState<boolean>(() => {
         if (typeof window === 'undefined' || selectedCompanyId === 'all') return false;
-        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
+        const saved = localStorage.getItem(getAssessmentStorageKey(selectedCompanyId));
         return saved ? JSON.parse(saved).isComplete : false;
     });
 
     const [showValidationModal, setShowValidationModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    
+    const [indicatorToEdit, setIndicatorToEdit] = useState<Indicator | null>(null);
+    const [isIndicatorModalOpen, setIsIndicatorModalOpen] = useState(false);
+
     // RELOAD data when company changes
     useEffect(() => {
         if (selectedCompanyId === 'all' || typeof window === 'undefined') {
@@ -66,7 +88,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
             return;
         }
 
-        const storageKey = getStorageKey(selectedCompanyId);
+        const storageKey = getAssessmentStorageKey(selectedCompanyId);
         const savedData = localStorage.getItem(storageKey);
         
         if (savedData) {
@@ -75,12 +97,19 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
             setIsAssessmentComplete(savedIsComplete || false);
             setFiles({}); // Files are not persisted in localStorage
         } else {
-            // CRITICAL: If no data exists, RESET the form
             setScores({});
             setFiles({});
             setIsAssessmentComplete(false);
         }
     }, [selectedCompanyId]);
+    
+    // Save indicators whenever they change
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('oia_indicators_data', JSON.stringify(indicators));
+        }
+    }, [indicators]);
+
 
     const handleSave = () => {
         if (selectedCompanyId === 'all' || typeof window === 'undefined') return;
@@ -89,12 +118,12 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
             scores: scores,
             isComplete: isAssessmentComplete,
         };
-        const storageKey = getStorageKey(selectedCompanyId);
+        const storageKey = getAssessmentStorageKey(selectedCompanyId);
         localStorage.setItem(storageKey, JSON.stringify(dataToSave));
         
         toast({
-            title: "تم الحفظ بنجاح",
-            description: `تم حفظ بيانات تقييم شركة ${selectedCompany?.name_ar}`,
+            title: t('common.saveSuccessTitle'),
+            description: `${t('assessment.saveSuccessDesc')} ${selectedCompany?.name_ar}`,
         });
     };
     
@@ -103,16 +132,47 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
         if (missing.length > 0) {
             setShowValidationModal(true);
         } else {
-            setIsAssessmentComplete(true); // Lock the assessment
+            setIsAssessmentComplete(true);
             const dataToSave = { scores: scores, isComplete: true };
-            localStorage.setItem(getStorageKey(selectedCompanyId), JSON.stringify(dataToSave));
-            setShowSuccessModal(true); // Show success confirmation
+            localStorage.setItem(getAssessmentStorageKey(selectedCompanyId), JSON.stringify(dataToSave));
+            setShowSuccessModal(true);
         }
     };
 
-    const indicatorsForAxis = useMemo(() => INDICATORS.filter(ind => ind.axisId === activeAxis), [activeAxis]);
+    const handleOpenIndicatorModal = (indicator: Indicator | null) => {
+        setIndicatorToEdit(indicator);
+        setIsIndicatorModalOpen(true);
+    };
+
+    const handleSaveIndicator = (formData: { text_ar: string, text_en: string, axisId: number }) => {
+        if (indicatorToEdit) {
+            // Edit existing
+            setIndicators(prev => prev.map(ind => ind.id === indicatorToEdit.id ? { ...ind, ...formData } : ind));
+            toast({ title: t('assessment.indicatorUpdated') });
+        } else {
+            // Add new
+            const newId = Math.max(...indicators.map(i => i.id)) + 1;
+            const newIndicator: Indicator = { id: newId, ...formData };
+            setIndicators(prev => [...prev, newIndicator]);
+            toast({ title: t('assessment.indicatorAdded') });
+        }
+        setIsIndicatorModalOpen(false);
+    };
+
+    const handleDeleteIndicator = (indicatorId: number) => {
+        setIndicators(prev => prev.filter(ind => ind.id !== indicatorId));
+        // Also remove score associated with it
+        setScores(prev => {
+            const newScores = { ...prev };
+            delete newScores[indicatorId];
+            return newScores;
+        });
+        toast({ title: t('assessment.indicatorDeleted'), variant: 'destructive' });
+    };
+
+    const indicatorsForAxis = useMemo(() => indicators.filter(ind => ind.axisId === activeAxis), [activeAxis, indicators]);
     const totalCompleted = useMemo(() => Object.keys(scores).length, [scores]);
-    const globalProgress = (totalCompleted / INDICATORS.length) * 100;
+    const globalProgress = (totalCompleted / indicators.length) * 100;
     
     const confettiConfig = {
         angle: 90,
@@ -139,13 +199,14 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     };
 
     const getAxisProgress = (axisId: number) => {
-        const axisIndicators = INDICATORS.filter(i => i.axisId === axisId);
+        const axisIndicators = indicators.filter(i => i.axisId === axisId);
+        if (axisIndicators.length === 0) return 0;
         const completedInAxis = axisIndicators.filter(i => scores[i.id] !== undefined).length;
         return (completedInAxis / axisIndicators.length) * 100;
     };
 
     const getMissingIndicators = () => {
-        return INDICATORS.filter(indicator => scores[indicator.id] === undefined);
+        return indicators.filter(indicator => scores[indicator.id] === undefined);
     };
 
     const handleJumpToIndicator = (indicator: Indicator) => {
@@ -161,12 +222,18 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     return (
         <div className="flex h-full text-white">
             {/* Internal Sidebar */}
-            <aside className="w-80 h-full bg-royal-800/30 backdrop-blur-lg border-l border-white/10 p-4 overflow-y-auto">
-                <h2 className="text-xl font-bold text-gold-400 mb-6 px-2">{t('assessment.title')}</h2>
-                <nav>
+            <aside className="w-80 h-full bg-royal-800/30 backdrop-blur-lg border-l border-white/10 p-4 flex flex-col">
+                <h2 className="text-xl font-bold text-gold-400 mb-4 px-2">{t('assessment.title')}</h2>
+                <Button onClick={() => handleOpenIndicatorModal(null)} className="mb-4 bg-gold-500/10 text-gold-400 hover:bg-gold-500/20 border border-gold-500/30">
+                    <Plus className="ml-2 h-4 w-4"/> {t('assessment.addIndicator')}
+                </Button>
+                <nav className="flex-1 overflow-y-auto">
                     <ul>
                         {AXES.map(axis => {
                             const progress = getAxisProgress(axis.id);
+                            const axisIndicatorCount = indicators.filter(i => i.axisId === axis.id).length;
+                            if (axisIndicatorCount === 0) return null;
+
                             return (
                                 <li key={axis.id} className="relative">
                                     <button
@@ -176,7 +243,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                                             activeAxis === axis.id ? "bg-gold-500/10 text-gold-400" : "hover:bg-white/5"
                                         )}
                                     >
-                                        <span>{language === 'ar' ? axis.title_ar : axis.title_en}</span>
+                                        <span className="flex-1">{language === 'ar' ? axis.title_ar : axis.title_en}</span>
                                         {progress === 100 ? (
                                             <CheckCircle className="w-5 h-5 text-success" />
                                         ) : (
@@ -211,7 +278,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                             )}
                              <div className="w-1/2 relative">
                                 <Progress value={globalProgress} className="h-4 bg-white/10" />
-                                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-black">{totalCompleted} / {INDICATORS.length} {t('assessment.completed')}</span>
+                                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-black">{totalCompleted} / {indicators.length} {t('assessment.completed')}</span>
                             </div>
                         </div>
                         <div className="flex gap-2">
@@ -251,6 +318,8 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                                         onScoreChange={handleScoreChange}
                                         onFileChange={handleFileChange}
                                         isLocked={isAssessmentComplete}
+                                        onEdit={() => handleOpenIndicatorModal(indicator)}
+                                        onDelete={() => handleDeleteIndicator(indicator.id)}
                                     />
                                 ))}
                             </motion.div>
@@ -321,10 +390,101 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-
+            
+            {/* Indicator Add/Edit Modal */}
+            <IndicatorFormModal
+                isOpen={isIndicatorModalOpen}
+                onClose={() => setIsIndicatorModalOpen(false)}
+                onSave={handleSaveIndicator}
+                indicator={indicatorToEdit}
+            />
         </div>
     );
 };
+
+// IndicatorFormModal Component
+interface IndicatorFormModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (data: { text_ar: string, text_en: string, axisId: number }) => void;
+    indicator: Indicator | null;
+}
+
+const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose, onSave, indicator }) => {
+    const { t, language } = useLanguage();
+    const [textAr, setTextAr] = useState('');
+    const [textEn, setTextEn] = useState('');
+    const [axisId, setAxisId] = useState<number>(1);
+
+    useEffect(() => {
+        if (indicator) {
+            setTextAr(indicator.text_ar);
+            setTextEn(indicator.text_en);
+            setAxisId(indicator.axisId);
+        } else {
+            setTextAr('');
+            setTextEn('');
+            setAxisId(1);
+        }
+    }, [indicator, isOpen]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!textAr || !textEn || !axisId) {
+            toast({
+                title: t('common.errorTitle'),
+                description: t('common.fillAllFields'),
+                variant: 'destructive'
+            });
+            return;
+        }
+        onSave({ text_ar: textAr, text_en: textEn, axisId: Number(axisId) });
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="glass text-white">
+                <DialogHeader>
+                    <DialogTitle className="text-gold-400 text-2xl">
+                        {indicator ? t('assessment.editIndicator') : t('assessment.addIndicator')}
+                    </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+                    <div>
+                        <label className="text-gray-300">{t('assessment.indicatorTextAr')}</label>
+                        <Textarea value={textAr} onChange={(e) => setTextAr(e.target.value)} className="bg-royal-900/50 border-white/10 mt-2" dir="rtl" />
+                    </div>
+                     <div>
+                        <label className="text-gray-300">{t('assessment.indicatorTextEn')}</label>
+                        <Textarea value={textEn} onChange={(e) => setTextEn(e.target.value)} className="bg-royal-900/50 border-white/10 mt-2" dir="ltr" />
+                    </div>
+                    <div>
+                        <label className="text-gray-300">{t('assessment.axis')}</label>
+                         <Select value={String(axisId)} onValueChange={(val) => setAxisId(Number(val))}>
+                            <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-royal-900 text-white border-white/20">
+                                {AXES.map(axis => (
+                                    <SelectItem key={axis.id} value={String(axis.id)}>
+                                        {language === 'ar' ? axis.title_ar : axis.title_en}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                           <Button type="button" variant="outline" className="text-white border-white/20">{t('common.cancel')}</Button>
+                        </DialogClose>
+                        <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400">{t('common.save')}</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default Assessment;
 
