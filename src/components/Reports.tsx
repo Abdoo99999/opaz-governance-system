@@ -1,6 +1,7 @@
+
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Bar,
@@ -36,6 +37,9 @@ import { Badge } from '@/components/ui/badge';
 import { TrendingUp, FileDown, AlertCircle, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
+import { useCompany } from '@/context/CompanyContext';
+import { INDICATORS, AXES } from '@/lib/data/indicators';
+import { initialTasks } from '@/components/ImprovementPlan'; // Assuming this is exported
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -46,66 +50,148 @@ const cardVariants = {
   }),
 };
 
-// Mock Data
-const summaryData = {
-  maturity: 3.8,
-  compliance: 85,
-  risks: { high: 3, medium: 2 },
-  actions: 12
-};
-
-const radarData = [
-  { subject: 'السياسات', company: 110, sector: 90 },
-  { subject: 'الهيكل', company: 98, sector: 120 },
-  { subject: 'المجلس', company: 86, sector: 100 },
-  { subject: 'التنفيذية', company: 130, sector: 110 },
-  { subject: 'المخاطر', company: 115, sector: 105 },
-  { subject: 'التدقيق', company: 95, sector: 90 },
-  { subject: 'الحقوق', company: 120, sector: 115 },
-  { subject: 'الإفصاح', company: 100, sector: 125 },
-  { subject: 'الاستدامة', company: 75, sector: 95 },
-  { subject: 'الابتكار', company: 125, sector: 110 },
-];
-
-const riskDistributionData = [
-    { name: 'Medium', count: 8, color: '#FFD700' },
-    { name: 'High', count: 5, color: '#FFA500' },
-    { name: 'Extreme', count: 3, color: '#FF3B3B' },
-    { name: 'Low', count: 12, color: '#00E096' },
-];
-
-const improvementPlanData = [
-  { name: 'Completed', value: 8, color: '#00E096' },
-  { name: 'In Progress', value: 12, color: '#FFD700' },
-  { name: 'Not Started', value: 4, color: '#6b7280' },
-];
-
-const topGapsData = [
-    { id: 45, name: 'الالتزام بأخلاقيات العمل', axis: 'الاستدامة', score: 1 },
-    { id: 38, name: 'شفافية مكافآت الإدارة', axis: 'الإفصاح والشفافية', score: 2 },
-    { id: 18, name: 'خطة التعاقب الوظيفي', axis: 'الإدارة التنفيذية', score: 2 },
-];
-
-const criticalRisksData = [
-    { id: 1, description: 'تغيرات تنظيمية مفاجئة', category: 'استراتيجي', impact: 5, probability: 4 },
-    { id: 2, description: 'هجوم سيبراني متقدم', category: 'سيبراني', impact: 5, probability: 3 },
-    { id: 3, description: 'تقلبات حادة في أسعار الطاقة', category: 'مالي', impact: 4, probability: 5 },
-];
-
-
 const Reports: React.FC = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const selectedCompany = getSelectedCompany();
+    
+    // --- Data States ---
+    const [summaryData, setSummaryData] = useState({ maturity: 0, compliance: 0, risks: { high: 0, medium: 0, critical: 0 }, actions: 0 });
+    const [radarData, setRadarData] = useState([]);
+    const [riskDistributionData, setRiskDistributionData] = useState([]);
+    const [improvementPlanData, setImprovementPlanData] = useState([]);
+    const [topGapsData, setTopGapsData] = useState([]);
+    const [criticalRisksData, setCriticalRisksData] = useState([]);
+
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
+             // Optionally, set to a default/aggregate state or clear it
+             setSummaryData({ maturity: 0, compliance: 0, risks: { high: 0, medium: 0, critical: 0 }, actions: 0 });
+             setRadarData([]);
+             setRiskDistributionData([]);
+             setImprovementPlanData([]);
+             setTopGapsData([]);
+             setCriticalRisksData([]);
+            return;
+        }
+
+        // --- Load Data from localStorage ---
+        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {}, isComplete: false };
+
+        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+        const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
+
+        // --- Process Data ---
+
+        // 1. Summary Cards
+        const scores = Object.values(assessmentData.scores) as number[];
+        const maturity = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / INDICATORS.length : 0;
+        
+        const complianceItems = Object.values(complianceData.compliance);
+        const complianceRate = complianceItems.length > 0 ? (complianceItems.filter(v => v).length / complianceItems.length) * 100 : 0;
+
+        const risks = complianceData.risks || [];
+        const highRisks = risks.filter((r: any) => r.impact * r.probability >= 15).length;
+        const mediumRisks = risks.filter((r: any) => r.impact * r.probability >= 5 && r.impact * r.probability < 15).length;
+        const criticalRisks = risks.filter((r:any) => r.impact * r.probability >= 20).length;
+
+        const totalActions = initialTasks.length; // From mock data for now
+        const completedActions = initialTasks.filter(t => t.status === 'done').length;
+
+        setSummaryData({
+            maturity: parseFloat(maturity.toFixed(1)),
+            compliance: Math.round(complianceRate),
+            risks: { high: highRisks, medium: mediumRisks, critical: criticalRisks },
+            actions: totalActions - completedActions
+        });
+
+        // 2. Radar Chart
+        const newRadarData = AXES.map(axis => {
+            const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
+            const axisScores = axisIndicators.map(ind => assessmentData.scores[ind.id] || 0);
+            const axisSum = axisScores.reduce((a, b) => a + b, 0);
+            const companyValue = axisScores.length > 0 ? (axisSum / (axisScores.length * 5)) * 150 : 0; // Scale to 150
+            
+            return {
+                subject: language === 'ar' ? axis.title_ar : axis.title_en,
+                company: companyValue,
+                sector: Math.random() * 110 + 20, // Mock sector average
+            };
+        });
+        setRadarData(newRadarData as any);
+        
+        // 3. Risk Distribution
+        const riskCounts = risks.reduce((acc: any, risk: any) => {
+            const score = risk.impact * risk.probability;
+            if (score >= 20) acc.Extreme += 1;
+            else if (score >= 15) acc.High += 1;
+            else if (score >= 5) acc.Medium += 1;
+            else acc.Low += 1;
+            return acc;
+        }, { Extreme: 0, High: 0, Medium: 0, Low: 0 });
+
+        setRiskDistributionData([
+            { name: 'Low', count: riskCounts.Low, color: '#00E096' },
+            { name: 'Medium', count: riskCounts.Medium, color: '#FFD700' },
+            { name: 'High', count: riskCounts.High, color: '#FFA500' },
+            { name: 'Extreme', count: riskCounts.Extreme, color: '#FF3B3B' },
+        ] as any);
+
+        // 4. Improvement Plan
+        const todo = initialTasks.filter(t => t.status === 'todo').length;
+        const inProgress = initialTasks.filter(t => t.status === 'in-progress').length;
+        setImprovementPlanData([
+            { name: 'Completed', value: completedActions, color: '#00E096' },
+            { name: 'In Progress', value: inProgress, color: '#FFD700' },
+            { name: 'Not Started', value: todo, color: '#6b7280' },
+        ] as any);
+        
+        // 5. Tables
+        const sortedGaps = Object.entries(assessmentData.scores)
+            .map(([id, score]) => ({ id: Number(id), score: Number(score) }))
+            .filter(item => item.score < 3)
+            .sort((a, b) => a.score - b.score)
+            .slice(0, 3)
+            .map(gap => {
+                const indicator = INDICATORS.find(i => i.id === gap.id);
+                const axis = AXES.find(a => a.id === indicator?.axisId);
+                return {
+                    id: gap.id,
+                    name: language === 'ar' ? indicator?.text_ar : indicator?.text_en,
+                    axis: language === 'ar' ? axis?.title_ar : axis?.title_en,
+                    score: gap.score,
+                }
+            });
+        setTopGapsData(sortedGaps as any);
+        
+        setCriticalRisksData(risks.filter((r: any) => r.impact * r.probability >= 15) as any);
+
+
+    }, [selectedCompanyId, language]);
 
     const handlePrint = () => {
         window.print();
     };
+
+    if (selectedCompanyId === 'all') {
+        return (
+           <div className="flex items-center justify-center h-full p-8 text-white">
+               <div className="text-center p-8 glass">
+                   <h3 className="text-2xl font-bold text-gold-400">{t('common.selectCompanyToStart')}</h3>
+                   <p className="text-gray-400 mt-2">{t('reports.selectCompanyToView')}</p>
+               </div>
+           </div>
+       );
+   }
 
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white print:p-0 print:bg-white print:text-black">
             {/* Header */}
             <header className="flex flex-col md:flex-row items-center justify-between mb-8 print:hidden">
                 <div>
-                    <h1 className="text-3xl font-bold">{t('reports.title')}</h1>
+                    <h1 className="text-3xl font-bold">{t('reports.title')} - {selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h1>
                     <p className="text-gray-400 mt-1">{format(new Date(), "eeee, d MMMM yyyy")}</p>
                 </div>
                 <div className="flex items-center gap-4 mt-4 md:mt-0">
@@ -128,6 +214,7 @@ const Reports: React.FC = () => {
             {/* For Print Header */}
             <div className="hidden print:block text-center mb-8">
                  <h1 className="text-3xl font-bold text-black">{t('reports.title')}</h1>
+                 <h2 className="text-xl font-semibold text-gray-700">{selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h2>
                  <p className="text-gray-600 mt-1">OIA Governance System - {format(new Date(), "d MMMM yyyy")}</p>
             </div>
 
@@ -164,8 +251,8 @@ const Reports: React.FC = () => {
                             <AlertCircle className="w-4 h-4 text-gray-400" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">
-                               <span className="text-danger">{summaryData.risks.high} {t('registry.risks.high')}</span> / <span className="text-yellow-400">{summaryData.risks.medium} {t('registry.risks.medium')}</span>
+                            <div className="text-xl font-bold">
+                               <span className="text-danger">{summaryData.risks.critical} {t('registry.risks.critical')}</span> / <span className="text-yellow-400">{summaryData.risks.medium} {t('registry.risks.medium')}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">{t('reports.summary.risksSub')}</p>
                         </CardContent>
@@ -222,7 +309,7 @@ const Reports: React.FC = () => {
                                     <Tooltip contentStyle={{ backgroundColor: '#001A33' }} cursor={{fill: 'rgba(255,255,255,0.1)'}} />
                                     <Bar dataKey="count" barSize={30} radius={[0, 10, 10, 0]}>
                                         {riskDistributionData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                            <Cell key={`cell-${index}`} fill={(entry as any).color} />
                                         ))}
                                     </Bar>
                                 </BarChart>
@@ -241,13 +328,13 @@ const Reports: React.FC = () => {
                                 <PieChart>
                                     <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5}>
                                         {improvementPlanData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                            <Cell key={`cell-${index}`} fill={(entry as any).color} />
                                         ))}
                                     </Pie>
                                     <Tooltip contentStyle={{ backgroundColor: '#001A33' }}/>
                                     <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
                                     <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold print:fill-black">
-                                       {improvementPlanData.reduce((acc, item) => acc + item.value, 0)}
+                                       {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
                                     </text>
                                      <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm print:fill-gray-600">
                                        {t('reports.actions')}
@@ -275,7 +362,7 @@ const Reports: React.FC = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {topGapsData.map((gap) => (
+                                    {topGapsData.map((gap: any) => (
                                         <TableRow key={gap.id} className="border-white/10 hover:bg-white/5 print:border-gray-200">
                                             <TableCell>{gap.id}. {gap.name}</TableCell>
                                             <TableCell>{gap.axis}</TableCell>
@@ -302,7 +389,7 @@ const Reports: React.FC = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {criticalRisksData.map((risk) => (
+                                    {criticalRisksData.map((risk: any) => (
                                         <TableRow key={risk.id} className="border-white/10 hover:bg-white/5 print:border-gray-200">
                                             <TableCell>{risk.description}</TableCell>
                                             <TableCell>{risk.category}</TableCell>
@@ -321,3 +408,5 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+    

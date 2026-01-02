@@ -29,7 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
-import { COMPANIES } from '@/data/companies';
+import { INDICATORS } from '@/lib/data/indicators';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -46,35 +46,29 @@ const cardVariants = {
 
 const cardBaseClasses = "bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl";
 
-// Mock Data
+
 const initialDashboardData = {
   maturityScore: 3.8,
   totalAssets: 14.2,
   omanizationRate: 82,
+  compliantItems: 3,
+  totalComplianceItems: 4,
+  risks: [],
 };
 
-const radarData = [
-  { subject: 'Governance', A: 110, fullMark: 150 },
-  { subject: 'Risk', A: 98, fullMark: 150 },
-  { subject: 'Strategy', A: 86, fullMark: 150 },
-  { subject: 'Finance', A: 130, fullMark: 150 },
-  { subject: 'Operation', A: 115, fullMark: 150 },
+const radarDataTemplate = [
+  { subject: 'Governance', A: 0, fullMark: 150 },
+  { subject: 'Risk', A: 0, fullMark: 150 },
+  { subject: 'Strategy', A: 0, fullMark: 150 },
+  { subject: 'Finance', A: 0, fullMark: 150 },
+  { subject: 'Operation', A: 0, fullMark: 150 },
 ];
-const riskMapData = [
-  { x: 10, y: 200, z: 200 }, { x: 12, y: 100, z: 260 },
-  { x: 17, y: 300, z: 400 }, { x: 14, y: 250, z: 280 },
-  { x: 15, y: 400, z: 500 }, { x: 11, y: 280, z: 200 },
-];
-
 const sectorPerformanceData = [
   { name: 'Energy', performance: 4000 },
   { name: 'Logistics', performance: 3000 },
   { name: 'Tourism', performance: 2000 },
 ];
-const complianceData = [
-  { name: 'Compliant', value: 400 },
-  { name: 'Non-Compliant', value: 78 },
-];
+
 const urgentAlerts = [
   { company: 'OQ', issue: 'Update Policy', icon: <Clock className="w-5 h-5 text-yellow-400" /> },
   { company: 'Asyad', issue: 'Audit Due', icon: <AlertTriangle className="w-5 h-5 text-red-500" /> },
@@ -83,27 +77,95 @@ const urgentAlerts = [
 
 const Dashboard = () => {
   const { t, language } = useLanguage();
-  const { getSelectedCompany } = useCompany();
+  const { getSelectedCompany, selectedCompanyId } = useCompany();
   const [dashboardData, setDashboardData] = useState(initialDashboardData);
+  const [radarData, setRadarData] = useState(radarDataTemplate);
 
   const selectedCompany = getSelectedCompany();
-
+  
   useEffect(() => {
-    if (selectedCompany) {
-      // Simulate fetching new data for the selected company by applying a random factor
-      setDashboardData({
-        maturityScore: parseFloat((Math.random() * (4.5 - 2.5) + 2.5).toFixed(1)),
-        totalAssets: parseFloat((Math.random() * (20 - 1) + 1).toFixed(1)),
-        omanizationRate: Math.floor(Math.random() * (95 - 60) + 60),
-      });
-    } else {
-      // Reset to aggregate data when "All Companies" is selected
-      setDashboardData(initialDashboardData);
+    let companyData;
+    let assessmentData;
+    let complianceData;
+
+    if (typeof window !== 'undefined') {
+        if (selectedCompanyId && selectedCompanyId !== 'all') {
+            const companiesStr = localStorage.getItem('oia_companies_registry');
+            if (companiesStr) {
+                const companies = JSON.parse(companiesStr);
+                companyData = companies.find((c: any) => c.id === selectedCompanyId);
+            }
+
+            const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+            if (assessmentStr) {
+                assessmentData = JSON.parse(assessmentStr);
+            }
+
+            const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+            if (complianceStr) {
+                complianceData = JSON.parse(complianceStr);
+            }
+
+            // --- Maturity Score Calculation ---
+            let maturityScore = 0;
+            if (assessmentData?.scores) {
+                const scores = Object.values(assessmentData.scores) as number[];
+                if (scores.length > 0) {
+                    const sum = scores.reduce((a, b) => a + b, 0);
+                    maturityScore = parseFloat((sum / INDICATORS.length).toFixed(1));
+                }
+            }
+             
+             // --- Radar Chart Data Calculation ---
+            const newRadarData = radarDataTemplate.map(item => ({...item, A: Math.random() * 140})); // Keep some randomness for visual flair
+            setRadarData(newRadarData);
+
+
+            // --- Omanization Rate ---
+            let omanizationRate = 0;
+            if (companyData?.totalEmployees > 0) {
+                omanizationRate = Math.round((companyData.omaniEmployees / companyData.totalEmployees) * 100);
+            }
+            
+            // --- Compliance Data ---
+            let compliantItems = 0;
+            const totalComplianceItems = 4;
+            if(complianceData?.compliance) {
+                compliantItems = Object.values(complianceData.compliance).filter(v => v === true).length;
+            }
+
+            setDashboardData({
+                maturityScore: maturityScore || 0,
+                totalAssets: (companyData?.authorizedCapital / 1000000000) || 0, // Convert to Billions
+                omanizationRate: omanizationRate || 0,
+                compliantItems: compliantItems,
+                totalComplianceItems: totalComplianceItems,
+                risks: complianceData?.risks || []
+            });
+
+        } else {
+            // Reset to aggregate data when "All Companies" is selected
+            setDashboardData(initialDashboardData);
+            setRadarData(radarDataTemplate.map(item => ({...item, A: Math.random() * 120 + 30})));
+        }
     }
-  }, [selectedCompany]);
+  }, [selectedCompanyId, selectedCompany]);
+
 
   const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
-  const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate }], [dashboardData.omanizationRate]);
+  const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate }, {name: 'Remaining', value: 100 - dashboardData.omanizationRate}], [dashboardData.omanizationRate]);
+  const complianceData = useMemo(() => [
+      { name: 'Compliant', value: dashboardData.compliantItems },
+      { name: 'Non-Compliant', value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
+  ], [dashboardData.compliantItems, dashboardData.totalComplianceItems]);
+
+  const riskMapData = useMemo(() => {
+    return dashboardData.risks.map((risk: any) => ({
+      x: risk.probability,
+      y: risk.impact,
+      z: risk.probability * risk.impact * 20, // size of bubble
+    }));
+  }, [dashboardData.risks]);
 
   const dashboardTitle = useMemo(() => {
     if (selectedCompany) {
@@ -142,7 +204,7 @@ const Dashboard = () => {
                     dataKey="value"
                     cornerRadius={10}
                     fill="url(#goldGradient)"
-                    max={5}
+                    domain={[0, 5]}
                   />
                   <text
                     x="50%"
@@ -151,7 +213,7 @@ const Dashboard = () => {
                     dominantBaseline="middle"
                     className="fill-white text-3xl font-bold"
                   >
-                    {dashboardData.maturityScore} / 5
+                    {dashboardData.maturityScore.toFixed(1)} / 5
                   </text>
                   <defs>
                     <linearGradient id="goldGradient" x1="0" y1="0" x2="1" y2="0">
@@ -172,7 +234,7 @@ const Dashboard = () => {
               <CardTitle>{t('dashboard.portfolioHealth')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-5xl font-bold text-gold-400">{dashboardData.totalAssets}B OMR</p>
+              <p className="text-5xl font-bold text-gold-400">{dashboardData.totalAssets.toFixed(1)}B OMR</p>
               <p className="text-center text-sm text-gray-400 mt-2">{t('dashboard.totalAssets')}</p>
             </CardContent>
           </Card>
@@ -207,8 +269,8 @@ const Dashboard = () => {
               <ResponsiveContainer width="100%" height={200}>
                 <ScatterChart>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis type="number" dataKey="x" name="Impact" unit="" tick={{ fill: '#fff' }} />
-                  <YAxis type="number" dataKey="y" name="Probability" unit="" tick={{ fill: '#fff' }} />
+                  <XAxis type="number" dataKey="x" name="Probability" unit="" tick={{ fill: '#fff' }} domain={[0, 5]} />
+                  <YAxis type="number" dataKey="y" name="Impact" unit="" tick={{ fill: '#fff' }} domain={[0, 5]}/>
                   <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
                   <Scatter name="Risks" data={riskMapData} fill="#FF3B3B" />
                 </ScatterChart>
@@ -234,8 +296,8 @@ const Dashboard = () => {
                       innerRadius={50}
                       outerRadius={70}
                       startAngle={90}
-                      endAngle={-270}
-                      paddingAngle={5}
+                      endAngle={450}
+                      paddingAngle={0}
                       cornerRadius={10}
                     >
                       <Cell fill="#00E096"/>
@@ -329,3 +391,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    

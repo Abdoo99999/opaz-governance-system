@@ -32,13 +32,14 @@ export const translations = {
         low: "منخفض",
         medium: "متوسط",
         high: "مرتفع",
+        critical: "حرج"
       }
     },
     assessment: {
         title: "محاور التقييم",
         globalProgress: "التقدم الكلي",
         completed: "مكتمل",
-        saveDraft: "حفظ مسودة",
+        saveDraft: "حفظ التقييم",
         submitFinal: "اعتماد نهائي",
         indicator: "المؤشر",
         maturityLevel: "حدد مستوى النضج (1 = الأدنى, 5 = الأعلى)",
@@ -115,6 +116,7 @@ export const translations = {
     },
     reports: {
         title: "التقرير الاستراتيجي الشامل",
+        selectCompanyToView: "يرجى اختيار شركة لعرض تقريرها التفصيلي.",
         year: "عام",
         export: "تصدير PDF",
         summary: {
@@ -252,13 +254,14 @@ export const translations = {
             low: "Low",
             medium: "Medium",
             high: "High",
+            critical: "Critical"
         }
     },
     assessment: {
         title: "Assessment Axes",
         globalProgress: "Global Progress",
         completed: "Completed",
-        saveDraft: "Save Draft",
+        saveDraft: "Save Assessment",
         submitFinal: "Submit Final",
         indicator: "Indicator",
         maturityLevel: "Select maturity level (1 = Lowest, 5 = Highest):",
@@ -335,6 +338,7 @@ export const translations = {
     },
     reports: {
         title: "Comprehensive Strategic Report",
+        selectCompanyToView: "Please select a company to view its detailed report.",
         year: "Year",
         export: "Export PDF",
         summary: {
@@ -441,7 +445,5 @@ export const translations = {
     }
   }
 };
-
-    
 
     

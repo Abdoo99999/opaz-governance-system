@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -27,7 +28,7 @@ import { useLanguage } from '@/context/LanguageContext';
 type Status = 'todo' | 'in-progress' | 'done';
 type Priority = 'Critical' | 'High' | 'Medium' | 'Low';
 
-interface Task {
+export interface Task {
   id: number;
   title: string;
   indicatorId?: number;
@@ -39,7 +40,7 @@ interface Task {
   axisId: number;
 }
 
-const initialTasks: Task[] = [
+export const initialTasks: Task[] = [
   { id: 1, title: 'Update the Whistleblowing Policy to include anonymous reporting.', indicatorId: 45, dueDate: '2024-08-15', priority: 'High', assignedTo: 'Fatma Al-Said', avatar: 'https://picsum.photos/seed/101/100/100', status: 'todo', axisId: 9 },
   { id: 2, title: 'Appoint an independent Audit Committee member.', indicatorId: 7, dueDate: '2024-07-30', priority: 'Critical', assignedTo: 'Ali Al-Habsi', avatar: 'https://picsum.photos/seed/102/100/100', status: 'todo', axisId: 2 },
   { id: 3, title: 'Formalize and document the CEO succession plan.', indicatorId: 18, dueDate: '2024-09-01', priority: 'High', assignedTo: 'Yusuf Al-Harthy', avatar: 'https://picsum.photos/seed/103/100/100', status: 'in-progress', axisId: 4 },
@@ -254,3 +255,5 @@ export default function ImprovementPlan() {
         </div>
     );
 }
+
+    
