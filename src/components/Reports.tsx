@@ -55,7 +55,6 @@ const Reports: React.FC = () => {
     const { selectedCompanyId, getSelectedCompany } = useCompany();
     const selectedCompany = getSelectedCompany();
     
-    // --- Data States ---
     const [summaryData, setSummaryData] = useState({ maturity: 0, compliance: 0, risks: { high: 0, medium: 0, critical: 0 }, actions: 0 });
     const [radarData, setRadarData] = useState([]);
     const [riskDistributionData, setRiskDistributionData] = useState([]);
@@ -66,7 +65,6 @@ const Reports: React.FC = () => {
 
     useEffect(() => {
         if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
-             // Optionally, set to a default/aggregate state or clear it
              setSummaryData({ maturity: 0, compliance: 0, risks: { high: 0, medium: 0, critical: 0 }, actions: 0 });
              setRadarData([]);
              setRiskDistributionData([]);
@@ -86,18 +84,19 @@ const Reports: React.FC = () => {
         // --- Process Data ---
 
         // 1. Summary Cards
-        const scores = Object.values(assessmentData.scores) as number[];
-        const maturity = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / INDICATORS.length : 0;
+        const scores = Object.values(assessmentData.scores || {}) as number[];
+        const totalScore = scores.reduce((sum, score) => sum + score, 0);
+        const maturity = scores.length > 0 ? totalScore / INDICATORS.length : 0;
         
-        const complianceItems = Object.values(complianceData.compliance);
+        const complianceItems = Object.values(complianceData.compliance || {});
         const complianceRate = complianceItems.length > 0 ? (complianceItems.filter(v => v).length / complianceItems.length) * 100 : 0;
 
         const risks = complianceData.risks || [];
-        const highRisks = risks.filter((r: any) => r.impact * r.probability >= 15).length;
+        const criticalRisks = risks.filter((r: any) => r.impact * r.probability >= 20).length;
+        const highRisks = risks.filter((r: any) => r.impact * r.probability >= 15 && r.impact * r.probability < 20).length;
         const mediumRisks = risks.filter((r: any) => r.impact * r.probability >= 5 && r.impact * r.probability < 15).length;
-        const criticalRisks = risks.filter((r:any) => r.impact * r.probability >= 20).length;
 
-        const totalActions = initialTasks.length; // From mock data for now
+        const totalActions = initialTasks.length; 
         const completedActions = initialTasks.filter(t => t.status === 'done').length;
 
         setSummaryData({
@@ -110,7 +109,7 @@ const Reports: React.FC = () => {
         // 2. Radar Chart
         const newRadarData = AXES.map(axis => {
             const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
-            const axisScores = axisIndicators.map(ind => assessmentData.scores[ind.id] || 0);
+            const axisScores = axisIndicators.map(ind => assessmentData.scores?.[ind.id] || 0);
             const axisSum = axisScores.reduce((a, b) => a + b, 0);
             const companyValue = axisScores.length > 0 ? (axisSum / (axisScores.length * 5)) * 150 : 0; // Scale to 150
             
@@ -149,7 +148,7 @@ const Reports: React.FC = () => {
         ] as any);
         
         // 5. Tables
-        const sortedGaps = Object.entries(assessmentData.scores)
+        const sortedGaps = Object.entries(assessmentData.scores || {})
             .map(([id, score]) => ({ id: Number(id), score: Number(score) }))
             .filter(item => item.score < 3)
             .sort((a, b) => a.score - b.score)
@@ -166,7 +165,7 @@ const Reports: React.FC = () => {
             });
         setTopGapsData(sortedGaps as any);
         
-        setCriticalRisksData(risks.filter((r: any) => r.impact * r.probability >= 15) as any);
+        setCriticalRisksData(risks.filter((r: any) => r.impact * r.probability >= 15).sort((a:any, b:any) => (b.impact * b.probability) - (a.impact * a.probability)) as any);
 
 
     }, [selectedCompanyId, language]);
@@ -252,7 +251,7 @@ const Reports: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                             <div className="text-xl font-bold">
-                               <span className="text-danger">{summaryData.risks.critical} {t('registry.risks.critical')}</span> / <span className="text-yellow-400">{summaryData.risks.medium} {t('registry.risks.medium')}</span>
+                               <span className="text-danger">{summaryData.risks.critical} {t('registry.risks.critical')}</span> / <span className="text-yellow-400">{summaryData.risks.high} {t('registry.risks.high')}</span>
                             </div>
                             <p className="text-xs text-muted-foreground">{t('reports.summary.risksSub')}</p>
                         </CardContent>
@@ -389,10 +388,10 @@ const Reports: React.FC = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {criticalRisksData.map((risk: any) => (
-                                        <TableRow key={risk.id} className="border-white/10 hover:bg-white/5 print:border-gray-200">
+                                    {criticalRisksData.map((risk: any, index: number) => (
+                                        <TableRow key={index} className="border-white/10 hover:bg-white/5 print:border-gray-200">
                                             <TableCell>{risk.description}</TableCell>
-                                            <TableCell>{risk.category}</TableCell>
+                                            <TableCell>{t(`compliance.riskCategories.${risk.category.toLowerCase()}`)}</TableCell>
                                             <TableCell className="text-center"><Badge className="bg-danger/80">{risk.impact}</Badge></TableCell>
                                             <TableCell className="text-center"><Badge className="bg-yellow-500/80">{risk.probability}</Badge></TableCell>
                                         </TableRow>

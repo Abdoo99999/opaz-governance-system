@@ -41,7 +41,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     const getStorageKey = (companyId: string) => `oia_assessment_${companyId}`;
 
     const [scores, setScores] = useState<Scores>(() => {
-        if (selectedCompanyId === 'all') return {};
+        if (typeof window === 'undefined' || selectedCompanyId === 'all') return {};
         const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
         return saved ? JSON.parse(saved).scores : {};
     });
@@ -49,7 +49,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     const [files, setFiles] = useState<Files>({});
     
     const [isAssessmentComplete, setIsAssessmentComplete] = useState<boolean>(() => {
-        if (selectedCompanyId === 'all') return false;
+        if (typeof window === 'undefined' || selectedCompanyId === 'all') return false;
         const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
         return saved ? JSON.parse(saved).isComplete : false;
     });
@@ -59,7 +59,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     
     // RELOAD data when company changes
     useEffect(() => {
-        if (selectedCompanyId === 'all') {
+        if (selectedCompanyId === 'all' || typeof window === 'undefined') {
             setScores({});
             setFiles({});
             setIsAssessmentComplete(false);
@@ -83,7 +83,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     }, [selectedCompanyId]);
 
     const handleSave = () => {
-        if (selectedCompanyId === 'all') return;
+        if (selectedCompanyId === 'all' || typeof window === 'undefined') return;
         
         const dataToSave = {
             scores: scores,
@@ -96,6 +96,18 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
             title: "تم الحفظ بنجاح",
             description: `تم حفظ بيانات تقييم شركة ${selectedCompany?.name_ar}`,
         });
+    };
+    
+    const handleSubmit = () => {
+        const missing = getMissingIndicators();
+        if (missing.length > 0) {
+            setShowValidationModal(true);
+        } else {
+            setIsAssessmentComplete(true); // Lock the assessment
+            const dataToSave = { scores: scores, isComplete: true };
+            localStorage.setItem(getStorageKey(selectedCompanyId), JSON.stringify(dataToSave));
+            setShowSuccessModal(true); // Show success confirmation
+        }
     };
 
     const indicatorsForAxis = useMemo(() => INDICATORS.filter(ind => ind.axisId === activeAxis), [activeAxis]);
@@ -136,17 +148,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
         return INDICATORS.filter(indicator => scores[indicator.id] === undefined);
     };
 
-    const handleSubmit = () => {
-        const missing = getMissingIndicators();
-        if (missing.length > 0) {
-            setShowValidationModal(true);
-        } else {
-            setIsAssessmentComplete(true); // Lock the assessment
-            handleSave(); // Save final state
-            setShowSuccessModal(true); // Show success confirmation
-        }
-    };
-    
     const handleJumpToIndicator = (indicator: Indicator) => {
         setActiveAxis(indicator.axisId);
         setShowValidationModal(false);

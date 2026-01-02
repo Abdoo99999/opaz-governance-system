@@ -29,7 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
-import { INDICATORS } from '@/lib/data/indicators';
+import { INDICATORS, AXES } from '@/lib/data/indicators';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -46,23 +46,22 @@ const cardVariants = {
 
 const cardBaseClasses = "bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl";
 
-
 const initialDashboardData = {
-  maturityScore: 3.8,
-  totalAssets: 14.2,
-  omanizationRate: 82,
-  compliantItems: 3,
+  maturityScore: 0,
+  totalAssets: 14.2, // This remains aggregate for now
+  omanizationRate: 0,
+  compliantItems: 0,
   totalComplianceItems: 4,
   risks: [],
 };
 
-const radarDataTemplate = [
-  { subject: 'Governance', A: 0, fullMark: 150 },
-  { subject: 'Risk', A: 0, fullMark: 150 },
-  { subject: 'Strategy', A: 0, fullMark: 150 },
-  { subject: 'Finance', A: 0, fullMark: 150 },
-  { subject: 'Operation', A: 0, fullMark: 150 },
-];
+const radarDataTemplate = AXES.map(axis => ({ 
+    subject: axis.title_en,
+    subject_ar: axis.title_ar,
+    A: 0, 
+    fullMark: 150 
+}));
+
 const sectorPerformanceData = [
   { name: 'Energy', performance: 4000 },
   { name: 'Logistics', performance: 3000 },
@@ -84,72 +83,65 @@ const Dashboard = () => {
   const selectedCompany = getSelectedCompany();
   
   useEffect(() => {
-    let companyData;
-    let assessmentData;
-    let complianceData;
+    if (typeof window === 'undefined') return;
 
-    if (typeof window !== 'undefined') {
-        if (selectedCompanyId && selectedCompanyId !== 'all') {
-            const companiesStr = localStorage.getItem('oia_companies_registry');
-            if (companiesStr) {
-                const companies = JSON.parse(companiesStr);
-                companyData = companies.find((c: any) => c.id === selectedCompanyId);
-            }
+    if (selectedCompanyId && selectedCompanyId !== 'all') {
+        // Load data for a specific company
+        const companiesStr = localStorage.getItem('oia_companies_registry');
+        const companies = companiesStr ? JSON.parse(companiesStr) : [];
+        const companyData = companies.find((c: any) => c.id === selectedCompanyId);
+        
+        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {} };
 
-            const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
-            if (assessmentStr) {
-                assessmentData = JSON.parse(assessmentStr);
-            }
+        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+        const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
 
-            const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
-            if (complianceStr) {
-                complianceData = JSON.parse(complianceStr);
-            }
+        // --- Maturity Score Calculation ---
+        const scores = Object.values(assessmentData.scores || {}) as number[];
+        const totalScore = scores.reduce((sum, score) => sum + score, 0);
+        const maturityScore = scores.length > 0 ? totalScore / INDICATORS.length : 0;
+         
+        // --- Radar Chart Data Calculation ---
+        const newRadarData = AXES.map(axis => {
+            const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
+            const axisScores = axisIndicators.map(ind => assessmentData.scores?.[ind.id] || 0);
+            const axisSum = axisScores.reduce((a, b) => a + b, 0);
+            // Value is average score for axis, scaled for chart
+            const companyValue = axisScores.length > 0 ? (axisSum / (axisScores.length * 5)) * 150 : 0;
+            return {
+                subject: language === 'ar' ? axis.title_ar : axis.title_en,
+                A: companyValue,
+                fullMark: 150,
+            };
+        });
+        setRadarData(newRadarData as any);
 
-            // --- Maturity Score Calculation ---
-            let maturityScore = 0;
-            if (assessmentData?.scores) {
-                const scores = Object.values(assessmentData.scores) as number[];
-                if (scores.length > 0) {
-                    const sum = scores.reduce((a, b) => a + b, 0);
-                    maturityScore = parseFloat((sum / INDICATORS.length).toFixed(1));
-                }
-            }
-             
-             // --- Radar Chart Data Calculation ---
-            const newRadarData = radarDataTemplate.map(item => ({...item, A: Math.random() * 140})); // Keep some randomness for visual flair
-            setRadarData(newRadarData);
-
-
-            // --- Omanization Rate ---
-            let omanizationRate = 0;
-            if (companyData?.totalEmployees > 0) {
-                omanizationRate = Math.round((companyData.omaniEmployees / companyData.totalEmployees) * 100);
-            }
-            
-            // --- Compliance Data ---
-            let compliantItems = 0;
-            const totalComplianceItems = 4;
-            if(complianceData?.compliance) {
-                compliantItems = Object.values(complianceData.compliance).filter(v => v === true).length;
-            }
-
-            setDashboardData({
-                maturityScore: maturityScore || 0,
-                totalAssets: (companyData?.authorizedCapital / 1000000000) || 0, // Convert to Billions
-                omanizationRate: omanizationRate || 0,
-                compliantItems: compliantItems,
-                totalComplianceItems: totalComplianceItems,
-                risks: complianceData?.risks || []
-            });
-
-        } else {
-            // Reset to aggregate data when "All Companies" is selected
-            setDashboardData(initialDashboardData);
-            setRadarData(radarDataTemplate.map(item => ({...item, A: Math.random() * 120 + 30})));
+        // --- Omanization Rate ---
+        let omanizationRate = 0;
+        if (companyData?.totalEmployees > 0) {
+            omanizationRate = Math.round((companyData.omaniEmployees / companyData.totalEmployees) * 100);
         }
+        
+        // --- Compliance Data ---
+        const complianceItems = Object.values(complianceData.compliance || {});
+        const compliantItemsCount = complianceItems.filter(v => v === true).length;
+        
+        setDashboardData({
+            maturityScore: parseFloat(maturityScore.toFixed(1)),
+            totalAssets: (companyData?.authorizedCapital / 1000000000) || 0,
+            omanizationRate: omanizationRate || 0,
+            compliantItems: compliantItemsCount,
+            totalComplianceItems: complianceItems.length || 4,
+            risks: complianceData?.risks || []
+        });
+
+    } else {
+        // Aggregate or default data when "All Companies" is selected
+        setDashboardData(initialDashboardData);
+        setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
     }
-  }, [selectedCompanyId, selectedCompany]);
+  }, [selectedCompanyId, language, selectedCompany]);
 
 
   const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
