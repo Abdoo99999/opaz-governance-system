@@ -15,12 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Badge } from './ui/badge';
+import { useLanguage } from '@/context/LanguageContext';
 
 const complianceItems = [
-    { id: 'auditor', question: 'هل تم تعيين مدقق حسابات خارجي؟' },
-    { id: 'quorum', question: 'هل اكتمل نصاب اجتماعات المجلس (4 مرات سنوياً)؟' },
-    { id: 'doa', question: 'هل توجد لائحة صلاحيات مالية وإدارية معتمدة؟' },
-    { id: 'conflict', question: 'هل تم الإفصاح عن تعارض المصالح للأعضاء؟' },
+    { id: 'auditor', question: 'compliance.questions.auditor' },
+    { id: 'quorum', question: 'compliance.questions.quorum' },
+    { id: 'doa', question: 'compliance.questions.doa' },
+    { id: 'conflict', question: 'compliance.questions.conflict' },
 ];
 
 const riskSchema = z.object({
@@ -51,6 +52,7 @@ const ComplianceMonitor: React.FC = () => {
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [risks, setRisks] = useState<RiskFormValues[]>(initialRisks);
+    const { t } = useLanguage();
 
     const { register, handleSubmit, control, reset, formState: { errors } } = useForm<RiskFormValues>({
         resolver: zodResolver(riskSchema),
@@ -83,13 +85,13 @@ const ComplianceMonitor: React.FC = () => {
     };
 
     return (
-        <div className="p-4 md:p-6 lg:p-8 text-white grid grid-cols-1 lg:grid-cols-2 gap-8 h-full" dir="rtl">
+        <div className="p-4 md:p-6 lg:p-8 text-white grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
 
             {/* Right Section: Statutory Compliance */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
                 <Card className="glass h-full">
                     <CardHeader>
-                        <CardTitle className="text-2xl font-bold text-gold-400">الامتثال النظامي والتشريعي</CardTitle>
+                        <CardTitle className="text-2xl font-bold text-gold-400">{t('compliance.statutoryTitle')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {complianceItems.map(item => {
@@ -104,12 +106,12 @@ const ComplianceMonitor: React.FC = () => {
                                     animate={{ borderColor: isCompliant ? 'rgba(0, 224, 150, 0.8)' : 'rgba(255, 59, 59, 0.8)' }}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <p className="text-lg flex-1">{item.question}</p>
+                                        <p className="text-lg flex-1">{t(item.question)}</p>
                                         <div className="flex items-center gap-4">
                                             {!isCompliant && (
                                                 <Badge variant="destructive" className="flex items-center gap-1">
                                                     <AlertTriangle size={14} />
-                                                    Non-Compliant
+                                                    {t('compliance.nonCompliant')}
                                                 </Badge>
                                             )}
                                             <Switch
@@ -131,10 +133,10 @@ const ComplianceMonitor: React.FC = () => {
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
                 <Card className="glass h-full">
                     <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-2xl font-bold text-gold-400">خارطة المخاطر</CardTitle>
+                        <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
                         <Button onClick={() => setIsModalOpen(true)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                             <Plus className="ml-2 h-5 w-5" />
-                            تسجيل خطر جديد
+                            {t('compliance.addRisk')}
                         </Button>
                     </CardHeader>
                     <CardContent>
@@ -168,37 +170,37 @@ const ComplianceMonitor: React.FC = () => {
                          <div className="flex justify-around text-center text-sm font-bold mt-2 ml-16">
                             {[1, 2, 3, 4, 5].map(p => <div key={p} className="w-16"><span>{p}</span></div>)}
                         </div>
-                        <div className="text-center mt-4 font-bold text-lg text-gold-400">الاحتمالية</div>
+                        <div className="text-center mt-4 font-bold text-lg text-gold-400">{t('compliance.probability')}</div>
                     </CardContent>
-                     <div className="absolute left-6 top-1/2 -translate-y-1/2 transform -rotate-90 font-bold text-lg text-gold-400">الأثر</div>
+                     <div className="absolute left-6 top-1/2 -translate-y-1/2 transform -rotate-90 font-bold text-lg text-gold-400">{t('compliance.impact')}</div>
                 </Card>
             </motion.div>
 
             {/* Add Risk Modal */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                <DialogContent className="glass text-white max-w-2xl" dir="rtl">
+                <DialogContent className="glass text-white max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-gold-400 text-2xl">تسجيل خطر جديد</DialogTitle>
+                        <DialogTitle className="text-gold-400 text-2xl">{t('compliance.addRisk')}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit(onSubmitRisk)} className="space-y-6 pt-4">
                         <div>
-                            <label className="text-gray-300">وصف الخطر</label>
+                            <label className="text-gray-300">{t('compliance.riskForm.description')}</label>
                             <Input {...register('description')} className="bg-royal-900/50 border-white/10 mt-2" />
                             {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
                         </div>
                         <div>
-                            <label className="text-gray-300">التصنيف</label>
+                            <label className="text-gray-300">{t('compliance.riskForm.category')}</label>
                             <Controller
                                 name="category"
                                 control={control}
                                 render={({ field }) => (
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue placeholder="اختر تصنيف..." /></SelectTrigger>
+                                        <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
                                         <SelectContent className="bg-royal-900 text-white border-white/20">
-                                            <SelectItem value="Financial">مالي</SelectItem>
-                                            <SelectItem value="Operational">تشغيلي</SelectItem>
-                                            <SelectItem value="Strategic">استراتيجي</SelectItem>
-                                            <SelectItem value="Cyber">سيبراني</SelectItem>
+                                            <SelectItem value="Financial">{t('compliance.riskCategories.financial')}</SelectItem>
+                                            <SelectItem value="Operational">{t('compliance.riskCategories.operational')}</SelectItem>
+                                            <SelectItem value="Strategic">{t('compliance.riskCategories.strategic')}</SelectItem>
+                                            <SelectItem value="Cyber">{t('compliance.riskCategories.cyber')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 )}
@@ -207,7 +209,7 @@ const ComplianceMonitor: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-6">
                             <div>
-                                <label className="text-gray-300">الأثر (1-5)</label>
+                                <label className="text-gray-300">{t('compliance.riskForm.impact')}</label>
                                 <Controller
                                     name="impact"
                                     control={control}
@@ -222,7 +224,7 @@ const ComplianceMonitor: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-gray-300">الاحتمالية (1-5)</label>
+                                <label className="text-gray-300">{t('compliance.riskForm.probability')}</label>
                                 <Controller
                                     name="probability"
                                     control={control}
@@ -238,13 +240,13 @@ const ComplianceMonitor: React.FC = () => {
                             </div>
                         </div>
                         <div>
-                            <label className="text-gray-300">خطة المعالجة</label>
+                            <label className="text-gray-300">{t('compliance.riskForm.mitigation')}</label>
                             <Textarea {...register('mitigation')} className="bg-royal-900/50 border-white/10 mt-2" />
                             {errors.mitigation && <p className="text-red-500 text-sm mt-1">{errors.mitigation.message}</p>}
                         </div>
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="text-white border-white/20">إلغاء</Button>
-                            <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400">حفظ السجل</Button>
+                            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="text-white border-white/20">{t('common.cancel')}</Button>
+                            <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400">{t('common.save')}</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

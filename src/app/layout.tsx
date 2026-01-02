@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="rtl">
+    <html lang="en">
       <body className={`${cairo.variable} font-body antialiased`}>
         {children}
         <Toaster />

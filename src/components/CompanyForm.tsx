@@ -17,6 +17,7 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useLanguage } from '@/context/LanguageContext';
 
 const companies = ['OQ', 'Asyad', 'Omran', 'Ithca', 'Nama', 'FDO', 'MDO', 'Oman Aviation Group', 'Fisheries Development Oman', 'Oman Logistics Company'];
 const sectors = ['Energy', 'Logistics', 'Tourism', 'Technology', 'Utilities', 'Food Security', 'Mining', 'Aviation', 'Fisheries'];
@@ -58,6 +59,7 @@ const cardVariants = {
 const inputStyles = "h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white";
 
 const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
+    const { t } = useLanguage();
     const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<CompanyFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -104,13 +106,13 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
             <header className="flex items-center justify-between mb-8">
                 <Button onClick={onClose} variant="ghost" className="text-white hover:bg-white/10">
                     <ArrowLeft className="ml-2 h-5 w-5" />
-                    Back to Registry
+                    {t('common.back')}
                 </Button>
                 <h1 className="text-3xl font-bold">
-                    {company ? `Edit ${company.companyName}` : 'إضافة شركة جديدة'}
+                    {company ? `${t('common.edit')} ${company.companyName}` : t('registry.addNew')}
                 </h1>
                 <Button onClick={handleSubmit(onSubmit)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    Save Changes
+                    {t('common.save')}
                 </Button>
             </header>
 
@@ -120,17 +122,17 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Building className="w-6 h-6 text-gold-400" />
-                            <CardTitle>البيانات الأساسية</CardTitle>
+                            <CardTitle>{t('companyForm.identity.title')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <label>Company Name</label>
+                                <label>{t('companyForm.identity.companyName')}</label>
                                 <Controller
                                     name="companyName"
                                     control={control}
                                     render={({ field }) => (
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger className={inputStyles}><SelectValue placeholder="Select a company" /></SelectTrigger>
+                                            <SelectTrigger className={inputStyles}><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
                                             <SelectContent className="bg-royal-900 text-white border-white/20">
                                                 {companies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                                             </SelectContent>
@@ -140,17 +142,17 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                 {errors.companyName && <p className="text-red-500 text-sm mt-1">{errors.companyName.message}</p>}
                             </div>
                             <div>
-                                <label>Code</label>
+                                <label>{t('companyForm.identity.code')}</label>
                                 <Input {...register('code')} readOnly className={inputStyles} />
                             </div>
                              <div>
-                                <label>Sector</label>
+                                <label>{t('companyForm.identity.sector')}</label>
                                 <Controller
                                     name="sector"
                                     control={control}
                                     render={({ field }) => (
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger className={inputStyles}><SelectValue placeholder="Select a sector" /></SelectTrigger>
+                                            <SelectTrigger className={inputStyles}><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
                                             <SelectContent className="bg-royal-900 text-white border-white/20">
                                                 {sectors.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                                             </SelectContent>
@@ -159,13 +161,13 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                 />
                             </div>
                             <div>
-                                <label>Legal Form</label>
+                                <label>{t('companyForm.identity.legalForm')}</label>
                                 <Controller
                                     name="legalForm"
                                     control={control}
                                     render={({ field }) => (
                                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger className={inputStyles}><SelectValue placeholder="Select legal form" /></SelectTrigger>
+                                            <SelectTrigger className={inputStyles}><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
                                             <SelectContent className="bg-royal-900 text-white border-white/20">
                                                 {legalForms.map(lf => <SelectItem key={lf} value={lf}>{lf}</SelectItem>)}
                                             </SelectContent>
@@ -182,15 +184,15 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Wallet className="w-6 h-6 text-gold-400" />
-                            <CardTitle>الموقف المالي</CardTitle>
+                            <CardTitle>{t('companyForm.financial.title')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                            <div>
-                                <label>Authorized Capital (OMR)</label>
+                                <label>{t('companyForm.financial.capital')}</label>
                                 <Input type="number" {...register('authorizedCapital', { valueAsNumber: true })} className={inputStyles} />
                             </div>
                             <div>
-                                <label>Financial Year End</label>
+                                <label>{t('companyForm.financial.yearEnd')}</label>
                                 <Controller
                                     name="financialYearEnd"
                                     control={control}
@@ -199,7 +201,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                             <PopoverTrigger asChild>
                                                 <Button variant={"outline"} className={cn(inputStyles, "w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
                                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                    {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-auto p-0 bg-royal-900 border-white/20">
@@ -210,7 +212,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                 />
                             </div>
                              <div>
-                                <label>Last ROI (%)</label>
+                                <label>{t('companyForm.financial.roi')}</label>
                                 <Input type="number" {...register('lastROI', { valueAsNumber: true })} className={inputStyles} />
                             </div>
                             <div className="flex items-center space-x-2 pt-4">
@@ -222,7 +224,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                     )}
                                 />
                                 <label htmlFor="uso" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    USO Obligations
+                                    {t('companyForm.financial.uso')}
                                 </label>
                             </div>
                         </CardContent>
@@ -234,11 +236,11 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Landmark className="w-6 h-6 text-gold-400" />
-                            <CardTitle>حوكمة المجلس</CardTitle>
+                            <CardTitle>{t('companyForm.board.title')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <label>Board Appointment Date</label>
+                                <label>{t('companyForm.board.appointmentDate')}</label>
                                 <Controller
                                     name="boardAppointmentDate"
                                     control={control}
@@ -247,7 +249,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                             <PopoverTrigger asChild>
                                                 <Button variant={"outline"} className={cn(inputStyles, "w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
                                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                    {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-auto p-0 bg-royal-900 border-white/20">
@@ -258,7 +260,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                                 />
                             </div>
                              <div>
-                                <label>Expiry Date</label>
+                                <label>{t('companyForm.board.expiryDate')}</label>
                                 <Controller
                                     name="expiryDate"
                                     control={control}
@@ -269,11 +271,11 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label>No. of Members</label>
+                                    <label>{t('companyForm.board.members')}</label>
                                     <Input type="number" {...register('boardMembers', { valueAsNumber: true })} className={inputStyles} />
                                 </div>
                                 <div>
-                                    <label>Independent</label>
+                                    <label>{t('companyForm.board.independent')}</label>
                                     <Input type="number" {...register('independentMembers', { valueAsNumber: true })} className={inputStyles} />
                                 </div>
                             </div>
@@ -286,22 +288,22 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose }) => {
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Users className="w-6 h-6 text-gold-400" />
-                            <CardTitle>رأس المال البشري</CardTitle>
+                            <CardTitle>{t('companyForm.hr.title')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label>Total Employees</label>
+                                    <label>{t('companyForm.hr.totalEmployees')}</label>
                                     <Input type="number" {...register('totalEmployees', { valueAsNumber: true })} className={inputStyles} />
                                 </div>
                                 <div>
-                                    <label>No. of Omanis</label>
+                                    <label>{t('companyForm.hr.omanis')}</label>
                                     <Input type="number" {...register('omaniEmployees', { valueAsNumber: true })} className={inputStyles} />
                                 </div>
                             </div>
                             <div className="pt-4">
                                 <div className="flex justify-between items-center text-sm text-gray-300 mb-2">
-                                    <span>Omanization Progress</span>
+                                    <span>{t('dashboard.omanization')}</span>
                                     <span>{omanizationPercentage.toFixed(1)}%</span>
                                 </div>
                                 <Progress value={omanizationPercentage} className="h-3" />

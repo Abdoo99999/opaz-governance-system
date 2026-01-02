@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -82,6 +83,8 @@ const urgentAlerts = [
 const companies = ['OQ', 'Asyad', 'Omran', 'Ithca', 'Nama', 'FDO'];
 
 const Dashboard = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="p-4 md:p-6 lg:p-8 text-white">
       <div className="mb-6 flex justify-end">
@@ -102,7 +105,7 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0} className="lg:col-span-1">
           <Card className={cardBaseClasses}>
             <CardHeader>
-              <CardTitle>Maturity Gauge</CardTitle>
+              <CardTitle>{t('dashboard.maturityGauge')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -147,11 +150,11 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1} className="lg:col-span-1">
           <Card className={`${cardBaseClasses} flex flex-col justify-center items-center h-full`}>
             <CardHeader>
-              <CardTitle>Portfolio Health</CardTitle>
+              <CardTitle>{t('dashboard.portfolioHealth')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-5xl font-bold text-gold-400">{portfolioHealth.totalAssets}</p>
-              <p className="text-center text-sm text-gray-400 mt-2">Total Assets</p>
+              <p className="text-center text-sm text-gray-400 mt-2">{t('dashboard.totalAssets')}</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -160,7 +163,7 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2} className="lg:col-span-1">
           <Card className={cardBaseClasses}>
             <CardHeader>
-              <CardTitle>Strategic Radar</CardTitle>
+              <CardTitle>{t('dashboard.strategicRadar')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -179,7 +182,7 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3} className="lg:col-span-1">
           <Card className={cardBaseClasses}>
             <CardHeader>
-              <CardTitle>Risk Map</CardTitle>
+              <CardTitle>{t('dashboard.riskMap')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -199,7 +202,7 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
           <Card className={`${cardBaseClasses} flex flex-col justify-center items-center h-full`}>
             <CardHeader>
-              <CardTitle>Omanization Rate</CardTitle>
+              <CardTitle>{t('dashboard.omanization')}</CardTitle>
             </CardHeader>
             <CardContent>
                <ResponsiveContainer width="100%" height={150}>
@@ -238,7 +241,7 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5} className="lg:col-span-1">
           <Card className={cardBaseClasses}>
             <CardHeader>
-              <CardTitle>Sector Performance</CardTitle>
+              <CardTitle>{t('dashboard.sectorPerf')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -262,7 +265,7 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
           <Card className={cardBaseClasses}>
             <CardHeader>
-              <CardTitle>Compliance Status</CardTitle>
+              <CardTitle>{t('dashboard.compliance')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={200}>
@@ -283,7 +286,7 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7} className="lg:col-span-2">
           <Card className={cardBaseClasses}>
             <CardHeader>
-              <CardTitle>Urgent Alerts</CardTitle>
+              <CardTitle>{t('dashboard.urgentAlerts')}</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
@@ -294,7 +297,7 @@ const Dashboard = () => {
                       <span className="font-bold">{alert.company}</span>
                       <span>{alert.issue}</span>
                     </div>
-                    <button className="text-sm text-gold-400 hover:underline">View</button>
+                    <button className="text-sm text-gold-400 hover:underline">{t('common.view')}</button>
                   </li>
                 ))}
               </ul>

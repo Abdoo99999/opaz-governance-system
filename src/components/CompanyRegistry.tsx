@@ -9,6 +9,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import CompanyForm from './CompanyForm';
+import { useLanguage } from '@/context/LanguageContext';
+
 
 const companiesData = [
     { name: 'OQ', sector: 'Energy', omanization: 85, risk: 'Low' },
@@ -32,6 +34,7 @@ const riskVariant: { [key: string]: "default" | "secondary" | "destructive" | "o
 const CompanyRegistry: React.FC = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState<any>(null);
+    const { t } = useLanguage();
 
     const handleAddCompany = () => {
         setSelectedCompany(null);
@@ -69,17 +72,17 @@ const CompanyRegistry: React.FC = () => {
                         transition={{ duration: 0.3 }}
                     >
                         <header className="flex items-center justify-between mb-8">
-                            <h1 className="text-3xl font-bold">سجل الشركات</h1>
+                            <h1 className="text-3xl font-bold">{t('registry.title')}</h1>
                             <Button onClick={handleAddCompany} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                                 <Plus className="ml-2 h-5 w-5" />
-                                إضافة شركة جديدة
+                                {t('registry.addNew')}
                             </Button>
                         </header>
 
                         <div className="mb-8 relative">
                             <Input
                                 type="text"
-                                placeholder="بحث باسم الشركة أو الكود..."
+                                placeholder={t('registry.searchPlaceholder')}
                                 className="h-12 w-full pl-12 bg-royal-800/40 backdrop-blur-md border-white/10 focus:border-gold-500 rounded-lg text-white"
                             />
                             <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -103,14 +106,14 @@ const CompanyRegistry: React.FC = () => {
                                         <div className="text-sm text-gray-400 mb-4">{company.sector}</div>
                                         <div className="mb-2">
                                             <div className="flex justify-between items-center text-xs text-gray-300 mb-1">
-                                                <span>Omanization</span>
+                                                <span>{t('dashboard.omanization')}</span>
                                                 <span>{company.omanization}%</span>
                                             </div>
                                             <Progress value={company.omanization} className="h-2" />
                                         </div>
                                         <div>
-                                            <span className="text-xs text-gray-300 mr-2">Risk Level:</span>
-                                            <Badge variant={riskVariant[company.risk]}>{company.risk}</Badge>
+                                            <span className="text-xs text-gray-300 mr-2">{t('registry.riskLevel')}:</span>
+                                            <Badge variant={riskVariant[company.risk]}>{t(`registry.risks.${company.risk.toLowerCase()}`)}</Badge>
                                         </div>
                                     </CardContent>
                                 </Card>

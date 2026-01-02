@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { AXES } from '@/lib/data/indicators';
+import { useLanguage } from '@/context/LanguageContext';
 
 type Status = 'todo' | 'in-progress' | 'done';
 type Priority = 'Critical' | 'High' | 'Medium' | 'Low';
@@ -55,13 +56,8 @@ const priorityConfig: Record<Priority, { variant: 'destructive' | 'secondary' | 
     'Low': { variant: 'default', className: 'bg-green-600/80 border-green-500' }
 };
 
-const statusConfig: Record<Status, { title: string; className: string }> = {
-    'todo': { title: 'مهام جديدة', className: 'shadow-red-500/40' },
-    'in-progress': { title: 'جاري المعالجة', className: 'shadow-gold-500/40' },
-    'done': { title: 'تم الإنجاز', className: 'shadow-success/40' },
-};
-
 const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId: number, newStatus: Status) => void; onOpenDetails: (task: Task) => void }) => {
+    const { t } = useLanguage();
     const nextStatus = task.status === 'todo' ? 'in-progress' : 'done';
     
     return (
@@ -75,11 +71,11 @@ const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId
             onClick={() => onOpenDetails(task)}
         >
             <div className="flex justify-between items-start mb-2">
-                <Badge className={cn('text-white', priorityConfig[task.priority].className)}>{task.priority}</Badge>
+                <Badge className={cn('text-white', priorityConfig[task.priority].className)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
                 <span className="text-xs text-gray-400">{task.dueDate}</span>
             </div>
             <h4 className="font-bold text-base mb-3 text-right">{task.title}</h4>
-            {task.indicatorId && <p className="text-xs text-gold-400 mb-4 text-right">Linked to Indicator #{task.indicatorId}</p>}
+            {task.indicatorId && <p className="text-xs text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
             
             <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
                 <div className="flex items-center gap-2">
@@ -97,7 +93,7 @@ const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId
                         onClick={(e) => { e.stopPropagation(); onMove(task.id, nextStatus); }}
                         className="text-gold-400 hover:bg-gold-500/10 hover:text-gold-300"
                     >
-                        {task.status === 'todo' ? 'Start' : 'Finish'}
+                        {t(task.status === 'todo' ? 'improvement.start' : 'improvement.finish')}
                         {task.status === 'todo' ? <ArrowRight className="mr-2 h-4 w-4" /> : <Check className="mr-2 h-4 w-4" />}
                     </Button>
                 )}
@@ -107,11 +103,18 @@ const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId
 };
 
 const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void, onOpenDetails: (task: Task) => void }) => {
+    const { t } = useLanguage();
+    const statusConfig: Record<Status, { titleKey: string; className: string }> = {
+      'todo': { titleKey: 'improvement.lanes.todo', className: 'shadow-red-500/40' },
+      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'shadow-gold-500/40' },
+      'done': { titleKey: 'improvement.lanes.done', className: 'shadow-success/40' },
+    };
+
     return (
         <div className="flex-shrink-0 w-[380px] h-full">
             <div className="p-4 rounded-lg h-full flex flex-col">
                 <div className={cn("flex justify-between items-center mb-4 p-2 rounded-t-lg", statusConfig[status].className)} style={{textShadow: '0 0 10px'}}>
-                    <h3 className="font-bold text-lg">{title}</h3>
+                    <h3 className="font-bold text-lg">{t(statusConfig[status].titleKey)}</h3>
                     <Badge variant="secondary">{tasks.length}</Badge>
                 </div>
                 <div className="overflow-y-auto flex-1 pr-2">
@@ -127,39 +130,40 @@ const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails }: { title: st
 };
 
 const TaskDetailsModal = ({ task, isOpen, onClose }: { task: Task | null; isOpen: boolean; onClose: () => void }) => {
+    const { t, language } = useLanguage();
     if (!task) return null;
     const axis = AXES.find(a => a.id === task.axisId);
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="glass text-white max-w-2xl" dir="rtl">
+            <DialogContent className="glass text-white max-w-2xl">
                 <DialogHeader>
-                    <Badge className={cn('text-white w-fit mb-2', priorityConfig[task.priority].className)}>{task.priority}</Badge>
+                    <Badge className={cn('text-white w-fit mb-2', priorityConfig[task.priority].className)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
                     <DialogTitle className="text-gold-400 text-2xl">{task.title}</DialogTitle>
                     <DialogDescription className="text-gray-300 pt-2">
-                        Due by {task.dueDate} • Assigned to {task.assignedTo}
+                        {t('improvement.dueDate')} {task.dueDate} • {t('improvement.assignedTo')} {task.assignedTo}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                     <div>
-                        <h5 className="font-bold mb-2">Description</h5>
-                        <p className="text-gray-300 bg-black/20 p-3 rounded-md">This task is to address a governance gap identified during the maturity assessment. The primary goal is to ensure compliance and improve the governance framework.</p>
+                        <h5 className="font-bold mb-2">{t('improvement.description')}</h5>
+                        <p className="text-gray-300 bg-black/20 p-3 rounded-md">{t('improvement.placeholderDesc')}</p>
                     </div>
                     {axis && (
                          <div>
-                            <h5 className="font-bold mb-2">Related Axis</h5>
-                            <p className="text-gray-300">{axis.title_ar}</p>
+                            <h5 className="font-bold mb-2">{t('improvement.relatedAxis')}</h5>
+                            <p className="text-gray-300">{language === 'ar' ? axis.title_ar : axis.title_en}</p>
                         </div>
                     )}
                     {task.indicatorId && (
                          <div>
-                            <h5 className="font-bold mb-2">Linked Indicator</h5>
+                            <h5 className="font-bold mb-2">{t('improvement.linkedIndicator')}</h5>
                             <p className="text-gray-300">#{task.indicatorId}</p>
                         </div>
                     )}
                      <div>
-                        <h5 className="font-bold mb-2 flex items-center gap-2"><MessageSquare size={18}/> Comments</h5>
+                        <h5 className="font-bold mb-2 flex items-center gap-2"><MessageSquare size={18}/> {t('improvement.comments')}</h5>
                         <div className="space-y-3 mt-3">
-                           <div className="text-sm text-gray-400 bg-black/20 p-3 rounded-md">Placeholder for team comments and discussion threads...</div>
+                           <div className="text-sm text-gray-400 bg-black/20 p-3 rounded-md">{t('improvement.commentsPlaceholder')}</div>
                         </div>
                     </div>
                 </div>
@@ -173,6 +177,7 @@ export default function ImprovementPlan() {
     const [filterPriority, setFilterPriority] = useState('All');
     const [filterAxis, setFilterAxis] = useState('All');
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const { t, language } = useLanguage();
 
     const handleMoveTask = (taskId: number, newStatus: Status) => {
         setTasks(prevTasks =>
@@ -207,27 +212,27 @@ export default function ImprovementPlan() {
     const priorities = ['All', 'Critical', 'High', 'Medium', 'Low'];
 
     return (
-        <div className="flex flex-col h-full text-white p-4 md:p-6 lg:p-8" dir="rtl">
+        <div className="flex flex-col h-full text-white p-4 md:p-6 lg:p-8">
             <header className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold">خطة التحسين</h1>
+                <h1 className="text-3xl font-bold">{t('menu.improvement')}</h1>
                 <div className="flex items-center gap-4">
                     <Filter className="text-gray-400" />
                      <Select onValueChange={setFilterPriority} defaultValue="All">
-                        <SelectTrigger className="w-[180px] glass"><SelectValue placeholder="Filter by Priority" /></SelectTrigger>
+                        <SelectTrigger className="w-[180px] glass"><SelectValue placeholder={t('improvement.filterPriority')} /></SelectTrigger>
                         <SelectContent className="bg-royal-900 text-white border-white/20">
-                            {priorities.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                            {priorities.map(p => <SelectItem key={p} value={p}>{t(`improvement.priorities.${p.toLowerCase()}`)}</SelectItem>)}
                         </SelectContent>
                     </Select>
                      <Select onValueChange={setFilterAxis} defaultValue="All">
-                        <SelectTrigger className="w-[220px] glass"><SelectValue placeholder="Filter by Axis" /></SelectTrigger>
+                        <SelectTrigger className="w-[220px] glass"><SelectValue placeholder={t('improvement.filterAxis')} /></SelectTrigger>
                         <SelectContent className="bg-royal-900 text-white border-white/20">
-                            <SelectItem value="All">All Axes</SelectItem>
-                            {AXES.map(axis => <SelectItem key={axis.id} value={String(axis.id)}>{axis.title_ar}</SelectItem>)}
+                            <SelectItem value="All">{t('improvement.allAxes')}</SelectItem>
+                            {AXES.map(axis => <SelectItem key={axis.id} value={String(axis.id)}>{language === 'ar' ? axis.title_ar : axis.title_en}</SelectItem>)}
                         </SelectContent>
                     </Select>
                     <Button className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                         <Plus className="ml-2 h-5 w-5" />
-                        إضافة مهمة يدوية
+                        {t('improvement.addTask')}
                     </Button>
                 </div>
             </header>
@@ -236,7 +241,7 @@ export default function ImprovementPlan() {
                 {lanes.map(lane => (
                     <KanbanLane
                         key={lane.status}
-                        title={statusConfig[lane.status].title}
+                        title={lane.title}
                         status={lane.status}
                         tasks={filteredTasks.filter(t => t.status === lane.status)}
                         onMove={handleMoveTask}

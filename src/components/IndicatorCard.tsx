@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import type { Indicator } from '@/lib/data/indicators';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface IndicatorCardProps {
     indicator: Indicator;
@@ -26,6 +27,7 @@ const scoreColors = [
 const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const evidenceRequired = (score ?? 0) > 3;
+    const { t, language } = useLanguage();
 
     const handleFileClick = () => {
         fileInputRef.current?.click();
@@ -46,16 +48,16 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
             {/* Header */}
             <div className="flex items-start justify-between gap-4 mb-6">
                 <Badge className="bg-gold-500 text-royal-900 text-lg font-bold">
-                    Indicator #{indicator.id}
+                    {t('assessment.indicator')} #{indicator.id}
                 </Badge>
                 <h3 className="flex-1 text-xl font-bold text-right leading-relaxed">
-                    {indicator.text_ar}
+                    {language === 'ar' ? indicator.text_ar : indicator.text_en}
                 </h3>
             </div>
             
             {/* Scoring */}
             <div className="mb-6">
-                <p className="text-gray-400 text-right mb-3 text-sm">حدد مستوى النضج (1 = الأدنى, 5 = الأعلى):</p>
+                <p className="text-gray-400 text-right mb-3 text-sm">{t('assessment.maturityLevel')}:</p>
                 <div className="flex justify-center items-center gap-2 md:gap-4 bg-black/20 p-3 rounded-lg">
                     {[1, 2, 3, 4, 5].map((value) => (
                         <motion.button
@@ -80,11 +82,11 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
             {/* Evidence Upload */}
             <div>
                  <div className="flex items-center justify-end gap-3 text-sm">
-                    {evidenceRequired && !file && <span className="text-yellow-400">مطلوب إرفاق دليل</span>}
-                    {evidenceRequired && file && <span className="text-green-400 flex items-center gap-1"><CheckCircle size={16}/> الدليل مرفق</span>}
+                    {evidenceRequired && !file && <span className="text-yellow-400">{t('assessment.evidenceRequired')}</span>}
+                    {evidenceRequired && file && <span className="text-green-400 flex items-center gap-1"><CheckCircle size={16}/> {t('assessment.evidenceAttached')}</span>}
                      <Button variant="outline" onClick={handleFileClick} className="bg-transparent border-white/20 hover:bg-white/10 text-white">
                         <Paperclip className="ml-2 h-4 w-4" />
-                        {file ? 'تغيير الدليل' : 'إرفاق دليل'}
+                        {file ? t('assessment.changeEvidence') : t('assessment.attachEvidence')}
                     </Button>
                 </div>
                  <input
@@ -95,7 +97,7 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
                 />
                  {file && (
                     <div className="text-right mt-2 text-xs text-gray-400">
-                        ملف مرفق: {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                        {t('assessment.fileAttached')}: {file.name} ({(file.size / 1024).toFixed(2)} KB)
                     </div>
                 )}
             </div>

@@ -35,6 +35,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, FileDown, AlertCircle, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/context/LanguageContext';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -93,17 +94,18 @@ const criticalRisksData = [
 
 
 const Reports: React.FC = () => {
+    const { t } = useLanguage();
 
     const handlePrint = () => {
         window.print();
     };
 
     return (
-        <div className="p-4 md:p-6 lg:p-8 text-white print:p-0 print:bg-white print:text-black" dir="rtl">
+        <div className="p-4 md:p-6 lg:p-8 text-white print:p-0 print:bg-white print:text-black">
             {/* Header */}
             <header className="flex flex-col md:flex-row items-center justify-between mb-8 print:hidden">
                 <div>
-                    <h1 className="text-3xl font-bold">التقرير الاستراتيجي الشامل</h1>
+                    <h1 className="text-3xl font-bold">{t('reports.title')}</h1>
                     <p className="text-gray-400 mt-1">{format(new Date(), "eeee, d MMMM yyyy")}</p>
                 </div>
                 <div className="flex items-center gap-4 mt-4 md:mt-0">
@@ -112,20 +114,20 @@ const Reports: React.FC = () => {
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-royal-900 text-white border-white/20">
-                            <SelectItem value="2024">عام 2024</SelectItem>
-                            <SelectItem value="2023">عام 2023</SelectItem>
+                            <SelectItem value="2024">{t('reports.year')} 2024</SelectItem>
+                            <SelectItem value="2023">{t('reports.year')} 2023</SelectItem>
                         </SelectContent>
                     </Select>
                     <Button onClick={handlePrint} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                         <FileDown className="ml-2 h-5 w-5" />
-                        تصدير PDF
+                        {t('reports.export')}
                     </Button>
                 </div>
             </header>
             
             {/* For Print Header */}
             <div className="hidden print:block text-center mb-8">
-                 <h1 className="text-3xl font-bold text-black">التقرير الاستراتيجي الشامل</h1>
+                 <h1 className="text-3xl font-bold text-black">{t('reports.title')}</h1>
                  <p className="text-gray-600 mt-1">OIA Governance System - {format(new Date(), "d MMMM yyyy")}</p>
             </div>
 
@@ -134,50 +136,50 @@ const Reports: React.FC = () => {
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">Overall Maturity</CardTitle>
+                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('reports.summary.maturity')}</CardTitle>
                             <TrendingUp className="w-4 h-4 text-gray-400" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold">{summaryData.maturity}/5</div>
-                            <p className="text-xs text-muted-foreground">+0.2 from last year</p>
+                            <p className="text-xs text-muted-foreground">{t('reports.summary.maturitySub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">Compliance Rate</CardTitle>
+                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('reports.summary.compliance')}</CardTitle>
                             <CheckCircle className="w-4 h-4 text-gray-400" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold">{summaryData.compliance}%</div>
-                             <p className="text-xs text-muted-foreground">4 non-compliant items</p>
+                             <p className="text-xs text-muted-foreground">{t('reports.summary.complianceSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">Active Risks</CardTitle>
+                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('reports.summary.risks')}</CardTitle>
                             <AlertCircle className="w-4 h-4 text-gray-400" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                               <span className="text-danger">{summaryData.risks.high} High</span> / <span className="text-yellow-400">{summaryData.risks.medium} Medium</span>
+                               <span className="text-danger">{summaryData.risks.high} {t('registry.risks.high')}</span> / <span className="text-yellow-400">{summaryData.risks.medium} {t('registry.risks.medium')}</span>
                             </div>
-                            <p className="text-xs text-muted-foreground">in critical zones</p>
+                            <p className="text-xs text-muted-foreground">{t('reports.summary.risksSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
                  <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">Improvement Actions</CardTitle>
+                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('reports.summary.actions')}</CardTitle>
                             <AlertCircle className="w-4 h-4 text-gray-400" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold">{summaryData.actions} Pending</div>
-                            <p className="text-xs text-muted-foreground">8 Completed this year</p>
+                            <div className="text-3xl font-bold">{summaryData.actions} {t('reports.summary.pending')}</div>
+                            <p className="text-xs text-muted-foreground">{t('reports.summary.actionsSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -188,7 +190,7 @@ const Reports: React.FC = () => {
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5} className="lg:col-span-2">
                     <Card className="glass">
                         <CardHeader>
-                            <CardTitle className="text-gold-400 print:text-black">تحليل نضج الحوكمة (Company vs. Sector)</CardTitle>
+                            <CardTitle className="text-gold-400 print:text-black">{t('reports.maturityAnalysis')}</CardTitle>
                         </CardHeader>
                         <CardContent className="print:text-black">
                             <ResponsiveContainer width="100%" height={400}>
@@ -198,8 +200,8 @@ const Reports: React.FC = () => {
                                     <PolarRadiusAxis angle={30} domain={[0, 150]} className="hidden" />
                                     <Tooltip contentStyle={{ backgroundColor: '#001A33' }} labelStyle={{ color: '#E5C565' }} />
                                     <Legend wrapperStyle={{ color: '#FFFFFF' }} />
-                                    <Radar name="Company Score" dataKey="company" stroke="#D4AF37" fill="#D4AF37" fillOpacity={0.6} />
-                                    <Radar name="Sector Average" dataKey="sector" stroke="#00E096" fill="#00E096" fillOpacity={0.2} />
+                                    <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" fill="#D4AF37" fillOpacity={0.6} />
+                                    <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#00E096" fill="#00E096" fillOpacity={0.2} />
                                 </RadarChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -209,7 +211,7 @@ const Reports: React.FC = () => {
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
                      <Card className="glass">
                         <CardHeader>
-                           <CardTitle className="text-gold-400 print:text-black">تحليل المخاطر حسب الشدة</CardTitle>
+                           <CardTitle className="text-gold-400 print:text-black">{t('reports.riskAnalysis')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
@@ -232,7 +234,7 @@ const Reports: React.FC = () => {
                  <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
                      <Card className="glass">
                         <CardHeader>
-                            <CardTitle className="text-gold-400 print:text-black">حالة خطة التحسين</CardTitle>
+                            <CardTitle className="text-gold-400 print:text-black">{t('reports.improvementStatus')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                              <ResponsiveContainer width="100%" height={300}>
@@ -248,7 +250,7 @@ const Reports: React.FC = () => {
                                        {improvementPlanData.reduce((acc, item) => acc + item.value, 0)}
                                     </text>
                                      <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm print:fill-gray-600">
-                                       Actions
+                                       {t('reports.actions')}
                                     </text>
                                 </PieChart>
                             </ResponsiveContainer>
@@ -261,15 +263,15 @@ const Reports: React.FC = () => {
             <div className="space-y-8 print:break-before-page">
                  <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
                      <Card className="glass">
-                        <CardHeader><CardTitle className="text-gold-400 print:text-black">أبرز الفجوات الاستراتيجية</CardTitle></CardHeader>
+                        <CardHeader><CardTitle className="text-gold-400 print:text-black">{t('reports.topGaps')}</CardTitle></CardHeader>
                         <CardContent>
                              <Table>
                                 <TableHeader>
                                     <TableRow className="border-white/10 hover:bg-white/5 print:border-gray-300">
-                                        <TableHead className="text-right text-white print:text-black">المؤشر</TableHead>
-                                        <TableHead className="text-right text-white print:text-black">المحور</TableHead>
-                                        <TableHead className="text-center text-white print:text-black">التقييم</TableHead>
-                                        <TableHead className="text-right text-white print:text-black">الإجراء الموصى به</TableHead>
+                                        <TableHead className="text-right text-white print:text-black">{t('reports.table.indicator')}</TableHead>
+                                        <TableHead className="text-right text-white print:text-black">{t('reports.table.axis')}</TableHead>
+                                        <TableHead className="text-center text-white print:text-black">{t('reports.table.score')}</TableHead>
+                                        <TableHead className="text-right text-white print:text-black">{t('reports.table.recommendation')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -278,7 +280,7 @@ const Reports: React.FC = () => {
                                             <TableCell>{gap.id}. {gap.name}</TableCell>
                                             <TableCell>{gap.axis}</TableCell>
                                             <TableCell className="text-center"><Badge variant="destructive">{gap.score}</Badge></TableCell>
-                                            <TableCell>تطوير واعتماد السياسة</TableCell>
+                                            <TableCell>{t('reports.developPolicy')}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -288,15 +290,15 @@ const Reports: React.FC = () => {
                 </motion.div>
                  <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
                      <Card className="glass">
-                        <CardHeader><CardTitle className="text-gold-400 print:text-black">المخاطر الحرجة المسجلة</CardTitle></CardHeader>
+                        <CardHeader><CardTitle className="text-gold-400 print:text-black">{t('reports.criticalRisks')}</CardTitle></CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow className="border-white/10 hover:bg-white/5 print:border-gray-300">
-                                        <TableHead className="text-right text-white print:text-black">وصف الخطر</TableHead>
-                                        <TableHead className="text-right text-white print:text-black">التصنيف</TableHead>
-                                        <TableHead className="text-center text-white print:text-black">الأثر</TableHead>
-                                        <TableHead className="text-center text-white print:text-black">الاحتمالية</TableHead>
+                                        <TableHead className="text-right text-white print:text-black">{t('compliance.riskForm.description')}</TableHead>
+                                        <TableHead className="text-right text-white print:text-black">{t('compliance.riskForm.category')}</TableHead>
+                                        <TableHead className="text-center text-white print:text-black">{t('compliance.riskForm.impact')}</TableHead>
+                                        <TableHead className="text-center text-white print:text-black">{t('compliance.riskForm.probability')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>

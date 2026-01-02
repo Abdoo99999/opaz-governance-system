@@ -11,6 +11,7 @@ import Reports from "@/components/Reports";
 import Settings from "@/components/Settings";
 import Login from "@/components/Login";
 import { useToast } from '@/hooks/use-toast';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -58,13 +59,15 @@ export default function Home() {
     }
   };
 
-  if (!isLoggedIn) {
-    return <Login onLogin={handleLogin} />;
-  }
-
   return (
-    <AppLayout currentView={currentView} onNavigate={handleNavigate} onLogout={handleLogout}>
-      {renderView()}
-    </AppLayout>
+    <LanguageProvider>
+      {!isLoggedIn ? (
+        <Login onLogin={handleLogin} />
+      ) : (
+        <AppLayout currentView={currentView} onNavigate={handleNavigate} onLogout={handleLogout}>
+          {renderView()}
+        </AppLayout>
+      )}
+    </LanguageProvider>
   );
 }

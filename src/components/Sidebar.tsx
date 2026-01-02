@@ -5,15 +5,17 @@ import { motion } from 'framer-motion';
 import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban, Settings, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
+import { useLanguage } from '@/context/LanguageContext';
+import { translations } from '@/data/translations';
 
 const menuItems = [
-  { name: 'لوحة القيادة', icon: LayoutDashboard, view: 'dashboard' },
-  { name: 'سجل الشركات', icon: Building2, view: 'companies' },
-  { name: 'تقييم النضج', icon: ClipboardCheck, view: 'maturity-assessment' },
-  { name: 'مراقب الامتثال', icon: ShieldAlert, view: 'compliance-monitor' },
-  { name: 'خطة التحسين', icon: Kanban, view: 'improvement-plan' },
-  { name: 'التقارير', icon: LineChart, view: 'reports' },
-  { name: 'الإعدادات', icon: Settings, view: 'settings' },
+  { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard' },
+  { name: 'registry', icon: Building2, view: 'companies' },
+  { name: 'assessment', icon: ClipboardCheck, view: 'maturity-assessment' },
+  { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor' },
+  { name: 'improvement', icon: Kanban, view: 'improvement-plan' },
+  { name: 'reports', icon: LineChart, view: 'reports' },
+  { name: 'settings', icon: Settings, view: 'settings' },
 ];
 
 interface SidebarProps {
@@ -24,6 +26,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLogout }) => {
+  const { t } = useLanguage();
 
   return (
     <div
@@ -35,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
       <div className="flex flex-col h-full">
         <div className="h-20 flex items-center justify-center">
           <h1 className={cn("font-bold text-xl text-gold-500 transition-opacity duration-300", !isOpen && 'opacity-0')}>
-            OIA Governance
+            {t('appTitle')}
           </h1>
         </div>
         <nav className="flex-1 px-4 py-8">
@@ -53,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                 >
                   <item.icon className="w-6 h-6 ml-4" />
                   <span className={cn("font-medium transition-opacity duration-300", !isOpen && 'opacity-0')}>
-                    {item.name}
+                    {t(`menu.${item.name}`)}
                   </span>
                 </button>
                 {currentView === item.view && (
@@ -74,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                 >
                   <LogOut className="w-6 h-6 ml-4" />
                   <span className={cn("font-medium transition-opacity duration-300", !isOpen && 'opacity-0')}>
-                    تسجيل الخروج
+                    {t('menu.logout')}
                   </span>
                 </button>
         </div>

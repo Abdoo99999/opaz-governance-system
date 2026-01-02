@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
 import Confetti from 'react-dom-confetti';
+import { useLanguage } from '@/context/LanguageContext';
 
 type Scores = { [key: number]: number };
 type Files = { [key: number]: File | null };
@@ -29,6 +30,7 @@ const Assessment: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [showValidationModal, setShowValidationModal] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const { t, language } = useLanguage();
 
     const indicatorsForAxis = useMemo(() => INDICATORS.filter(ind => ind.axisId === activeAxis), [activeAxis]);
     const totalCompleted = useMemo(() => Object.keys(scores).length, [scores]);
@@ -92,10 +94,10 @@ const Assessment: React.FC = () => {
     const missingIndicators = showValidationModal ? getMissingIndicators() : [];
 
     return (
-        <div className="flex h-full text-white" dir="rtl">
+        <div className="flex h-full text-white">
             {/* Internal Sidebar */}
             <aside className="w-80 h-full bg-royal-800/30 backdrop-blur-lg border-l border-white/10 p-4 overflow-y-auto">
-                <h2 className="text-xl font-bold text-gold-400 mb-6 px-2">محاور التقييم</h2>
+                <h2 className="text-xl font-bold text-gold-400 mb-6 px-2">{t('assessment.title')}</h2>
                 <nav>
                     <ul>
                         {AXES.map(axis => {
@@ -109,7 +111,7 @@ const Assessment: React.FC = () => {
                                             activeAxis === axis.id ? "bg-gold-500/10 text-gold-400" : "hover:bg-white/5"
                                         )}
                                     >
-                                        <span>{axis.title_ar}</span>
+                                        <span>{language === 'ar' ? axis.title_ar : axis.title_en}</span>
                                         {progress === 100 ? (
                                             <CheckCircle className="w-5 h-5 text-success" />
                                         ) : (
@@ -135,15 +137,15 @@ const Assessment: React.FC = () => {
                 <header className="sticky top-0 z-10 p-4 bg-royal-900/80 backdrop-blur-sm border-b border-white/10">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">
-                            <span className="font-bold">Global Progress:</span>
+                            <span className="font-bold">{t('assessment.globalProgress')}:</span>
                              <div className="w-1/2 relative">
                                 <Progress value={globalProgress} className="h-4 bg-white/10" />
-                                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-black">{totalCompleted} / {INDICATORS.length} Completed</span>
+                                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-black">{totalCompleted} / {INDICATORS.length} {t('assessment.completed')}</span>
                             </div>
                         </div>
                         <div className="flex gap-2">
-                             <Button variant="outline" className="text-white border-white/20 hover:bg-white/10">حفظ مسودة</Button>
-                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400">اعتماد نهائي</Button>
+                             <Button variant="outline" className="text-white border-white/20 hover:bg-white/10">{t('assessment.saveDraft')}</Button>
+                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400">{t('assessment.submitFinal')}</Button>
                         </div>
                     </div>
                 </header>
@@ -179,25 +181,25 @@ const Assessment: React.FC = () => {
                     <AlertDialogHeader>
                         <AlertDialogTitle className="flex items-center gap-2">
                            <AlertTriangle className="text-gold-400" />
-                           التقييم غير مكتمل
+                           {t('assessment.incompleteTitle')}
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-gray-300 pt-4">
-                           يجب الإجابة على جميع المؤشرات قبل الاعتماد النهائي. المؤشرات المتبقية:
+                           {t('assessment.incompleteDesc')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="max-h-60 overflow-y-auto my-4 pr-2 space-y-2">
                         {missingIndicators.map(ind => (
                             <div key={ind.id} className="flex justify-between items-center bg-white/5 p-2 rounded-md">
-                                <span>{ind.id}. {ind.text_ar}</span>
+                                <span>{ind.id}. {language === 'ar' ? ind.text_ar : ind.text_en}</span>
                                 <Button size="sm" variant="ghost" className="text-gold-400 hover:text-gold-500" onClick={() => handleJumpToIndicator(ind)}>
-                                    اذهب للسؤال
+                                    {t('assessment.goTo')}
                                 </Button>
                             </div>
                         ))}
                     </div>
                     <AlertDialogFooter>
                         <AlertDialogAction onClick={() => setShowValidationModal(false)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                           حسناً، فهمت
+                           {t('assessment.gotIt')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -211,8 +213,8 @@ const Assessment: React.FC = () => {
                  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
                     <motion.div initial={{opacity: 0, scale: 0.8}} animate={{opacity: 1, scale: 1}} className="text-center">
                         <CheckCircle className="w-24 h-24 text-success mx-auto mb-4" />
-                        <h2 className="text-3xl font-bold">تم الاعتماد بنجاح!</h2>
-                        <p className="text-gray-300">جاري تحويلك لصفحة التقارير...</p>
+                        <h2 className="text-3xl font-bold">{t('assessment.successTitle')}</h2>
+                        <p className="text-gray-300">{t('assessment.successDesc')}</p>
                     </motion.div>
                  </div>
             )}

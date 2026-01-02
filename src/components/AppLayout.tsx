@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -13,13 +14,14 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, currentView, onNavigate, onLogout }: AppLayoutProps) {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const { dir } = useLanguage();
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
   };
 
   return (
-    <div className="flex h-screen bg-royal-900 text-foreground" dir="rtl">
+    <div className="flex h-screen bg-royal-900 text-foreground" dir={dir}>
       <Sidebar 
         isOpen={isSidebarOpen} 
         currentView={currentView} 
