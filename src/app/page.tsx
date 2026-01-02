@@ -11,7 +11,6 @@ import Reports from "@/components/Reports";
 import Login from "@/components/Login";
 import { useToast } from '@/hooks/use-toast';
 
-
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentView, setCurrentView] = useState('dashboard');
@@ -20,8 +19,8 @@ export default function Home() {
   const handleLogin = () => {
     setIsLoggedIn(true);
     toast({
-        title: "Login Successful",
-        description: "Welcome to the OIA Governance System.",
+        title: "تم تسجيل الدخول بنجاح",
+        description: "أهلاً بك في نظام حوكمة جهاز الاستثمار العماني.",
     });
   };
 
