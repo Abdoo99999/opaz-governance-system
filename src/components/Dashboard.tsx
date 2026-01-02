@@ -26,7 +26,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
@@ -37,18 +37,18 @@ const cardVariants = {
     y: 0,
     opacity: 1,
     transition: {
-      delay: i * 0.05,
-      duration: 0.3,
+      delay: i * 0.1,
+      duration: 0.4,
       ease: 'easeOut',
     },
   }),
 };
 
-const cardBaseClasses = "bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl";
+const cardBaseClasses = "glass h-full";
 
 const initialDashboardData = {
   maturityScore: 0,
-  totalAssets: 14.2, // This remains aggregate for now
+  totalAssets: 14.2, 
   omanizationRate: 0,
   compliantItems: 0,
   totalComplianceItems: 4,
@@ -63,16 +63,13 @@ const radarDataTemplate = AXES.map(axis => ({
 }));
 
 const sectorPerformanceData = [
-  { name: 'Energy', performance: 4000 },
-  { name: 'Logistics', performance: 3000 },
-  { name: 'Tourism', performance: 2000 },
+  { name: 'Energy', performance: 4000, name_ar: 'الطاقة' },
+  { name: 'Logistics', performance: 3000, name_ar: 'اللوجستيات' },
+  { name: 'Tourism', performance: 2000, name_ar: 'السياحة' },
+  { name: 'Tech', performance: 2780, name_ar: 'التقنية' },
+  { name: 'Mining', performance: 1890, name_ar: 'التعدين' },
 ];
 
-const urgentAlerts = [
-  { company: 'OQ', issue: 'Update Policy', icon: <Clock className="w-5 h-5 text-yellow-400" /> },
-  { company: 'Asyad', issue: 'Audit Due', icon: <AlertTriangle className="w-5 h-5 text-red-500" /> },
-  { company: 'Omran', issue: 'Review Financials', icon: <CheckCircle className="w-5 h-5 text-green-500" /> },
-];
 
 const Dashboard = () => {
   const { t, language } = useLanguage();
@@ -86,7 +83,6 @@ const Dashboard = () => {
     if (typeof window === 'undefined') return;
 
     if (selectedCompanyId && selectedCompanyId !== 'all') {
-        // Load data for a specific company
         const companiesStr = localStorage.getItem('oia_companies_registry');
         const companies = companiesStr ? JSON.parse(companiesStr) : [];
         const companyData = companies.find((c: any) => c.id === selectedCompanyId);
@@ -97,17 +93,14 @@ const Dashboard = () => {
         const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
 
-        // --- Maturity Score Calculation ---
         const scores = Object.values(assessmentData.scores || {}) as number[];
         const totalScore = scores.reduce((sum, score) => sum + score, 0);
         const maturityScore = scores.length > 0 ? totalScore / INDICATORS.length : 0;
          
-        // --- Radar Chart Data Calculation ---
         const newRadarData = AXES.map(axis => {
             const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
             const axisScores = axisIndicators.map(ind => assessmentData.scores?.[ind.id] || 0);
             const axisSum = axisScores.reduce((a, b) => a + b, 0);
-            // Value is average score for axis, scaled for chart
             const companyValue = axisScores.length > 0 ? (axisSum / (axisScores.length * 5)) * 150 : 0;
             return {
                 subject: language === 'ar' ? axis.title_ar : axis.title_en,
@@ -117,13 +110,11 @@ const Dashboard = () => {
         });
         setRadarData(newRadarData as any);
 
-        // --- Omanization Rate ---
         let omanizationRate = 0;
         if (companyData?.totalEmployees > 0) {
             omanizationRate = Math.round((companyData.omaniEmployees / companyData.totalEmployees) * 100);
         }
         
-        // --- Compliance Data ---
         const complianceItems = Object.values(complianceData.compliance || {});
         const compliantItemsCount = complianceItems.filter(v => v === true).length;
         
@@ -137,22 +128,60 @@ const Dashboard = () => {
         });
 
     } else {
-        // Aggregate or default data when "All Companies" is selected
-        setDashboardData(initialDashboardData);
+        // Aggregate data for "All Companies"
+        let totalMaturity = 0, totalOmanization = 0, totalCompliant = 0, totalItems = 0;
+        const allCompaniesStr = localStorage.getItem('oia_companies_registry');
+        const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
+        let totalAssets = 0;
+        let riskCount = 0;
+
+        allCompanies.forEach((comp: any) => {
+            const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+            const complianceStr = localStorage.getItem(`oia_compliance_${comp.id}`);
+            if (assessmentStr) {
+                const assessmentData = JSON.parse(assessmentStr);
+                const scores = Object.values(assessmentData.scores || {}) as number[];
+                if(scores.length > 0) {
+                  const totalScore = scores.reduce((sum, score) => sum + score, 0);
+                  totalMaturity += totalScore / INDICATORS.length;
+                }
+            }
+            if (complianceStr) {
+                const complianceData = JSON.parse(complianceStr);
+                const complianceItems = Object.values(complianceData.compliance || {});
+                totalCompliant += complianceItems.filter(v => v === true).length;
+                totalItems += complianceItems.length;
+                riskCount += (complianceData.risks || []).length;
+            }
+            totalOmanization += comp.omanization || 0;
+            totalAssets += (comp.authorizedCapital / 1000000000) || 0;
+        });
+        
+        const avgMaturity = allCompanies.length > 0 ? totalMaturity / allCompanies.length : 0;
+        const avgOmanization = allCompanies.length > 0 ? totalOmanization / allCompanies.length : 0;
+        
+        setDashboardData({
+            maturityScore: parseFloat(avgMaturity.toFixed(1)),
+            totalAssets: parseFloat(totalAssets.toFixed(1)),
+            omanizationRate: Math.round(avgOmanization),
+            compliantItems: totalCompliant,
+            totalComplianceItems: totalItems || 4,
+            risks: Array(riskCount).fill({probability: Math.random()*5, impact: Math.random()*5}), // Mock risks
+        });
         setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
     }
-  }, [selectedCompanyId, language, selectedCompany]);
+  }, [selectedCompanyId, language]);
 
 
   const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
   const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate }, {name: 'Remaining', value: 100 - dashboardData.omanizationRate}], [dashboardData.omanizationRate]);
   const complianceData = useMemo(() => [
-      { name: 'Compliant', value: dashboardData.compliantItems },
-      { name: 'Non-Compliant', value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
-  ], [dashboardData.compliantItems, dashboardData.totalComplianceItems]);
+      { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
+  ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
 
   const riskMapData = useMemo(() => {
-    return dashboardData.risks.map((risk: any) => ({
+    return (dashboardData.risks || []).map((risk: any) => ({
       x: risk.probability,
       y: risk.impact,
       z: risk.probability * risk.impact * 20, // size of bubble
@@ -172,216 +201,124 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold">{dashboardTitle}</h1>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Maturity Gauge */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0} className="lg:col-span-1">
-          <Card className={cardBaseClasses}>
-            <CardHeader>
-              <CardTitle>{t('dashboard.maturityGauge')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <RadialBarChart
-                  cx="50%"
-                  cy="70%"
-                  innerRadius="90%"
-                  outerRadius="120%"
-                  barSize={20}
-                  data={maturityGaugeData}
-                  startAngle={180}
-                  endAngle={0}
-                >
-                  <RadialBar
-                    background
-                    dataKey="value"
-                    cornerRadius={10}
-                    fill="url(#goldGradient)"
-                    domain={[0, 5]}
-                  />
-                  <text
-                    x="50%"
-                    y="70%"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className="fill-white text-3xl font-bold"
-                  >
-                    {dashboardData.maturityScore.toFixed(1)} / 5
-                  </text>
-                  <defs>
-                    <linearGradient id="goldGradient" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#E5C565" />
-                      <stop offset="100%" stopColor="#D4AF37" />
-                    </linearGradient>
-                  </defs>
-                </RadialBarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </motion.div>
-        
-        {/* Portfolio Health */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1} className="lg:col-span-1">
-          <Card className={`${cardBaseClasses} flex flex-col justify-center items-center h-full`}>
-            <CardHeader>
-              <CardTitle>{t('dashboard.portfolioHealth')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-5xl font-bold text-gold-400">{dashboardData.totalAssets.toFixed(1)}B OMR</p>
-              <p className="text-center text-sm text-gray-400 mt-2">{t('dashboard.totalAssets')}</p>
-            </CardContent>
-          </Card>
-        </motion.div>
+      {/* KPIs Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0}>
+              <Card className={`${cardBaseClasses}`}>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-300">{t('dashboard.maturityGauge')}</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-gray-400" />
+                  </CardHeader>
+                  <CardContent>
+                      <div className="text-4xl font-bold text-gold-400">{dashboardData.maturityScore.toFixed(1)} / 5</div>
+                      <p className="text-xs text-gray-400 mt-1">{t('dashboard.overallScore')}</p>
+                  </CardContent>
+              </Card>
+          </motion.div>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
+              <Card className={`${cardBaseClasses}`}>
+                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-300">{t('dashboard.portfolioHealth')}</CardTitle>
+                      <CheckCircle className="h-4 w-4 text-gray-400" />
+                  </CardHeader>
+                  <CardContent>
+                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(1)}B</div>
+                      <p className="text-xs text-gray-400 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
+                  </CardContent>
+              </Card>
+          </motion.div>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
+              <Card className={`${cardBaseClasses}`}>
+                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-300">{t('dashboard.omanization')}</CardTitle>
+                       <Users className="h-4 w-4 text-gray-400" />
+                  </CardHeader>
+                  <CardContent>
+                      <div className="text-4xl font-bold">{dashboardData.omanizationRate}%</div>
+                      <p className="text-xs text-gray-400 mt-1">{t('dashboard.nationalWorkforce')}</p>
+                  </CardContent>
+              </Card>
+          </motion.div>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
+              <Card className={`${cardBaseClasses}`}>
+                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-300">{t('dashboard.riskMap')}</CardTitle>
+                      <AlertTriangle className="h-4 w-4 text-gray-400" />
+                  </CardHeader>
+                  <CardContent>
+                      <div className="text-4xl font-bold">{(riskMapData || []).length}</div>
+                      <p className="text-xs text-gray-400 mt-1">{t('dashboard.activeRisks')}</p>
+                  </CardContent>
+              </Card>
+          </motion.div>
+      </div>
 
+      {/* Main Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Strategic Radar */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2} className="lg:col-span-1">
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4} className="lg:col-span-3">
           <Card className={cardBaseClasses}>
             <CardHeader>
-              <CardTitle>{t('dashboard.strategicRadar')}</CardTitle>
+              <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={350}>
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                   <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#fff' }} />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#fff', fontSize: 14 }} />
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                   <Radar name="Performance" dataKey="A" stroke="#D4AF37" fill="#D4AF37" fillOpacity={0.6} />
+                  <Tooltip contentStyle={{ backgroundColor: '#001A33', border: '1px solid #D4AF37' }} />
                 </RadarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </motion.div>
-
-        {/* Risk Map */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3} className="lg:col-span-1">
-          <Card className={cardBaseClasses}>
-            <CardHeader>
-              <CardTitle>{t('dashboard.riskMap')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <ScatterChart>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis type="number" dataKey="x" name="Probability" unit="" tick={{ fill: '#fff' }} domain={[0, 5]} />
-                  <YAxis type="number" dataKey="y" name="Impact" unit="" tick={{ fill: '#fff' }} domain={[0, 5]}/>
-                  <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
-                  <Scatter name="Risks" data={riskMapData} fill="#FF3B3B" />
-                </ScatterChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Omanization Rate */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-          <Card className={`${cardBaseClasses} flex flex-col justify-center items-center h-full`}>
-            <CardHeader>
-              <CardTitle>{t('dashboard.omanization')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-               <ResponsiveContainer width="100%" height={150}>
-                  <PieChart>
-                    <Pie
-                      data={omanizationData}
-                      cx="50%"
-                      cy="50%"
-                      dataKey="value"
-                      innerRadius={50}
-                      outerRadius={70}
-                      startAngle={90}
-                      endAngle={450}
-                      paddingAngle={0}
-                      cornerRadius={10}
-                    >
-                      <Cell fill="#00E096"/>
-                      <Cell fill="rgba(255,255,255,0.1)"/>
-                    </Pie>
-                     <text
-                      x="50%"
-                      y="50%"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-white text-3xl font-bold"
-                    >
-                      {dashboardData.omanizationRate}%
-                    </text>
-                  </PieChart>
-                </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Sector Performance */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5} className="lg:col-span-1">
-          <Card className={cardBaseClasses}>
-            <CardHeader>
-              <CardTitle>{t('dashboard.sectorPerf')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={sectorPerformanceData} layout="vertical">
-                  <CartesianGrid horizontal={false} stroke="rgba(255,255,255,0.1)" />
-                  <XAxis type="number" hide />
-                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#fff' }} width={80} />
-                  <Tooltip cursor={{ fill: 'rgba(255,255,255,0.1)' }} contentStyle={{ backgroundColor: '#001A33' }}/>
-                  <Bar dataKey="performance" barSize={20} radius={[0, 10, 10, 0]}>
-                     <Cell fill="#4682B4" />
-                     <Cell fill="#5F9EA0" />
-                     <Cell fill="#20B2AA" />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </motion.div>
         
-        {/* Compliance Status */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
-          <Card className={cardBaseClasses}>
-            <CardHeader>
-              <CardTitle>{t('dashboard.compliance')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie data={complianceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5}>
-                    <Cell key="compliant" fill="#00E096" />
-                    <Cell key="non-compliant" fill="#FF3B3B" />
-                  </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#001A33' }} />
-                  <Legend iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Urgent Alerts */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7} className="lg:col-span-2">
-          <Card className={cardBaseClasses}>
-            <CardHeader>
-              <CardTitle>{t('dashboard.urgentAlerts')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {urgentAlerts.map((alert, index) => (
-                  <li key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                    <div className="flex items-center gap-4">
-                      {alert.icon}
-                      <span className="font-bold">{alert.company}</span>
-                      <span>{alert.issue}</span>
-                    </div>
-                    <button className="text-sm text-gold-400 hover:underline">{t('common.view')}</button>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+        {/* Compliance and Risk */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5} className="lg:col-span-2">
+          <div className="grid grid-rows-2 gap-6 h-full">
+             <Card className={cardBaseClasses}>
+                <CardHeader>
+                  <CardTitle>{t('dashboard.compliance')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={120}>
+                    <PieChart>
+                      <Pie data={complianceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
+                        <Cell key="compliant" fill="#00E096" />
+                        <Cell key="non-compliant" fill="#FF3B3B" />
+                      </Pie>
+                      <Tooltip contentStyle={{ backgroundColor: '#001A33' }} />
+                      <Legend iconType="circle" wrapperStyle={{fontSize: '14px'}}/>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className={cardBaseClasses}>
+                <CardHeader>
+                  <CardTitle>{t('dashboard.riskMap')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                   <ResponsiveContainer width="100%" height={120}>
+                    <ScatterChart>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <XAxis type="number" dataKey="x" name={t('compliance.probability')} unit="" tick={{ fill: '#fff' }} domain={[0, 5]} />
+                      <YAxis type="number" dataKey="y" name={t('compliance.impact')} unit="" tick={{ fill: '#fff' }} domain={[0, 5]}/>
+                      <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
+                      <Scatter name="Risks" data={riskMapData} fill="#FF3B3B" />
+                    </ScatterChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+          </div>
         </motion.div>
       </div>
+
     </div>
   );
 };
 
 export default Dashboard;
 
-    
+import { Users } from 'lucide-react';
