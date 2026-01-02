@@ -4,24 +4,23 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 
 const menuItems = [
-  { name: 'لوحة القيادة', icon: LayoutDashboard, path: '/' },
-  { name: 'سجل الشركات', icon: Building2, path: '/companies' },
-  { name: 'تقييم النضج', icon: ClipboardCheck, path: '/maturity-assessment' },
-  { name: 'مراقب الامتثال', icon: ShieldAlert, path: '/compliance-monitor' },
-  { name: 'خطة التحسين', icon: Kanban, path: '/improvement-plan' },
-  { name: 'التقارير', icon: LineChart, path: '/reports' },
+  { name: 'لوحة القيادة', icon: LayoutDashboard, view: 'dashboard' },
+  { name: 'سجل الشركات', icon: Building2, view: 'companies' },
+  { name: 'تقييم النضج', icon: ClipboardCheck, view: 'maturity-assessment' },
+  { name: 'مراقب الامتثال', icon: ShieldAlert, view: 'compliance-monitor' },
+  { name: 'خطة التحسين', icon: Kanban, view: 'improvement-plan' },
+  { name: 'التقارير', icon: LineChart, view: 'reports' },
 ];
 
 interface SidebarProps {
   isOpen: boolean;
+  currentView: string;
+  onNavigate: (view: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
-  const pathname = usePathname();
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate }) => {
 
   return (
     <div
@@ -40,11 +39,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
           <ul>
             {menuItems.map((item) => (
               <li key={item.name} className="relative mb-2">
-                <Link
-                  href={item.path}
+                <button
+                  onClick={() => onNavigate(item.view)}
                   className={cn(
-                    "flex items-center py-3 px-4 rounded-md transition-colors duration-200",
-                    pathname === item.path
+                    "flex items-center w-full py-3 px-4 rounded-md transition-colors duration-200",
+                    currentView === item.view
                       ? "text-gold-400 bg-white/5"
                       : "text-gray-300 hover:text-white hover:bg-white/5"
                   )}
@@ -53,8 +52,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                   <span className={cn("font-medium transition-opacity duration-300", !isOpen && 'opacity-0')}>
                     {item.name}
                   </span>
-                </Link>
-                {pathname === item.path && (
+                </button>
+                {currentView === item.view && (
                   <motion.div
                     layoutId="active-indicator"
                     className="absolute right-0 top-0 h-full w-1 bg-gold-500 rounded-l-full"
