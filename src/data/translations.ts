@@ -1,4 +1,3 @@
-
 export const translations = {
   ar: {
     appTitle: "مركز حوكمة جهاز الاستثمار",
@@ -52,7 +51,6 @@ export const translations = {
         goTo: "اذهب للسؤال",
         gotIt: "حسناً، فهمت",
         successTitle: "تم الاعتماد بنجاح!",
-        successDesc: "جاري تحويلك لصفحة التقارير...",
         successDescManual: "تم اعتماد التقييم بنجاح. يمكنك الآن مراجعة النتائج أو استكمال العمل.",
         viewResults: "عرض النتائج",
         stayHere: "البقاء هنا",
@@ -209,7 +207,11 @@ export const translations = {
       selectPlaceholder: "اختر...",
       pickDate: "اختر تاريخ",
       cancel: "إلغاء",
-      view: "عرض"
+      view: "عرض",
+      editingFor: "جاري التعديل لـ",
+      selectAllCompanies: "عرض كل الشركات",
+      selectCompanyToStart: "اختر شركة للبدء",
+      selectCompanyToStartDesc: "يرجى اختيار شركة من القائمة أعلاه لعرض أو تعديل بياناتها."
     }
   },
   en: {
@@ -264,7 +266,6 @@ export const translations = {
         goTo: "Go to Question",
         gotIt: "Okay, I understand",
         successTitle: "Submitted Successfully!",
-        successDesc: "Redirecting to the reports page...",
         successDescManual: "Assessment submitted successfully. You can now review the results or continue your work.",
         viewResults: "View Results",
         stayHere: "Stay Here",
@@ -352,7 +353,7 @@ export const translations = {
         table: {
             indicator: "Indicator",
             axis: "Axis",
-score: "Score",
+            score: "Score",
             recommendation: "Recommended Action"
         }
     },
@@ -421,7 +422,13 @@ score: "Score",
       selectPlaceholder: "Select...",
       pickDate: "Pick a date",
       cancel: "Cancel",
-      view: "View"
+      view: "View",
+      editingFor: "Editing for",
+      selectAllCompanies: "All Companies View",
+      selectCompanyToStart: "Select a Company to Begin",
+      selectCompanyToStartDesc: "Please select a company from the dropdown above to view or edit its data."
     }
   }
 };
+
+    

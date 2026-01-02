@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AXES, INDICATORS, Indicator } from '@/lib/data/indicators';
 import IndicatorCard from './IndicatorCard';
@@ -19,9 +19,12 @@ import {
 import { cn } from '@/lib/utils';
 import Confetti from 'react-dom-confetti';
 import { useLanguage } from '@/context/LanguageContext';
+import { useCompany } from '@/context/CompanyContext';
+import { Badge } from './ui/badge';
 
 type Scores = { [key: number]: number };
-type Files = { [key: number]: File | null };
+// Files state is complex with localStorage, so we'll mock its persistence for now.
+type Files = { [key: number]: File | { name: string; size: number } | null };
 
 interface AssessmentProps {
     onNavigate: (view: string) => void;
@@ -31,10 +34,54 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     const [activeAxis, setActiveAxis] = useState(AXES[0].id);
     const [scores, setScores] = useState<Scores>({});
     const [files, setFiles] = useState<Files>({});
+    const [isAssessmentComplete, setIsAssessmentComplete] = useState(false);
     const [showValidationModal, setShowValidationModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [isAssessmentComplete, setIsAssessmentComplete] = useState(false);
+    
     const { t, language } = useLanguage();
+    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const selectedCompany = getSelectedCompany();
+
+    // Load data from localStorage when company changes
+    useEffect(() => {
+        if (selectedCompanyId === 'all') {
+            setScores({});
+            setFiles({});
+            setIsAssessmentComplete(false);
+            return;
+        }
+
+        const storageKey = `oia_assessment_${selectedCompanyId}`;
+        const savedData = localStorage.getItem(storageKey);
+        
+        if (savedData) {
+            const { scores: savedScores, isComplete: savedIsComplete } = JSON.parse(savedData);
+            setScores(savedScores || {});
+            setIsAssessmentComplete(savedIsComplete || false);
+            // Note: Files cannot be directly stored in JSON, this is a simplified reset.
+            // In a real app, you'd handle file re-association via a backend.
+            setFiles({});
+        } else {
+            // CRITICAL: If no data exists, RESET the form
+            setScores({});
+            setFiles({});
+            setIsAssessmentComplete(false);
+        }
+    }, [selectedCompanyId]);
+
+    // Save data to localStorage whenever scores or completion status change
+    useEffect(() => {
+        if (selectedCompanyId === 'all') return;
+
+        const dataToSave = {
+            scores: scores,
+            isComplete: isAssessmentComplete,
+        };
+        const storageKey = `oia_assessment_${selectedCompanyId}`;
+        localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+
+    }, [scores, isAssessmentComplete, selectedCompanyId]);
+
 
     const indicatorsForAxis = useMemo(() => INDICATORS.filter(ind => ind.axisId === activeAxis), [activeAxis]);
     const totalCompleted = useMemo(() => Object.keys(scores).length, [scores]);
@@ -81,7 +128,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
         } else {
             setShowSuccessModal(true);
             setIsAssessmentComplete(true);
-            console.log("Assessment Submitted!", { scores, files });
         }
     };
     
@@ -139,45 +185,60 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                 <header className="sticky top-0 z-10 p-4 bg-royal-900/80 backdrop-blur-sm border-b border-white/10">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1">
-                            <span className="font-bold">{t('assessment.globalProgress')}:</span>
+                            {selectedCompany ? (
+                                <Badge className="bg-blue-900/50 border-blue-600 text-blue-300">
+                                    {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
+                                </Badge>
+                            ) : (
+                                <Badge variant="outline">{t('common.selectAllCompanies')}</Badge>
+                            )}
                              <div className="w-1/2 relative">
                                 <Progress value={globalProgress} className="h-4 bg-white/10" />
                                 <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-black">{totalCompleted} / {INDICATORS.length} {t('assessment.completed')}</span>
                             </div>
                         </div>
                         <div className="flex gap-2">
-                             <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete}>{t('assessment.saveDraft')}</Button>
-                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete}>{t('assessment.submitFinal')}</Button>
+                             <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || selectedCompanyId === 'all'}>{t('assessment.saveDraft')}</Button>
+                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete || selectedCompanyId === 'all'}>{t('assessment.submitFinal')}</Button>
                         </div>
                     </div>
                 </header>
 
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-                     <AnimatePresence mode="wait">
-                        <motion.div
-                            key={activeAxis}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3 }}
-                            className="space-y-6"
-                        >
-                            {indicatorsForAxis.map(indicator => (
-                                <IndicatorCard
-                                    key={indicator.id}
-                                    indicator={indicator}
-                                    score={scores[indicator.id]}
-                                    file={files[indicator.id]}
-                                    onScoreChange={handleScoreChange}
-                                    onFileChange={handleFileChange}
-                                    isLocked={isAssessmentComplete}
-                                />
-                            ))}
-                        </motion.div>
-                    </AnimatePresence>
+                    {selectedCompanyId === 'all' ? (
+                        <div className="flex items-center justify-center h-full">
+                            <div className="text-center p-8 glass">
+                                <h3 className="text-2xl font-bold text-gold-400">{t('common.selectCompanyToStart')}</h3>
+                                <p className="text-gray-400 mt-2">{t('common.selectCompanyToStartDesc')}</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeAxis}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.3 }}
+                                className="space-y-6"
+                            >
+                                {indicatorsForAxis.map(indicator => (
+                                    <IndicatorCard
+                                        key={indicator.id}
+                                        indicator={indicator}
+                                        score={scores[indicator.id]}
+                                        file={files[indicator.id]}
+                                        onScoreChange={handleScoreChange}
+                                        onFileChange={handleFileChange}
+                                        isLocked={isAssessmentComplete}
+                                    />
+                                ))}
+                            </motion.div>
+                        </AnimatePresence>
+                    )}
                 </div>
 
-                {isAssessmentComplete && (
+                {isAssessmentComplete && selectedCompanyId !== 'all' && (
                      <div className="sticky bottom-0 z-10 p-4 bg-royal-900/80 backdrop-blur-sm border-t border-white/10 flex items-center justify-between">
                         <span className="font-bold text-success">{t('assessment.locked')}</span>
                         <Button onClick={() => onNavigate('compliance-monitor')} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
@@ -234,7 +295,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                         <Button variant="outline" onClick={() => setShowSuccessModal(false)} className="text-white border-white/20 hover:bg-white/10">
                             {t('assessment.stayHere')}
                         </Button>
-                        <Button onClick={() => onNavigate('reports')} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                        <Button onClick={() => { setShowSuccessModal(false); onNavigate('reports'); }} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                             {t('assessment.viewResults')}
                         </Button>
                     </AlertDialogFooter>
@@ -246,3 +307,5 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
 };
 
 export default Assessment;
+
+    
