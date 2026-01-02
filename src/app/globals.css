@@ -48,6 +48,12 @@
     @apply text-foreground;
     background: radial-gradient(circle at 50% 0%, #002952 0%, #001220 100%) fixed;
   }
+  @media print {
+    body {
+      background: #fff;
+      color: #000;
+    }
+  }
 }
 
 @layer components {
@@ -56,5 +62,14 @@
         background-color: rgba(28, 41, 60, 0.4) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
         border-radius: 1rem !important;
+    }
+    @media print {
+      .glass {
+        backdrop-filter: none;
+        background-color: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        color: #000;
+        box-shadow: none;
+      }
     }
 }

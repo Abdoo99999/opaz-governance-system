@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ const menuItems = [
   { name: 'سجل الشركات', icon: Building2, path: '/companies' },
   { name: 'تقييم النضج', icon: ClipboardCheck, path: '/maturity-assessment' },
   { name: 'مراقب الامتثال', icon: ShieldAlert, path: '/compliance-monitor' },
+  { name: 'التقارير', icon: LineChart, path: '/reports' },
 ];
 
 interface SidebarProps {
@@ -24,7 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   return (
     <div
       className={cn(
-        "relative h-screen bg-royal-800/50 backdrop-blur-xl border-l border-white/5 transition-all duration-300 ease-in-out",
+        "relative h-screen bg-royal-800/50 backdrop-blur-xl border-l border-white/5 transition-all duration-300 ease-in-out print:hidden",
         isOpen ? 'w-64' : 'w-20'
       )}
     >

@@ -11,7 +11,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   return (
-    <header className="sticky top-0 z-40">
+    <header className="sticky top-0 z-40 print:hidden">
       <div className="h-16 flex items-center justify-between px-4 md:px-6 m-4 rounded-lg border-b border-white/5 bg-royal-800/30 backdrop-blur-md">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="text-foreground hover:text-gold-400">
