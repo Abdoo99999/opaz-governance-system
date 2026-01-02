@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { AXES, INDICATORS, Indicator } from '@/lib/data/indicators';
 import IndicatorCard from './IndicatorCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react';
+import { CheckCircle, AlertTriangle, ArrowRight, Save } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,9 +22,9 @@ import Confetti from 'react-dom-confetti';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { Badge } from './ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 type Scores = { [key: number]: number };
-// Files state is complex with localStorage, so we'll mock its persistence for now.
 type Files = { [key: number]: File | { name: string; size: number } | null };
 
 interface AssessmentProps {
@@ -31,18 +32,31 @@ interface AssessmentProps {
 }
 
 const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
-    const [activeAxis, setActiveAxis] = useState(AXES[0].id);
-    const [scores, setScores] = useState<Scores>({});
+    const { t, language } = useLanguage();
+    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { toast } = useToast();
+    const selectedCompany = getSelectedCompany();
+
+    const getStorageKey = (companyId: string) => `oia_assessment_${companyId}`;
+
+    const [scores, setScores] = useState<Scores>(() => {
+        if (selectedCompanyId === 'all') return {};
+        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
+        return saved ? JSON.parse(saved).scores : {};
+    });
+    
     const [files, setFiles] = useState<Files>({});
-    const [isAssessmentComplete, setIsAssessmentComplete] = useState(false);
+    
+    const [isAssessmentComplete, setIsAssessmentComplete] = useState<boolean>(() => {
+        if (selectedCompanyId === 'all') return false;
+        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
+        return saved ? JSON.parse(saved).isComplete : false;
+    });
+
     const [showValidationModal, setShowValidationModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     
-    const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany } = useCompany();
-    const selectedCompany = getSelectedCompany();
-
-    // Load data from localStorage when company changes
+    // RELOAD data when company changes
     useEffect(() => {
         if (selectedCompanyId === 'all') {
             setScores({});
@@ -51,16 +65,14 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
             return;
         }
 
-        const storageKey = `oia_assessment_${selectedCompanyId}`;
+        const storageKey = getStorageKey(selectedCompanyId);
         const savedData = localStorage.getItem(storageKey);
         
         if (savedData) {
             const { scores: savedScores, isComplete: savedIsComplete } = JSON.parse(savedData);
             setScores(savedScores || {});
             setIsAssessmentComplete(savedIsComplete || false);
-            // Note: Files cannot be directly stored in JSON, this is a simplified reset.
-            // In a real app, you'd handle file re-association via a backend.
-            setFiles({});
+            setFiles({}); // Files are not persisted in localStorage
         } else {
             // CRITICAL: If no data exists, RESET the form
             setScores({});
@@ -69,24 +81,28 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
         }
     }, [selectedCompanyId]);
 
-    // Save data to localStorage whenever scores or completion status change
-    useEffect(() => {
+    const handleSave = () => {
         if (selectedCompanyId === 'all') return;
-
+        
         const dataToSave = {
             scores: scores,
             isComplete: isAssessmentComplete,
         };
-        const storageKey = `oia_assessment_${selectedCompanyId}`;
+        const storageKey = getStorageKey(selectedCompanyId);
         localStorage.setItem(storageKey, JSON.stringify(dataToSave));
-
-    }, [scores, isAssessmentComplete, selectedCompanyId]);
-
+        
+        toast({
+            title: "تم الحفظ بنجاح",
+            description: `تم حفظ بيانات تقييم شركة ${selectedCompany?.name_ar}`,
+        });
+    };
 
     const indicatorsForAxis = useMemo(() => INDICATORS.filter(ind => ind.axisId === activeAxis), [activeAxis]);
     const totalCompleted = useMemo(() => Object.keys(scores).length, [scores]);
     const globalProgress = (totalCompleted / INDICATORS.length) * 100;
     
+    const [activeAxis, setActiveAxis] = useState(AXES[0].id);
+
     const confettiConfig = {
         angle: 90,
         spread: 360,
@@ -126,8 +142,9 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
         if (missing.length > 0) {
             setShowValidationModal(true);
         } else {
-            setShowSuccessModal(true);
-            setIsAssessmentComplete(true);
+            setIsAssessmentComplete(true); // Lock the assessment
+            handleSave(); // Save final state
+            setShowSuccessModal(true); // Show success confirmation
         }
     };
     
@@ -198,7 +215,10 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                             <Button variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || selectedCompanyId === 'all'}>{t('assessment.saveDraft')}</Button>
+                             <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || selectedCompanyId === 'all'}>
+                                 <Save className="ml-2 h-4 w-4"/>
+                                 {t('assessment.saveDraft')}
+                             </Button>
                             <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete || selectedCompanyId === 'all'}>{t('assessment.submitFinal')}</Button>
                         </div>
                     </div>
@@ -288,7 +308,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                         </div>
                         <AlertDialogTitle className="text-3xl font-bold">{t('assessment.successTitle')}</AlertDialogTitle>
                         <AlertDialogDescription className="text-gray-300 pt-2">
-                            {t('assessment.successDescManual')}
+                            {t('assessment.successDesc')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="sm:justify-center pt-4">

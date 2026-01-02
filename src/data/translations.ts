@@ -1,3 +1,4 @@
+
 export const translations = {
   ar: {
     appTitle: "مركز حوكمة جهاز الاستثمار",
@@ -51,13 +52,14 @@ export const translations = {
         goTo: "اذهب للسؤال",
         gotIt: "حسناً، فهمت",
         successTitle: "تم الاعتماد بنجاح!",
-        successDescManual: "تم اعتماد التقييم بنجاح. يمكنك الآن مراجعة النتائج أو استكمال العمل.",
+        successDesc: "تم اعتماد التقييم بنجاح. يمكنك الآن مراجعة النتائج أو استكمال العمل.",
         viewResults: "عرض النتائج",
         stayHere: "البقاء هنا",
         locked: "التقييم معتمد ومغلق",
         nextCompliance: "التالي: مراقبة الامتثال والمخاطر"
     },
     compliance: {
+        saveButton: "حفظ سجل الامتثال والمخاطر",
         statutoryTitle: "الامتثال النظامي والتشريعي",
         nonCompliant: "غير ممتثل",
         addRisk: "تسجيل خطر جديد",
@@ -266,13 +268,14 @@ export const translations = {
         goTo: "Go to Question",
         gotIt: "Okay, I understand",
         successTitle: "Submitted Successfully!",
-        successDescManual: "Assessment submitted successfully. You can now review the results or continue your work.",
+        successDesc: "Assessment submitted successfully. You can now review the results or continue your work.",
         viewResults: "View Results",
         stayHere: "Stay Here",
         locked: "Assessment Locked",
         nextCompliance: "Next: Compliance & Risk"
     },
     compliance: {
+        saveButton: "Save Compliance & Risks",
         statutoryTitle: "Statutory Compliance",
         nonCompliant: "Non-Compliant",
         addRisk: "Add New Risk",

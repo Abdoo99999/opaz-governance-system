@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -8,7 +9,7 @@ import * as z from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { AlertTriangle, Plus } from 'lucide-react';
+import { AlertTriangle, Plus, Save } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from './ui/badge';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
+import { useToast } from '@/hooks/use-toast';
 
 const complianceItems = [
     { id: 'auditor', question: 'compliance.questions.auditor' },
@@ -49,25 +51,29 @@ const initialComplianceState: ComplianceState = {
     conflict: true,
 };
 
-const initialRisks: RiskFormValues[] = [
-    { description: "Cyber attack", category: "Cyber", impact: 5, probability: 4, mitigation: "Strengthen firewall" },
-    { description: "Market downturn", category: "Financial", impact: 4, probability: 3, mitigation: "Diversify investments" },
-    { description: "Regulatory changes", category: "Strategic", impact: 3, probability: 5, mitigation: "Lobbying efforts" },
-    { description: "Operational failure", category: "Operational", impact: 5, probability: 5, mitigation: "Redundancy systems" },
-    { description: "Another operational failure", category: "Operational", impact: 5, probability: 5, mitigation: "More redundancy" },
-];
-
-
 const ComplianceMonitor: React.FC = () => {
-    const [complianceState, setComplianceState] = useState<ComplianceState>(initialComplianceState);
-    const [risks, setRisks] = useState<RiskFormValues[]>(initialRisks);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
+    
+    const getStorageKey = (companyId: string) => `oia_compliance_${companyId}`;
 
-    // Load data from localStorage when company changes
+    const [complianceState, setComplianceState] = useState<ComplianceState>(() => {
+        if (selectedCompanyId === 'all') return initialComplianceState;
+        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
+        return saved ? JSON.parse(saved).compliance : initialComplianceState;
+    });
+
+    const [risks, setRisks] = useState<RiskFormValues[]>(() => {
+        if (selectedCompanyId === 'all') return [];
+        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
+        return saved ? JSON.parse(saved).risks : [];
+    });
+    
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // RELOAD data when company changes
     useEffect(() => {
         if (selectedCompanyId === 'all') {
             setComplianceState(initialComplianceState);
@@ -75,7 +81,7 @@ const ComplianceMonitor: React.FC = () => {
             return;
         }
 
-        const storageKey = `oia_compliance_${selectedCompanyId}`;
+        const storageKey = getStorageKey(selectedCompanyId);
         const savedData = localStorage.getItem(storageKey);
         
         if (savedData) {
@@ -89,26 +95,26 @@ const ComplianceMonitor: React.FC = () => {
         }
     }, [selectedCompanyId]);
 
-    // Save data to localStorage whenever compliance state or risks change
-    useEffect(() => {
-        if (selectedCompanyId === 'all') return;
+    const { register, handleSubmit, control, reset, formState: { errors } } = useForm<RiskFormValues>({
+        resolver: zodResolver(riskSchema),
+        defaultValues: { impact: 1, probability: 1 }
+    });
 
+    const handleSave = () => {
+        if (selectedCompanyId === 'all') return;
+        
         const dataToSave = {
             compliance: complianceState,
             risks: risks,
         };
-        const storageKey = `oia_compliance_${selectedCompanyId}`;
+        const storageKey = getStorageKey(selectedCompanyId);
         localStorage.setItem(storageKey, JSON.stringify(dataToSave));
 
-    }, [complianceState, risks, selectedCompanyId]);
-
-    const { register, handleSubmit, control, reset, formState: { errors } } = useForm<RiskFormValues>({
-        resolver: zodResolver(riskSchema),
-        defaultValues: {
-            impact: 1,
-            probability: 1,
-        }
-    });
+        toast({
+            title: "تم الحفظ بنجاح",
+            description: `تم حفظ بيانات الامتثال والمخاطر لشركة ${selectedCompany?.name_ar}`,
+        });
+    };
 
     const handleToggle = (id: keyof typeof complianceState) => {
         setComplianceState(prev => ({ ...prev, [id]: !prev[id] }));
@@ -144,15 +150,20 @@ const ComplianceMonitor: React.FC = () => {
     }
 
     return (
-        <div className="p-4 md:p-6 lg:p-8 text-white h-full">
-            <div className="mb-6">
+        <div className="p-4 md:p-6 lg:p-8 text-white h-full flex flex-col">
+            <header className="flex items-center justify-between mb-6">
                 {selectedCompany && (
                     <Badge className="bg-blue-900/50 border-blue-600 text-blue-300">
                         {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
                     </Badge>
                 )}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100%-4rem)]">
+                <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                    <Save className="ml-2 h-5 w-5" />
+                    {t('compliance.saveButton')}
+                </Button>
+            </header>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
                 {/* Right Section: Statutory Compliance */}
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
                     <Card className="glass h-full">
