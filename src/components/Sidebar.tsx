@@ -4,6 +4,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 const menuItems = [
   { name: 'لوحة القيادة', icon: LayoutDashboard, path: '/' },
@@ -17,7 +19,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
-  const [activePath, setActivePath] = React.useState('/');
+  const pathname = usePathname();
 
   return (
     <div
@@ -36,12 +38,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
           <ul>
             {menuItems.map((item) => (
               <li key={item.name} className="relative mb-2">
-                <a
+                <Link
                   href={item.path}
-                  onClick={(e) => { e.preventDefault(); setActivePath(item.path); }}
                   className={cn(
                     "flex items-center py-3 px-4 rounded-md transition-colors duration-200",
-                    activePath === item.path
+                    pathname === item.path
                       ? "text-gold-400 bg-white/5"
                       : "text-gray-300 hover:text-white hover:bg-white/5"
                   )}
@@ -50,8 +51,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                   <span className={cn("font-medium transition-opacity duration-300", !isOpen && 'opacity-0')}>
                     {item.name}
                   </span>
-                </a>
-                {activePath === item.path && (
+                </Link>
+                {pathname === item.path && (
                   <motion.div
                     layoutId="active-indicator"
                     className="absolute right-0 top-0 h-full w-1 bg-gold-500 rounded-l-full"

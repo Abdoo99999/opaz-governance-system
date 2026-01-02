@@ -108,8 +108,9 @@ export default {
       addUtilities({
         '.glass': {
           'backdrop-filter': 'blur(12px)',
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'rgba(28, 41, 60, 0.4)',
           border: '1px solid rgba(255, 255, 255, 0.05)',
+          'border-radius': '1rem'
         },
       });
     }),
