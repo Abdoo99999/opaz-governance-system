@@ -1,6 +1,7 @@
+
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Bar,
@@ -24,16 +25,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useCompany } from '@/context/CompanyContext';
+import { COMPANIES } from '@/data/companies';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -51,8 +47,12 @@ const cardVariants = {
 const cardBaseClasses = "bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl";
 
 // Mock Data
-const maturityData = [{ name: 'L1', value: 5 }];
-const portfolioHealth = { totalAssets: '14.2B OMR' };
+const initialDashboardData = {
+  maturityScore: 3.8,
+  totalAssets: 14.2,
+  omanizationRate: 82,
+};
+
 const radarData = [
   { subject: 'Governance', A: 110, fullMark: 150 },
   { subject: 'Risk', A: 98, fullMark: 150 },
@@ -65,7 +65,7 @@ const riskMapData = [
   { x: 17, y: 300, z: 400 }, { x: 14, y: 250, z: 280 },
   { x: 15, y: 400, z: 500 }, { x: 11, y: 280, z: 200 },
 ];
-const omanizationData = [{ name: 'Omanization', value: 82 }];
+
 const sectorPerformanceData = [
   { name: 'Energy', performance: 4000 },
   { name: 'Logistics', performance: 3000 },
@@ -80,25 +80,43 @@ const urgentAlerts = [
   { company: 'Asyad', issue: 'Audit Due', icon: <AlertTriangle className="w-5 h-5 text-red-500" /> },
   { company: 'Omran', issue: 'Review Financials', icon: <CheckCircle className="w-5 h-5 text-green-500" /> },
 ];
-const companies = ['OQ', 'Asyad', 'Omran', 'Ithca', 'Nama', 'FDO'];
 
 const Dashboard = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { getSelectedCompany } = useCompany();
+  const [dashboardData, setDashboardData] = useState(initialDashboardData);
+
+  const selectedCompany = getSelectedCompany();
+
+  useEffect(() => {
+    if (selectedCompany) {
+      // Simulate fetching new data for the selected company by applying a random factor
+      setDashboardData({
+        maturityScore: parseFloat((Math.random() * (4.5 - 2.5) + 2.5).toFixed(1)),
+        totalAssets: parseFloat((Math.random() * (20 - 1) + 1).toFixed(1)),
+        omanizationRate: Math.floor(Math.random() * (95 - 60) + 60),
+      });
+    } else {
+      // Reset to aggregate data when "All Companies" is selected
+      setDashboardData(initialDashboardData);
+    }
+  }, [selectedCompany]);
+
+  const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
+  const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate }], [dashboardData.omanizationRate]);
+
+  const dashboardTitle = useMemo(() => {
+    if (selectedCompany) {
+      return language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en;
+    }
+    return t('menu.dashboard');
+  }, [selectedCompany, language, t]);
 
   return (
     <div className="p-4 md:p-6 lg:p-8 text-white">
-      <div className="mb-6 flex justify-end">
-        <Select defaultValue="OQ">
-          <SelectTrigger className="w-[180px] bg-royal-800/60 border-white/10 text-white rounded-lg">
-            <SelectValue placeholder="Select Company" />
-          </SelectTrigger>
-          <SelectContent className="bg-royal-900 text-white border-white/20">
-            {companies.map((company) => (
-              <SelectItem key={company} value={company}>{company}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+       <header className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold">{dashboardTitle}</h1>
+      </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Maturity Gauge */}
@@ -115,7 +133,7 @@ const Dashboard = () => {
                   innerRadius="90%"
                   outerRadius="120%"
                   barSize={20}
-                  data={maturityData}
+                  data={maturityGaugeData}
                   startAngle={180}
                   endAngle={0}
                 >
@@ -124,6 +142,7 @@ const Dashboard = () => {
                     dataKey="value"
                     cornerRadius={10}
                     fill="url(#goldGradient)"
+                    max={5}
                   />
                   <text
                     x="50%"
@@ -132,7 +151,7 @@ const Dashboard = () => {
                     dominantBaseline="middle"
                     className="fill-white text-3xl font-bold"
                   >
-                    3.8 / 5
+                    {dashboardData.maturityScore} / 5
                   </text>
                   <defs>
                     <linearGradient id="goldGradient" x1="0" y1="0" x2="1" y2="0">
@@ -153,7 +172,7 @@ const Dashboard = () => {
               <CardTitle>{t('dashboard.portfolioHealth')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-5xl font-bold text-gold-400">{portfolioHealth.totalAssets}</p>
+              <p className="text-5xl font-bold text-gold-400">{dashboardData.totalAssets}B OMR</p>
               <p className="text-center text-sm text-gray-400 mt-2">{t('dashboard.totalAssets')}</p>
             </CardContent>
           </Card>
@@ -229,7 +248,7 @@ const Dashboard = () => {
                       dominantBaseline="middle"
                       className="fill-white text-3xl font-bold"
                     >
-                      82%
+                      {dashboardData.omanizationRate}%
                     </text>
                   </PieChart>
                 </ResponsiveContainer>

@@ -1,10 +1,20 @@
+
 "use client";
 
 import React from 'react';
 import { Menu, Globe } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useLanguage } from '@/context/LanguageContext';
+import { useCompany } from '@/context/CompanyContext';
+import { COMPANIES } from '@/data/companies';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -12,6 +22,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { language, setLanguage, t } = useLanguage();
+  const { selectedCompanyId, setSelectedCompanyId } = useCompany();
 
   const handleLanguageChange = () => {
     setLanguage(language === 'ar' ? 'en' : 'ar');
@@ -19,11 +30,24 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
   return (
     <header className="sticky top-0 z-40 print:hidden">
-      <div className="h-16 flex items-center justify-between px-4 md:px-6 m-4 rounded-lg border-b border-white/5 bg-royal-800/30 backdrop-blur-md">
+      <div className="h-20 flex items-center justify-between px-4 md:px-6 m-4 rounded-lg border-b border-white/5 bg-royal-800/30 backdrop-blur-md">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="text-foreground hover:text-gold-400">
             <Menu className="h-6 w-6" />
           </Button>
+          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <SelectTrigger className="w-[280px] bg-royal-900/60 border-white/10 text-white rounded-lg h-12">
+              <SelectValue placeholder="Select Company" />
+            </SelectTrigger>
+            <SelectContent className="bg-royal-900 text-white border-white/20">
+              <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'All Companies'}</SelectItem>
+              {COMPANIES.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {language === 'ar' ? company.name_ar : company.name_en}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={handleLanguageChange} className="text-foreground hover:text-gold-400">

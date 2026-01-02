@@ -1,3 +1,4 @@
+
 export const translations = {
   ar: {
     appTitle: "مركز حوكمة جهاز الاستثمار",
@@ -341,7 +342,7 @@ export const translations = {
         table: {
             indicator: "Indicator",
             axis: "Axis",
-            score: "Score",
+score: "Score",
             recommendation: "Recommended Action"
         }
     },

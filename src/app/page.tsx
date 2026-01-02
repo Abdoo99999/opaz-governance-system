@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -12,6 +13,7 @@ import Settings from "@/components/Settings";
 import Login from "@/components/Login";
 import { useToast } from '@/hooks/use-toast';
 import { LanguageProvider } from '@/context/LanguageContext';
+import { CompanyProvider } from '@/context/CompanyContext';
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -61,13 +63,15 @@ export default function Home() {
 
   return (
     <LanguageProvider>
-      {!isLoggedIn ? (
-        <Login onLogin={handleLogin} />
-      ) : (
-        <AppLayout currentView={currentView} onNavigate={handleNavigate} onLogout={handleLogout}>
-          {renderView()}
-        </AppLayout>
-      )}
+      <CompanyProvider>
+        {!isLoggedIn ? (
+          <Login onLogin={handleLogin} />
+        ) : (
+          <AppLayout currentView={currentView} onNavigate={handleNavigate} onLogout={handleLogout}>
+            {renderView()}
+          </AppLayout>
+        )}
+      </CompanyProvider>
     </LanguageProvider>
   );
 }
