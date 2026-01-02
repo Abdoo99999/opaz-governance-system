@@ -30,7 +30,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, AlertTriangle, CheckCircle, Users, Target } from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
@@ -272,7 +272,7 @@ const Dashboard = () => {
       </div>
 
       {/* Main Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Strategic Radar */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
           <Card className={cardBaseClasses}>
@@ -280,7 +280,7 @@ const Dashboard = () => {
               <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
+              <ResponsiveContainer width="100%" height={400}>
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                   <defs>
                     <radialGradient id="radarFill">
@@ -300,45 +300,56 @@ const Dashboard = () => {
         </motion.div>
         
         {/* Compliance and Risk */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-          <div className="grid grid-rows-1 gap-6 h-full">
-             <Card className={cardBaseClasses}>
-                <CardHeader>
-                  <CardTitle>{t('dashboard.complianceRisk')}</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col items-center justify-center">
-                    <ResponsiveContainer width="100%" height={150}>
-                      <PieChart>
-                        <Pie data={complianceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5}>
-                          <Cell key="compliant" fill="#00E096" />
-                          <Cell key="non-compliant" fill="#FF3B3B" />
-                        </Pie>
-                        <Tooltip contentStyle={{ backgroundColor: '#001A33' }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}}/>
-                  </div>
-                   <div className="flex flex-col items-center justify-center">
-                     <ResponsiveContainer width="100%" height={150}>
-                      <ScatterChart margin={{ top: 20, right: 20, bottom: 10, left: 10 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                        <XAxis type="number" dataKey="x" name={t('compliance.probability')} unit="" tick={{ fill: '#fff' }} domain={[0, 5]} />
-                        <YAxis type="number" dataKey="y" name={t('compliance.impact')} unit="" tick={{ fill: '#fff' }} domain={[0, 5]}/>
-                        <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
-                        <Scatter name="Risks" data={riskMapData} fill="#FF3B3B" />
-                      </ScatterChart>
-                    </ResponsiveContainer>
-                    <p className="text-sm text-gray-300 mt-2">{t('dashboard.riskMap')}</p>
-                   </div>
-                </CardContent>
-              </Card>
-          </div>
-        </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+                <Card className={cardBaseClasses}>
+                    <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-gold-400">
+                        <PieChartIcon />
+                        {t('dashboard.compliance')}
+                    </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie data={complianceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} labelLine={false}>
+                                    <Cell key="compliant" fill="#00E096" />
+                                    <Cell key="non-compliant" fill="#FF3B3B" />
+                                </Pie>
+                                <Tooltip contentStyle={{ backgroundColor: '#001A33' }} />
+                                <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}}/>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
+
+             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+                <Card className={cardBaseClasses}>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-gold-400">
+                            <AlertTriangle />
+                             {t('dashboard.riskMap')}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                <XAxis type="number" dataKey="x" name={t('compliance.probability')} unit="" tick={{ fill: '#A0A0A0' }} domain={[0, 5]} label={{ value: t('compliance.probability'), position: 'insideBottom', dy: 20, fill: '#A0A0A0' }} />
+                                <YAxis type="number" dataKey="y" name={t('compliance.impact')} unit="" tick={{ fill: '#A0A0A0' }} domain={[0, 5]} label={{ value: t('compliance.impact'), angle: -90, position: 'insideLeft', dx: -10, fill: '#A0A0A0' }}/>
+                                <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
+                                <Scatter name="Risks" data={riskMapData} fill="#FF3B3B" shape="star" />
+                            </ScatterChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
+        </div>
       </div>
 
        {/* Strategic Path Chart */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
             <Card className={cardBaseClasses}>
                 <CardHeader>
                     <CardTitle className="text-gold-400 flex items-center gap-2">
@@ -374,3 +385,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    
