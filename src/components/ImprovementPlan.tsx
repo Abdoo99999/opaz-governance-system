@@ -22,7 +22,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { AXES } from '@/lib/data/indicators';
+import { AXES, INDICATORS } from '@/lib/data/indicators';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { useToast } from '@/hooks/use-toast';
@@ -44,15 +44,6 @@ export interface Task {
   axisId: number;
 }
 
-export const initialTasksData: Task[] = [
-  { id: 1, title_en: 'Update the Whistleblowing Policy to include anonymous reporting.', title_ar: 'تحديث سياسة الإبلاغ عن المخالفات لتشمل الإبلاغ المجهول.', indicatorId: 45, dueDate: '2024-08-15', priority: 'High', assignedTo: 'Fatma Al-Said', avatar: 'https://picsum.photos/seed/101/100/100', status: 'todo', axisId: 9 },
-  { id: 2, title_en: 'Appoint an independent Audit Committee member.', title_ar: 'تعيين عضو مستقل في لجنة المراجعة.', indicatorId: 7, dueDate: '2024-07-30', priority: 'Critical', assignedTo: 'Ali Al-Habsi', avatar: 'https://picsum.photos/seed/102/100/100', status: 'todo', axisId: 2 },
-  { id: 3, title_en: 'Formalize and document the CEO succession plan.', title_ar: 'إضفاء الطابع الرسمي على خطة تعاقب الرئيس التنفيذي وتوثيقها.', indicatorId: 18, dueDate: '2024-09-01', priority: 'High', assignedTo: 'Yusuf Al-Harthy', avatar: 'https://picsum.photos/seed/103/100/100', status: 'in-progress', axisId: 4 },
-  { id: 4, title_en: 'Publish the Annual ESG Report on the company website.', title_ar: 'نشر تقرير الاستدامة السنوي على موقع الشركة.', indicatorId: 42, dueDate: '2024-08-20', priority: 'Medium', assignedTo: 'Maryam Al-Balushi', avatar: 'https://picsum.photos/seed/104/100/100', status: 'in-progress', axisId: 9 },
-  { id: 5, title_en: 'Implement a cybersecurity risk assessment framework.', title_ar: 'تطبيق إطار عمل لتقييم مخاطر الأمن السيبراني.', indicatorId: 48, dueDate: '2024-10-01', priority: 'Critical', assignedTo: 'John Doe', avatar: 'https://picsum.photos/seed/105/100/100', status: 'todo', axisId: 10 },
-  { id: 6, title_en: 'Conduct mandatory Code of Conduct training for all employees.', title_ar: 'إجراء تدريب إلزامي على مدونة قواعد السلوك لجميع الموظفين.', dueDate: '2024-07-25', priority: 'Medium', assignedTo: 'Sara Al-Amri', avatar: 'https://picsum.photos/seed/106/100/100', status: 'done', axisId: 9 },
-  { id: 7, title_en: 'Review and update the Delegation of Authority matrix.', title_ar: 'مراجعة وتحديث مصفوفة تفويض الصلاحيات.', indicatorId: 3, dueDate: '2024-09-15', priority: 'Low', assignedTo: 'Ahmed Al-Farsi', avatar: 'https://picsum.photos/seed/107/100/100', status: 'todo', axisId: 1 },
-];
 
 const priorityConfig: Record<Priority, { variant: 'destructive' | 'secondary' | 'default', className: string }> = {
     'Critical': { variant: 'destructive', className: 'bg-red-700/80 border-red-500' },
@@ -60,6 +51,14 @@ const priorityConfig: Record<Priority, { variant: 'destructive' | 'secondary' | 
     'Medium': { variant: 'secondary', className: 'bg-yellow-500/80 border-yellow-400' },
     'Low': { variant: 'default', className: 'bg-green-600/80 border-green-500' }
 };
+
+const complianceQuestions: Record<string, {en: string, ar: string, axisId: number}> = {
+    auditor: { en: 'Appoint external auditor', ar: 'تعيين مدقق حسابات خارجي', axisId: 6 },
+    quorum: { en: 'Ensure board meeting quorum is met', ar: 'التأكد من اكتمال نصاب اجتماعات المجلس', axisId: 3 },
+    doa: { en: 'Develop and approve Delegation of Authority policy', ar: 'تطوير واعتماد لائحة صلاحيات', axisId: 1 },
+    conflict: { en: 'Establish a conflict of interest disclosure process', ar: 'تأسيس عملية للإفصاح عن تعارض المصالح', axisId: 7 },
+};
+
 
 const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMove: (taskId: number, newStatus: Status) => void; onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t, language } = useLanguage();
@@ -197,20 +196,75 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
 
     // RELOAD data when company changes
     useEffect(() => {
-        if (typeof window === 'undefined') return;
-
-        let companySpecificTasks: Task[];
-        
-        if (!selectedCompanyId || selectedCompanyId === 'all') {
-            companySpecificTasks = []; // Set tasks to empty for "All Companies" to show the prompt
-        } else {
-            const storageKey = getStorageKey(selectedCompanyId);
-            const savedData = localStorage.getItem(storageKey);
-            // If no data is saved for a specific company, start with an empty array.
-            companySpecificTasks = savedData ? JSON.parse(savedData) : [];
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
+            setTasks([]);
+            return;
         }
 
-        setTasks(companySpecificTasks);
+        const storageKey = getStorageKey(selectedCompanyId);
+        const savedData = localStorage.getItem(storageKey);
+        let existingTasks: Task[] = savedData ? JSON.parse(savedData) : [];
+        const generatedTasks: Task[] = [];
+        let nextId = existingTasks.length > 0 ? Math.max(...existingTasks.map(t => t.id)) + 1 : 1;
+
+        // 1. Generate tasks from Assessment Gaps
+        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        if (assessmentStr) {
+            const assessmentData = JSON.parse(assessmentStr);
+            const scores = assessmentData.scores || {};
+            for (const indicatorIdStr in scores) {
+                const indicatorId = parseInt(indicatorIdStr, 10);
+                const score = scores[indicatorId];
+                if (score < 3) { // Gap detected
+                    const indicator = INDICATORS.find(i => i.id === indicatorId);
+                    if (indicator && !existingTasks.some(t => t.indicatorId === indicatorId)) {
+                        generatedTasks.push({
+                            id: nextId++,
+                            title_en: `Address gap for indicator: "${indicator.text_en}"`,
+                            title_ar: `معالجة الفجوة للمؤشر: "${indicator.text_ar}"`,
+                            indicatorId: indicator.id,
+                            dueDate: '2024-12-31',
+                            priority: score === 1 ? 'Critical' : 'High',
+                            assignedTo: 'Governance Lead',
+                            avatar: 'https://picsum.photos/seed/lead/100/100',
+                            status: 'todo',
+                            axisId: indicator.axisId
+                        });
+                    }
+                }
+            }
+        }
+        
+        // 2. Generate tasks from Compliance Gaps
+        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+        if (complianceStr) {
+            const complianceData = JSON.parse(complianceStr);
+            const complianceState = complianceData.compliance || {};
+            for (const key in complianceState) {
+                if (!complianceState[key]) { // Non-compliant
+                     const question = complianceQuestions[key];
+                     const indicatorId = 1000 + Object.keys(complianceQuestions).indexOf(key); // unique virtual ID
+                     if (question && !existingTasks.some(t => t.indicatorId === indicatorId)) {
+                         generatedTasks.push({
+                             id: nextId++,
+                             title_en: question.en,
+                             title_ar: question.ar,
+                             indicatorId: indicatorId, // Virtual ID to prevent duplicates
+                             dueDate: '2024-11-30',
+                             priority: 'Critical',
+                             assignedTo: 'Compliance Officer',
+                             avatar: 'https://picsum.photos/seed/officer/100/100',
+                             status: 'todo',
+                             axisId: question.axisId
+                         });
+                     }
+                }
+            }
+        }
+        
+        // Combine and set tasks
+        const allTasks = [...existingTasks, ...generatedTasks];
+        setTasks(allTasks);
 
     }, [selectedCompanyId]);
 
@@ -218,6 +272,9 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
         
         const storageKey = getStorageKey(selectedCompanyId);
+        // We only save tasks that are not in the 'todo' state if they were auto-generated,
+        // or any manually added task. This prevents auto-generated tasks from persisting if untouched.
+        // A simple way is to just save all current tasks. The generation logic prevents re-adding.
         localStorage.setItem(storageKey, JSON.stringify(tasks));
         
         toast({
@@ -328,3 +385,5 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
+
+    

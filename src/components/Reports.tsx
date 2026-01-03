@@ -39,7 +39,7 @@ import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
-import { initialTasksData } from '@/components/ImprovementPlan';
+import type { Task } from '@/components/ImprovementPlan';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -81,6 +81,9 @@ const Reports: React.FC = () => {
         const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
 
+        const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
+        const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
+
         // --- Process Data ---
 
         // 1. Summary Cards
@@ -96,8 +99,8 @@ const Reports: React.FC = () => {
         const highRisks = risks.filter((r: any) => r.impact * r.probability >= 15 && r.impact * r.probability < 20).length;
         const mediumRisks = risks.filter((r: any) => r.impact * r.probability >= 5 && r.impact * r.probability < 15).length;
 
-        const totalActions = initialTasksData.length; 
-        const completedActions = initialTasksData.filter(t => t.status === 'done').length;
+        const totalActions = improvementPlanTasks.length; 
+        const completedActions = improvementPlanTasks.filter(t => t.status === 'done').length;
 
         setSummaryData({
             maturity: parseFloat(maturity.toFixed(1)),
@@ -139,8 +142,8 @@ const Reports: React.FC = () => {
         ] as any);
 
         // 4. Improvement Plan
-        const todo = initialTasksData.filter(t => t.status === 'todo').length;
-        const inProgress = initialTasksData.filter(t => t.status === 'in-progress').length;
+        const todo = improvementPlanTasks.filter(t => t.status === 'todo').length;
+        const inProgress = improvementPlanTasks.filter(t => t.status === 'in-progress').length;
         setImprovementPlanData([
             { name: 'Completed', value: completedActions, color: '#00E096' },
             { name: 'In Progress', value: inProgress, color: '#FFD700' },
@@ -174,7 +177,7 @@ const Reports: React.FC = () => {
         window.print();
     };
 
-    if (selectedCompanyId === 'all') {
+    if (!selectedCompanyId || selectedCompanyId === 'all') {
         return (
            <div className="flex items-center justify-center h-full p-8 text-white">
                <div className="text-center p-8 glass">
@@ -407,3 +410,5 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+    
