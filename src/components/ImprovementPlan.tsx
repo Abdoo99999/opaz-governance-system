@@ -189,25 +189,26 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
     
     const getStorageKey = (companyId: string) => `oia_improvement_plan_${companyId}`;
     
-    const [tasks, setTasks] = useState<Task[]>(() => {
-        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return initialTasksData;
-        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
-        return saved ? JSON.parse(saved) : initialTasksData;
-    });
-
+    const [tasks, setTasks] = useState<Task[]>([]);
+    
     const [filterPriority, setFilterPriority] = useState('All');
     const [filterAxis, setFilterAxis] = useState('All');
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
     // RELOAD data when company changes
     useEffect(() => {
-        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
-            setTasks(initialTasksData);
-            return;
+        if (typeof window === 'undefined') return;
+
+        let currentTasks: Task[];
+        if (!selectedCompanyId || selectedCompanyId === 'all') {
+            // For 'All' view, maybe show all tasks or a default set. Here we use initial as default.
+            currentTasks = initialTasksData;
+        } else {
+            const storageKey = getStorageKey(selectedCompanyId);
+            const savedData = localStorage.getItem(storageKey);
+            currentTasks = savedData ? JSON.parse(savedData) : initialTasksData;
         }
-        const storageKey = getStorageKey(selectedCompanyId);
-        const savedData = localStorage.getItem(storageKey);
-        setTasks(savedData ? JSON.parse(savedData) : initialTasksData);
+        setTasks(currentTasks);
     }, [selectedCompanyId]);
 
     const handleSave = () => {
@@ -259,9 +260,13 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
             <header className="flex items-center justify-between mb-6">
                  <div>
                     <h1 className="text-3xl font-bold">{t('menu.improvement')}</h1>
-                    {selectedCompany && (
+                    {selectedCompany ? (
                         <Badge className="bg-blue-900/50 border-blue-600 text-blue-300 mt-2">
                             {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
+                        </Badge>
+                    ) : (
+                         <Badge className="bg-blue-900/50 border-blue-600 text-blue-300 mt-2">
+                            {t('common.selectAllCompanies')}
                         </Badge>
                     )}
                  </div>
@@ -311,3 +316,5 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
+
+    
