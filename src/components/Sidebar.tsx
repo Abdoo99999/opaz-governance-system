@@ -35,16 +35,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
     <div
       className={cn(
         "relative h-screen bg-royal-800/50 backdrop-blur-xl border-l border-white/5 transition-all duration-300 ease-in-out print:hidden",
-        isOpen ? 'w-64' : 'w-20'
+        isOpen ? 'w-72' : 'w-20'
       )}
     >
       <div className="flex flex-col h-full">
-        <div className="h-20 flex items-center justify-center">
-          <h1 className={cn("font-bold text-xl text-gold-500 transition-opacity duration-300", !isOpen && 'opacity-0')}>
+        <div className="h-24 flex items-center justify-center px-4">
+          <h1 className={cn("font-bold text-base text-center leading-snug text-gold-500 transition-opacity duration-300", !isOpen && 'opacity-0')}>
             {t('appTitle')}
           </h1>
         </div>
-        <nav className="flex-1 px-4 py-8">
+        <nav className="flex-1 px-2 py-4">
           <ul>
             {menuItems.map((item) => (
               <li key={item.name} className="relative mb-2">
@@ -58,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                   )}
                 >
                   <item.icon className="w-6 h-6 ml-4" />
-                  <span className={cn("font-medium transition-opacity duration-300", !isOpen && 'opacity-0')}>
+                  <span className={cn("font-medium mr-4 transition-opacity duration-300", !isOpen && 'opacity-0')}>
                     {t(`menu.${item.name}`)}
                   </span>
                 </button>
@@ -79,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                   className="flex items-center w-full py-3 px-4 rounded-md transition-colors duration-200 text-gray-400 hover:text-red-500 hover:bg-red-500/10"
                 >
                   <LogOut className="w-6 h-6 ml-4" />
-                  <span className={cn("font-medium transition-opacity duration-300", !isOpen && 'opacity-0')}>
+                  <span className={cn("font-medium mr-4 transition-opacity duration-300", !isOpen && 'opacity-0')}>
                     {t('menu.logout')}
                   </span>
                 </button>

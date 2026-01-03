@@ -26,11 +26,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="w-full max-w-md z-10"
+            className="w-full max-w-lg z-10"
         >
             <Card className="glass">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-3xl font-bold text-gold-400">{t('appTitle')}</CardTitle>
+                    <CardTitle className="text-2xl leading-relaxed font-bold text-gold-400">{t('appTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="admin" className="w-full">

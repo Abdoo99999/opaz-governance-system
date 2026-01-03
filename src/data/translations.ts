@@ -1,7 +1,7 @@
 
 export const translations = {
   ar: {
-    appTitle: "مركز حوكمة جهاز الاستثمار",
+    appTitle: "البرنامج الوطني لقياس نضج الحوكمة لشركات جهاز الاستثمار العماني",
     menu: {
       dashboard: "لوحة القيادة",
       registry: "سجل الشركات",
@@ -246,7 +246,7 @@ export const translations = {
     }
   },
   en: {
-    appTitle: "OIA Governance Center",
+    appTitle: "National Program for Governance Maturity Measurement for OIA Companies",
     menu: {
       dashboard: "Dashboard",
       registry: "Company Registry",
