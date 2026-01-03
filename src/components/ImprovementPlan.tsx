@@ -199,16 +199,35 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        let currentTasks: Task[];
+        let companySpecificTasks: Task[];
+        
         if (!selectedCompanyId || selectedCompanyId === 'all') {
-            // For 'All' view, maybe show all tasks or a default set. Here we use initial as default.
-            currentTasks = initialTasksData;
+            // Aggregate all tasks from all companies for the 'All' view
+            let allTasks: Task[] = [];
+            const companiesStr = localStorage.getItem('oia_companies_registry');
+            const allCompanies = companiesStr ? JSON.parse(companiesStr) : [];
+            allCompanies.forEach((comp: any) => {
+                const storageKey = getStorageKey(comp.id);
+                const savedData = localStorage.getItem(storageKey);
+                if (savedData) {
+                    allTasks.push(...JSON.parse(savedData));
+                }
+            });
+            // Use a Set to remove duplicate tasks if any company shares tasks, then convert back to array
+            companySpecificTasks = [...new Map(allTasks.map(task => [task.id, task])).values()];
+            if(companySpecificTasks.length === 0) {
+                 companySpecificTasks = initialTasksData; // fallback for first load
+            }
         } else {
+            // Load tasks for the specific company
             const storageKey = getStorageKey(selectedCompanyId);
             const savedData = localStorage.getItem(storageKey);
-            currentTasks = savedData ? JSON.parse(savedData) : initialTasksData;
+            // If no data is saved for a specific company, start with the default initial data.
+            companySpecificTasks = savedData ? JSON.parse(savedData) : [...initialTasksData];
         }
-        setTasks(currentTasks);
+
+        setTasks(companySpecificTasks);
+
     }, [selectedCompanyId]);
 
     const handleSave = () => {
@@ -316,5 +335,3 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
-
-    
