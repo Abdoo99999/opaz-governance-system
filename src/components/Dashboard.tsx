@@ -28,6 +28,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  Text
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon } from 'lucide-react';
@@ -211,6 +212,27 @@ const Dashboard = () => {
     }
     return null;
   };
+  
+    const renderPolarAngleAxisTick = (props: any) => {
+        const { x, y, payload } = props;
+        const { value } = payload;
+        const words = value.split(' ');
+        
+        if (words.length > 2) {
+             return (
+                <Text {...props} y={y - (words.length-2)*5} verticalAnchor="end" textAnchor="middle">
+                    {words.map((word: string, i: number) => {
+                         if (i > 0 && i % 2 === 0) {
+                            return <tspan key={i} x={x} dy="1em">{word}</tspan>;
+                         }
+                         return <tspan key={i}> {word}</tspan>;
+                    })}
+                </Text>
+             );
+        }
+
+        return <Text {...props}>{value}</Text>;
+    };
 
 
   return (
@@ -281,7 +303,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                   <defs>
                     <radialGradient id="radarFill">
                       <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
@@ -289,7 +311,7 @@ const Dashboard = () => {
                     </radialGradient>
                   </defs>
                   <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#fff', fontSize: 14 }} />
+                  <PolarAngleAxis dataKey="subject" tick={renderPolarAngleAxisTick} tickLine={false} style={{ fill: '#fff', fontSize: 14 }}/>
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                   <Radar name="Performance" dataKey="A" stroke="#E5C565" strokeWidth={2} fill="url(#radarFill)" />
                   <Tooltip contentStyle={{ backgroundColor: '#001A33', border: '1px solid #D4AF37' }} />
