@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/context/LanguageContext';
+import { UserRole } from '@/app/page';
 
 interface LoginProps {
-  onLogin: () => void;
+  onLogin: (role: UserRole) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
@@ -35,10 +36,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                             <TabsTrigger value="company">{t('common.company')}</TabsTrigger>
                         </TabsList>
                         <TabsContent value="admin">
-                            {renderLoginForm()}
+                            {renderLoginForm('admin')}
                         </TabsContent>
                         <TabsContent value="company">
-                            {renderLoginForm()}
+                            {renderLoginForm('company')}
                         </TabsContent>
                     </Tabs>
                 </CardContent>
@@ -47,12 +48,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     </div>
   );
 
-  function renderLoginForm() {
+  function renderLoginForm(role: UserRole) {
     return (
-        <form onSubmit={(e) => { e.preventDefault(); onLogin(); }} className="space-y-6 pt-6">
+        <form onSubmit={(e) => { e.preventDefault(); onLogin(role); }} className="space-y-6 pt-6">
             <div className="space-y-2">
                 <label htmlFor="username">{t('common.username')}</label>
-                <Input id="username" type="text" placeholder={t('common.usernamePlaceholder')} defaultValue="admin" className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white" />
+                <Input id="username" type="text" placeholder={t('common.usernamePlaceholder')} defaultValue={role === 'admin' ? 'admin' : 'company_user'} className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white" />
             </div>
             <div className="space-y-2">
                 <label htmlFor="password">{t('common.password')}</label>

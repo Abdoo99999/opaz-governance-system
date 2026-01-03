@@ -15,13 +15,22 @@ import { useToast } from '@/hooks/use-toast';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { CompanyProvider } from '@/context/CompanyContext';
 
+export type UserRole = 'admin' | 'company';
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentView, setCurrentView] = useState('dashboard');
+  const [userRole, setUserRole] = useState<UserRole>('admin');
   const { toast } = useToast();
 
-  const handleLogin = () => {
+  const handleLogin = (role: UserRole) => {
     setIsLoggedIn(true);
+    setUserRole(role);
+    if (role === 'company') {
+        setCurrentView('companies'); // Redirect company user to registry
+    } else {
+        setCurrentView('dashboard');
+    }
     toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "أهلاً بك في نظام حوكمة جهاز الاستثمار العماني.",
@@ -30,6 +39,7 @@ export default function Home() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setUserRole('admin'); // Reset role on logout
     setCurrentView('dashboard'); // Reset to default view on logout
     toast({
         title: "تم تسجيل الخروج بنجاح",
@@ -43,7 +53,7 @@ export default function Home() {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard />;
+        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry />; // Fallback for company user
       case 'companies':
         return <CompanyRegistry />;
       case 'maturity-assessment':
@@ -53,11 +63,11 @@ export default function Home() {
       case 'improvement-plan':
         return <ImprovementPlan />;
       case 'reports':
-        return <Reports />;
+        return userRole === 'admin' ? <Reports /> : <CompanyRegistry />; // Fallback for company user
       case 'settings':
-        return <Settings />;
+        return userRole === 'admin' ? <Settings /> : <CompanyRegistry />; // Fallback for company user
       default:
-        return <Dashboard />;
+        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry />;
     }
   };
 
@@ -67,7 +77,12 @@ export default function Home() {
         {!isLoggedIn ? (
           <Login onLogin={handleLogin} />
         ) : (
-          <AppLayout currentView={currentView} onNavigate={handleNavigate} onLogout={handleLogout}>
+          <AppLayout 
+            currentView={currentView} 
+            onNavigate={handleNavigate} 
+            onLogout={handleLogout}
+            userRole={userRole}
+          >
             {renderView()}
           </AppLayout>
         )}

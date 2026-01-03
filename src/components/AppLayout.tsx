@@ -4,15 +4,17 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useLanguage } from '@/context/LanguageContext';
+import { UserRole } from '@/app/page';
 
 interface AppLayoutProps {
   children: React.ReactNode;
   currentView: string;
   onNavigate: (view: string) => void;
   onLogout: () => void;
+  userRole: UserRole;
 }
 
-export default function AppLayout({ children, currentView, onNavigate, onLogout }: AppLayoutProps) {
+export default function AppLayout({ children, currentView, onNavigate, onLogout, userRole }: AppLayoutProps) {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const { dir } = useLanguage();
 
@@ -27,6 +29,7 @@ export default function AppLayout({ children, currentView, onNavigate, onLogout 
         currentView={currentView} 
         onNavigate={onNavigate}
         onLogout={onLogout} 
+        userRole={userRole}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header onToggleSidebar={toggleSidebar} />

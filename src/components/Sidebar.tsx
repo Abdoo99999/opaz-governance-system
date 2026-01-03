@@ -6,16 +6,16 @@ import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kan
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { useLanguage } from '@/context/LanguageContext';
-import { translations } from '@/data/translations';
+import { UserRole } from '@/app/page';
 
-const menuItems = [
-  { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard' },
-  { name: 'registry', icon: Building2, view: 'companies' },
-  { name: 'assessment', icon: ClipboardCheck, view: 'maturity-assessment' },
-  { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor' },
-  { name: 'improvement', icon: Kanban, view: 'improvement-plan' },
-  { name: 'reports', icon: LineChart, view: 'reports' },
-  { name: 'settings', icon: Settings, view: 'settings' },
+const allMenuItems = [
+  { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard', roles: ['admin'] },
+  { name: 'registry', icon: Building2, view: 'companies', roles: ['admin', 'company'] },
+  { name: 'assessment', icon: ClipboardCheck, view: 'maturity-assessment', roles: ['admin', 'company'] },
+  { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor', roles: ['admin', 'company'] },
+  { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'] },
+  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin'] },
+  { name: 'settings', icon: Settings, view: 'settings', roles: ['admin'] },
 ];
 
 interface SidebarProps {
@@ -23,10 +23,13 @@ interface SidebarProps {
   currentView: string;
   onNavigate: (view: string) => void;
   onLogout: () => void;
+  userRole: UserRole;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLogout, userRole }) => {
   const { t } = useLanguage();
+
+  const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
 
   return (
     <div
