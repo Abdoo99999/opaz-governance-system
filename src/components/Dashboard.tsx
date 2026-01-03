@@ -196,7 +196,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(maturityScore.toFixed(1)),
-            totalAssets: (companyData?.authorizedCapital / 1_000_000) || 0,
+            totalAssets: (companyData?.authorizedCapital / 1_000_000_000) || 0,
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
             totalComplianceItems: complianceItems.length || 4,
@@ -253,7 +253,7 @@ const Dashboard = () => {
   const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate }, {name: 'Remaining', value: 100 - dashboardData.omanizationRate}], [dashboardData.omanizationRate]);
   const complianceData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
-      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
 
   const riskMapData = useMemo(() => {
