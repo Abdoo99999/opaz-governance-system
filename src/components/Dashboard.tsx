@@ -28,7 +28,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Text
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon } from 'lucide-react';
@@ -126,7 +125,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(maturityScore.toFixed(1)),
-            totalAssets: (companyData?.authorizedCapital / 1_000_000_000) || 0,
+            totalAssets: (companyData?.authorizedCapital / 1_000_000) || 0,
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
             totalComplianceItems: complianceItems.length || 4,
@@ -168,7 +167,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
-            totalAssets: totalAssets / 1_000_000_000,
+            totalAssets: totalAssets / 1_000_000,
             omanizationRate: Math.round(avgOmanization),
             compliantItems: totalCompliant,
             totalComplianceItems: totalItems || 4,
@@ -183,7 +182,7 @@ const Dashboard = () => {
   const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate }, {name: 'Remaining', value: 100 - dashboardData.omanizationRate}], [dashboardData.omanizationRate]);
   const complianceData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
-      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
 
   const riskMapData = useMemo(() => {
@@ -212,28 +211,6 @@ const Dashboard = () => {
     }
     return null;
   };
-  
-    const renderPolarAngleAxisTick = (props: any) => {
-        const { x, y, payload } = props;
-        const { value } = payload;
-        const words = value.split(' ');
-        
-        if (words.length > 2) {
-             return (
-                <Text {...props} y={y - (words.length-2)*5} verticalAnchor="end" textAnchor="middle">
-                    {words.map((word: string, i: number) => {
-                         if (i > 0 && i % 2 === 0) {
-                            return <tspan key={i} x={x} dy="1em">{word}</tspan>;
-                         }
-                         return <tspan key={i}> {word}</tspan>;
-                    })}
-                </Text>
-             );
-        }
-
-        return <Text {...props}>{value}</Text>;
-    };
-
 
   return (
     <div className="p-4 md:p-6 lg:p-8 text-white space-y-8">
@@ -262,7 +239,7 @@ const Dashboard = () => {
                       <CheckCircle className="h-4 w-4 text-gray-400" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(2)}B</div>
+                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(2)}M</div>
                       <p className="text-xs text-gray-400 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
                   </CardContent>
               </Card>
@@ -311,7 +288,7 @@ const Dashboard = () => {
                     </radialGradient>
                   </defs>
                   <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                  <PolarAngleAxis dataKey="subject" tick={renderPolarAngleAxisTick} tickLine={false} style={{ fill: '#fff', fontSize: 14 }}/>
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#fff' }}/>
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                   <Radar name="Performance" dataKey="A" stroke="#E5C565" strokeWidth={2} fill="url(#radarFill)" />
                   <Tooltip contentStyle={{ backgroundColor: '#001A33', border: '1px solid #D4AF37' }} />
