@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -45,6 +46,9 @@ const CompanyRegistry: React.FC<{ userRole: UserRole }> = ({ userRole }) => {
     
     const companiesToDisplay = useMemo(() => {
         if (userRole === 'company') {
+            return companies.filter(c => c.id === selectedCompanyId);
+        }
+        if (userRole === 'admin' && selectedCompanyId !== 'all') {
             return companies.filter(c => c.id === selectedCompanyId);
         }
         return companies;
