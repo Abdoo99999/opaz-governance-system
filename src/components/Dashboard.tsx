@@ -75,37 +75,74 @@ const maturityPathData = [
   { year: '2030', score: 5.0 },
 ];
 
-const RadarCustomTick = ({ payload, x, y, textAnchor, stroke, radius, index }: any) => {
-    const { language } = useLanguage();
-    const isRtl = language === 'ar';
-    const value = isRtl && payload.value.length > 20 ? payload.value.substring(0, 20) + '...' : payload.value;
+const RadarCustomTick = (props: any) => {
+    const { payload, x, y, textAnchor, index } = props;
+    const value = payload.value;
+    const wordWrapThreshold = 12;
 
-    const angle = (index * 360 / AXES.length) * (Math.PI / 180);
+    // Manual adjustments for position
     let newX = x;
     let newY = y;
+    const offset = 30; // 30px offset
+
+    const angle = (360 / AXES.length) * index;
+
+    if (angle === 0 || angle === 180) { // Top and bottom
+        newY += (angle === 0 ? -offset : offset);
+    } else if (angle > 0 && angle < 180) { // Right side
+        newX += offset;
+    } else { // Left side
+        newX -= offset;
+    }
     
-    // Custom adjustments for specific labels to avoid overlap
-    if (index === 0) { // Top label
-      newY -= 15;
-    } else if (index === 5) { // Bottom label
-      newY += 10;
+    // Adjust Y for top/bottom quarters to avoid collision
+    if(angle > 0 && angle < 90) newY += offset / 2;
+    if(angle > 270 && angle < 360) newY += offset / 2;
+    if(angle > 90 && angle < 180) newY -= offset / 2;
+    if(angle > 180 && angle < 270) newY -= offset / 2;
+
+
+    if (value && value.length > wordWrapThreshold) {
+        const words = value.split(' ');
+        const lines = words.reduce((acc: string[], word: string) => {
+            if (acc.length === 0) {
+                acc.push(word);
+            } else {
+                const lastLine = acc[acc.length - 1];
+                if (lastLine.length + word.length + 1 > wordWrapThreshold) {
+                    acc.push(word);
+                } else {
+                    acc[acc.length - 1] = `${lastLine} ${word}`;
+                }
+            }
+            return acc;
+        }, []);
+
+        return (
+            <g transform={`translate(${newX}, ${newY})`}>
+                <text
+                    textAnchor={textAnchor}
+                    fill="#fff"
+                    fontSize="12px"
+                >
+                    {lines.map((line, i) => (
+                        <tspan key={i} x={0} dy={i === 0 ? 0 : '1.2em'}>{line}</tspan>
+                    ))}
+                </text>
+            </g>
+        );
     }
 
-
     return (
-      <g>
         <text
-            radius={radius}
-            stroke={stroke}
             x={newX}
             y={newY}
             textAnchor={textAnchor}
             fill="#fff"
             fontSize="12px"
         >
-          {value}
+            {value}
         </text>
-      </g>
     );
 };
 
@@ -419,5 +456,6 @@ const Dashboard = () => {
 
 export default Dashboard;
 
+    
     
     
