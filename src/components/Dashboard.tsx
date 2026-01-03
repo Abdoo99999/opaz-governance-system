@@ -52,7 +52,7 @@ const cardBaseClasses = "glass h-full";
 
 const initialDashboardData = {
   maturityScore: 0,
-  totalAssets: 14.2, 
+  totalAssets: 0, 
   omanizationRate: 0,
   compliantItems: 0,
   totalComplianceItems: 4,
@@ -125,7 +125,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(maturityScore.toFixed(1)),
-            totalAssets: (companyData?.authorizedCapital / 1000000000) || 0,
+            totalAssets: (companyData?.authorizedCapital / 1_000_000_000) || 0,
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
             totalComplianceItems: complianceItems.length || 4,
@@ -159,7 +159,7 @@ const Dashboard = () => {
                 riskCount += (complianceData.risks || []).length;
             }
             totalOmanization += comp.omanization || 0;
-            totalAssets += (comp.authorizedCapital / 1000000000) || 0;
+            totalAssets += comp.authorizedCapital || 0;
         });
         
         const avgMaturity = allCompanies.length > 0 ? totalMaturity / allCompanies.length : 0;
@@ -167,7 +167,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
-            totalAssets: parseFloat(totalAssets.toFixed(1)),
+            totalAssets: totalAssets / 1_000_000_000,
             omanizationRate: Math.round(avgOmanization),
             compliantItems: totalCompliant,
             totalComplianceItems: totalItems || 4,
@@ -240,7 +240,7 @@ const Dashboard = () => {
                       <CheckCircle className="h-4 w-4 text-gray-400" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(1)}B</div>
+                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(2)}B</div>
                       <p className="text-xs text-gray-400 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
                   </CardContent>
               </Card>
@@ -385,5 +385,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
