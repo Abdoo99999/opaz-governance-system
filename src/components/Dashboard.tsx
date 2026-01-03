@@ -280,7 +280,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                   <defs>
                     <radialGradient id="radarFill">
                       <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
@@ -384,3 +384,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    
