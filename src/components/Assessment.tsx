@@ -36,15 +36,17 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { Badge } from './ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { UserRole } from '@/app/page';
 
 type Scores = { [key: number]: number };
 type Files = { [key: number]: File | { name: string; size: number } | null };
 
 interface AssessmentProps {
     onNavigate: (view: string) => void;
+    userRole: UserRole;
 }
 
-const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
+const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany } = useCompany();
     const { toast } = useToast();
@@ -56,12 +58,12 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
         return savedIndicators ? JSON.parse(savedIndicators) : initialIndicators;
     });
 
-    const [activeAxis, setActiveAxis] = useState(AXES[0].id);
+    const activeAxis = AXES[0].id;
 
     const getAssessmentStorageKey = (companyId: string) => `oia_assessment_${companyId}`;
 
     const [scores, setScores] = useState<Scores>(() => {
-        if (typeof window === 'undefined' || selectedCompanyId === 'all') return {};
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return {};
         const saved = localStorage.getItem(getAssessmentStorageKey(selectedCompanyId));
         return saved ? JSON.parse(saved).scores : {};
     });
@@ -69,7 +71,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     const [files, setFiles] = useState<Files>({});
     
     const [isAssessmentComplete, setIsAssessmentComplete] = useState<boolean>(() => {
-        if (typeof window === 'undefined' || selectedCompanyId === 'all') return false;
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return false;
         const saved = localStorage.getItem(getAssessmentStorageKey(selectedCompanyId));
         return saved ? JSON.parse(saved).isComplete : false;
     });
@@ -78,10 +80,11 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [indicatorToEdit, setIndicatorToEdit] = useState<Indicator | null>(null);
     const [isIndicatorModalOpen, setIsIndicatorModalOpen] = useState(false);
+    const [currentActiveAxis, setCurrentActiveAxis] = useState(activeAxis);
 
     // RELOAD data when company changes
     useEffect(() => {
-        if (selectedCompanyId === 'all' || typeof window === 'undefined') {
+        if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
             setScores({});
             setFiles({});
             setIsAssessmentComplete(false);
@@ -112,7 +115,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
 
 
     const handleSave = () => {
-        if (selectedCompanyId === 'all' || typeof window === 'undefined') return;
+        if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
         
         const dataToSave = {
             scores: scores,
@@ -128,6 +131,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     };
     
     const handleSubmit = () => {
+        if (!selectedCompanyId) return;
         const missing = getMissingIndicators();
         if (missing.length > 0) {
             setShowValidationModal(true);
@@ -170,7 +174,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
         toast({ title: t('assessment.indicatorDeleted'), variant: 'destructive' });
     };
 
-    const indicatorsForAxis = useMemo(() => indicators.filter(ind => ind.axisId === activeAxis), [activeAxis, indicators]);
+    const indicatorsForAxis = useMemo(() => indicators.filter(ind => ind.axisId === currentActiveAxis), [currentActiveAxis, indicators]);
     const totalCompleted = useMemo(() => Object.keys(scores).length, [scores]);
     const globalProgress = (totalCompleted / indicators.length) * 100;
     
@@ -210,7 +214,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
     };
 
     const handleJumpToIndicator = (indicator: Indicator) => {
-        setActiveAxis(indicator.axisId);
+        setCurrentActiveAxis(indicator.axisId);
         setShowValidationModal(false);
         setTimeout(() => {
             document.getElementById(`indicator-${indicator.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -224,9 +228,11 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
             {/* Internal Sidebar */}
             <aside className="w-80 h-full bg-royal-800/30 backdrop-blur-lg border-l border-white/10 p-4 flex flex-col">
                 <h2 className="text-xl font-bold text-gold-400 mb-4 px-2">{t('assessment.title')}</h2>
-                <Button onClick={() => handleOpenIndicatorModal(null)} className="mb-4 bg-gold-500/10 text-gold-400 hover:bg-gold-500/20 border border-gold-500/30">
-                    <Plus className="ml-2 h-4 w-4"/> {t('assessment.addIndicator')}
-                </Button>
+                {userRole === 'admin' && (
+                    <Button onClick={() => handleOpenIndicatorModal(null)} className="mb-4 bg-gold-500/10 text-gold-400 hover:bg-gold-500/20 border border-gold-500/30">
+                        <Plus className="ml-2 h-4 w-4"/> {t('assessment.addIndicator')}
+                    </Button>
+                )}
                 <nav className="flex-1 overflow-y-auto">
                     <ul>
                         {AXES.map(axis => {
@@ -237,10 +243,10 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                             return (
                                 <li key={axis.id} className="relative">
                                     <button
-                                        onClick={() => setActiveAxis(axis.id)}
+                                        onClick={() => setCurrentActiveAxis(axis.id)}
                                         className={cn(
                                             "w-full text-right flex items-center justify-between p-3 my-1 rounded-lg transition-colors duration-200",
-                                            activeAxis === axis.id ? "bg-gold-500/10 text-gold-400" : "hover:bg-white/5"
+                                            currentActiveAxis === axis.id ? "bg-gold-500/10 text-gold-400" : "hover:bg-white/5"
                                         )}
                                     >
                                         <span className="flex-1">{language === 'ar' ? axis.title_ar : axis.title_en}</span>
@@ -250,7 +256,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                                             <span className="text-xs font-mono text-gray-400">{Math.round(progress)}%</span>
                                         )}
                                     </button>
-                                     {activeAxis === axis.id && (
+                                     {currentActiveAxis === axis.id && (
                                         <motion.div
                                             layoutId="active-axis-indicator"
                                             className="absolute right-0 top-0 h-full w-1 bg-gold-500 rounded-l-full"
@@ -282,17 +288,17 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                             <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || selectedCompanyId === 'all'}>
+                             <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
                                  <Save className="ml-2 h-4 w-4"/>
                                  {t('assessment.saveDraft')}
                              </Button>
-                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete || selectedCompanyId === 'all'}>{t('assessment.submitFinal')}</Button>
+                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>{t('assessment.submitFinal')}</Button>
                         </div>
                     </div>
                 </header>
 
                 <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-                    {selectedCompanyId === 'all' ? (
+                    {!selectedCompanyId || selectedCompanyId === 'all' ? (
                         <div className="flex items-center justify-center h-full">
                             <div className="text-center p-8 glass">
                                 <h3 className="text-2xl font-bold text-gold-400">{t('common.selectCompanyToStart')}</h3>
@@ -302,7 +308,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                     ) : (
                         <AnimatePresence mode="wait">
                             <motion.div
-                                key={activeAxis}
+                                key={currentActiveAxis}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
@@ -320,6 +326,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                                         isLocked={isAssessmentComplete}
                                         onEdit={() => handleOpenIndicatorModal(indicator)}
                                         onDelete={() => handleDeleteIndicator(indicator.id)}
+                                        canEdit={userRole === 'admin'}
                                     />
                                 ))}
                             </motion.div>
@@ -327,7 +334,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate }) => {
                     )}
                 </div>
 
-                {isAssessmentComplete && selectedCompanyId !== 'all' && (
+                {isAssessmentComplete && selectedCompanyId && selectedCompanyId !== 'all' && (
                      <div className="sticky bottom-0 z-10 p-4 bg-royal-900/80 backdrop-blur-sm border-t border-white/10 flex items-center justify-between">
                         <span className="font-bold text-success">{t('assessment.locked')}</span>
                         <Button onClick={() => onNavigate('compliance-monitor')} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
@@ -412,6 +419,7 @@ interface IndicatorFormModalProps {
 
 const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose, onSave, indicator }) => {
     const { t, language } = useLanguage();
+    const { toast } = useToast();
     const [textAr, setTextAr] = useState('');
     const [textEn, setTextEn] = useState('');
     const [axisId, setAxisId] = useState<number>(1);
@@ -487,5 +495,3 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
-
-    

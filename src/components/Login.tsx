@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,13 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/context/LanguageContext';
 import { UserRole } from '@/app/page';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { COMPANIES } from '@/data/companies';
 
 interface LoginProps {
-  onLogin: (role: UserRole) => void;
+  onLogin: (role: UserRole, companyId?: string) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const { t, dir } = useLanguage();
+  const { t, dir, language } = useLanguage();
+  const [selectedCompany, setSelectedCompany] = useState<string | undefined>(undefined);
 
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-royal-900 text-white" dir={dir}>
@@ -49,8 +52,34 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   );
 
   function renderLoginForm(role: UserRole) {
+    const handleCompanyLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (role === 'company' && !selectedCompany) {
+            alert('Please select a company.'); // Or use a proper toast
+            return;
+        }
+        onLogin(role, selectedCompany);
+    }
+    
     return (
-        <form onSubmit={(e) => { e.preventDefault(); onLogin(role); }} className="space-y-6 pt-6">
+        <form onSubmit={role === 'company' ? handleCompanyLogin : (e) => { e.preventDefault(); onLogin(role); }} className="space-y-6 pt-6">
+            {role === 'company' && (
+                <div className="space-y-2">
+                    <label htmlFor="companySelect">{t('companyForm.identity.companyName')}</label>
+                    <Select onValueChange={setSelectedCompany}>
+                        <SelectTrigger id="companySelect" className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white">
+                            <SelectValue placeholder={t('common.selectPlaceholder')} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-royal-900 text-white border-white/20">
+                            {COMPANIES.map(c => (
+                                <SelectItem key={c.id} value={c.id}>
+                                    {language === 'ar' ? c.name_ar : c.name_en}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            )}
             <div className="space-y-2">
                 <label htmlFor="username">{t('common.username')}</label>
                 <Input id="username" type="text" placeholder={t('common.usernamePlaceholder')} defaultValue={role === 'admin' ? 'admin' : 'company_user'} className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white" />

@@ -30,6 +30,7 @@ interface IndicatorCardProps {
     isLocked?: boolean;
     onEdit: () => void;
     onDelete: () => void;
+    canEdit: boolean;
 }
 
 const scoreColors = [
@@ -40,7 +41,7 @@ const scoreColors = [
     '#00E096', // 5 - Neon Green (Success)
 ];
 
-const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange, isLocked, onEdit, onDelete }) => {
+const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange, isLocked, onEdit, onDelete, canEdit }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const evidenceRequired = (score ?? 0) > 3;
     const { t } = useLanguage();
@@ -63,32 +64,34 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
             transition={{ duration: 0.4 }}
         >
             {/* Edit/Delete Buttons */}
-             <div className="absolute top-3 left-3 flex gap-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gold-400" onClick={onEdit}>
-                    <Pencil className="h-4 w-4" />
-                </Button>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                         <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="glass text-white">
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>{t('assessment.deleteIndicatorTitle')}</AlertDialogTitle>
-                            <AlertDialogDescription className="text-gray-300 pt-2">
-                                {t('assessment.deleteIndicatorDesc')}
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel className="text-white border-white/20">{t('common.cancel')}</AlertDialogCancel>
-                            <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                {t('common.delete')}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            </div>
+            {canEdit && (
+                <div className="absolute top-3 left-3 flex gap-2">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gold-400" onClick={onEdit}>
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="glass text-white">
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>{t('assessment.deleteIndicatorTitle')}</AlertDialogTitle>
+                                <AlertDialogDescription className="text-gray-300 pt-2">
+                                    {t('assessment.deleteIndicatorDesc')}
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel className="text-white border-white/20">{t('common.cancel')}</AlertDialogCancel>
+                                <AlertDialogAction onClick={onDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                    {t('common.delete')}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            )}
 
             {/* Header */}
             <div className="flex items-start justify-between gap-4 mb-6">
@@ -153,5 +156,3 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
 };
 
 export default IndicatorCard;
-
-    

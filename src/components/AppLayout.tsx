@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import { useLanguage } from '@/context/LanguageContext';
 import { UserRole } from '@/app/page';
+import { useCompany } from '@/context/CompanyContext';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ interface AppLayoutProps {
 export default function AppLayout({ children, currentView, onNavigate, onLogout, userRole }: AppLayoutProps) {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const { dir } = useLanguage();
+  const { selectedCompanyId } = useCompany();
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -32,9 +34,9 @@ export default function AppLayout({ children, currentView, onNavigate, onLogout,
         userRole={userRole}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onToggleSidebar={toggleSidebar} />
+        <Header onToggleSidebar={toggleSidebar} userRole={userRole} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
-          {children}
+          {React.cloneElement(children as React.ReactElement, { userRole: userRole, key: selectedCompanyId })}
         </main>
       </div>
     </div>

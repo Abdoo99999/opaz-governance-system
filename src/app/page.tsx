@@ -13,22 +13,26 @@ import Settings from "@/components/Settings";
 import Login from "@/components/Login";
 import { useToast } from '@/hooks/use-toast';
 import { LanguageProvider } from '@/context/LanguageContext';
-import { CompanyProvider } from '@/context/CompanyContext';
+import { CompanyProvider, useCompany } from '@/context/CompanyContext';
 
 export type UserRole = 'admin' | 'company';
 
-export default function Home() {
+// A wrapper component to use the context hook
+const AppContent = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentView, setCurrentView] = useState('dashboard');
   const [userRole, setUserRole] = useState<UserRole>('admin');
   const { toast } = useToast();
+  const { setSelectedCompanyId } = useCompany();
 
-  const handleLogin = (role: UserRole) => {
+  const handleLogin = (role: UserRole, companyId?: string) => {
     setIsLoggedIn(true);
     setUserRole(role);
-    if (role === 'company') {
+    if (role === 'company' && companyId) {
+        setSelectedCompanyId(companyId);
         setCurrentView('companies'); // Redirect company user to registry
     } else {
+        setSelectedCompanyId('all'); // Admin defaults to all
         setCurrentView('dashboard');
     }
     toast({
@@ -41,6 +45,7 @@ export default function Home() {
     setIsLoggedIn(false);
     setUserRole('admin'); // Reset role on logout
     setCurrentView('dashboard'); // Reset to default view on logout
+    setSelectedCompanyId('all');
     toast({
         title: "تم تسجيل الخروج بنجاح",
     });
@@ -57,7 +62,7 @@ export default function Home() {
       case 'companies':
         return <CompanyRegistry />;
       case 'maturity-assessment':
-        return <Assessment onNavigate={handleNavigate} />;
+        return <Assessment onNavigate={handleNavigate} userRole={userRole} />;
       case 'compliance-monitor':
         return <ComplianceMonitor />;
       case 'improvement-plan':
@@ -71,21 +76,26 @@ export default function Home() {
     }
   };
 
+  return !isLoggedIn ? (
+    <Login onLogin={handleLogin} />
+  ) : (
+    <AppLayout 
+      currentView={currentView} 
+      onNavigate={handleNavigate} 
+      onLogout={handleLogout}
+      userRole={userRole}
+    >
+      {renderView()}
+    </AppLayout>
+  );
+}
+
+
+export default function Home() {
   return (
     <LanguageProvider>
       <CompanyProvider>
-        {!isLoggedIn ? (
-          <Login onLogin={handleLogin} />
-        ) : (
-          <AppLayout 
-            currentView={currentView} 
-            onNavigate={handleNavigate} 
-            onLogout={handleLogout}
-            userRole={userRole}
-          >
-            {renderView()}
-          </AppLayout>
-        )}
+        <AppContent />
       </CompanyProvider>
     </LanguageProvider>
   );

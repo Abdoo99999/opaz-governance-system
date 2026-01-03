@@ -15,14 +15,17 @@ import {
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { COMPANIES } from '@/data/companies';
+import { UserRole } from '@/app/page';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
+  userRole: UserRole;
 }
 
-const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar, userRole }) => {
   const { language, setLanguage, t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId } = useCompany();
+  const { selectedCompanyId, setSelectedCompanyId, getSelectedCompany } = useCompany();
+  const selectedCompany = getSelectedCompany();
 
   const handleLanguageChange = () => {
     setLanguage(language === 'ar' ? 'en' : 'ar');
@@ -35,19 +38,23 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="text-foreground hover:text-gold-400">
             <Menu className="h-6 w-6" />
           </Button>
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-            <SelectTrigger className="w-[280px] bg-royal-900/60 border-white/10 text-white rounded-lg h-12">
-              <SelectValue placeholder="Select Company" />
-            </SelectTrigger>
-            <SelectContent className="bg-royal-900 text-white border-white/20">
-              <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'All Companies'}</SelectItem>
-              {COMPANIES.map((company) => (
-                <SelectItem key={company.id} value={company.id}>
-                  {language === 'ar' ? company.name_ar : company.name_en}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {userRole === 'admin' ? (
+            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <SelectTrigger className="w-[280px] bg-royal-900/60 border-white/10 text-white rounded-lg h-12">
+                <SelectValue placeholder="Select Company" />
+              </SelectTrigger>
+              <SelectContent className="bg-royal-900 text-white border-white/20">
+                <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'All Companies'}</SelectItem>
+                {COMPANIES.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {language === 'ar' ? company.name_ar : company.name_en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            selectedCompany && <div className="text-xl font-bold">{language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}</div>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={handleLanguageChange} className="text-foreground hover:text-gold-400">
@@ -56,10 +63,10 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           </Button>
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9 border-2 border-gold-500/50">
-              <AvatarImage src="https://picsum.photos/seed/admin/100/100" alt="Admin" data-ai-hint="person portrait" />
-              <AvatarFallback>A</AvatarFallback>
+              <AvatarImage src={userRole === 'admin' ? "https://picsum.photos/seed/admin/100/100" : "https://picsum.photos/seed/company/100/100" } alt="User" data-ai-hint="person portrait" />
+              <AvatarFallback>{userRole === 'admin' ? 'A' : 'C'}</AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium hidden md:block">{t('common.admin')}</span>
+            <span className="text-sm font-medium hidden md:block">{userRole === 'admin' ? t('common.admin') : t('common.company')}</span>
           </div>
         </div>
       </div>

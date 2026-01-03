@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { COMPANIES } from '@/data/companies';
 import type { Company } from '@/data/companies';
+import { useCompany } from '@/context/CompanyContext';
+import { UserRole } from '@/app/page';
 
 
 const initialCompaniesData = COMPANIES.map(c => ({
@@ -28,40 +30,49 @@ const riskVariant: { [key: string]: "default" | "secondary" | "destructive" | "o
     'High': 'destructive'
 }
 
-const CompanyRegistry: React.FC = () => {
+const CompanyRegistry: React.FC<{ userRole: UserRole }> = ({ userRole }) => {
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [selectedCompany, setSelectedCompany] = useState<any>(null);
+    const [selectedCompanyForForm, setSelectedCompanyForForm] = useState<any>(null);
     const { t, language } = useLanguage();
     const { toast } = useToast();
+    const { selectedCompanyId } = useCompany();
 
     const [companies, setCompanies] = useState(() => {
         if (typeof window === 'undefined') return initialCompaniesData;
         const savedCompanies = localStorage.getItem('oia_companies_registry');
         return savedCompanies ? JSON.parse(savedCompanies) : initialCompaniesData;
     });
+    
+    const companiesToDisplay = useMemo(() => {
+        if (userRole === 'company') {
+            return companies.filter(c => c.id === selectedCompanyId);
+        }
+        return companies;
+    }, [companies, userRole, selectedCompanyId]);
 
     useEffect(() => {
         localStorage.setItem('oia_companies_registry', JSON.stringify(companies));
     }, [companies]);
 
     const handleAddCompany = () => {
-        setSelectedCompany(null);
+        setSelectedCompanyForForm(null);
         setIsFormOpen(true);
     };
 
     const handleEditCompany = (company: any) => {
-        setSelectedCompany(company);
+        setSelectedCompanyForForm(company);
         setIsFormOpen(true);
     };
 
     const handleSaveCompany = (formData: any) => {
         setCompanies(prevCompanies => {
-            const isNew = !selectedCompany;
+            const isNew = !selectedCompanyForForm;
+            const companyDataFromList = COMPANIES.find(c => c.name_en === formData.companyName)
             if (isNew) {
                 const newCompany = {
-                    id: formData.companyName.toLowerCase().replace(/ /g, '_'),
+                    id: companyDataFromList?.id || formData.companyName.toLowerCase().replace(/ /g, '_'),
                     name_en: formData.companyName,
-                    name_ar: formData.companyName, // Assuming name is same for simplicity
+                    name_ar: companyDataFromList?.name_ar || formData.companyName, // Assuming name is same for simplicity
                     ...formData,
                     omanization: formData.omaniEmployees / formData.totalEmployees * 100,
                     risk: 'Medium' // Default risk
@@ -69,12 +80,12 @@ const CompanyRegistry: React.FC = () => {
                 return [...prevCompanies, newCompany];
             } else {
                 return prevCompanies.map(c => 
-                    c.id === selectedCompany.id 
+                    c.id === selectedCompanyForForm.id 
                     ? { 
                         ...c, 
                         ...formData,
                         name_en: formData.companyName,
-                        name_ar: formData.companyName, // Assuming name is same for simplicity
+                        name_ar: companyDataFromList?.name_ar || formData.companyName, // Assuming name is same for simplicity
                         omanization: formData.omaniEmployees / formData.totalEmployees * 100,
                       } 
                     : c
@@ -88,12 +99,12 @@ const CompanyRegistry: React.FC = () => {
         });
 
         setIsFormOpen(false);
-        setSelectedCompany(null);
+        setSelectedCompanyForForm(null);
     };
 
     const handleCloseForm = () => {
         setIsFormOpen(false);
-        setSelectedCompany(null);
+        setSelectedCompanyForForm(null);
     };
     
     const handleDeleteCompany = (companyId: string) => {
@@ -121,7 +132,7 @@ const CompanyRegistry: React.FC = () => {
                         className="absolute inset-0 z-50 bg-royal-900"
                     >
                         <CompanyForm 
-                            company={selectedCompany} 
+                            company={selectedCompanyForForm} 
                             onClose={handleCloseForm}
                             onSave={handleSaveCompany} 
                         />
@@ -135,23 +146,27 @@ const CompanyRegistry: React.FC = () => {
                     >
                         <header className="flex items-center justify-between mb-8">
                             <h1 className="text-3xl font-bold">{t('registry.title')}</h1>
-                            <Button onClick={handleAddCompany} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                                <Plus className="ml-2 h-5 w-5" />
-                                {t('registry.addNew')}
-                            </Button>
+                            {userRole === 'admin' && (
+                                <Button onClick={handleAddCompany} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                                    <Plus className="ml-2 h-5 w-5" />
+                                    {t('registry.addNew')}
+                                </Button>
+                            )}
                         </header>
-
-                        <div className="mb-8 relative">
-                            <Input
-                                type="text"
-                                placeholder={t('registry.searchPlaceholder')}
-                                className="h-12 w-full pl-12 bg-royal-800/40 backdrop-blur-md border-white/10 focus:border-gold-500 rounded-lg text-white"
-                            />
-                            <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        </div>
+                        
+                        {userRole === 'admin' && (
+                            <div className="mb-8 relative">
+                                <Input
+                                    type="text"
+                                    placeholder={t('registry.searchPlaceholder')}
+                                    className="h-12 w-full pl-12 bg-royal-800/40 backdrop-blur-md border-white/10 focus:border-gold-500 rounded-lg text-white"
+                                />
+                                <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {companies.map((company) => (
+                            {companiesToDisplay.map((company) => (
                                 <Card key={company.id} className="bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between mb-4">
@@ -160,9 +175,11 @@ const CompanyRegistry: React.FC = () => {
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white" onClick={() => handleEditCompany(company)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500" onClick={() => handleDeleteCompany(company.id)}>
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                {userRole === 'admin' && (
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500" onClick={() => handleDeleteCompany(company.id)}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="text-sm text-gray-400 mb-4">{company.sector}</div>
@@ -189,5 +206,3 @@ const CompanyRegistry: React.FC = () => {
 };
 
 export default CompanyRegistry;
-
-    
