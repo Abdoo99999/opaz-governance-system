@@ -50,6 +50,80 @@ const cardVariants = {
   }),
 };
 
+const RadarCustomTick = (props: any) => {
+    const { payload, x, y, textAnchor, index } = props;
+    const value = payload.value;
+    const wordWrapThreshold = 12;
+
+    // Manual adjustments for position
+    let newX = x;
+    let newY = y;
+    const offset = 30; // 30px offset
+
+    const angle = (360 / AXES.length) * index;
+
+    if (angle === 0 || angle === 180) { // Top and bottom
+        newY += (angle === 0 ? -offset : offset);
+    } else if (angle > 0 && angle < 180) { // Right side
+        newX += offset;
+    } else { // Left side
+        newX -= offset;
+    }
+    
+    // Adjust Y for top/bottom quarters to avoid collision
+    if(angle > 0 && angle < 90) newY += offset / 2;
+    if(angle > 270 && angle < 360) newY += offset / 2;
+    if(angle > 90 && angle < 180) newY -= offset / 2;
+    if(angle > 180 && angle < 270) newY -= offset / 2;
+
+
+    if (value && value.length > wordWrapThreshold) {
+        const words = value.split(' ');
+        const lines = words.reduce((acc: string[], word: string) => {
+            if (acc.length === 0) {
+                acc.push(word);
+            } else {
+                const lastLine = acc[acc.length - 1];
+                if (lastLine.length + word.length + 1 > wordWrapThreshold) {
+                    acc.push(word);
+                } else {
+                    acc[acc.length - 1] = `${lastLine} ${word}`;
+                }
+            }
+            return acc;
+        }, []);
+
+        return (
+            <g transform={`translate(${newX}, ${newY})`}>
+                <text
+                    textAnchor={textAnchor}
+                    fill="#fff"
+                    fontSize="12px"
+                    className="print:fill-black"
+                >
+                    {lines.map((line, i) => (
+                        <tspan key={i} x={0} dy={i === 0 ? 0 : '1.2em'}>{line}</tspan>
+                    ))}
+                </text>
+            </g>
+        );
+    }
+
+    return (
+        <text
+            x={newX}
+            y={newY}
+            textAnchor={textAnchor}
+            fill="#fff"
+            fontSize="12px"
+            className="print:fill-black"
+        >
+            {value}
+        </text>
+    );
+};
+
+
 const Reports: React.FC = () => {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany } = useCompany();
@@ -283,12 +357,12 @@ const Reports: React.FC = () => {
                         </CardHeader>
                         <CardContent className="print:text-black">
                             <ResponsiveContainer width="100%" height={400}>
-                                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                                     <PolarGrid className="stroke-white/20 print:stroke-gray-300" />
-                                    <PolarAngleAxis dataKey="subject" className="fill-white text-xs print:fill-black"/>
+                                    <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                                     <PolarRadiusAxis angle={30} domain={[0, 150]} className="hidden" />
                                     <Tooltip contentStyle={{ backgroundColor: '#001A33' }} labelStyle={{ color: '#E5C565' }} />
-                                    <Legend wrapperStyle={{ color: '#FFFFFF' }} />
+                                    <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
                                     <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" fill="#D4AF37" fillOpacity={0.6} />
                                     <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#00E096" fill="#00E096" fillOpacity={0.2} />
                                 </RadarChart>
