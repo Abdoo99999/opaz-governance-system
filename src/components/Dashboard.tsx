@@ -75,6 +75,40 @@ const maturityPathData = [
   { year: '2030', score: 5.0 },
 ];
 
+const RadarCustomTick = ({ payload, x, y, textAnchor, stroke, radius, index }: any) => {
+    const { language } = useLanguage();
+    const isRtl = language === 'ar';
+    const value = isRtl && payload.value.length > 20 ? payload.value.substring(0, 20) + '...' : payload.value;
+
+    const angle = (index * 360 / AXES.length) * (Math.PI / 180);
+    let newX = x;
+    let newY = y;
+    
+    // Custom adjustments for specific labels to avoid overlap
+    if (index === 0) { // Top label
+      newY -= 15;
+    } else if (index === 5) { // Bottom label
+      newY += 10;
+    }
+
+
+    return (
+      <g>
+        <text
+            radius={radius}
+            stroke={stroke}
+            x={newX}
+            y={newY}
+            textAnchor={textAnchor}
+            fill="#fff"
+            fontSize="12px"
+        >
+          {value}
+        </text>
+      </g>
+    );
+};
+
 
 const Dashboard = () => {
   const { t, language } = useLanguage();
@@ -167,7 +201,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
-            totalAssets: totalAssets / 1_000_000,
+            totalAssets: totalAssets / 1_000_000_000,
             omanizationRate: Math.round(avgOmanization),
             compliantItems: totalCompliant,
             totalComplianceItems: totalItems || 4,
@@ -239,7 +273,7 @@ const Dashboard = () => {
                       <CheckCircle className="h-4 w-4 text-gray-400" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(2)}M</div>
+                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(2)}B</div>
                       <p className="text-xs text-gray-400 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
                   </CardContent>
               </Card>
@@ -280,7 +314,7 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                   <defs>
                     <radialGradient id="radarFill">
                       <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
@@ -288,7 +322,7 @@ const Dashboard = () => {
                     </radialGradient>
                   </defs>
                   <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#fff' }}/>
+                  <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                   <Radar name="Performance" dataKey="A" stroke="#E5C565" strokeWidth={2} fill="url(#radarFill)" />
                   <Tooltip contentStyle={{ backgroundColor: '#001A33', border: '1px solid #D4AF37' }} />
@@ -385,4 +419,5 @@ const Dashboard = () => {
 
 export default Dashboard;
 
+    
     
