@@ -202,28 +202,12 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         let companySpecificTasks: Task[];
         
         if (!selectedCompanyId || selectedCompanyId === 'all') {
-            // Aggregate all tasks from all companies for the 'All' view
-            let allTasks: Task[] = [];
-            const companiesStr = localStorage.getItem('oia_companies_registry');
-            const allCompanies = companiesStr ? JSON.parse(companiesStr) : [];
-            allCompanies.forEach((comp: any) => {
-                const storageKey = getStorageKey(comp.id);
-                const savedData = localStorage.getItem(storageKey);
-                if (savedData) {
-                    allTasks.push(...JSON.parse(savedData));
-                }
-            });
-            // Use a Set to remove duplicate tasks if any company shares tasks, then convert back to array
-            companySpecificTasks = [...new Map(allTasks.map(task => [task.id, task])).values()];
-            if(companySpecificTasks.length === 0) {
-                 companySpecificTasks = initialTasksData; // fallback for first load
-            }
+            companySpecificTasks = []; // Set tasks to empty for "All Companies" to show the prompt
         } else {
-            // Load tasks for the specific company
             const storageKey = getStorageKey(selectedCompanyId);
             const savedData = localStorage.getItem(storageKey);
-            // If no data is saved for a specific company, start with the default initial data.
-            companySpecificTasks = savedData ? JSON.parse(savedData) : [...initialTasksData];
+            // If no data is saved for a specific company, start with an empty array.
+            companySpecificTasks = savedData ? JSON.parse(savedData) : [];
         }
 
         setTasks(companySpecificTasks);
@@ -284,7 +268,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                             {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
                         </Badge>
                     ) : (
-                         <Badge className="bg-blue-900/50 border-blue-600 text-blue-300 mt-2">
+                         <Badge variant="outline" className="mt-2">
                             {t('common.selectAllCompanies')}
                         </Badge>
                     )}
@@ -305,7 +289,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                         </SelectContent>
                     </Select>
                     {userRole === 'admin' && (
-                        <Button className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                        <Button className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={!selectedCompanyId || selectedCompanyId === 'all'}>
                             <Plus className="ml-2 h-5 w-5" />
                             {t('improvement.addTask')}
                         </Button>
@@ -316,20 +300,29 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                      </Button>
                 </div>
             </header>
-
-            <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
-                {lanes.map(lane => (
-                    <KanbanLane
-                        key={lane.status}
-                        title={lane.title}
-                        status={lane.status}
-                        tasks={filteredTasks.filter(t => t.status === lane.status)}
-                        onMove={handleMoveTask}
-                        onOpenDetails={handleOpenDetails}
-                        userRole={userRole}
-                    />
-                ))}
-            </div>
+            
+            {(!selectedCompanyId || selectedCompanyId === 'all') ? (
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center p-8 glass">
+                        <h3 className="text-2xl font-bold text-gold-400">{t('common.selectCompanyToStart')}</h3>
+                        <p className="text-gray-400 mt-2">{t('common.selectCompanyToStartDesc')}</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
+                    {lanes.map(lane => (
+                        <KanbanLane
+                            key={lane.status}
+                            title={lane.title}
+                            status={lane.status}
+                            tasks={filteredTasks.filter(t => t.status === lane.status)}
+                            onMove={handleMoveTask}
+                            onOpenDetails={handleOpenDetails}
+                            userRole={userRole}
+                        />
+                    ))}
+                </div>
+            )}
             
             <TaskDetailsModal task={selectedTask} isOpen={!!selectedTask} onClose={handleCloseDetails} />
         </div>
