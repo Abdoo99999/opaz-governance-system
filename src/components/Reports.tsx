@@ -39,7 +39,7 @@ import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
-import { initialTasks } from '@/components/ImprovementPlan'; // Assuming this is exported
+import { initialTasksData } from '@/components/ImprovementPlan';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -96,8 +96,8 @@ const Reports: React.FC = () => {
         const highRisks = risks.filter((r: any) => r.impact * r.probability >= 15 && r.impact * r.probability < 20).length;
         const mediumRisks = risks.filter((r: any) => r.impact * r.probability >= 5 && r.impact * r.probability < 15).length;
 
-        const totalActions = initialTasks.length; 
-        const completedActions = initialTasks.filter(t => t.status === 'done').length;
+        const totalActions = initialTasksData.length; 
+        const completedActions = initialTasksData.filter(t => t.status === 'done').length;
 
         setSummaryData({
             maturity: parseFloat(maturity.toFixed(1)),
@@ -139,8 +139,8 @@ const Reports: React.FC = () => {
         ] as any);
 
         // 4. Improvement Plan
-        const todo = initialTasks.filter(t => t.status === 'todo').length;
-        const inProgress = initialTasks.filter(t => t.status === 'in-progress').length;
+        const todo = initialTasksData.filter(t => t.status === 'todo').length;
+        const inProgress = initialTasksData.filter(t => t.status === 'in-progress').length;
         setImprovementPlanData([
             { name: 'Completed', value: completedActions, color: '#00E096' },
             { name: 'In Progress', value: inProgress, color: '#FFD700' },
@@ -407,5 +407,3 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
-
-    

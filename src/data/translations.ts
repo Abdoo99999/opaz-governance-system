@@ -132,6 +132,7 @@ export const translations = {
         relatedAxis: "المحور المرتبط",
         comments: "التعليقات",
         commentsPlaceholder: "مكان مخصص لتعليقات ومناقشات الفريق...",
+        saveSuccessDesc: "تم حفظ بيانات خطة التحسين لشركة"
     },
     reports: {
         title: "التقرير الاستراتيجي الشامل",
@@ -376,6 +377,7 @@ export const translations = {
         relatedAxis: "Related Axis",
         comments: "Comments",
         commentsPlaceholder: "Placeholder for team comments and discussion threads...",
+        saveSuccessDesc: "Improvement plan data saved for"
     },
     reports: {
         title: "Comprehensive Strategic Report",

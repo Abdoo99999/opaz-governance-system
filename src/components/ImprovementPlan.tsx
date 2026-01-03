@@ -1,9 +1,9 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Filter, ArrowRight, Check, Star, MessageSquare } from 'lucide-react';
+import { Plus, Filter, ArrowRight, Check, Star, MessageSquare, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -24,6 +24,9 @@ import {
 import { cn } from '@/lib/utils';
 import { AXES } from '@/lib/data/indicators';
 import { useLanguage } from '@/context/LanguageContext';
+import { useCompany } from '@/context/CompanyContext';
+import { useToast } from '@/hooks/use-toast';
+import { UserRole } from '@/app/page';
 
 type Status = 'todo' | 'in-progress' | 'done';
 type Priority = 'Critical' | 'High' | 'Medium' | 'Low';
@@ -41,7 +44,7 @@ export interface Task {
   axisId: number;
 }
 
-export const initialTasks: Task[] = [
+export const initialTasksData: Task[] = [
   { id: 1, title_en: 'Update the Whistleblowing Policy to include anonymous reporting.', title_ar: 'تحديث سياسة الإبلاغ عن المخالفات لتشمل الإبلاغ المجهول.', indicatorId: 45, dueDate: '2024-08-15', priority: 'High', assignedTo: 'Fatma Al-Said', avatar: 'https://picsum.photos/seed/101/100/100', status: 'todo', axisId: 9 },
   { id: 2, title_en: 'Appoint an independent Audit Committee member.', title_ar: 'تعيين عضو مستقل في لجنة المراجعة.', indicatorId: 7, dueDate: '2024-07-30', priority: 'Critical', assignedTo: 'Ali Al-Habsi', avatar: 'https://picsum.photos/seed/102/100/100', status: 'todo', axisId: 2 },
   { id: 3, title_en: 'Formalize and document the CEO succession plan.', title_ar: 'إضفاء الطابع الرسمي على خطة تعاقب الرئيس التنفيذي وتوثيقها.', indicatorId: 18, dueDate: '2024-09-01', priority: 'High', assignedTo: 'Yusuf Al-Harthy', avatar: 'https://picsum.photos/seed/103/100/100', status: 'in-progress', axisId: 4 },
@@ -58,7 +61,7 @@ const priorityConfig: Record<Priority, { variant: 'destructive' | 'secondary' | 
     'Low': { variant: 'default', className: 'bg-green-600/80 border-green-500' }
 };
 
-const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId: number, newStatus: Status) => void; onOpenDetails: (task: Task) => void }) => {
+const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMove: (taskId: number, newStatus: Status) => void; onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t, language } = useLanguage();
     const nextStatus = task.status === 'todo' ? 'in-progress' : 'done';
     
@@ -88,7 +91,7 @@ const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId
                     <span className="text-xs">{task.assignedTo}</span>
                 </div>
 
-                {task.status !== 'done' && (
+                {task.status !== 'done' && userRole === 'admin' && (
                     <Button
                         size="sm"
                         variant="ghost"
@@ -108,7 +111,7 @@ const TaskCard = ({ task, onMove, onOpenDetails }: { task: Task; onMove: (taskId
     );
 };
 
-const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void, onOpenDetails: (task: Task) => void }) => {
+const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails, userRole }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void, onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t } = useLanguage();
     const statusConfig: Record<Status, { titleKey: string; className: string }> = {
       'todo': { titleKey: 'improvement.lanes.todo', className: 'shadow-red-500/40' },
@@ -126,7 +129,7 @@ const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails }: { title: st
                 <div className="overflow-y-auto flex-1 pr-2">
                     <AnimatePresence>
                         {tasks.map(task => (
-                            <TaskCard key={task.id} task={task} onMove={onMove} onOpenDetails={onOpenDetails} />
+                            <TaskCard key={task.id} task={task} onMove={onMove} onOpenDetails={onOpenDetails} userRole={userRole} />
                         ))}
                     </AnimatePresence>
                 </div>
@@ -178,12 +181,46 @@ const TaskDetailsModal = ({ task, isOpen, onClose }: { task: Task | null; isOpen
     );
 };
 
-export default function ImprovementPlan() {
-    const [tasks, setTasks] = useState<Task[]>(initialTasks);
+export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
+    const { t, language } = useLanguage();
+    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { toast } = useToast();
+    const selectedCompany = getSelectedCompany();
+    
+    const getStorageKey = (companyId: string) => `oia_improvement_plan_${companyId}`;
+    
+    const [tasks, setTasks] = useState<Task[]>(() => {
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return initialTasksData;
+        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
+        return saved ? JSON.parse(saved) : initialTasksData;
+    });
+
     const [filterPriority, setFilterPriority] = useState('All');
     const [filterAxis, setFilterAxis] = useState('All');
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-    const { t, language } = useLanguage();
+
+    // RELOAD data when company changes
+    useEffect(() => {
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
+            setTasks(initialTasksData);
+            return;
+        }
+        const storageKey = getStorageKey(selectedCompanyId);
+        const savedData = localStorage.getItem(storageKey);
+        setTasks(savedData ? JSON.parse(savedData) : initialTasksData);
+    }, [selectedCompanyId]);
+
+    const handleSave = () => {
+        if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
+        
+        const storageKey = getStorageKey(selectedCompanyId);
+        localStorage.setItem(storageKey, JSON.stringify(tasks));
+        
+        toast({
+            title: t('common.saveSuccessTitle'),
+            description: `${t('improvement.saveSuccessDesc')} ${selectedCompany?.name_ar}`,
+        });
+    };
 
     const handleMoveTask = (taskId: number, newStatus: Status) => {
         setTasks(prevTasks =>
@@ -220,8 +257,15 @@ export default function ImprovementPlan() {
     return (
         <div className="flex flex-col h-full text-white p-4 md:p-6 lg:p-8">
             <header className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold">{t('menu.improvement')}</h1>
-                <div className="flex items-center gap-4">
+                 <div>
+                    <h1 className="text-3xl font-bold">{t('menu.improvement')}</h1>
+                    {selectedCompany && (
+                        <Badge className="bg-blue-900/50 border-blue-600 text-blue-300 mt-2">
+                            {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
+                        </Badge>
+                    )}
+                 </div>
+                <div className="flex items-center gap-2">
                     <Filter className="text-gray-400" />
                      <Select onValueChange={setFilterPriority} defaultValue="All">
                         <SelectTrigger className="w-[180px] glass"><SelectValue placeholder={t('improvement.filterPriority')} /></SelectTrigger>
@@ -236,10 +280,16 @@ export default function ImprovementPlan() {
                             {AXES.map(axis => <SelectItem key={axis.id} value={String(axis.id)}>{language === 'ar' ? axis.title_ar : axis.title_en}</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    <Button className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                        <Plus className="ml-2 h-5 w-5" />
-                        {t('improvement.addTask')}
-                    </Button>
+                    {userRole === 'admin' && (
+                        <Button className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                            <Plus className="ml-2 h-5 w-5" />
+                            {t('improvement.addTask')}
+                        </Button>
+                    )}
+                     <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={!selectedCompanyId || selectedCompanyId === 'all'}>
+                        <Save className="ml-2 h-4 w-4"/>
+                        {t('common.save')}
+                     </Button>
                 </div>
             </header>
 
@@ -252,6 +302,7 @@ export default function ImprovementPlan() {
                         tasks={filteredTasks.filter(t => t.status === lane.status)}
                         onMove={handleMoveTask}
                         onOpenDetails={handleOpenDetails}
+                        userRole={userRole}
                     />
                 ))}
             </div>
@@ -260,4 +311,3 @@ export default function ImprovementPlan() {
         </div>
     );
 }
-
