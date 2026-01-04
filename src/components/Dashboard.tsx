@@ -196,7 +196,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(maturityScore.toFixed(1)),
-            totalAssets: (companyData?.authorizedCapital / 1_000_000_000) || 0,
+            totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital / 1_000_000_000 : 0,
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
             totalComplianceItems: complianceItems.length || 4,
@@ -209,7 +209,7 @@ const Dashboard = () => {
         const allCompaniesStr = localStorage.getItem('oia_companies_registry');
         const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
         let totalAssets = 0;
-        let riskCount = 0;
+        let allRisks: any[] = [];
 
         allCompanies.forEach((comp: any) => {
             const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
@@ -227,7 +227,7 @@ const Dashboard = () => {
                 const complianceItems = Object.values(complianceData.compliance || {});
                 totalCompliant += complianceItems.filter(v => v === true).length;
                 totalItems += complianceItems.length;
-                riskCount += (complianceData.risks || []).length;
+                allRisks.push(...(complianceData.risks || []));
             }
             totalOmanization += comp.omanization || 0;
             totalAssets += comp.authorizedCapital || 0;
@@ -242,7 +242,7 @@ const Dashboard = () => {
             omanizationRate: Math.round(avgOmanization),
             compliantItems: totalCompliant,
             totalComplianceItems: totalItems || 4,
-            risks: Array(riskCount).fill({probability: Math.random()*5, impact: Math.random()*5}), // Mock risks
+            risks: allRisks,
         });
         setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
     }
@@ -405,11 +405,17 @@ const Dashboard = () => {
                     <CardContent>
                         <ResponsiveContainer width="100%" height={300}>
                             <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+                                <defs>
+                                    <radialGradient id="riskBubble" cx="0.4" cy="0.4" r="0.6">
+                                        <stop offset="0%" stopColor="#FF3B3B" stopOpacity={0.8} />
+                                        <stop offset="100%" stopColor="#FF3B3B" stopOpacity={0.2} />
+                                    </radialGradient>
+                                </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                                 <XAxis type="number" dataKey="x" name={t('compliance.probability')} unit="" tick={{ fill: '#A0A0A0' }} domain={[0, 5]} label={{ value: t('compliance.probability'), position: 'insideBottom', dy: 20, fill: '#A0A0A0' }} />
                                 <YAxis type="number" dataKey="y" name={t('compliance.impact')} unit="" tick={{ fill: '#A0A0A0' }} domain={[0, 5]} label={{ value: t('compliance.impact'), angle: -90, position: 'insideLeft', dx: -10, fill: '#A0A0A0' }}/>
                                 <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
-                                <Scatter name="Risks" data={riskMapData} fill="#FF3B3B" shape="star" />
+                                <Scatter name="Risks" data={riskMapData} fill="url(#riskBubble)" shape="circle" />
                             </ScatterChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -459,3 +465,4 @@ export default Dashboard;
     
     
     
+
