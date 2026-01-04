@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -45,11 +44,11 @@ export interface Task {
 }
 
 
-const priorityConfig: Record<Priority, { variant: 'destructive' | 'secondary' | 'default', className: string }> = {
-    'Critical': { variant: 'destructive', className: 'bg-red-700/80 border-red-500' },
-    'High': { variant: 'destructive', className: 'bg-red-500/80 border-red-400' },
-    'Medium': { variant: 'secondary', className: 'bg-yellow-500/80 border-yellow-400' },
-    'Low': { variant: 'default', className: 'bg-green-600/80 border-green-500' }
+const priorityConfig: Record<Priority, { className: string, glowClassName: string }> = {
+    'Critical': { className: 'bg-red-500/80 border-red-400 text-red-50', glowClassName: 'shadow-[0_0_12px_rgba(255,59,59,0.7)]' },
+    'High': { className: 'bg-yellow-500/80 border-yellow-400 text-yellow-50', glowClassName: 'shadow-[0_0_12px_rgba(234,179,8,0.6)]' },
+    'Medium': { className: 'bg-blue-500/80 border-blue-400 text-blue-50', glowClassName: 'shadow-[0_0_12px_rgba(59,130,246,0.6)]' },
+    'Low': { className: 'bg-green-600/80 border-green-500 text-green-50', glowClassName: 'shadow-[0_0_12px_rgba(22,163,74,0.5)]' }
 };
 
 const complianceQuestions: Record<string, {en: string, ar: string, axisId: number}> = {
@@ -71,31 +70,24 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="glass p-4 mb-4 cursor-pointer"
+            className="glass p-5 mb-4 cursor-pointer flex flex-col h-full"
             onClick={() => onOpenDetails(task)}
         >
-            <div className="flex justify-between items-start mb-2">
-                <Badge className={cn('text-white', priorityConfig[task.priority].className)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
+            <div className="flex justify-between items-center mb-3">
+                <Badge className={cn('text-white text-xs', priorityConfig[task.priority].className, priorityConfig[task.priority].glowClassName)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
                 <span className="text-xs text-gray-400">{task.dueDate}</span>
             </div>
-            <h4 className="font-bold text-base mb-3 text-right">{language === 'ar' ? task.title_ar : task.title_en}</h4>
-            {task.indicatorId && <p className="text-xs text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
+            <div className="flex-1">
+                <h4 className="font-bold text-lg mb-2 text-right leading-relaxed text-white">{language === 'ar' ? task.title_ar : task.title_en}</h4>
+                {task.indicatorId && <p className="text-sm text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
+            </div>
             
-            <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
-                <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage src={task.avatar} alt={task.assignedTo} data-ai-hint="person portrait" />
-                        <AvatarFallback>{task.assignedTo.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs">{task.assignedTo}</span>
-                </div>
-
-                {task.status !== 'done' && userRole === 'admin' && (
+            {task.status !== 'done' && userRole === 'admin' && (
+                 <motion.div className="mt-auto" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Button
-                        size="sm"
-                        variant="ghost"
+                        variant="outline"
                         onClick={(e) => { e.stopPropagation(); onMove(task.id, nextStatus); }}
-                        className="text-gold-400 hover:bg-gold-500/10 hover:text-gold-300"
+                        className="w-full bg-transparent border-white/10 hover:bg-white/5 text-white"
                     >
                         {t(task.status === 'todo' ? 'improvement.start' : 'improvement.finish')}
                         {language === 'ar' ? (
@@ -104,8 +96,8 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
                             task.status === 'todo' ? <ArrowRight className="ml-2 h-4 w-4" /> : <Check className="ml-2 h-4 w-4" />
                         )}
                     </Button>
-                )}
-            </div>
+                 </motion.div>
+            )}
         </motion.div>
     );
 };
@@ -113,25 +105,23 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
 const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails, userRole }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void, onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t } = useLanguage();
     const statusConfig: Record<Status, { titleKey: string; className: string }> = {
-      'todo': { titleKey: 'improvement.lanes.todo', className: 'shadow-red-500/40' },
-      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'shadow-gold-500/40' },
-      'done': { titleKey: 'improvement.lanes.done', className: 'shadow-success/40' },
+      'todo': { titleKey: 'improvement.lanes.todo', className: 'border-b-red-500/60' },
+      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'border-b-gold-500/60' },
+      'done': { titleKey: 'improvement.lanes.done', className: 'border-b-success/60' },
     };
 
     return (
-        <div className="flex-shrink-0 w-[380px] h-full">
-            <div className="p-4 rounded-lg h-full flex flex-col">
-                <div className={cn("flex justify-between items-center mb-4 p-2 rounded-t-lg", statusConfig[status].className)} style={{textShadow: '0 0 10px'}}>
-                    <h3 className="font-bold text-lg">{t(statusConfig[status].titleKey)}</h3>
-                    <Badge variant="secondary">{tasks.length}</Badge>
-                </div>
-                <div className="overflow-y-auto flex-1 pr-2">
-                    <AnimatePresence>
-                        {tasks.map(task => (
-                            <TaskCard key={task.id} task={task} onMove={onMove} onOpenDetails={onOpenDetails} userRole={userRole} />
-                        ))}
-                    </AnimatePresence>
-                </div>
+        <div className="flex-shrink-0 w-[380px] h-full flex flex-col">
+            <div className={cn("flex justify-between items-center mb-6 pb-2 border-b-2", statusConfig[status].className)}>
+                <h3 className="font-bold text-xl">{t(statusConfig[status].titleKey)}</h3>
+                <Badge variant="secondary" className="bg-white/10 text-white">{tasks.length}</Badge>
+            </div>
+            <div className="overflow-y-auto flex-1 pr-4 custom-scrollbar">
+                <AnimatePresence>
+                    {tasks.map(task => (
+                        <TaskCard key={task.id} task={task} onMove={onMove} onOpenDetails={onOpenDetails} userRole={userRole} />
+                    ))}
+                </AnimatePresence>
             </div>
         </div>
     );
@@ -145,7 +135,7 @@ const TaskDetailsModal = ({ task, isOpen, onClose }: { task: Task | null; isOpen
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="glass text-white max-w-2xl">
                 <DialogHeader>
-                    <Badge className={cn('text-white w-fit mb-2', priorityConfig[task.priority].className)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
+                    <Badge className={cn('text-white w-fit mb-2', priorityConfig[task.priority].className, priorityConfig[task.priority].glowClassName)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
                     <DialogTitle className="text-gold-400 text-2xl">{language === 'ar' ? task.title_ar : task.title_en}</DialogTitle>
                     <DialogDescription className="text-gray-300 pt-2">
                         {t('improvement.dueDate')} {task.dueDate} • {t('improvement.assignedTo')} {task.assignedTo}
@@ -272,9 +262,6 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
         
         const storageKey = getStorageKey(selectedCompanyId);
-        // We only save tasks that are not in the 'todo' state if they were auto-generated,
-        // or any manually added task. This prevents auto-generated tasks from persisting if untouched.
-        // A simple way is to just save all current tasks. The generation logic prevents re-adding.
         localStorage.setItem(storageKey, JSON.stringify(tasks));
         
         toast({
@@ -317,7 +304,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
 
     return (
         <div className="flex flex-col h-full text-white p-4 md:p-6 lg:p-8">
-            <header className="flex items-center justify-between mb-6">
+            <header className="flex items-center justify-between mb-8 flex-shrink-0">
                  <div>
                     <h1 className="text-3xl font-bold">{t('menu.improvement')}</h1>
                     {selectedCompany ? (
@@ -366,7 +353,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                     </div>
                 </div>
             ) : (
-                <div className="flex-1 flex gap-6 overflow-x-auto pb-4">
+                <div className="flex-1 flex gap-8 overflow-x-auto pb-4 -mx-8 px-8">
                     {lanes.map(lane => (
                         <KanbanLane
                             key={lane.status}
