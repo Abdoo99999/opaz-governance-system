@@ -101,7 +101,7 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="glass p-5 mb-4 cursor-pointer flex flex-col h-fit"
+            className="glass p-5 mb-4 cursor-pointer flex flex-col h-fit border border-white/5 hover:border-white/20 transition-all"
             onClick={() => onOpenDetails(task)}
         >
             <div className="flex justify-between items-start mb-3">
@@ -112,6 +112,8 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
             <h4 className="font-bold text-lg mb-2 text-right leading-relaxed text-white">{language === 'ar' ? task.title_ar : task.title_en}</h4>
             {task.indicatorId && <p className="text-sm text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
             
+            <div className="flex-grow"></div>
+            
             {renderMoveButtons()}
         </motion.div>
     );
@@ -119,17 +121,17 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
 
 const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails, userRole }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void, onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t } = useLanguage();
-    const statusConfig: Record<Status, { titleKey: string; className: string }> = {
-      'todo': { titleKey: 'improvement.lanes.todo', className: 'border-t-red-500/80' },
-      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'border-t-gold-500/80' },
-      'done': { titleKey: 'improvement.lanes.done', className: 'border-t-success/80' },
+    const statusConfig: Record<Status, { titleKey: string; className: string, badgeClass: string }> = {
+      'todo': { titleKey: 'improvement.lanes.todo', className: 'border-t-red-500/80', badgeClass: 'bg-red-500/20 text-red-300' },
+      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'border-t-gold-500/80', badgeClass: 'bg-gold-500/20 text-gold-300' },
+      'done': { titleKey: 'improvement.lanes.done', className: 'border-t-success/80', badgeClass: 'bg-success/20 text-green-300' },
     };
 
     return (
         <div className={cn("glass flex flex-col h-full", statusConfig[status].className, "border-t-4")}>
             <div className="flex justify-between items-center p-4 border-b border-white/10">
                 <h3 className="font-bold text-xl">{t(statusConfig[status].titleKey)}</h3>
-                <Badge variant="secondary" className="bg-white/10 text-white">{tasks.length}</Badge>
+                <Badge className={cn("text-white", statusConfig[status].badgeClass)}>{tasks.length}</Badge>
             </div>
             <div className="overflow-y-auto flex-1 p-4 custom-scrollbar">
                 <AnimatePresence>
