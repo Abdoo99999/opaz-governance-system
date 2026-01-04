@@ -88,22 +88,18 @@ const RadarCustomTick = (props: any) => {
     const offset = 30; // 30px offset
 
     const angle = (360 / AXES.length) * index;
-
-    if (angle === 0 || angle === 180) { // Top and bottom
-        newY += (angle === 0 ? -offset : offset);
-    } else if (angle > 0 && angle < 180) { // Right side
-        newX += offset;
-    } else { // Left side
-        newX -= offset;
-    }
     
-    // Adjust Y for top/bottom quarters to avoid collision
-    if(angle > 0 && angle < 90) newY += offset / 2;
-    if(angle > 270 && angle < 360) newY += offset / 2;
-    if(angle > 90 && angle < 180) newY -= offset / 2;
-    if(angle > 180 && angle < 270) newY -= offset / 2;
-
-
+    if (angle === 0) newY -= offset; // Top
+    else if (angle === 180) newY += offset; // Bottom
+    else if (angle > 0 && angle < 180) newX += offset; // Right side
+    else newX -= offset; // Left side
+    
+    // Fine-tune Y for corners
+    if (angle > 0 && angle < 90) newY += offset / 3;
+    if (angle > 90 && angle < 180) newY -= offset / 4;
+    if (angle > 180 && angle < 270) newY -= offset / 4;
+    if (angle > 270 && angle < 360) newY += offset / 3;
+    
     if (value && value.length > wordWrapThreshold) {
         const words = value.split(' ');
         const lines = words.reduce((acc: string[], word: string) => {
@@ -285,6 +281,18 @@ const Dashboard = () => {
     return null;
   };
 
+    const tooltipStyle = {
+        contentStyle: {
+            backgroundColor: 'rgba(20, 20, 30, 0.9)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '8px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+            color: '#fff'
+        },
+        itemStyle: { color: '#fff' },
+        labelStyle: { color: '#D4AF37' }
+    };
+
   return (
     <div className="p-4 md:p-6 lg:p-8 text-white space-y-8">
        <header className="flex items-center justify-between">
@@ -364,7 +372,7 @@ const Dashboard = () => {
                   <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                   <Radar name="Performance" dataKey="A" stroke="#E5C565" strokeWidth={2} fill="url(#radarFill)" />
-                  <Tooltip contentStyle={{ backgroundColor: '#001A33', border: '1px solid #D4AF37' }} />
+                   <Tooltip {...tooltipStyle} />
                 </RadarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -388,7 +396,7 @@ const Dashboard = () => {
                                     <Cell key="compliant" fill="#00E096" />
                                     <Cell key="non-compliant" fill="#FF3B3B" />
                                 </Pie>
-                                <Tooltip contentStyle={{ backgroundColor: '#001A33' }} />
+                                 <Tooltip {...tooltipStyle} />
                                 <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}}/>
                             </PieChart>
                         </ResponsiveContainer>
@@ -451,7 +459,3 @@ const Dashboard = () => {
 export default Dashboard;
 
     
-    
-    
-
-
