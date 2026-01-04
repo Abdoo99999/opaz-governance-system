@@ -10,7 +10,8 @@ import {
   Tooltip,
   Scatter,
   ReferenceArea,
-  Cell
+  Cell,
+  CartesianGrid
 } from 'recharts';
 import { useLanguage } from '@/context/LanguageContext';
 
