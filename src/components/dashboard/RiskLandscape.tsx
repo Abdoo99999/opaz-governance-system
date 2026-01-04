@@ -61,15 +61,16 @@ const CustomShape = (props: any) => {
 };
 
 const CustomTooltipContent = (props: any) => {
+    const { t } = useLanguage();
     const { active, payload } = props;
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         const zone = getRiskZone(data.x, data.y);
         return (
             <div className="glass p-4 rounded-lg text-white">
-                <h4 style={{ color: zone.textColor, fontWeight: 'bold' }}>{zone.name} Zone</h4>
-                <p>{data.z} risk(s) identified</p>
-                <p className="text-xs text-gray-400">Impact: {data.y}, Probability: {data.x}</p>
+                <h4 style={{ color: zone.textColor, fontWeight: 'bold' }}>{t(`registry.risks.${zone.name.toLowerCase()}`)}</h4>
+                <p>{data.z} {t('dashboard.activeRisks')}</p>
+                <p className="text-xs text-gray-400">{t('compliance.impact')}: {data.y}, {t('compliance.probability')}: {data.x}</p>
             </div>
         );
     }
@@ -82,7 +83,7 @@ interface RiskLandscapeProps {
 }
 
 const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     const processedData = useMemo(() => {
         const grouped = data.reduce((acc, risk) => {
@@ -96,8 +97,16 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
         return Object.values(grouped);
     }, [data]);
     
-    const impactLabels: Record<number, string> = { 1: "Low", 3: "Medium", 5: "Critical" };
-    const probLabels: Record<number, string> = { 1: "Rare", 3: "Likely", 5: "Certain" };
+    const impactLabels: Record<number, string> = {
+        1: t('registry.risks.low'),
+        3: t('registry.risks.medium'),
+        5: t('registry.risks.critical')
+    };
+    const probLabels: Record<number, string> = {
+        1: t('compliance.riskCategories.rare'),
+        3: t('compliance.riskCategories.likely'),
+        5: t('compliance.riskCategories.certain')
+    };
 
     return (
         <ResponsiveContainer width="100%" height="100%">

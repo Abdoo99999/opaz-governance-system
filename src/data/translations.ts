@@ -102,7 +102,10 @@ export const translations = {
             financial: "مالي",
             operational: "تشغيلي",
             strategic: "استراتيجي",
-            cyber: "سيبراني"
+            cyber: "سيبراني",
+            rare: "نادر",
+            likely: "محتمل",
+            certain: "مؤكد"
         }
     },
     improvement: {
@@ -347,7 +350,10 @@ export const translations = {
             financial: "Financial",
             operational: "Operational",
             strategic: "Strategic",
-            cyber: "Cyber"
+            cyber: "Cyber",
+            rare: "Rare",
+            likely: "Likely",
+            certain: "Certain"
         }
     },
     improvement: {
