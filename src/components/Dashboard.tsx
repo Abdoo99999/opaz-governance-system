@@ -34,6 +34,8 @@ import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon } f
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
+import RiskLandscape from './dashboard/RiskLandscape';
+
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -196,7 +198,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(maturityScore.toFixed(1)),
-            totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital / 1_000_000_000 : 0,
+            totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital / 1_000_000 : 0,
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
             totalComplianceItems: complianceItems.length || 4,
@@ -238,7 +240,7 @@ const Dashboard = () => {
         
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
-            totalAssets: totalAssets / 1_000_000_000,
+            totalAssets: totalAssets / 1_000_000,
             omanizationRate: Math.round(avgOmanization),
             compliantItems: totalCompliant,
             totalComplianceItems: totalItems || 4,
@@ -310,7 +312,7 @@ const Dashboard = () => {
                       <CheckCircle className="h-4 w-4 text-gray-400" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(2)}B</div>
+                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(2)}M</div>
                       <p className="text-xs text-gray-400 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
                   </CardContent>
               </Card>
@@ -334,7 +336,7 @@ const Dashboard = () => {
                       <AlertTriangle className="h-4 w-4 text-gray-400" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold">{(riskMapData || []).length}</div>
+                      <div className="text-4xl font-bold">{(dashboardData.risks || []).length}</div>
                       <p className="text-xs text-gray-400 mt-1">{t('dashboard.activeRisks')}</p>
                   </CardContent>
               </Card>
@@ -402,22 +404,8 @@ const Dashboard = () => {
                              {t('dashboard.riskMap')}
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
-                                <defs>
-                                    <radialGradient id="riskBubble" cx="0.4" cy="0.4" r="0.6">
-                                        <stop offset="0%" stopColor="#FF3B3B" stopOpacity={0.8} />
-                                        <stop offset="100%" stopColor="#FF3B3B" stopOpacity={0.2} />
-                                    </radialGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                                <XAxis type="number" dataKey="x" name={t('compliance.probability')} unit="" tick={{ fill: '#A0A0A0' }} domain={[0, 5]} label={{ value: t('compliance.probability'), position: 'insideBottom', dy: 20, fill: '#A0A0A0' }} />
-                                <YAxis type="number" dataKey="y" name={t('compliance.impact')} unit="" tick={{ fill: '#A0A0A0' }} domain={[0, 5]} label={{ value: t('compliance.impact'), angle: -90, position: 'insideLeft', dx: -10, fill: '#A0A0A0' }}/>
-                                <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#001A33' }} />
-                                <Scatter name="Risks" data={riskMapData} fill="url(#riskBubble)" shape="circle" />
-                            </ScatterChart>
-                        </ResponsiveContainer>
+                    <CardContent className='h-[300px]'>
+                        <RiskLandscape data={dashboardData.risks} />
                     </CardContent>
                 </Card>
             </motion.div>
@@ -465,4 +453,5 @@ export default Dashboard;
     
     
     
+
 
