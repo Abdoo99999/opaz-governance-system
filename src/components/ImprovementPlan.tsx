@@ -64,32 +64,36 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
     
     const renderMoveButtons = () => {
         if (userRole !== 'admin') return null;
+        
+        const buttonClasses = "border-gray-600 text-gray-300 hover:bg-gold-500 hover:text-black hover:border-gold-500";
 
         return (
-            <div className="flex justify-between items-center p-3 bg-black/20 mt-4 rounded-b-lg -m-5">
-                 {task.status === 'in-progress' && (
-                     <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'todo'); }}>
-                         <ArrowLeft className="mr-2 h-4 w-4" /> {t('improvement.return')}
-                    </Button>
-                )}
-                {task.status === 'done' && (
-                     <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
-                         <ArrowLeft className="mr-2 h-4 w-4" /> {t('improvement.reopen')}
-                    </Button>
-                )}
+            <div className="flex justify-between items-center p-3 bg-black/20 mt-4 -mx-4 -mb-4 rounded-b-lg">
+                <div className="flex-1 flex justify-between items-center gap-2">
+                    {task.status === 'in-progress' && (
+                        <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'todo'); }}>
+                            <ArrowLeft className="mr-1 h-4 w-4" /> {t('improvement.return')}
+                        </Button>
+                    )}
+                    {task.status === 'done' && (
+                        <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
+                            <ArrowLeft className="mr-1 h-4 w-4" /> {t('improvement.reopen')}
+                        </Button>
+                    )}
 
-                <div className="flex-grow"></div> 
+                    <div className="flex-grow"></div> 
 
-                {task.status === 'todo' && (
-                     <Button variant="ghost" size="sm" className="text-gold-400 hover:text-gold-300" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
-                        {t('improvement.start')} <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                )}
-                 {task.status === 'in-progress' && (
-                     <Button variant="ghost" size="sm" className="text-success hover:text-green-400" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'done'); }}>
-                        {t('improvement.finish')} <Check className="ml-2 h-4 w-4" />
-                    </Button>
-                )}
+                    {task.status === 'todo' && (
+                        <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
+                            {t('improvement.start')} <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                    )}
+                    {task.status === 'in-progress' && (
+                        <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'done'); }}>
+                            {t('improvement.finish')} <Check className="ml-1 h-4 w-4" />
+                        </Button>
+                    )}
+                </div>
             </div>
         );
     }
@@ -101,16 +105,16 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="glass p-5 mb-4 cursor-pointer flex flex-col h-fit border border-white/5 hover:border-white/20 transition-all"
+            className="bg-[#1e293b] p-4 mb-4 cursor-pointer flex flex-col h-fit border border-white/10 hover:border-white/20 transition-all rounded-lg"
             onClick={() => onOpenDetails(task)}
         >
             <div className="flex justify-between items-start mb-3">
-                <p className="text-sm text-gray-400">{task.dueDate}</p>
-                <Badge className={cn('text-white text-xs', priorityConfig[task.priority].className, priorityConfig[task.priority].glowClassName)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
+                <p className="text-xs text-gray-400">{task.dueDate}</p>
+                <Badge className={cn('text-white text-[10px] px-2 py-0.5', priorityConfig[task.priority].className)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
             </div>
             
-            <h4 className="font-bold text-lg mb-2 text-right leading-relaxed text-white">{language === 'ar' ? task.title_ar : task.title_en}</h4>
-            {task.indicatorId && <p className="text-sm text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
+            <h4 className="font-bold text-sm mb-2 text-right leading-relaxed text-white">{language === 'ar' ? task.title_ar : task.title_en}</h4>
+            {task.indicatorId && <p className="text-xs text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
             
             <div className="flex-grow"></div>
             
@@ -122,9 +126,9 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
 const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails, userRole }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void, onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t } = useLanguage();
     const statusConfig: Record<Status, { titleKey: string; className: string, badgeClass: string }> = {
-      'todo': { titleKey: 'improvement.lanes.todo', className: 'border-t-red-500/80', badgeClass: 'bg-red-500/20 text-red-300' },
-      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'border-t-gold-500/80', badgeClass: 'bg-gold-500/20 text-gold-300' },
-      'done': { titleKey: 'improvement.lanes.done', className: 'border-t-success/80', badgeClass: 'bg-success/20 text-green-300' },
+      'todo': { titleKey: 'improvement.lanes.todo', className: 'border-t-red-500', badgeClass: 'bg-red-500/20 text-red-300' },
+      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'border-t-amber-400', badgeClass: 'bg-gold-500/20 text-gold-300' },
+      'done': { titleKey: 'improvement.lanes.done', className: 'border-t-emerald-500', badgeClass: 'bg-success/20 text-green-300' },
     };
 
     return (
@@ -399,6 +403,5 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
-
 
     
