@@ -209,19 +209,19 @@ const Reports: React.FC = () => {
         }, { Extreme: 0, High: 0, Medium: 0, Low: 0 });
 
         setRiskDistributionData([
-            { name: 'Low', count: riskCounts.Low, color: '#00E096' },
-            { name: 'Medium', count: riskCounts.Medium, color: '#FFD700' },
-            { name: 'High', count: riskCounts.High, color: '#FFA500' },
-            { name: 'Extreme', count: riskCounts.Extreme, color: '#FF3B3B' },
+            { name: t('reports.riskLevels.low'), count: riskCounts.Low, color: '#00E096' },
+            { name: t('reports.riskLevels.medium'), count: riskCounts.Medium, color: '#FFD700' },
+            { name: t('reports.riskLevels.high'), count: riskCounts.High, color: '#FFA500' },
+            { name: t('reports.riskLevels.extreme'), count: riskCounts.Extreme, color: '#FF3B3B' },
         ] as any);
 
         // 4. Improvement Plan
         const todo = improvementPlanTasks.filter(t => t.status === 'todo').length;
         const inProgress = improvementPlanTasks.filter(t => t.status === 'in-progress').length;
         setImprovementPlanData([
-            { name: 'Completed', value: completedActions, color: '#00E096' },
-            { name: 'In Progress', value: inProgress, color: '#FFD700' },
-            { name: 'Not Started', value: todo, color: '#6b7280' },
+            { name: t('reports.improvement.completed'), value: completedActions, color: '#00E096' },
+            { name: t('reports.improvement.inProgress'), value: inProgress, color: '#FFD700' },
+            { name: t('reports.improvement.notStarted'), value: todo, color: '#6b7280' },
         ] as any);
         
         // 5. Tables
@@ -245,10 +245,22 @@ const Reports: React.FC = () => {
         setCriticalRisksData(risks.filter((r: any) => r.impact * r.probability >= 15).sort((a:any, b:any) => (b.impact * b.probability) - (a.impact * a.probability)) as any);
 
 
-    }, [selectedCompanyId, language]);
+    }, [selectedCompanyId, language, t]);
 
     const handlePrint = () => {
         window.print();
+    };
+    
+    const tooltipStyle = {
+        contentStyle: {
+            backgroundColor: 'rgba(20, 20, 30, 0.9)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '8px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+            color: '#fff'
+        },
+        itemStyle: { color: '#fff' },
+        cursor: { fill: 'rgba(255,255,255,0.05)' }
     };
 
     if (!selectedCompanyId || selectedCompanyId === 'all') {
@@ -361,7 +373,7 @@ const Reports: React.FC = () => {
                                     <PolarGrid className="stroke-white/20 print:stroke-gray-300" />
                                     <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                                     <PolarRadiusAxis angle={30} domain={[0, 150]} className="hidden" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#001A33' }} labelStyle={{ color: '#E5C565' }} />
+                                    <Tooltip {...tooltipStyle} />
                                     <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
                                     <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" fill="#D4AF37" fillOpacity={0.6} />
                                     <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#00E096" fill="#00E096" fillOpacity={0.2} />
@@ -380,9 +392,9 @@ const Reports: React.FC = () => {
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={riskDistributionData} layout="vertical" margin={{ right: 20 }}>
                                     <CartesianGrid horizontal={false} className="stroke-white/10 print:stroke-gray-200" />
-                                    <XAxis type="number" className="fill-white text-xs print:fill-black" />
-                                    <YAxis dataKey="name" type="category" width={80} className="fill-white text-xs print:fill-black" />
-                                    <Tooltip contentStyle={{ backgroundColor: '#001A33' }} cursor={{fill: 'rgba(255,255,255,0.1)'}} />
+                                    <XAxis type="number" tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
+                                    <YAxis dataKey="name" type="category" width={80} tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
+                                    <Tooltip {...tooltipStyle} />
                                     <Bar dataKey="count" barSize={30} radius={[0, 10, 10, 0]}>
                                         {riskDistributionData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={(entry as any).color} />
@@ -407,7 +419,7 @@ const Reports: React.FC = () => {
                                             <Cell key={`cell-${index}`} fill={(entry as any).color} />
                                         ))}
                                     </Pie>
-                                    <Tooltip contentStyle={{ backgroundColor: '#001A33' }}/>
+                                    <Tooltip {...tooltipStyle}/>
                                     <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
                                     <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold print:fill-black">
                                        {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
@@ -485,4 +497,3 @@ const Reports: React.FC = () => {
 
 export default Reports;
 
-    

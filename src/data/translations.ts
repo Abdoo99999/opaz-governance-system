@@ -154,7 +154,7 @@ export const translations = {
             actionsSub: "8 مكتملة هذا العام"
         },
         maturityAnalysis: "تحليل نضج الحوكمة (الشركة مقابل القطاع)",
-        companyScore: "คะแนน الشركة",
+        companyScore: "نتيجة الشركة",
         sectorAverage: "متوسط القطاع",
         riskAnalysis: "تحليل المخاطر حسب الشدة",
         improvementStatus: "حالة خطة التحسين",
@@ -167,6 +167,17 @@ export const translations = {
             axis: "المحور",
             score: "التقييم",
             recommendation: "الإجراء الموصى به"
+        },
+        riskLevels: {
+          low: "منخفض",
+          medium: "متوسط",
+          high: "مرتفع",
+          extreme: "حرج"
+        },
+        improvement: {
+          completed: "تم الإنجاز",
+          inProgress: "جاري التنفيذ",
+          notStarted: "قيد الانتظار"
         }
     },
     settings: {
@@ -415,6 +426,17 @@ export const translations = {
             axis: "Axis",
             score: "Score",
             recommendation: "Recommended Action"
+        },
+        riskLevels: {
+            low: "Low",
+            medium: "Medium",
+            high: "High",
+            extreme: "Extreme"
+        },
+        improvement: {
+            completed: "Completed",
+            inProgress: "In Progress",
+            notStarted: "Not Started"
         }
     },
     settings: {
