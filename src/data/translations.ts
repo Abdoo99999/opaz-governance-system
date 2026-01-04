@@ -128,6 +128,8 @@ export const translations = {
         linkedIndicator: "مرتبط بالمؤشر",
         start: "بدء",
         finish: "إنهاء",
+        return: "إرجاع",
+        reopen: "إعادة فتح",
         dueDate: "تاريخ الاستحقاق:",
         assignedTo: "مسند إلى:",
         description: "الوصف",
@@ -387,6 +389,8 @@ export const translations = {
         linkedIndicator: "Linked to Indicator",
         start: "Start",
         finish: "Finish",
+        return: "Return",
+        reopen: "Re-open",
         dueDate: "Due by:",
         assignedTo: "Assigned to:",
         description: "Description",
@@ -434,9 +438,9 @@ export const translations = {
             extreme: "Extreme"
         },
         improvement: {
-            completed: "Completed",
-            inProgress: "In Progress",
-            notStarted: "Not Started"
+          completed: "Completed",
+          inProgress: "In Progress",
+          notStarted: "Not Started"
         }
     },
     settings: {
@@ -519,5 +523,6 @@ export const translations = {
     }
   }
 };
+
 
     

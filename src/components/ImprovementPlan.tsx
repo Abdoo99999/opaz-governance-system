@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Filter, ArrowRight, Check, Star, MessageSquare, Save } from 'lucide-react';
+import { Plus, Filter, ArrowRight, Check, Star, MessageSquare, Save, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -61,7 +61,38 @@ const complianceQuestions: Record<string, {en: string, ar: string, axisId: numbe
 
 const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMove: (taskId: number, newStatus: Status) => void; onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t, language } = useLanguage();
-    const nextStatus = task.status === 'todo' ? 'in-progress' : 'done';
+    
+    const renderMoveButtons = () => {
+        if (userRole !== 'admin') return null;
+
+        return (
+            <div className="flex justify-between items-center p-3 bg-black/20 mt-4 rounded-b-lg -m-5">
+                 {task.status === 'in-progress' && (
+                     <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'todo'); }}>
+                         <ArrowLeft className="mr-2 h-4 w-4" /> {t('improvement.return')}
+                    </Button>
+                )}
+                {task.status === 'done' && (
+                     <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
+                         <ArrowLeft className="mr-2 h-4 w-4" /> {t('improvement.reopen')}
+                    </Button>
+                )}
+
+                <div className="flex-grow"></div> 
+
+                {task.status === 'todo' && (
+                     <Button variant="ghost" size="sm" className="text-gold-400 hover:text-gold-300" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
+                        {t('improvement.start')} <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                )}
+                 {task.status === 'in-progress' && (
+                     <Button variant="ghost" size="sm" className="text-success hover:text-green-400" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'done'); }}>
+                        {t('improvement.finish')} <Check className="ml-2 h-4 w-4" />
+                    </Button>
+                )}
+            </div>
+        );
+    }
     
     return (
         <motion.div
@@ -70,34 +101,18 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="glass p-5 mb-4 cursor-pointer flex flex-col h-full"
+            className="glass p-5 mb-4 cursor-pointer flex flex-col h-fit"
             onClick={() => onOpenDetails(task)}
         >
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex justify-between items-start mb-3">
+                <p className="text-sm text-gray-400">{task.dueDate}</p>
                 <Badge className={cn('text-white text-xs', priorityConfig[task.priority].className, priorityConfig[task.priority].glowClassName)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
-                <span className="text-xs text-gray-400">{task.dueDate}</span>
-            </div>
-            <div className="flex-1">
-                <h4 className="font-bold text-lg mb-2 text-right leading-relaxed text-white">{language === 'ar' ? task.title_ar : task.title_en}</h4>
-                {task.indicatorId && <p className="text-sm text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
             </div>
             
-            {task.status !== 'done' && userRole === 'admin' && (
-                 <motion.div className="mt-auto" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button
-                        variant="outline"
-                        onClick={(e) => { e.stopPropagation(); onMove(task.id, nextStatus); }}
-                        className="w-full bg-transparent border-white/10 hover:bg-white/5 text-white"
-                    >
-                        {t(task.status === 'todo' ? 'improvement.start' : 'improvement.finish')}
-                        {language === 'ar' ? (
-                            task.status === 'todo' ? <ArrowRight className="mr-2 h-4 w-4" /> : <Check className="mr-2 h-4 w-4" />
-                        ) : (
-                            task.status === 'todo' ? <ArrowRight className="ml-2 h-4 w-4" /> : <Check className="ml-2 h-4 w-4" />
-                        )}
-                    </Button>
-                 </motion.div>
-            )}
+            <h4 className="font-bold text-lg mb-2 text-right leading-relaxed text-white">{language === 'ar' ? task.title_ar : task.title_en}</h4>
+            {task.indicatorId && <p className="text-sm text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
+            
+            {renderMoveButtons()}
         </motion.div>
     );
 };
@@ -105,18 +120,18 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
 const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails, userRole }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void, onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t } = useLanguage();
     const statusConfig: Record<Status, { titleKey: string; className: string }> = {
-      'todo': { titleKey: 'improvement.lanes.todo', className: 'border-b-red-500/60' },
-      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'border-b-gold-500/60' },
-      'done': { titleKey: 'improvement.lanes.done', className: 'border-b-success/60' },
+      'todo': { titleKey: 'improvement.lanes.todo', className: 'border-t-red-500/80' },
+      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'border-t-gold-500/80' },
+      'done': { titleKey: 'improvement.lanes.done', className: 'border-t-success/80' },
     };
 
     return (
-        <div className="flex-shrink-0 w-[380px] h-full flex flex-col">
-            <div className={cn("flex justify-between items-center mb-6 pb-2 border-b-2", statusConfig[status].className)}>
+        <div className={cn("glass flex flex-col h-full", statusConfig[status].className, "border-t-4")}>
+            <div className="flex justify-between items-center p-4 border-b border-white/10">
                 <h3 className="font-bold text-xl">{t(statusConfig[status].titleKey)}</h3>
                 <Badge variant="secondary" className="bg-white/10 text-white">{tasks.length}</Badge>
             </div>
-            <div className="overflow-y-auto flex-1 pr-4 custom-scrollbar">
+            <div className="overflow-y-auto flex-1 p-4 custom-scrollbar">
                 <AnimatePresence>
                     {tasks.map(task => (
                         <TaskCard key={task.id} task={task} onMove={onMove} onOpenDetails={onOpenDetails} userRole={userRole} />
@@ -216,7 +231,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                             dueDate: '2024-12-31',
                             priority: score === 1 ? 'Critical' : 'High',
                             assignedTo: 'Governance Lead',
-                            avatar: 'https://picsum.photos/seed/lead/100/100',
+                            avatar: '', // No avatar
                             status: 'todo',
                             axisId: indicator.axisId
                         });
@@ -243,7 +258,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                              dueDate: '2024-11-30',
                              priority: 'Critical',
                              assignedTo: 'Compliance Officer',
-                             avatar: 'https://picsum.photos/seed/officer/100/100',
+                             avatar: '', // No avatar
                              status: 'todo',
                              axisId: question.axisId
                          });
@@ -293,12 +308,6 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
             return priorityMatch && axisMatch;
         });
     }, [tasks, filterPriority, filterAxis]);
-
-    const lanes: { status: Status; title: string; }[] = [
-        { status: 'todo', title: 'Identified Gaps' },
-        { status: 'in-progress', title: 'In Remediation' },
-        { status: 'done', title: 'Resolved' },
-    ];
     
     const priorities = ['All', 'Critical', 'High', 'Medium', 'Low'];
 
@@ -353,18 +362,34 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                     </div>
                 </div>
             ) : (
-                <div className="flex-1 flex gap-8 overflow-x-auto pb-4 -mx-8 px-8">
-                    {lanes.map(lane => (
-                        <KanbanLane
-                            key={lane.status}
-                            title={lane.title}
-                            status={lane.status}
-                            tasks={filteredTasks.filter(t => t.status === lane.status)}
-                            onMove={handleMoveTask}
-                            onOpenDetails={handleOpenDetails}
-                            userRole={userRole}
-                        />
-                    ))}
+                <div className="grid grid-cols-3 gap-6 flex-1 min-h-0">
+                    <KanbanLane
+                        key="todo"
+                        title="Identified Gaps"
+                        status="todo"
+                        tasks={filteredTasks.filter(t => t.status === 'todo')}
+                        onMove={handleMoveTask}
+                        onOpenDetails={handleOpenDetails}
+                        userRole={userRole}
+                    />
+                     <KanbanLane
+                        key="in-progress"
+                        title="In Remediation"
+                        status="in-progress"
+                        tasks={filteredTasks.filter(t => t.status === 'in-progress')}
+                        onMove={handleMoveTask}
+                        onOpenDetails={handleOpenDetails}
+                        userRole={userRole}
+                    />
+                     <KanbanLane
+                        key="done"
+                        title="Resolved"
+                        status="done"
+                        tasks={filteredTasks.filter(t => t.status === 'done')}
+                        onMove={handleMoveTask}
+                        onOpenDetails={handleOpenDetails}
+                        userRole={userRole}
+                    />
                 </div>
             )}
             
@@ -372,5 +397,6 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
+
 
     
