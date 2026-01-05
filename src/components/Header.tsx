@@ -20,9 +20,10 @@ import { UserRole } from '@/app/page';
 interface HeaderProps {
   onToggleSidebar: () => void;
   userRole: UserRole;
+  isSidebarVisible: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onToggleSidebar, userRole }) => {
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar, userRole, isSidebarVisible }) => {
   const { language, setLanguage, t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId, getSelectedCompany } = useCompany();
   const selectedCompany = getSelectedCompany();
@@ -35,9 +36,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, userRole }) => {
     <header className="sticky top-0 z-40 print:hidden">
       <div className="h-20 flex items-center justify-between px-4 md:px-6 m-4 rounded-lg border-b border-white/5 bg-royal-800/30 backdrop-blur-md">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="text-foreground hover:text-gold-400">
-            <Menu className="h-6 w-6" />
-          </Button>
+          {isSidebarVisible && (
+            <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="text-foreground hover:text-gold-400">
+              <Menu className="h-6 w-6" />
+            </Button>
+          )}
           {userRole === 'admin' ? (
             <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
               <SelectTrigger className="w-[280px] bg-royal-900/60 border-white/10 text-white rounded-lg h-12">
