@@ -40,6 +40,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
 import type { Task } from '@/components/ImprovementPlan';
+import { cn } from '@/lib/utils';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -49,6 +50,9 @@ const cardVariants = {
     transition: { delay: i * 0.1, duration: 0.4, ease: 'easeOut' },
   }),
 };
+
+const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl";
+
 
 const RadarCustomTick = (props: any) => {
     const { payload, x, y, textAnchor, index } = props;
@@ -309,52 +313,52 @@ const Reports: React.FC = () => {
             {/* Top Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-                    <Card className="glass">
+                    <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('reports.summary.maturity')}</CardTitle>
-                            <TrendingUp className="w-4 h-4 text-gray-400" />
+                            <CardTitle className="text-sm font-medium text-gold-200/80 print:text-gray-600">{t('reports.summary.maturity')}</CardTitle>
+                            <TrendingUp className="w-4 h-4 text-gold-300/70" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold">{summaryData.maturity}/5</div>
-                            <p className="text-xs text-muted-foreground">{t('reports.summary.maturitySub')}</p>
+                            <div className="text-3xl font-bold text-gold-400">{summaryData.maturity}/5</div>
+                            <p className="text-xs text-gold-200/60">{t('reports.summary.maturitySub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-                    <Card className="glass">
+                    <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70")}>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('reports.summary.compliance')}</CardTitle>
-                            <CheckCircle className="w-4 h-4 text-gray-400" />
+                            <CardTitle className="text-sm font-medium text-green-200/80 print:text-gray-600">{t('reports.summary.compliance')}</CardTitle>
+                            <CheckCircle className="w-4 h-4 text-green-300/70" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold">{summaryData.compliance}%</div>
-                             <p className="text-xs text-muted-foreground">{t('reports.summary.complianceSub')}</p>
+                            <div className="text-3xl font-bold text-green-400">{summaryData.compliance}%</div>
+                             <p className="text-xs text-green-200/60">{t('reports.summary.complianceSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-                    <Card className="glass">
+                    <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('reports.summary.risks')}</CardTitle>
-                            <AlertCircle className="w-4 h-4 text-gray-400" />
+                            <CardTitle className="text-sm font-medium text-red-200/80 print:text-gray-600">{t('reports.summary.risks')}</CardTitle>
+                            <AlertCircle className="w-4 h-4 text-red-300/70" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-xl font-bold">
                                <span className="text-danger">{summaryData.risks.critical} {t('registry.risks.critical')}</span> / <span className="text-yellow-400">{summaryData.risks.high} {t('registry.risks.high')}</span>
                             </div>
-                            <p className="text-xs text-muted-foreground">{t('reports.summary.risksSub')}</p>
+                            <p className="text-xs text-red-200/60">{t('reports.summary.risksSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
                  <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-                    <Card className="glass">
+                    <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('reports.summary.actions')}</CardTitle>
-                            <AlertCircle className="w-4 h-4 text-gray-400" />
+                            <CardTitle className="text-sm font-medium text-blue-200/80 print:text-gray-600">{t('reports.summary.actions')}</CardTitle>
+                            <AlertCircle className="w-4 h-4 text-blue-300/70" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold">{summaryData.actions} {t('reports.summary.pending')}</div>
-                            <p className="text-xs text-muted-foreground">{t('reports.summary.actionsSub')}</p>
+                            <div className="text-3xl font-bold text-blue-400">{summaryData.actions} {t('reports.summary.pending')}</div>
+                            <p className="text-xs text-blue-200/60">{t('reports.summary.actionsSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -497,3 +501,5 @@ const Reports: React.FC = () => {
 
 export default Reports;
 
+
+    
