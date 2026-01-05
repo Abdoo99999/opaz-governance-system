@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -40,6 +41,7 @@ export default function AppLayout({ children, currentView, onNavigate, onLogout,
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
           onToggleSidebar={toggleSidebar} 
+          onNavigate={onNavigate}
           userRole={userRole}
           isSidebarVisible={!isAssessmentView}
         />

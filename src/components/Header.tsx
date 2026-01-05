@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Menu, Globe } from 'lucide-react';
+import { Menu, Globe, LayoutDashboard } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +19,12 @@ import { UserRole } from '@/app/page';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
+  onNavigate: (view: string) => void;
   userRole: UserRole;
   isSidebarVisible: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onToggleSidebar, userRole, isSidebarVisible }) => {
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onNavigate, userRole, isSidebarVisible }) => {
   const { language, setLanguage, t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId, getSelectedCompany } = useCompany();
   const selectedCompany = getSelectedCompany();
@@ -36,9 +37,14 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, userRole, isSidebarVis
     <header className="sticky top-0 z-40 print:hidden">
       <div className="h-20 flex items-center justify-between px-4 md:px-6 m-4 rounded-lg border-b border-white/5 bg-royal-800/30 backdrop-blur-md">
         <div className="flex items-center gap-4">
-          {isSidebarVisible && (
+          {isSidebarVisible ? (
             <Button variant="ghost" size="icon" onClick={onToggleSidebar} className="text-foreground hover:text-gold-400">
               <Menu className="h-6 w-6" />
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={() => onNavigate('dashboard')} className="text-gold-400 border-gold-500/50 hover:bg-gold-500/10 hover:text-gold-300">
+                <LayoutDashboard className="h-5 w-5 ml-2"/>
+                {t('menu.dashboard')}
             </Button>
           )}
           {userRole === 'admin' ? (
