@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -47,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
         <nav className="flex-1 px-2 py-4">
           <ul>
             {menuItems.map((item) => (
-              <li key={item.name} className="relative mb-2">
+              <li key={item.name} className="relative mb-2 transition-transform duration-200 ease-in-out hover:scale-105">
                 <button
                   onClick={() => onNavigate(item.view)}
                   className={cn(
