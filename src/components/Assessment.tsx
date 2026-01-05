@@ -241,7 +241,12 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                             if (axisIndicatorCount === 0) return null;
 
                             return (
-                                <li key={axis.id} className="relative">
+                                <motion.li 
+                                    key={axis.id} 
+                                    className="relative"
+                                    whileHover={{ scale: 1.05 }}
+                                    transition={{ duration: 0.2 }}
+                                >
                                     <button
                                         onClick={() => setCurrentActiveAxis(axis.id)}
                                         className={cn(
@@ -262,7 +267,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                                             className="absolute right-0 top-0 h-full w-1 bg-gold-500 rounded-l-full"
                                         />
                                     )}
-                                </li>
+                                </motion.li>
                             );
                         })}
                     </ul>
