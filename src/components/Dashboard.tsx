@@ -35,6 +35,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
 import RiskLandscape from './dashboard/RiskLandscape';
+import { cn } from '@/lib/utils';
 
 
 const cardVariants = {
@@ -50,7 +51,7 @@ const cardVariants = {
   }),
 };
 
-const cardBaseClasses = "glass h-full";
+const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl";
 
 const initialDashboardData = {
   maturityScore: 0,
@@ -302,50 +303,50 @@ const Dashboard = () => {
       {/* KPIs Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0}>
-              <Card className={`${cardBaseClasses}`}>
+              <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-300">{t('dashboard.maturityGauge')}</CardTitle>
-                      <TrendingUp className="h-4 w-4 text-gray-400" />
+                      <CardTitle className="text-sm font-medium text-gold-200/80">{t('dashboard.maturityGauge')}</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-gold-300/70" />
                   </CardHeader>
                   <CardContent>
                       <div className="text-4xl font-bold text-gold-400">{dashboardData.maturityScore.toFixed(1)} / 5</div>
-                      <p className="text-xs text-gray-400 mt-1">{t('dashboard.overallScore')}</p>
+                      <p className="text-xs text-gold-200/60 mt-1">{t('dashboard.overallScore')}</p>
                   </CardContent>
               </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-              <Card className={`${cardBaseClasses}`}>
+              <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-300">{t('dashboard.portfolioHealth')}</CardTitle>
-                      <CheckCircle className="h-4 w-4 text-gray-400" />
+                      <CardTitle className="text-sm font-medium text-green-200/80">{t('dashboard.portfolioHealth')}</CardTitle>
+                      <CheckCircle className="h-4 w-4 text-green-300/70" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold">{dashboardData.totalAssets.toFixed(2)}M</div>
-                      <p className="text-xs text-gray-400 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
+                      <div className="text-4xl font-bold text-green-400">{dashboardData.totalAssets.toFixed(2)}M</div>
+                      <p className="text-xs text-green-200/60 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
                   </CardContent>
               </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-              <Card className={`${cardBaseClasses}`}>
+              <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-300">{t('dashboard.omanization')}</CardTitle>
-                       <Users className="h-4 w-4 text-gray-400" />
+                      <CardTitle className="text-sm font-medium text-blue-200/80">{t('dashboard.omanization')}</CardTitle>
+                       <Users className="h-4 w-4 text-blue-300/70" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold">{dashboardData.omanizationRate}%</div>
-                      <p className="text-xs text-gray-400 mt-1">{t('dashboard.nationalWorkforce')}</p>
+                      <div className="text-4xl font-bold text-blue-400">{dashboardData.omanizationRate}%</div>
+                      <p className="text-xs text-blue-200/60 mt-1">{t('dashboard.nationalWorkforce')}</p>
                   </CardContent>
               </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-              <Card className={`${cardBaseClasses}`}>
+              <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gray-300">{t('dashboard.riskMap')}</CardTitle>
-                      <AlertTriangle className="h-4 w-4 text-gray-400" />
+                      <CardTitle className="text-sm font-medium text-red-200/80">{t('dashboard.riskMap')}</CardTitle>
+                      <AlertTriangle className="h-4 w-4 text-red-300/70" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold">{(dashboardData.risks || []).length}</div>
-                      <p className="text-xs text-gray-400 mt-1">{t('dashboard.activeRisks')}</p>
+                      <div className="text-4xl font-bold text-red-400">{(dashboardData.risks || []).length}</div>
+                      <p className="text-xs text-red-200/60 mt-1">{t('dashboard.activeRisks')}</p>
                   </CardContent>
               </Card>
           </motion.div>
@@ -355,7 +356,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 gap-8">
         {/* Strategic Radar */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-          <Card className={cardBaseClasses}>
+          <Card className={"glass h-full"}>
             <CardHeader>
               <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
             </CardHeader>
@@ -382,7 +383,7 @@ const Dashboard = () => {
         {/* Compliance and Risk */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-                <Card className={cardBaseClasses}>
+                <Card className={"glass h-full"}>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-gold-400">
                         <PieChartIcon />
@@ -405,7 +406,7 @@ const Dashboard = () => {
             </motion.div>
 
              <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
-                <Card className={cardBaseClasses}>
+                <Card className={"glass h-full"}>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-gold-400">
                             <AlertTriangle />
@@ -422,7 +423,7 @@ const Dashboard = () => {
 
        {/* Strategic Path Chart */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
-            <Card className={cardBaseClasses}>
+            <Card className={"glass h-full"}>
                 <CardHeader>
                     <CardTitle className="text-gold-400 flex items-center gap-2">
                         <Target />
