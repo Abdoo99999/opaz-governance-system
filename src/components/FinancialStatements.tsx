@@ -10,6 +10,7 @@ import {
   UploadCloud,
   CheckSquare,
   Save,
+  Filter,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -44,16 +45,15 @@ const FinancialStatements: React.FC = () => {
   const [revenue, setRevenue] = useState<number | ''>('');
   const [expenses, setExpenses] = useState<number | ''>('');
   const [operatingCash, setOperatingCash] = useState<number | ''>('');
-  const [investingCash, setInvestingCash] = useState<number | ''>('');
-  const [financingCash, setFinancingCash] = useState<number | ''>('');
+  const [capex, setCapex] = useState<number | ''>('');
   const [dividends, setDividends] = useState<number | ''>('');
   const [isDeclared, setIsDeclared] = useState(false);
 
   const equity = useMemo(() => (Number(assets) || 0) - (Number(liabilities) || 0), [assets, liabilities]);
   const netProfit = useMemo(() => (Number(revenue) || 0) - (Number(expenses) || 0), [revenue, expenses]);
-  const netCashChange = useMemo(
-    () => (Number(operatingCash) || 0) + (Number(investingCash) || 0) + (Number(financingCash) || 0),
-    [operatingCash, investingCash, financingCash]
+  const freeCashFlow = useMemo(
+    () => (Number(operatingCash) || 0) - (Number(capex) || 0),
+    [operatingCash, capex]
   );
   const roi = useMemo(
     () => ((Number(assets) || 0) > 0 ? (netProfit / (Number(assets) || 1)) * 100 : 0),
@@ -113,21 +113,23 @@ const FinancialStatements: React.FC = () => {
               <div className="space-y-2">
                 <label className="text-right block pr-2 text-gray-300">إجمالي الأصول</label>
                 <Input
-                  type="number"
-                  value={assets}
-                  onChange={handleNumericInput(setAssets)}
+                  type="text"
+                  pattern="[0-9-]*"
+                  value={assets === '' ? '' : formatNumber(assets)}
+                  onChange={(e) => setAssets(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
                   className={inputStyles}
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-right block pr-2 text-gray-300">إجمالي الالتزامات</label>
                 <Input
-                  type="number"
-                  value={liabilities}
-                  onChange={handleNumericInput(setLiabilities)}
+                  type="text"
+                  pattern="[0-9-]*"
+                  value={liabilities === '' ? '' : formatNumber(liabilities)}
+                  onChange={(e) => setLiabilities(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
                   className={inputStyles}
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-gold-500/30 text-center mt-4">
@@ -151,21 +153,23 @@ const FinancialStatements: React.FC = () => {
               <div className="space-y-2">
                 <label className="text-right block pr-2 text-gray-300">الإيرادات</label>
                 <Input
-                  type="number"
-                  value={revenue}
-                  onChange={handleNumericInput(setRevenue)}
+                  type="text"
+                  pattern="[0-9-]*"
+                  value={revenue === '' ? '' : formatNumber(revenue)}
+                  onChange={(e) => setRevenue(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
                   className={inputStyles}
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-right block pr-2 text-gray-300">المصروفات</label>
                 <Input
-                  type="number"
-                  value={expenses}
-                  onChange={handleNumericInput(setExpenses)}
+                  type="text"
+                  pattern="[0-9-]*"
+                  value={expenses === '' ? '' : formatNumber(expenses)}
+                  onChange={(e) => setExpenses(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
                   className={inputStyles}
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
               <div
@@ -190,52 +194,52 @@ const FinancialStatements: React.FC = () => {
           </Card>
         </motion.div>
 
-        {/* Cash Flow Card */}
+        {/* Free Cash Flow Card */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-          <Card className="glass bg-[#112620] border-white/10 h-full">
-            <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
-              <ArrowRightLeft className="w-7 h-7 text-gold-500" />
-              <CardTitle className="text-2xl">التدفقات النقدية</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-5 pt-4">
-              <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">التدفقات التشغيلية</label>
-                <Input
-                  type="number"
-                  value={operatingCash}
-                  onChange={handleNumericInput(setOperatingCash)}
-                  className={inputStyles}
-                  placeholder="0"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">التدفقات الاستثمارية</label>
-                <Input
-                  type="number"
-                  value={investingCash}
-                  onChange={handleNumericInput(setInvestingCash)}
-                  className={inputStyles}
-                  placeholder="0"
-                />
-              </div>
-               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">التدفقات التمويلية</label>
-                <Input
-                  type="number"
-                  value={financingCash}
-                  onChange={handleNumericInput(setFinancingCash)}
-                  className={inputStyles}
-                  placeholder="0"
-                />
-              </div>
-              <div className="p-4 bg-black/30 rounded-lg border border-gold-500/30 text-center mt-4">
-                <p className="text-gray-400 text-sm">صافي التغير في النقد</p>
-                <p className="text-3xl font-bold text-gold-400 tracking-wider">
-                  {formatNumber(netCashChange)}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="glass bg-[#112620] border-white/10 h-full">
+                <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
+                    <Filter className="w-7 h-7 text-gold-500" />
+                    <CardTitle className="text-2xl">السيولة والتدفق النقدي الحر</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-5 pt-4">
+                    <div className="space-y-2">
+                        <label className="text-right block pr-2 text-gray-300">النقد التشغيلي</label>
+                        <Input
+                            type="text"
+                            pattern="[0-9-]*"
+                            value={operatingCash === '' ? '' : formatNumber(operatingCash)}
+                            onChange={(e) => setOperatingCash(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                            className={inputStyles}
+                            placeholder=""
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-right block pr-2 text-gray-300">الإنفاق الرأسمالي (CAPEX)</label>
+                        <Input
+                            type="text"
+                            pattern="[0-9-]*"
+                            value={capex === '' ? '' : formatNumber(capex)}
+                            onChange={(e) => setCapex(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                            className={inputStyles}
+                            placeholder=""
+                        />
+                    </div>
+                    <div
+                        className={cn(
+                            'p-4 bg-black/30 rounded-lg border text-center mt-4',
+                            freeCashFlow >= 0 ? 'border-emerald-500/30' : 'border-red-500/30'
+                        )}
+                    >
+                        <p className="text-gray-400 text-sm">التدفق النقدي الحر (FCF)</p>
+                        <p className={cn('text-3xl font-bold tracking-wider', freeCashFlow >= 0 ? 'text-emerald-400' : 'text-red-500')}>
+                            {formatNumber(freeCashFlow)}
+                        </p>
+                        <p className={cn('text-xs mt-1', freeCashFlow >= 0 ? 'text-emerald-500' : 'text-red-600')}>
+                            {freeCashFlow >= 0 ? 'متاح للتوزيعات/سداد الديون' : 'إحتراق نقدي'}
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
         </motion.div>
 
         {/* Investment Returns Card */}
@@ -249,11 +253,12 @@ const FinancialStatements: React.FC = () => {
               <div className="space-y-2">
                 <label className="text-right block pr-2 text-gray-300">توزيعات الأرباح المعلنة</label>
                 <Input
-                  type="number"
-                  value={dividends}
-                  onChange={handleNumericInput(setDividends)}
+                  type="text"
+                  pattern="[0-9-]*"
+                  value={dividends === '' ? '' : formatNumber(dividends)}
+                  onChange={(e) => setDividends(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
                   className={inputStyles}
-                  placeholder="0"
+                  placeholder=""
                 />
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-emerald-500/30 mt-4 space-y-3">
@@ -318,3 +323,5 @@ const FinancialStatements: React.FC = () => {
 };
 
 export default FinancialStatements;
+
+    
