@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -22,6 +21,7 @@ import {
   Cell,
   Line,
   LineChart,
+  ComposedChart,
 } from 'recharts';
 import {
   Select,
@@ -34,7 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, FileDown, AlertCircle, CheckCircle } from 'lucide-react';
+import { TrendingUp, FileDown, AlertCircle, CheckCircle, Wallet } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
@@ -139,6 +139,7 @@ const Reports: React.FC = () => {
     const [improvementPlanData, setImprovementPlanData] = useState([]);
     const [topGapsData, setTopGapsData] = useState([]);
     const [criticalRisksData, setCriticalRisksData] = useState([]);
+    const [financialPerformanceData, setFinancialPerformanceData] = useState([]);
 
 
     useEffect(() => {
@@ -149,6 +150,7 @@ const Reports: React.FC = () => {
              setImprovementPlanData([]);
              setTopGapsData([]);
              setCriticalRisksData([]);
+             setFinancialPerformanceData([]);
             return;
         }
 
@@ -161,6 +163,10 @@ const Reports: React.FC = () => {
 
         const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
         const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
+
+        const companiesStr = localStorage.getItem('oia_companies_registry');
+        const companiesData = companiesStr ? JSON.parse(companiesStr) : [];
+        const companyData = companiesData.find((c: any) => c.id === selectedCompanyId);
 
         // --- Process Data ---
 
@@ -248,6 +254,15 @@ const Reports: React.FC = () => {
         
         setCriticalRisksData(risks.filter((r: any) => r.impact * r.probability >= 15).sort((a:any, b:any) => (b.impact * b.probability) - (a.impact * a.probability)) as any);
 
+        // 6. Financial Performance Chart
+        if (companyData) {
+            const revenue = companyData.revenue || 0;
+            const expenses = companyData.expenses || 0;
+            const netProfit = revenue - expenses;
+            setFinancialPerformanceData([
+                { name: t('reports.financial.performance'), revenue, expenses, netProfit }
+            ] as any);
+        }
 
     }, [selectedCompanyId, language, t]);
 
@@ -266,6 +281,9 @@ const Reports: React.FC = () => {
         itemStyle: { color: '#fff' },
         cursor: { fill: 'rgba(255,255,255,0.05)' }
     };
+    
+    const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'OMR', minimumFractionDigits: 0 }).format(value);
+
 
     if (!selectedCompanyId || selectedCompanyId === 'all') {
         return (
@@ -366,7 +384,7 @@ const Reports: React.FC = () => {
 
             {/* Main Visuals */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5} className="lg:col-span-2">
+                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
                     <Card className="glass">
                         <CardHeader>
                             <CardTitle className="text-gold-400 print:text-black">{t('reports.maturityAnalysis')}</CardTitle>
@@ -388,6 +406,28 @@ const Reports: React.FC = () => {
                 </motion.div>
 
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+                    <Card className="glass">
+                        <CardHeader>
+                           <CardTitle className="text-gold-400 print:text-black">{t('reports.financial.title')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                             <ResponsiveContainer width="100%" height={400}>
+                                <ComposedChart data={financialPerformanceData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                                    <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" />
+                                    <XAxis dataKey="name" tick={{ fill: '#A0A0A0' }} />
+                                    <YAxis tickFormatter={(value) => `${value / 1000000}M`} tick={{ fill: '#A0A0A0' }} />
+                                    <Tooltip {...tooltipStyle} formatter={formatCurrency} />
+                                    <Legend wrapperStyle={{ color: '#FFFFFF' }}/>
+                                    <Bar dataKey="revenue" name={t('reports.financial.revenue')} barSize={50} fill="#3b82f6" />
+                                    <Bar dataKey="expenses" name={t('reports.financial.expenses')} barSize={50} fill="#ef4444" />
+                                    <Line type="monotone" dataKey="netProfit" name={t('reports.financial.netProfit')} stroke="#00E096" strokeWidth={3} />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
                      <Card className="glass">
                         <CardHeader>
                            <CardTitle className="text-gold-400 print:text-black">{t('reports.riskAnalysis')}</CardTitle>
@@ -410,7 +450,7 @@ const Reports: React.FC = () => {
                     </Card>
                 </motion.div>
 
-                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
+                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
                      <Card className="glass">
                         <CardHeader>
                             <CardTitle className="text-gold-400 print:text-black">{t('reports.improvementStatus')}</CardTitle>
@@ -440,7 +480,7 @@ const Reports: React.FC = () => {
             
              {/* Detailed Tables */}
             <div className="space-y-8 print:break-before-page">
-                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
                      <Card className="glass">
                         <CardHeader><CardTitle className="text-gold-400 print:text-black">{t('reports.topGaps')}</CardTitle></CardHeader>
                         <CardContent>
@@ -467,7 +507,7 @@ const Reports: React.FC = () => {
                         </CardContent>
                     </Card>
                 </motion.div>
-                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
                      <Card className="glass">
                         <CardHeader><CardTitle className="text-gold-400 print:text-black">{t('reports.criticalRisks')}</CardTitle></CardHeader>
                         <CardContent>
@@ -500,6 +540,3 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
-
-
-    

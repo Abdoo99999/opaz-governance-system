@@ -181,6 +181,13 @@ export const translations = {
           completed: "تم الإنجاز",
           inProgress: "جاري التنفيذ",
           notStarted: "قيد الانتظار"
+        },
+        financial: {
+            title: "ملخص الأداء المالي",
+            performance: "الأداء",
+            revenue: "الإيرادات",
+            expenses: "المصروفات",
+            netProfit: "صافي الربح"
         }
     },
     settings: {
@@ -443,6 +450,13 @@ export const translations = {
           completed: "Completed",
           inProgress: "In Progress",
           notStarted: "Not Started"
+        },
+        financial: {
+            title: "Financial Performance Snapshot",
+            performance: "Performance",
+            revenue: "Revenue",
+            expenses: "Expenses",
+            netProfit: "Net Profit"
         }
     },
     settings: {
