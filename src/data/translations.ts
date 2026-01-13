@@ -8,6 +8,7 @@ export const translations = {
       assessment: "تقييم النضج",
       compliance: "مراقب الامتثال",
       improvement: "خطة التحسين",
+      financials: "القوائم المالية",
       reports: "التقارير",
       settings: "الإعدادات",
       logout: "تسجيل الخروج"
@@ -269,6 +270,7 @@ export const translations = {
       assessment: "Maturity Assessment",
       compliance: "Compliance Monitor",
       improvement: "Improvement Plan",
+      financials: "Financial Statements",
       reports: "Reports",
       settings: "Settings",
       logout: "Logout"
@@ -523,6 +525,3 @@ export const translations = {
     }
   }
 };
-
-
-    

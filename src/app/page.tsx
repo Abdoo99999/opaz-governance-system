@@ -8,6 +8,7 @@ import CompanyRegistry from "@/components/CompanyRegistry";
 import Assessment from "@/components/Assessment";
 import ComplianceMonitor from "@/components/ComplianceMonitor";
 import ImprovementPlan from "@/components/ImprovementPlan";
+import FinancialStatements from "@/components/FinancialStatements";
 import Reports from "@/components/Reports";
 import Settings from "@/components/Settings";
 import Login from "@/components/Login";
@@ -67,6 +68,8 @@ const AppContent = () => {
         return <ComplianceMonitor />;
       case 'improvement-plan':
         return <ImprovementPlan />;
+      case 'financial-statements':
+        return <FinancialStatements />;
       case 'reports':
         return userRole === 'admin' ? <Reports /> : <CompanyRegistry />; // Fallback for company user
       case 'settings':
