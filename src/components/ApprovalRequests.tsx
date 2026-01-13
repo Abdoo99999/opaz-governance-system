@@ -121,11 +121,13 @@ const ApprovalRequests: React.FC = () => {
                                                 <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
                                                     <FileText className="h-5 w-5"/>
                                                 </Button>
-                                                <DialogTrigger asChild>
-                                                   <Button variant="outline" size="icon" className="text-yellow-400 border-yellow-400/50 hover:bg-yellow-400/10 hover:text-yellow-300" onClick={() => { setSelectedCompany(company); setIsReturnModalOpen(true); }}>
-                                                        <Send className="h-5 w-5"/>
-                                                    </Button>
-                                                </DialogTrigger>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                       <Button variant="outline" size="icon" className="text-yellow-400 border-yellow-400/50 hover:bg-yellow-400/10 hover:text-yellow-300" onClick={() => { setSelectedCompany(company); setIsReturnModalOpen(true); }}>
+                                                            <Send className="h-5 w-5"/>
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                </Dialog>
                                                 <AlertDialog>
                                                     <AlertDialogTrigger asChild>
                                                         <Button variant="outline" size="icon" className="text-emerald-400 border-emerald-400/50 hover:bg-emerald-400/10 hover:text-emerald-300">
