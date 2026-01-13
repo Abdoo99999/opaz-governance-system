@@ -64,7 +64,7 @@ export const translations = {
         goTo: "اذهب للسؤال",
         gotIt: "حسناً، فهمت",
         successTitle: "تم الاعتماد بنجاح!",
-        successDesc: "تم اعتماد التقييم بنجاح. يمكنك الآن مراجعة النتائج أو استكمال العمل.",
+        successDesc: "تم حفظ واعتماد التقييم بنجاح.",
         saveSuccessDesc: "تم حفظ بيانات تقييم شركة",
         viewResults: "عرض النتائج",
         stayHere: "البقاء هنا",
@@ -376,7 +376,7 @@ export const translations = {
         goTo: "Go to Question",
         gotIt: "Okay, I understand",
         successTitle: "Submitted Successfully!",
-        successDesc: "Assessment submitted successfully. You can now review the results or continue your work.",
+        successDesc: "Assessment has been saved and submitted successfully.",
         saveSuccessDesc: "Assessment data saved for",
         viewResults: "View Results",
         stayHere: "Stay Here",
@@ -625,3 +625,5 @@ export const translations = {
     }
   }
 };
+
+    

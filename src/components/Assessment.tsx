@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AXES, INDICATORS as initialIndicators, Indicator } from '@/lib/data/indicators';
 import IndicatorCard from './IndicatorCard';
@@ -51,6 +51,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     const { selectedCompanyId, getSelectedCompany } = useCompany();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
+    const contentAreaRef = useRef<HTMLDivElement>(null);
     
     const [indicators, setIndicators] = useState<Indicator[]>(() => {
         if (typeof window === 'undefined') return initialIndicators;
@@ -77,7 +78,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     });
 
     const [showValidationModal, setShowValidationModal] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [indicatorToEdit, setIndicatorToEdit] = useState<Indicator | null>(null);
     const [isIndicatorModalOpen, setIsIndicatorModalOpen] = useState(false);
     const [currentActiveAxis, setCurrentActiveAxis] = useState(activeAxis);
@@ -113,6 +113,13 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
         }
     }, [indicators]);
 
+    const handleAxisChange = (axisId: number) => {
+        setCurrentActiveAxis(axisId);
+        if (contentAreaRef.current) {
+            contentAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
 
     const handleSave = () => {
         if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
@@ -139,7 +146,10 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
             setIsAssessmentComplete(true);
             const dataToSave = { scores: scores, isComplete: true };
             localStorage.setItem(getAssessmentStorageKey(selectedCompanyId), JSON.stringify(dataToSave));
-            setShowSuccessModal(true);
+            toast({
+                title: t('assessment.successTitle'),
+                description: t('assessment.successDesc'),
+            });
         }
     };
 
@@ -178,20 +188,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     const totalCompleted = useMemo(() => Object.keys(scores).length, [scores]);
     const globalProgress = (totalCompleted / indicators.length) * 100;
     
-    const confettiConfig = {
-        angle: 90,
-        spread: 360,
-        startVelocity: 40,
-        elementCount: 70,
-        dragFriction: 0.12,
-        duration: 3000,
-        stagger: 3,
-        width: "10px",
-        height: "10px",
-        perspective: "500px",
-        colors: ["#D4AF37", "#E5C565", "#ffffff"]
-    };
-
     const handleScoreChange = (indicatorId: number, score: number) => {
         if (isAssessmentComplete) return;
         setScores(prev => ({ ...prev, [indicatorId]: score }));
@@ -214,7 +210,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     };
 
     const handleJumpToIndicator = (indicator: Indicator) => {
-        setCurrentActiveAxis(indicator.axisId);
+        handleAxisChange(indicator.axisId);
         setShowValidationModal(false);
         setTimeout(() => {
             document.getElementById(`indicator-${indicator.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -248,7 +244,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                                     transition={{ duration: 0.2 }}
                                 >
                                     <button
-                                        onClick={() => setCurrentActiveAxis(axis.id)}
+                                        onClick={() => handleAxisChange(axis.id)}
                                         className={cn(
                                             "w-full text-right flex items-center justify-between p-3 my-1 rounded-lg transition-colors duration-200",
                                             currentActiveAxis === axis.id ? "bg-gold-500/10 text-gold-400" : "hover:bg-white/5"
@@ -302,7 +298,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+                <div ref={contentAreaRef} className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
                     {!selectedCompanyId || selectedCompanyId === 'all' ? (
                         <div className="flex items-center justify-center h-full">
                             <div className="text-center p-8 glass">
@@ -375,30 +371,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                         <AlertDialogAction onClick={() => setShowValidationModal(false)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                            {t('assessment.gotIt')}
                         </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-
-            {/* Success Modal */}
-             <AlertDialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-                <AlertDialogContent className="glass text-white text-center">
-                    <AlertDialogHeader>
-                        <div className="mx-auto">
-                            <Confetti active={showSuccessModal} config={confettiConfig} />
-                            <CheckCircle className="w-24 h-24 text-success mx-auto mb-4" />
-                        </div>
-                        <AlertDialogTitle className="text-3xl font-bold">{t('assessment.successTitle')}</AlertDialogTitle>
-                        <AlertDialogDescription className="text-gray-300 pt-2">
-                            {t('assessment.successDesc')}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="sm:justify-center pt-4">
-                        <Button variant="outline" onClick={() => setShowSuccessModal(false)} className="text-white border-white/20 hover:bg-white/10">
-                            {t('assessment.stayHere')}
-                        </Button>
-                        <Button onClick={() => { setShowSuccessModal(false); onNavigate('reports'); }} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                            {t('assessment.viewResults')}
-                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -500,3 +472,6 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
+
+
+    
