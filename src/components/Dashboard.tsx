@@ -62,6 +62,7 @@ const initialDashboardData = {
   totalComplianceItems: 4,
   risks: [],
   lastROI: 0,
+  netProfit: 0,
 };
 
 const radarDataTemplate = AXES.map(axis => ({ 
@@ -195,6 +196,8 @@ const Dashboard = () => {
         const complianceItems = Object.values(complianceData.compliance || {});
         const compliantItemsCount = complianceItems.filter(v => v === true).length;
         
+        const netProfit = (companyData?.revenue || 0) - (companyData?.expenses || 0);
+        
         setDashboardData({
             maturityScore: parseFloat(maturityScore.toFixed(1)),
             totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital / 1_000_000 : 0,
@@ -203,6 +206,7 @@ const Dashboard = () => {
             totalComplianceItems: complianceItems.length || 4,
             risks: complianceData?.risks || [],
             lastROI: companyData?.lastROI || 0,
+            netProfit: netProfit,
         });
 
     } else {
@@ -212,6 +216,7 @@ const Dashboard = () => {
         const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
         let totalAssets = 0;
         let totalROI = 0;
+        let totalNetProfit = 0;
         let allRisks: any[] = [];
 
         allCompanies.forEach((comp: any) => {
@@ -235,6 +240,7 @@ const Dashboard = () => {
             totalOmanization += comp.omanization || 0;
             totalAssets += comp.authorizedCapital || 0;
             totalROI += comp.lastROI || 0;
+            totalNetProfit += (comp.revenue || 0) - (comp.expenses || 0);
         });
         
         const avgMaturity = allCompanies.length > 0 ? totalMaturity / allCompanies.length : 0;
@@ -249,6 +255,7 @@ const Dashboard = () => {
             totalComplianceItems: totalItems || 4,
             risks: allRisks,
             lastROI: avgROI,
+            netProfit: totalNetProfit,
         });
         setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
     }
@@ -366,7 +373,7 @@ const Dashboard = () => {
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
             <FinancialHub
                 roi={dashboardData.lastROI}
-                netProfit={(dashboardData.totalAssets * 1_000_000 * (dashboardData.lastROI / 100))}
+                netProfit={dashboardData.netProfit}
                 equity={dashboardData.totalAssets * 1_000_000}
             />
         </motion.div>
@@ -475,3 +482,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    

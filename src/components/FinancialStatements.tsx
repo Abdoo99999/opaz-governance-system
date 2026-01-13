@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Landmark,
@@ -20,6 +21,8 @@ import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useCompany } from '@/context/CompanyContext';
+import { Badge } from './ui/badge';
 
 
 const cardVariants = {
@@ -36,9 +39,12 @@ const cardVariants = {
 };
 
 const FinancialStatements: React.FC = () => {
-  const { t, dir } = useLanguage();
+  const { t, dir, language } = useLanguage();
   const { toast } = useToast();
-
+  const { selectedCompanyId, getSelectedCompany } = useCompany();
+  const selectedCompany = getSelectedCompany();
+  
+  const getStorageKey = () => `oia_companies_registry`;
 
   const [assets, setAssets] = useState<number | ''>('');
   const [liabilities, setLiabilities] = useState<number | ''>('');
@@ -46,8 +52,39 @@ const FinancialStatements: React.FC = () => {
   const [expenses, setExpenses] = useState<number | ''>('');
   const [operatingCash, setOperatingCash] = useState<number | ''>('');
   const [capex, setCapex] = useState<number | ''>('');
-  const [dividends, setDividends] = useState<number | ''>('');
+  const [dividends, setDividends] = useState<number | ''>(0);
   const [isDeclared, setIsDeclared] = useState(false);
+  const [auditorName, setAuditorName] = useState('');
+
+  // Load data when company changes
+  useEffect(() => {
+    if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
+        // Reset fields if no company is selected
+        setAssets(''); setLiabilities(''); setRevenue(''); setExpenses('');
+        setOperatingCash(''); setCapex(''); setDividends(0); setIsDeclared(false);
+        setAuditorName('');
+        return;
+    }
+
+    const storageKey = getStorageKey();
+    const allCompaniesStr = localStorage.getItem(storageKey);
+    if (allCompaniesStr) {
+        const allCompanies = JSON.parse(allCompaniesStr);
+        const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
+        if(companyData) {
+            setAssets(companyData.authorizedCapital || '');
+            setLiabilities(companyData.liabilities || ''); // Assuming liabilities is a field
+            setRevenue(companyData.revenue || ''); // Assuming revenue is a field
+            setExpenses(companyData.expenses || ''); // Assuming expenses is a field
+            setOperatingCash(companyData.operatingCash || '');
+            setCapex(companyData.capex || '');
+            setDividends(companyData.dividends || 0);
+            setAuditorName(companyData.auditorName || '');
+            // We don't load 'isDeclared' state
+        }
+    }
+  }, [selectedCompanyId]);
+
 
   const equity = useMemo(() => (Number(assets) || 0) - (Number(liabilities) || 0), [assets, liabilities]);
   const netProfit = useMemo(() => (Number(revenue) || 0) - (Number(expenses) || 0), [revenue, expenses]);
@@ -65,27 +102,75 @@ const FinancialStatements: React.FC = () => {
   };
   
   const handleSave = () => {
+    if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
+        toast({ title: "Error", description: "Please select a company first.", variant: 'destructive'});
+        return;
+    }
+    
+    const storageKey = getStorageKey();
+    const allCompaniesStr = localStorage.getItem(storageKey);
+    let allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
+    
+    const companyIndex = allCompanies.findIndex((c: any) => c.id === selectedCompanyId);
+
+    if (companyIndex > -1) {
+        const companyData = allCompanies[companyIndex];
+        const updatedCompany = {
+            ...companyData,
+            authorizedCapital: Number(assets) || 0,
+            liabilities: Number(liabilities) || 0,
+            revenue: Number(revenue) || 0,
+            expenses: Number(expenses) || 0,
+            operatingCash: Number(operatingCash) || 0,
+            capex: Number(capex) || 0,
+            dividends: Number(dividends) || 0,
+            lastROI: roi,
+            auditorName,
+        };
+        allCompanies[companyIndex] = updatedCompany;
+    } else {
+        // This case should ideally not happen if form is only shown for existing companies
+        toast({ title: "Error", description: "Could not find company to update.", variant: 'destructive'});
+        return;
+    }
+
+    localStorage.setItem(storageKey, JSON.stringify(allCompanies));
+
     toast({
       title: "تم الحفظ بنجاح",
-      description: "تم حفظ بياناتك المالية.",
+      description: `تم حفظ البيانات المالية لشركة ${selectedCompany?.name_ar}.`,
     });
   };
 
   const handleNumericInput = (setter: React.Dispatch<React.SetStateAction<number | ''>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/,/g, '');
     if (value === '' || value === '-') {
       setter(value);
     } else {
       const num = parseFloat(value);
       if (!isNaN(num)) {
         setter(num);
+      } else {
+        setter('');
       }
     }
   };
 
 
   const inputStyles =
-    'h-14 bg-[#112620] border-white/10 focus:border-gold-500 rounded-lg text-white text-lg text-center';
+    'h-14 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white text-lg text-center';
+  
+  if (!selectedCompanyId || selectedCompanyId === 'all') {
+    return (
+       <div className="flex items-center justify-center h-full p-8 text-white">
+           <div className="text-center p-8 glass">
+               <h3 className="text-2xl font-bold text-gold-400">{t('common.selectCompanyToStart')}</h3>
+               <p className="text-gray-400 mt-2">{t('common.selectCompanyToStartDesc')}</p>
+           </div>
+       </div>
+   );
+}
+
 
   return (
     <div
@@ -94,9 +179,18 @@ const FinancialStatements: React.FC = () => {
       dir={dir}
     >
       <header className="mb-8 max-w-4xl mx-auto">
+        <div className="flex justify-center mb-4">
+             {selectedCompany && (
+                <Badge className="bg-blue-900/50 border-blue-600 text-blue-300 text-lg">
+                    {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
+                </Badge>
+            )}
+        </div>
         <h1 className="text-3xl font-bold text-center mb-4 text-gold-400">القوائم المالية والحوكمة</h1>
         <Input
           placeholder="اسم مكتب التدقيق الخارجي..."
+          value={auditorName}
+          onChange={(e) => setAuditorName(e.target.value)}
           className="h-12 bg-[#112620]/80 border-white/10 focus:border-gold-500 rounded-lg text-white text-center"
         />
       </header>
@@ -114,9 +208,8 @@ const FinancialStatements: React.FC = () => {
                 <label className="text-right block pr-2 text-gray-300">إجمالي الأصول</label>
                 <Input
                   type="text"
-                  pattern="[0-9-]*"
-                  value={assets === '' ? '' : formatNumber(assets)}
-                  onChange={(e) => setAssets(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                  value={assets === '' ? '' : formatNumber(Number(assets))}
+                  onChange={handleNumericInput(setAssets)}
                   className={inputStyles}
                   placeholder=""
                 />
@@ -125,9 +218,8 @@ const FinancialStatements: React.FC = () => {
                 <label className="text-right block pr-2 text-gray-300">إجمالي الالتزامات</label>
                 <Input
                   type="text"
-                  pattern="[0-9-]*"
-                  value={liabilities === '' ? '' : formatNumber(liabilities)}
-                  onChange={(e) => setLiabilities(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                  value={liabilities === '' ? '' : formatNumber(Number(liabilities))}
+                  onChange={handleNumericInput(setLiabilities)}
                   className={inputStyles}
                   placeholder=""
                 />
@@ -154,9 +246,8 @@ const FinancialStatements: React.FC = () => {
                 <label className="text-right block pr-2 text-gray-300">الإيرادات</label>
                 <Input
                   type="text"
-                  pattern="[0-9-]*"
-                  value={revenue === '' ? '' : formatNumber(revenue)}
-                  onChange={(e) => setRevenue(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                  value={revenue === '' ? '' : formatNumber(Number(revenue))}
+                  onChange={handleNumericInput(setRevenue)}
                   className={inputStyles}
                   placeholder=""
                 />
@@ -165,9 +256,8 @@ const FinancialStatements: React.FC = () => {
                 <label className="text-right block pr-2 text-gray-300">المصروفات</label>
                 <Input
                   type="text"
-                  pattern="[0-9-]*"
-                  value={expenses === '' ? '' : formatNumber(expenses)}
-                  onChange={(e) => setExpenses(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                  value={expenses === '' ? '' : formatNumber(Number(expenses))}
+                  onChange={handleNumericInput(setExpenses)}
                   className={inputStyles}
                   placeholder=""
                 />
@@ -206,9 +296,8 @@ const FinancialStatements: React.FC = () => {
                         <label className="text-right block pr-2 text-gray-300">النقد التشغيلي</label>
                         <Input
                             type="text"
-                            pattern="[0-9-]*"
-                            value={operatingCash === '' ? '' : formatNumber(operatingCash)}
-                            onChange={(e) => setOperatingCash(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                            value={operatingCash === '' ? '' : formatNumber(Number(operatingCash))}
+                            onChange={handleNumericInput(setOperatingCash)}
                             className={inputStyles}
                             placeholder=""
                         />
@@ -217,9 +306,8 @@ const FinancialStatements: React.FC = () => {
                         <label className="text-right block pr-2 text-gray-300">الإنفاق الرأسمالي (CAPEX)</label>
                         <Input
                             type="text"
-                            pattern="[0-9-]*"
-                            value={capex === '' ? '' : formatNumber(capex)}
-                            onChange={(e) => setCapex(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                            value={capex === '' ? '' : formatNumber(Number(capex))}
+                            onChange={handleNumericInput(setCapex)}
                             className={inputStyles}
                             placeholder=""
                         />
@@ -254,9 +342,8 @@ const FinancialStatements: React.FC = () => {
                 <label className="text-right block pr-2 text-gray-300">توزيعات الأرباح المعلنة</label>
                 <Input
                   type="text"
-                  pattern="[0-9-]*"
-                  value={dividends === '' ? '' : formatNumber(dividends)}
-                  onChange={(e) => setDividends(e.target.value.replace(/,/g, '')==='-'?'-':(parseFloat(e.target.value.replace(/,/g, '')) || ''))}
+                  value={dividends === '' ? '' : formatNumber(Number(dividends))}
+                  onChange={handleNumericInput(setDividends)}
                   className={inputStyles}
                   placeholder=""
                 />
