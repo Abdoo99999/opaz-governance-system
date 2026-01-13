@@ -18,6 +18,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -34,31 +36,53 @@ const cardVariants = {
 
 const FinancialStatements: React.FC = () => {
   const { t, dir } = useLanguage();
+  const { toast } = useToast();
 
-  const [assets, setAssets] = useState(0);
-  const [liabilities, setLiabilities] = useState(0);
-  const [revenue, setRevenue] = useState(0);
-  const [expenses, setExpenses] = useState(0);
-  const [operatingCash, setOperatingCash] = useState(0);
-  const [investingCash, setInvestingCash] = useState(0);
-  const [financingCash, setFinancingCash] = useState(0);
-  const [dividends, setDividends] = useState(0);
+
+  const [assets, setAssets] = useState<number | ''>('');
+  const [liabilities, setLiabilities] = useState<number | ''>('');
+  const [revenue, setRevenue] = useState<number | ''>('');
+  const [expenses, setExpenses] = useState<number | ''>('');
+  const [operatingCash, setOperatingCash] = useState<number | ''>('');
+  const [investingCash, setInvestingCash] = useState<number | ''>('');
+  const [financingCash, setFinancingCash] = useState<number | ''>('');
+  const [dividends, setDividends] = useState<number | ''>('');
   const [isDeclared, setIsDeclared] = useState(false);
 
-  const equity = useMemo(() => assets - liabilities, [assets, liabilities]);
-  const netProfit = useMemo(() => revenue - expenses, [revenue, expenses]);
+  const equity = useMemo(() => (Number(assets) || 0) - (Number(liabilities) || 0), [assets, liabilities]);
+  const netProfit = useMemo(() => (Number(revenue) || 0) - (Number(expenses) || 0), [revenue, expenses]);
   const netCashChange = useMemo(
-    () => operatingCash + investingCash + financingCash,
+    () => (Number(operatingCash) || 0) + (Number(investingCash) || 0) + (Number(financingCash) || 0),
     [operatingCash, investingCash, financingCash]
   );
   const roi = useMemo(
-    () => (assets > 0 ? (netProfit / assets) * 100 : 0),
+    () => ((Number(assets) || 0) > 0 ? (netProfit / (Number(assets) || 1)) * 100 : 0),
     [netProfit, assets]
   );
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('ar-EG').format(num);
+    return new Intl.NumberFormat('en-US').format(num);
   };
+  
+  const handleSave = () => {
+    toast({
+      title: "تم الحفظ بنجاح",
+      description: "تم حفظ بياناتك المالية.",
+    });
+  };
+
+  const handleNumericInput = (setter: React.Dispatch<React.SetStateAction<number | ''>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || value === '-') {
+      setter(value);
+    } else {
+      const num = parseFloat(value);
+      if (!isNaN(num)) {
+        setter(num);
+      }
+    }
+  };
+
 
   const inputStyles =
     'h-14 bg-[#112620] border-white/10 focus:border-gold-500 rounded-lg text-white text-lg text-center';
@@ -91,8 +115,9 @@ const FinancialStatements: React.FC = () => {
                 <Input
                   type="number"
                   value={assets}
-                  onChange={(e) => setAssets(parseFloat(e.target.value) || 0)}
+                  onChange={handleNumericInput(setAssets)}
                   className={inputStyles}
+                  placeholder="0"
                 />
               </div>
               <div className="space-y-2">
@@ -100,8 +125,9 @@ const FinancialStatements: React.FC = () => {
                 <Input
                   type="number"
                   value={liabilities}
-                  onChange={(e) => setLiabilities(parseFloat(e.target.value) || 0)}
+                  onChange={handleNumericInput(setLiabilities)}
                   className={inputStyles}
+                  placeholder="0"
                 />
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-gold-500/30 text-center mt-4">
@@ -127,8 +153,9 @@ const FinancialStatements: React.FC = () => {
                 <Input
                   type="number"
                   value={revenue}
-                  onChange={(e) => setRevenue(parseFloat(e.target.value) || 0)}
+                  onChange={handleNumericInput(setRevenue)}
                   className={inputStyles}
+                  placeholder="0"
                 />
               </div>
               <div className="space-y-2">
@@ -136,8 +163,9 @@ const FinancialStatements: React.FC = () => {
                 <Input
                   type="number"
                   value={expenses}
-                  onChange={(e) => setExpenses(parseFloat(e.target.value) || 0)}
+                  onChange={handleNumericInput(setExpenses)}
                   className={inputStyles}
+                  placeholder="0"
                 />
               </div>
               <div
@@ -175,8 +203,9 @@ const FinancialStatements: React.FC = () => {
                 <Input
                   type="number"
                   value={operatingCash}
-                  onChange={(e) => setOperatingCash(parseFloat(e.target.value) || 0)}
+                  onChange={handleNumericInput(setOperatingCash)}
                   className={inputStyles}
+                  placeholder="0"
                 />
               </div>
               <div className="space-y-2">
@@ -184,8 +213,9 @@ const FinancialStatements: React.FC = () => {
                 <Input
                   type="number"
                   value={investingCash}
-                  onChange={(e) => setInvestingCash(parseFloat(e.target.value) || 0)}
+                  onChange={handleNumericInput(setInvestingCash)}
                   className={inputStyles}
+                  placeholder="0"
                 />
               </div>
                <div className="space-y-2">
@@ -193,8 +223,9 @@ const FinancialStatements: React.FC = () => {
                 <Input
                   type="number"
                   value={financingCash}
-                  onChange={(e) => setFinancingCash(parseFloat(e.target.value) || 0)}
+                  onChange={handleNumericInput(setFinancingCash)}
                   className={inputStyles}
+                  placeholder="0"
                 />
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-gold-500/30 text-center mt-4">
@@ -220,8 +251,9 @@ const FinancialStatements: React.FC = () => {
                 <Input
                   type="number"
                   value={dividends}
-                  onChange={(e) => setDividends(parseFloat(e.target.value) || 0)}
+                  onChange={handleNumericInput(setDividends)}
                   className={inputStyles}
+                  placeholder="0"
                 />
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-emerald-500/30 mt-4 space-y-3">
@@ -272,6 +304,7 @@ const FinancialStatements: React.FC = () => {
                 size="lg"
                 className="bg-gold-500 text-royal-900 hover:bg-gold-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed w-1/2 h-16 text-xl font-bold"
                 disabled={!isDeclared}
+                onClick={handleSave}
               >
                 <Save className="ml-3" />
                 حفظ البيانات المالية
