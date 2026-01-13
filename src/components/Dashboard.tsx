@@ -36,6 +36,7 @@ import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
 import RiskLandscape from './dashboard/RiskLandscape';
 import { cn } from '@/lib/utils';
+import FinancialHub from './dashboard/FinancialHub';
 
 
 const cardVariants = {
@@ -60,6 +61,7 @@ const initialDashboardData = {
   compliantItems: 0,
   totalComplianceItems: 4,
   risks: [],
+  lastROI: 0,
 };
 
 const radarDataTemplate = AXES.map(axis => ({ 
@@ -199,7 +201,8 @@ const Dashboard = () => {
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
             totalComplianceItems: complianceItems.length || 4,
-            risks: complianceData?.risks || []
+            risks: complianceData?.risks || [],
+            lastROI: companyData?.lastROI || 0,
         });
 
     } else {
@@ -208,6 +211,7 @@ const Dashboard = () => {
         const allCompaniesStr = localStorage.getItem('oia_companies_registry');
         const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
         let totalAssets = 0;
+        let totalROI = 0;
         let allRisks: any[] = [];
 
         allCompanies.forEach((comp: any) => {
@@ -230,10 +234,12 @@ const Dashboard = () => {
             }
             totalOmanization += comp.omanization || 0;
             totalAssets += comp.authorizedCapital || 0;
+            totalROI += comp.lastROI || 0;
         });
         
         const avgMaturity = allCompanies.length > 0 ? totalMaturity / allCompanies.length : 0;
         const avgOmanization = allCompanies.length > 0 ? totalOmanization / allCompanies.length : 0;
+        const avgROI = allCompanies.length > 0 ? totalROI / allCompanies.length : 0;
         
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
@@ -242,6 +248,7 @@ const Dashboard = () => {
             compliantItems: totalCompliant,
             totalComplianceItems: totalItems || 4,
             risks: allRisks,
+            lastROI: avgROI,
         });
         setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
     }
@@ -451,6 +458,15 @@ const Dashboard = () => {
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
+        </motion.div>
+        
+        {/* Financial Hub */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+            <FinancialHub
+                roi={dashboardData.lastROI}
+                netProfit={(dashboardData.totalAssets * 1_000_000 * (dashboardData.lastROI / 100))}
+                equity={dashboardData.totalAssets * 1_000_000}
+            />
         </motion.div>
 
     </div>
