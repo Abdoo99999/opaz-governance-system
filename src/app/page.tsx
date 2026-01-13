@@ -61,7 +61,7 @@ const AppContent = () => {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry />; // Fallback for company user
+        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry userRole={userRole} />; // Fallback for company user
       case 'companies':
         return <CompanyRegistry userRole={userRole} />;
       case 'maturity-assessment':
@@ -75,7 +75,7 @@ const AppContent = () => {
       case 'review-submit':
         return userRole === 'company' ? <ReviewSubmit /> : <CompanyRegistry userRole={userRole} />;
       case 'approval-requests':
-        return userRole === 'admin' ? <ApprovalRequests /> : <CompanyRegistry userRole={userRole} />;
+        return userRole === 'admin' ? <ApprovalRequests onNavigate={handleNavigate} /> : <CompanyRegistry userRole={userRole} />;
       case 'reports':
         return userRole === 'admin' ? <Reports /> : <CompanyRegistry userRole={userRole} />; // Fallback for company user
       case 'settings':
