@@ -1,9 +1,12 @@
 
+export type SubmissionStatus = 'draft' | 'submitted' | 'returned' | 'approved';
+
 export interface Company {
     id: string;
     name_ar: string;
     name_en: string;
     sector: string;
+    submissionStatus?: SubmissionStatus;
 }
 
 export const COMPANIES: Company[] = [

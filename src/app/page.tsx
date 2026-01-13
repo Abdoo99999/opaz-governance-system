@@ -12,6 +12,8 @@ import FinancialStatements from "@/components/FinancialStatements";
 import Reports from "@/components/Reports";
 import Settings from "@/components/Settings";
 import Login from "@/components/Login";
+import ReviewSubmit from '@/components/ReviewSubmit';
+import ApprovalRequests from '@/components/ApprovalRequests';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { CompanyProvider, useCompany } from '@/context/CompanyContext';
@@ -61,21 +63,25 @@ const AppContent = () => {
       case 'dashboard':
         return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry />; // Fallback for company user
       case 'companies':
-        return <CompanyRegistry />;
+        return <CompanyRegistry userRole={userRole} />;
       case 'maturity-assessment':
         return <Assessment onNavigate={handleNavigate} userRole={userRole} />;
       case 'compliance-monitor':
         return <ComplianceMonitor />;
       case 'improvement-plan':
-        return <ImprovementPlan />;
+        return <ImprovementPlan userRole={userRole}/>;
       case 'financial-statements':
         return <FinancialStatements />;
+      case 'review-submit':
+        return userRole === 'company' ? <ReviewSubmit /> : <CompanyRegistry userRole={userRole} />;
+      case 'approval-requests':
+        return userRole === 'admin' ? <ApprovalRequests /> : <CompanyRegistry userRole={userRole} />;
       case 'reports':
-        return userRole === 'admin' ? <Reports /> : <CompanyRegistry />; // Fallback for company user
+        return userRole === 'admin' ? <Reports /> : <CompanyRegistry userRole={userRole} />; // Fallback for company user
       case 'settings':
-        return userRole === 'admin' ? <Settings /> : <CompanyRegistry />; // Fallback for company user
+        return userRole === 'admin' ? <Settings /> : <CompanyRegistry userRole={userRole} />; // Fallback for company user
       default:
-        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry />;
+        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry userRole={userRole} />;
     }
   };
 

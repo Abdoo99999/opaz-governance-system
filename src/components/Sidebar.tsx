@@ -3,11 +3,12 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban, Settings, LogOut, FileText } from 'lucide-react';
+import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban, Settings, LogOut, FileText, Send, GitPullRequest } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { useLanguage } from '@/context/LanguageContext';
 import { UserRole } from '@/app/page';
+import { Badge } from './ui/badge';
 
 const allMenuItems = [
   { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard', roles: ['admin'] },
@@ -16,6 +17,8 @@ const allMenuItems = [
   { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor', roles: ['admin', 'company'] },
   { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'] },
   { name: 'financials', icon: FileText, view: 'financial-statements', roles: ['admin', 'company'] },
+  { name: 'review', icon: Send, view: 'review-submit', roles: ['company'] },
+  { name: 'approvals', icon: GitPullRequest, view: 'approval-requests', roles: ['admin'] },
   { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin'] },
   { name: 'settings', icon: Settings, view: 'settings', roles: ['admin'] },
 ];
@@ -32,6 +35,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
   const { t } = useLanguage();
 
   const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
+  
+  // MOCK: Get pending count for admin
+  const pendingApprovals = 3; 
 
   return (
     <div
@@ -60,9 +66,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                   )}
                 >
                   <item.icon className="w-6 h-6 ml-4" />
-                  <span className={cn("font-medium mr-4 transition-opacity duration-300", !isOpen && 'opacity-0')}>
+                  <span className={cn("font-medium mr-4 transition-opacity duration-300 flex-1 text-right", !isOpen && 'opacity-0')}>
                     {t(`menu.${item.name}`)}
                   </span>
+                  {item.name === 'approvals' && pendingApprovals > 0 && isOpen && (
+                    <Badge className="bg-red-500 text-white">{pendingApprovals}</Badge>
+                  )}
                 </button>
                 {currentView === item.view && (
                   <motion.div
@@ -70,6 +79,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                     className="absolute right-0 top-0 h-full w-1 bg-gold-500 rounded-l-full"
                   />
                 )}
+                 {item.name === 'approvals' && pendingApprovals > 0 && !isOpen && (
+                    <div className="absolute top-1 right-2 w-3 h-3 bg-red-500 rounded-full border-2 border-royal-800"></div>
+                  )}
               </li>
             ))}
           </ul>

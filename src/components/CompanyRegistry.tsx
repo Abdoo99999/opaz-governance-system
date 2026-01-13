@@ -21,7 +21,8 @@ import { UserRole } from '@/app/page';
 const initialCompaniesData = COMPANIES.map(c => ({
     ...c,
     omanization: 70 + Math.floor(Math.random() * 25), // 70-95%
-    risk: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
+    risk: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
+    submissionStatus: 'draft' as 'draft' | 'submitted' | 'returned' | 'approved',
 }));
 
 
@@ -79,7 +80,8 @@ const CompanyRegistry: React.FC<{ userRole: UserRole }> = ({ userRole }) => {
                     name_ar: companyDataFromList?.name_ar || formData.companyName, // Assuming name is same for simplicity
                     ...formData,
                     omanization: formData.omaniEmployees / formData.totalEmployees * 100,
-                    risk: 'Medium' // Default risk
+                    risk: 'Medium', // Default risk
+                    submissionStatus: 'draft'
                 };
                 return [...prevCompanies, newCompany];
             } else {

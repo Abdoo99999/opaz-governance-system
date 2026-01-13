@@ -11,7 +11,9 @@ export const translations = {
       financials: "القوائم المالية",
       reports: "التقارير",
       settings: "الإعدادات",
-      logout: "تسجيل الخروج"
+      logout: "تسجيل الخروج",
+      review: "المراجعة والإرسال",
+      approvals: "طلبات الاعتماد"
     },
     dashboard: {
       strategicRadar: "رادار الأداء الاستراتيجي",
@@ -240,6 +242,47 @@ export const translations = {
             omanis: "عدد العمانيين",
         }
     },
+    approvals: {
+      title: "طلبات الاعتماد",
+      companyName: "اسم الشركة",
+      submissionDate: "تاريخ الإرسال",
+      maturityScore: "نتيجة النضج",
+      actions: "الإجراءات",
+      view: "معاينة",
+      return: "إعادة للتعديل",
+      approve: "اعتماد نهائي",
+      returnModalTitle: "إعادة التقييم للمراجعة",
+      returnModalDesc: "يرجى كتابة الملاحظات المطلوبة من الشركة قبل إعادة الإرسال.",
+      notesPlaceholder: "مثال: يرجى استكمال بيانات التدقيق الداخلي...",
+      sendFeedback: "إرسال الملاحظات",
+      approveConfirmTitle: "هل أنت متأكد؟",
+      approveConfirmDesc: "سيتم اعتماد التقييم بشكل نهائي وإصدار الشهادة. لا يمكن التراجع عن هذا الإجراء.",
+      status: {
+        draft: "مسودة",
+        submitted: "قيد المراجعة",
+        returned: "مُعاد للتعديل",
+        approved: "معتمد"
+      }
+    },
+    review: {
+      title: "المراجعة النهائية والإرسال",
+      subtitle: "يرجى التأكد من اكتمال جميع الأقسام قبل إرسال التقييم إلى جهاز الاستثمار العماني للمراجعة النهائية.",
+      checklistTitle: "قائمة التحقق من الاكتمال",
+      profile: "الملف التعريفي للشركة",
+      assessment: "تقييم نضج الحوكمة",
+      compliance: "الامتثال والمخاطر",
+      status: {
+        complete: "مكتمل",
+        incomplete: "غير مكتمل"
+      },
+      view: "مراجعة",
+      submitButton: "إرسال إلى جهاز الاستثمار",
+      submittedTitle: "تم الإرسال بنجاح",
+      submittedDesc: "تم إرسال تقييم شركتكم بنجاح. سيتم إشعاركم عند اكتمال المراجعة من قبل فريق الحوكمة في جهاز الاستثمار العماني.",
+      underReview: "التقييم قيد المراجعة حالياً من قبل جهاز الاستثمار. لا يمكن إجراء تعديلات في هذه المرحلة.",
+      returned: "تمت إعادة التقييم من قبل جهاز الاستثمار مع الملاحظات التالية:",
+      viewNotes: "عرض الملاحظات"
+    },
     common: {
       admin: "مدير النظام",
       company: "بوابة الشركة",
@@ -280,7 +323,9 @@ export const translations = {
       financials: "Financial Statements",
       reports: "Reports",
       settings: "Settings",
-      logout: "Logout"
+      logout: "Logout",
+      review: "Review & Submit",
+      approvals: "Approval Requests"
     },
     dashboard: {
       strategicRadar: "Strategic Performance Radar",
@@ -508,6 +553,47 @@ export const translations = {
             totalEmployees: "Total Employees",
             omanis: "No. of Omanis",
         }
+    },
+    approvals: {
+      title: "Approval Requests",
+      companyName: "Company Name",
+      submissionDate: "Submission Date",
+      maturityScore: "Maturity Score",
+      actions: "Actions",
+      view: "View",
+      return: "Return for Edits",
+      approve: "Final Approve",
+      returnModalTitle: "Return Assessment for Review",
+      returnModalDesc: "Please provide the required feedback for the company before they resubmit.",
+      notesPlaceholder: "e.g., Please complete the internal audit section...",
+      sendFeedback: "Send Feedback",
+      approveConfirmTitle: "Are you sure?",
+      approveConfirmDesc: "The assessment will be finally approved and the certificate will be issued. This action cannot be undone.",
+      status: {
+        draft: "Draft",
+        submitted: "Submitted",
+        returned: "Returned",
+        approved: "Approved"
+      }
+    },
+    review: {
+      title: "Final Review and Submission",
+      subtitle: "Please ensure all sections are complete before sending the assessment to OIA for final review.",
+      checklistTitle: "Completion Checklist",
+      profile: "Company Profile Data",
+      assessment: "Governance Maturity Assessment",
+      compliance: "Compliance & Risk Registry",
+      status: {
+        complete: "Complete",
+        incomplete: "Incomplete"
+      },
+      view: "Review",
+      submitButton: "Send to OIA",
+      submittedTitle: "Successfully Submitted",
+      submittedDesc: "Your company's assessment has been sent successfully. You will be notified once the review by OIA's governance team is complete.",
+      underReview: "The assessment is currently under review by OIA. No edits can be made at this stage.",
+      returned: "The assessment has been returned by OIA with the following feedback:",
+      viewNotes: "View Notes"
     },
     common: {
       admin: "Admin Access",
