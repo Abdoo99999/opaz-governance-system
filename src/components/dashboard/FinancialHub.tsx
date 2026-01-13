@@ -24,39 +24,41 @@ const ChartCard = ({ title, value, unit, chartData, color, isSemiCircle = false 
              <div className="absolute -top-1/2 -right-1/2 w-full h-full rounded-full bg-[var(--glow-color)]/5 blur-3xl"></div>
 
             <CardContent className="p-4 flex flex-col items-center justify-center text-center flex-grow relative">
-                <ResponsiveContainer width="100%" height={150}>
-                    <RadialBarChart
-                        innerRadius="70%"
-                        outerRadius="100%"
-                        data={chartData}
-                        startAngle={startAngle}
-                        endAngle={endAngle}
-                        barSize={12}
-                    >
-                        <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                        <RadialBar
-                            background
-                            dataKey="value"
-                            angleAxisId={0}
-                            fill={color}
-                            cornerRadius={6}
-                            className="drop-shadow-[0_2px_4px_var(--glow-color)]"
-                        />
-                         <defs>
-                            <filter id={`glow-${color.slice(1)}`}>
-                                <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-                                <feMerge>
-                                    <feMergeNode in="blur" />
-                                    <feMergeNode in="SourceGraphic" />
-                                </feMerge>
-                            </filter>
-                        </defs>
-                    </RadialBarChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center mt-2">
-                    <p className="text-gray-300 text-xs mb-1">{title}</p>
+                <div className="h-[100px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadialBarChart
+                            innerRadius="70%"
+                            outerRadius="100%"
+                            data={chartData}
+                            startAngle={startAngle}
+                            endAngle={endAngle}
+                            barSize={12}
+                        >
+                            <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                            <RadialBar
+                                background
+                                dataKey="value"
+                                angleAxisId={0}
+                                fill={color}
+                                cornerRadius={6}
+                                className="drop-shadow-[0_2px_4px_var(--glow-color)]"
+                            />
+                            <defs>
+                                <filter id={`glow-${color.slice(1)}`}>
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+                                    <feMerge>
+                                        <feMergeNode in="blur" />
+                                        <feMergeNode in="SourceGraphic" />
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                        </RadialBarChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="mt-2 text-center">
+                    <p className="text-gray-300 text-sm mb-1">{title}</p>
                     <span className="text-3xl font-bold text-white tracking-tighter">{value}</span>
-                    <span className="text-sm font-bold" style={{ color }}>{unit}</span>
+                    <span className="text-sm font-bold ml-1" style={{ color }}>{unit}</span>
                 </div>
             </CardContent>
         </Card>
@@ -120,5 +122,3 @@ const FinancialHub: React.FC<FinancialHubProps> = ({ roi, netProfit, equity }) =
 };
 
 export default FinancialHub;
-
-    

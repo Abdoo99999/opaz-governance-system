@@ -361,6 +361,16 @@ const Dashboard = () => {
 
       {/* Main Charts Row */}
       <div className="grid grid-cols-1 gap-8">
+        
+        {/* Financial Hub */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+            <FinancialHub
+                roi={dashboardData.lastROI}
+                netProfit={(dashboardData.totalAssets * 1_000_000 * (dashboardData.lastROI / 100))}
+                equity={dashboardData.totalAssets * 1_000_000}
+            />
+        </motion.div>
+
         {/* Strategic Radar */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
           <Card className={"glass h-full"}>
@@ -460,19 +470,8 @@ const Dashboard = () => {
             </Card>
         </motion.div>
         
-        {/* Financial Hub */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
-            <FinancialHub
-                roi={dashboardData.lastROI}
-                netProfit={(dashboardData.totalAssets * 1_000_000 * (dashboardData.lastROI / 100))}
-                equity={dashboardData.totalAssets * 1_000_000}
-            />
-        </motion.div>
-
     </div>
   );
 };
 
 export default Dashboard;
-
-    
