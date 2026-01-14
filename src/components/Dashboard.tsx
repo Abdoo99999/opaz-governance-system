@@ -284,9 +284,9 @@ const Dashboard = () => {
 
   const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
   const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate, fill: '#3b82f6' }], [dashboardData.omanizationRate]);
-  const complianceData = useMemo(() => [
+  const compliancePieData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
-      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
 
   const riskMapData = useMemo(() => {
@@ -470,7 +470,7 @@ const Dashboard = () => {
                     <CardContent>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
-                                <Pie data={complianceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} labelLine={false}>
+                                <Pie data={compliancePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} labelLine={false}>
                                     <Cell key="compliant" fill="#00E096" />
                                     <Cell key="non-compliant" fill="#FF3B3B" />
                                 </Pie>
@@ -538,3 +538,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    
