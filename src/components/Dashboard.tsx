@@ -259,11 +259,15 @@ const Dashboard = () => {
 
     // Generate maturity path data based on current score
     const path = Array.from({ length: 7 }, (_, i) => {
-        const year = selectedYear - 2 + i;
+        const year = 2024 + i;
         const baseScore = currentMaturityScore || 3.0;
         // Simulate a path: past was lower, future is higher
-        const companyScore = baseScore + (i - 2) * 0.2 + (Math.random() - 0.5) * 0.2;
-        const sectorAverage = baseScore * 0.9 + (i - 2) * 0.15 + (Math.random() - 0.5) * 0.15;
+        const isCurrentOrFuture = year >= selectedYear;
+        const companyScore = isCurrentOrFuture 
+            ? baseScore + (year - selectedYear) * 0.2 + (Math.random() - 0.5) * 0.1
+            : baseScore - (selectedYear - year) * 0.15 + (Math.random() - 0.5) * 0.1;
+
+        const sectorAverage = baseScore * 0.9 + (year - selectedYear) * 0.15 + (Math.random() - 0.5) * 0.15;
         const target = 3.5 + i * 0.25;
 
         return {
@@ -427,41 +431,6 @@ const Dashboard = () => {
             />
         </motion.div>
 
-        {/* Strategic Path Chart */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
-            <Card className={"glass h-full"}>
-                <CardHeader>
-                    <CardTitle className="text-gold-400 flex items-center gap-2">
-                        <Target />
-                        {t('dashboard.maturityPath')}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart
-                            data={maturityPathData}
-                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                        >
-                            <defs>
-                                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#E5C565" stopOpacity={0.8}/>
-                                    <stop offset="95%" stopColor="#E5C565" stopOpacity={0}/>
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                            <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
-                            <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
-                            <Area type="monotone" dataKey="companyScore" name={t('reports.companyScore')} stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                             <Line type="monotone" dataKey="sectorAverage" name={t('reports.sectorAverage')} stroke="#00E096" strokeWidth={2} dot={false} />
-                            <Line type="monotone" dataKey="target" name="المستهدف" stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
-        </motion.div>
-
         {/* Strategic Radar */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
           <Card className={"glass h-full"}>
@@ -527,6 +496,41 @@ const Dashboard = () => {
                 </Card>
             </motion.div>
         </div>
+
+        {/* Strategic Path Chart */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
+            <Card className={"glass h-full"}>
+                <CardHeader>
+                    <CardTitle className="text-gold-400 flex items-center gap-2">
+                        <Target />
+                        {t('dashboard.maturityPath')}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart
+                            data={maturityPathData}
+                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                            <defs>
+                                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#E5C565" stopOpacity={0.8}/>
+                                    <stop offset="95%" stopColor="#E5C565" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                            <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
+                            <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
+                            <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                             <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#00E096" strokeWidth={2} dot={false} />
+                            <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </motion.div>
       </div>
         
     </div>
