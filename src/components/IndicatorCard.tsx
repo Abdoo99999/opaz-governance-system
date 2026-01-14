@@ -44,7 +44,7 @@ const scoreColors = [
 const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, onScoreChange, onFileChange, isLocked, onEdit, onDelete, canEdit }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const evidenceRequired = (score ?? 0) > 3;
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     const handleFileClick = () => {
         if (isLocked) return;
@@ -99,13 +99,13 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
                     {t('assessment.indicator')} #{indicator.id}
                 </Badge>
                 <h3 className="flex-1 text-xl font-bold text-right leading-relaxed">
-                    {t(indicator.text_ar)}
+                    {language === 'ar' ? indicator.text_ar : indicator.text_en}
                 </h3>
             </div>
             
             {/* Scoring */}
             <div className="mb-6">
-                <p className="text-gray-400 text-right mb-3 text-sm">{t('assessment.maturityLevel')}:</p>
+                <p className="text-gray-400 text-right mb-3 text-sm">{t('assessment.maturityLevel')}</p>
                 <div className="flex justify-center items-center gap-2 md:gap-4 bg-black/20 p-3 rounded-lg">
                     {[1, 2, 3, 4, 5].map((value) => (
                         <motion.button
@@ -156,3 +156,5 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
 };
 
 export default IndicatorCard;
+
+    

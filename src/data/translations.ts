@@ -164,6 +164,43 @@ export const translations = {
         commentsPlaceholder: "مكان مخصص لتعليقات ومناقشات الفريق...",
         saveSuccessDesc: "تم حفظ بيانات خطة التحسين لشركة"
     },
+    financials: {
+      title: "القوائم المالية والحوكمة",
+      auditorPlaceholder: "اسم مكتب التدقيق الخارجي...",
+      saveSuccessDesc: "تم حفظ البيانات المالية لشركة",
+      position: {
+        title: "المركز المالي",
+        assets: "إجمالي الأصول",
+        liabilities: "إجمالي الالتزامات",
+        equity: "حقوق الملكية"
+      },
+      performance: {
+        title: "الأداء المالي",
+        revenue: "الإيرادات",
+        expenses: "المصروفات",
+        netProfit: "صافي الربح/الخسارة"
+      },
+      cashflow: {
+        title: "السيولة والتدفق النقدي الحر",
+        operating: "النقد التشغيلي",
+        capex: "الإنفاق الرأسمالي (CAPEX)",
+        fcf: "التدفق النقدي الحر (FCF)",
+        fcfPositive: "متاح للتوزيعات/سداد الديون",
+        fcfNegative: "إحتراق نقدي"
+      },
+      kpi: {
+        title: "مؤشرات الأداء",
+        dividends: "توزيعات الأرباح المعلنة",
+        roi: "العائد على الاستثمار (ROI)"
+      },
+      declaration: {
+        title: "المرفقات والإقرار",
+        uploadDesc: "قم بسحب وإفلات تقرير المدقق المالي (PDF) هنا، أو اضغط للاختيار",
+        uploadHint: "حجم الملف الأقصى: 10MB",
+        checkbox: "أقر بصحة البيانات المالية المقدمة",
+        saveButton: "حفظ البيانات المالية"
+      }
+    },
     reports: {
         title: "التقرير الاستراتيجي الشامل",
         selectCompanyToView: "يرجى اختيار شركة لعرض تقريرها التفصيلي.",
@@ -498,6 +535,43 @@ export const translations = {
         commentsPlaceholder: "Placeholder for team comments and discussion threads...",
         saveSuccessDesc: "Improvement plan data saved for"
     },
+    financials: {
+      title: "Financial Statements & Governance",
+      auditorPlaceholder: "External Auditor's Office Name...",
+      saveSuccessDesc: "Financial data has been saved for",
+      position: {
+        title: "Financial Position",
+        assets: "Total Assets",
+        liabilities: "Total Liabilities",
+        equity: "Equity"
+      },
+      performance: {
+        title: "Financial Performance",
+        revenue: "Revenue",
+        expenses: "Expenses",
+        netProfit: "Net Profit/Loss"
+      },
+      cashflow: {
+        title: "Liquidity & Free Cash Flow",
+        operating: "Operating Cash",
+        capex: "Capital Expenditure (CAPEX)",
+        fcf: "Free Cash Flow (FCF)",
+        fcfPositive: "Available for distribution/debt repayment",
+        fcfNegative: "Cash Burn"
+      },
+      kpi: {
+        title: "Performance Indicators",
+        dividends: "Declared Dividends",
+        roi: "Return on Investment (ROI)"
+      },
+      declaration: {
+        title: "Attachments & Declaration",
+        uploadDesc: "Drag and drop the financial auditor's report (PDF) here, or click to select",
+        uploadHint: "Maximum file size: 10MB",
+        checkbox: "I hereby declare the provided financial data is accurate",
+        saveButton: "Save Financial Data"
+      }
+    },
     reports: {
         title: "Comprehensive Strategic Report",
         selectCompanyToView: "Please select a company to view its detailed report.",
@@ -669,3 +743,5 @@ export const translations = {
     }
   }
 };
+
+    

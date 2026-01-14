@@ -133,7 +133,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
         
         toast({
             title: t('common.saveSuccessTitle'),
-            description: `${t('assessment.saveSuccessDesc')} ${selectedCompany?.name_ar}`,
+            description: `${t('assessment.saveSuccessDesc')} ${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en): ''}`,
         });
     };
     
@@ -473,5 +473,7 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 export default Assessment;
 
+
+    
 
     

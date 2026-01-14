@@ -103,7 +103,7 @@ const FinancialStatements: React.FC = () => {
   
   const handleSave = () => {
     if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
-        toast({ title: "Error", description: "Please select a company first.", variant: 'destructive'});
+        toast({ title: t('common.errorTitle'), description: t('common.selectCompanyToStart'), variant: 'destructive'});
         return;
     }
     
@@ -130,15 +130,15 @@ const FinancialStatements: React.FC = () => {
         allCompanies[companyIndex] = updatedCompany;
     } else {
         // This case should ideally not happen if form is only shown for existing companies
-        toast({ title: "Error", description: "Could not find company to update.", variant: 'destructive'});
+        toast({ title: t('common.errorTitle'), description: "Could not find company to update.", variant: 'destructive'});
         return;
     }
 
     localStorage.setItem(storageKey, JSON.stringify(allCompanies));
 
     toast({
-      title: "تم الحفظ بنجاح",
-      description: `تم حفظ البيانات المالية لشركة ${selectedCompany?.name_ar}.`,
+      title: t('common.saveSuccessTitle'),
+      description: `${t('financials.saveSuccessDesc')} ${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en): ''}.`,
     });
   };
 
@@ -186,9 +186,9 @@ const FinancialStatements: React.FC = () => {
                 </Badge>
             )}
         </div>
-        <h1 className="text-3xl font-bold text-center mb-4 text-gold-400">القوائم المالية والحوكمة</h1>
+        <h1 className="text-3xl font-bold text-center mb-4 text-gold-400">{t('financials.title')}</h1>
         <Input
-          placeholder="اسم مكتب التدقيق الخارجي..."
+          placeholder={t('financials.auditorPlaceholder')}
           value={auditorName}
           onChange={(e) => setAuditorName(e.target.value)}
           className="h-12 bg-[#112620]/80 border-white/10 focus:border-gold-500 rounded-lg text-white text-center"
@@ -201,11 +201,11 @@ const FinancialStatements: React.FC = () => {
           <Card className="glass bg-[#112620] border-white/10 h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <Landmark className="w-7 h-7 text-gold-500" />
-              <CardTitle className="text-2xl">المركز المالي</CardTitle>
+              <CardTitle className="text-2xl">{t('financials.position.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 pt-4">
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">إجمالي الأصول</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.position.assets')}</label>
                 <Input
                   type="text"
                   value={assets === '' ? '' : formatNumber(Number(assets))}
@@ -215,7 +215,7 @@ const FinancialStatements: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">إجمالي الالتزامات</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.position.liabilities')}</label>
                 <Input
                   type="text"
                   value={liabilities === '' ? '' : formatNumber(Number(liabilities))}
@@ -225,7 +225,7 @@ const FinancialStatements: React.FC = () => {
                 />
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-gold-500/30 text-center mt-4">
-                <p className="text-gray-400 text-sm">حقوق الملكية</p>
+                <p className="text-gray-400 text-sm">{t('financials.position.equity')}</p>
                 <p className="text-3xl font-bold text-gold-400 tracking-wider">
                   {formatNumber(equity)}
                 </p>
@@ -239,11 +239,11 @@ const FinancialStatements: React.FC = () => {
           <Card className="glass bg-[#112620] border-white/10 h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <TrendingUp className="w-7 h-7 text-gold-500" />
-              <CardTitle className="text-2xl">الأداء المالي</CardTitle>
+              <CardTitle className="text-2xl">{t('financials.performance.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 pt-4">
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">الإيرادات</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.performance.revenue')}</label>
                 <Input
                   type="text"
                   value={revenue === '' ? '' : formatNumber(Number(revenue))}
@@ -253,7 +253,7 @@ const FinancialStatements: React.FC = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">المصروفات</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.performance.expenses')}</label>
                 <Input
                   type="text"
                   value={expenses === '' ? '' : formatNumber(Number(expenses))}
@@ -270,7 +270,7 @@ const FinancialStatements: React.FC = () => {
                     : 'border-red-500/30'
                 )}
               >
-                <p className="text-gray-400 text-sm">صافي الربح/الخسارة</p>
+                <p className="text-gray-400 text-sm">{t('financials.performance.netProfit')}</p>
                 <p
                   className={cn(
                     'text-3xl font-bold tracking-wider',
@@ -289,11 +289,11 @@ const FinancialStatements: React.FC = () => {
             <Card className="glass bg-[#112620] border-white/10 h-full">
                 <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
                     <Filter className="w-7 h-7 text-gold-500" />
-                    <CardTitle className="text-2xl">السيولة والتدفق النقدي الحر</CardTitle>
+                    <CardTitle className="text-2xl">{t('financials.cashflow.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-5 pt-4">
                     <div className="space-y-2">
-                        <label className="text-right block pr-2 text-gray-300">النقد التشغيلي</label>
+                        <label className="text-right block pr-2 text-gray-300">{t('financials.cashflow.operating')}</label>
                         <Input
                             type="text"
                             value={operatingCash === '' ? '' : formatNumber(Number(operatingCash))}
@@ -303,7 +303,7 @@ const FinancialStatements: React.FC = () => {
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-right block pr-2 text-gray-300">الإنفاق الرأسمالي (CAPEX)</label>
+                        <label className="text-right block pr-2 text-gray-300">{t('financials.cashflow.capex')}</label>
                         <Input
                             type="text"
                             value={capex === '' ? '' : formatNumber(Number(capex))}
@@ -318,12 +318,12 @@ const FinancialStatements: React.FC = () => {
                             freeCashFlow >= 0 ? 'border-emerald-500/30' : 'border-red-500/30'
                         )}
                     >
-                        <p className="text-gray-400 text-sm">التدفق النقدي الحر (FCF)</p>
+                        <p className="text-gray-400 text-sm">{t('financials.cashflow.fcf')}</p>
                         <p className={cn('text-3xl font-bold tracking-wider', freeCashFlow >= 0 ? 'text-emerald-400' : 'text-red-500')}>
                             {formatNumber(freeCashFlow)}
                         </p>
                         <p className={cn('text-xs mt-1', freeCashFlow >= 0 ? 'text-emerald-500' : 'text-red-600')}>
-                            {freeCashFlow >= 0 ? 'متاح للتوزيعات/سداد الديون' : 'إحتراق نقدي'}
+                            {freeCashFlow >= 0 ? t('financials.cashflow.fcfPositive') : t('financials.cashflow.fcfNegative')}
                         </p>
                     </div>
                 </CardContent>
@@ -335,11 +335,11 @@ const FinancialStatements: React.FC = () => {
           <Card className="glass bg-[#112620] border-white/10 h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <Target className="w-7 h-7 text-gold-500" />
-              <CardTitle className="text-2xl">مؤشرات الأداء</CardTitle>
+              <CardTitle className="text-2xl">{t('financials.kpi.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 pt-4">
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">توزيعات الأرباح المعلنة</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.kpi.dividends')}</label>
                 <Input
                   type="text"
                   value={dividends === '' ? '' : formatNumber(Number(dividends))}
@@ -350,7 +350,7 @@ const FinancialStatements: React.FC = () => {
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-emerald-500/30 mt-4 space-y-3">
                 <div className="flex justify-between items-center text-lg">
-                    <span className="text-gray-300">العائد على الاستثمار (ROI)</span>
+                    <span className="text-gray-300">{t('financials.kpi.roi')}</span>
                     <span className="font-bold text-emerald-400">{roi.toFixed(2)}%</span>
                 </div>
                 <Progress value={roi} className="h-3 [&>div]:bg-emerald-500" />
@@ -369,13 +369,13 @@ const FinancialStatements: React.FC = () => {
       >
         <Card className="glass bg-[#112620] border-white/10">
           <CardHeader>
-            <CardTitle className="text-center text-xl text-gold-400">المرفقات والإقرار</CardTitle>
+            <CardTitle className="text-center text-xl text-gold-400">{t('financials.declaration.title')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="relative border-2 border-dashed border-gray-500 rounded-lg p-8 flex flex-col items-center justify-center text-center">
               <UploadCloud className="w-12 h-12 text-gray-400 mb-4" />
-              <p className="text-gray-300 mb-2">قم بسحب وإفلات تقرير المدقق المالي (PDF) هنا، أو اضغط للاختيار</p>
-              <p className="text-xs text-gray-500">حجم الملف الأقصى: 10MB</p>
+              <p className="text-gray-300 mb-2">{t('financials.declaration.uploadDesc')}</p>
+              <p className="text-xs text-gray-500">{t('financials.declaration.uploadHint')}</p>
               <Input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
             </div>
 
@@ -387,7 +387,7 @@ const FinancialStatements: React.FC = () => {
                 className="data-[state=checked]:bg-gold-500 data-[state=checked]:border-gold-400"
               />
               <label htmlFor="declaration" className="text-lg font-medium">
-                أقر بصحة البيانات المالية المقدمة
+                {t('financials.declaration.checkbox')}
               </label>
             </div>
 
@@ -399,7 +399,7 @@ const FinancialStatements: React.FC = () => {
                 onClick={handleSave}
               >
                 <Save className="ml-3" />
-                حفظ البيانات المالية
+                {t('financials.declaration.saveButton')}
               </Button>
             </div>
           </CardContent>
