@@ -152,8 +152,8 @@ export const translations = {
             low: "منخفضة"
         },
         linkedIndicator: "مرتبط بالمؤشر",
-        start: "بدء",
-        finish: "إنهاء",
+        start: "بدء المهمة",
+        finish: "إنهاء المهمة",
         return: "إرجاع",
         reopen: "إعادة فتح",
         dueDate: "تاريخ الاستحقاق:",
@@ -163,7 +163,16 @@ export const translations = {
         relatedAxis: "المحور المرتبط",
         comments: "التعليقات",
         commentsPlaceholder: "مكان مخصص لتعليقات ومناقشات الفريق...",
-        saveSuccessDesc: "تم حفظ بيانات خطة التحسين لشركة"
+        saveSuccessDesc: "تم حفظ بيانات خطة التحسين لشركة",
+        completeTaskTitle: "إنهاء المهمة وتقديم الدليل",
+        completeTaskDesc: "يرجى تقديم ملاحظات حول كيفية إنجاز المهمة وإرفاق دليل الإنجاز.",
+        completionNotes: "ملاحظات الإنجاز",
+        completionNotesPlaceholder: "مثال: تم عقد اجتماع مجلس الإدارة وتحديث السياسة...",
+        attachEvidence: "إرفاق الدليل",
+        attachEvidenceHint: "اسحب وأفلت ملفًا هنا، أو انقر للاختيار",
+        completeError: "يرجى كتابة الملاحظات وإرفاق ملف الدليل.",
+        taskCompleted: "تم إنجاز المهمة بنجاح!",
+        attachedEvidence: "الدليل المرفق"
     },
     financials: {
       title: "القوائم المالية والحوكمة",
@@ -534,8 +543,8 @@ export const translations = {
             low: "Low"
         },
         linkedIndicator: "Linked to Indicator",
-        start: "Start",
-        finish: "Finish",
+        start: "Start Task",
+        finish: "Complete Task",
         return: "Return",
         reopen: "Re-open",
         dueDate: "Due by:",
@@ -545,7 +554,16 @@ export const translations = {
         relatedAxis: "Related Axis",
         comments: "Comments",
         commentsPlaceholder: "Placeholder for team comments and discussion threads...",
-        saveSuccessDesc: "Improvement plan data saved for"
+        saveSuccessDesc: "Improvement plan data saved for",
+        completeTaskTitle: "Complete Task & Submit Evidence",
+        completeTaskDesc: "Please provide notes on how the task was completed and attach the evidence of completion.",
+        completionNotes: "Completion Notes",
+        completionNotesPlaceholder: "e.g., The board meeting was held and the policy was updated...",
+        attachEvidence: "Attach Evidence",
+        attachEvidenceHint: "Drag & drop a file here, or click to select",
+        completeError: "Please provide completion notes and attach an evidence file.",
+        taskCompleted: "Task completed successfully!",
+        attachedEvidence: "Attached Evidence"
     },
     financials: {
       title: "Financial Statements & Governance",
