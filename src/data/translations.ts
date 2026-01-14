@@ -6,7 +6,7 @@ export const translations = {
       dashboard: "لوحة القيادة",
       registry: "سجل الشركات",
       assessment: "تقييم النضج",
-      compliance: "مراقب الامتثال",
+      compliance: "الامتثال والمخاطر",
       improvement: "خطة التحسين",
       financials: "القوائم المالية",
       reports: "التقارير",
@@ -318,7 +318,7 @@ export const translations = {
       dashboard: "Dashboard",
       registry: "Company Registry",
       assessment: "Maturity Assessment",
-      compliance: "Compliance Monitor",
+      compliance: "Compliance & Risk",
       improvement: "Improvement Plan",
       financials: "Financial Statements",
       reports: "Reports",
@@ -625,5 +625,3 @@ export const translations = {
     }
   }
 };
-
-    

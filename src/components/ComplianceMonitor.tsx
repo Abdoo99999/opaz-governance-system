@@ -19,6 +19,7 @@ import { Badge } from './ui/badge';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { useToast } from '@/hooks/use-toast';
+import RiskLandscape from './dashboard/RiskLandscape';
 
 const complianceItems = [
     { id: 'auditor', question: 'compliance.questions.auditor' },
@@ -60,13 +61,13 @@ const ComplianceMonitor: React.FC = () => {
     const getStorageKey = (companyId: string) => `oia_compliance_${companyId}`;
 
     const [complianceState, setComplianceState] = useState<ComplianceState>(() => {
-        if (selectedCompanyId === 'all') return initialComplianceState;
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return initialComplianceState;
         const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
         return saved ? JSON.parse(saved).compliance : initialComplianceState;
     });
 
     const [risks, setRisks] = useState<RiskFormValues[]>(() => {
-        if (selectedCompanyId === 'all') return [];
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return [];
         const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
         return saved ? JSON.parse(saved).risks : [];
     });
@@ -75,7 +76,7 @@ const ComplianceMonitor: React.FC = () => {
 
     // RELOAD data when company changes
     useEffect(() => {
-        if (selectedCompanyId === 'all') {
+        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
             setComplianceState(initialComplianceState);
             setRisks([]);
             return;
@@ -101,7 +102,7 @@ const ComplianceMonitor: React.FC = () => {
     });
 
     const handleSave = () => {
-        if (selectedCompanyId === 'all') return;
+        if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
         
         const dataToSave = {
             compliance: complianceState,
@@ -125,20 +126,8 @@ const ComplianceMonitor: React.FC = () => {
         setIsModalOpen(false);
         reset();
     };
-
-    const getRiskCount = (impact: number, probability: number) => {
-        return risks.filter(r => r.impact === impact && r.probability === probability).length;
-    };
     
-    const getCellColor = (impact: number, probability: number) => {
-        const score = impact * probability;
-        if (score >= 15) return 'bg-red-800/60 border-red-600/80';
-        if (score >= 10) return 'bg-red-600/50 border-red-500/70';
-        if (score >= 5) return 'bg-yellow-500/50 border-yellow-400/70';
-        return 'bg-green-600/50 border-green-500/70';
-    };
-
-    if (selectedCompanyId === 'all') {
+    if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
          return (
             <div className="flex items-center justify-center h-full p-8 text-white">
                 <div className="text-center p-8 glass">
@@ -197,7 +186,6 @@ const ComplianceMonitor: React.FC = () => {
                                                     checked={isCompliant}
                                                     onCheckedChange={() => handleToggle(item.id as keyof typeof complianceState)}
                                                     className="data-[state=checked]:bg-success data-[state=unchecked]:bg-danger/50"
-                                                    style={{ transform: 'scale(1.3)' }}
                                                 />
                                             </div>
                                         </div>
@@ -210,7 +198,7 @@ const ComplianceMonitor: React.FC = () => {
 
                 {/* Left Section: Risk Management */}
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-                    <Card className="glass h-full">
+                    <Card className="glass h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
                             <Button onClick={() => setIsModalOpen(true)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
@@ -218,40 +206,9 @@ const ComplianceMonitor: React.FC = () => {
                                 {t('compliance.addRisk')}
                             </Button>
                         </CardHeader>
-                        <CardContent>
-                            <div className="flex">
-                                <div className="flex flex-col-reverse justify-around text-center text-sm font-bold w-16">
-                                    {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-16 flex items-center justify-center"><span>{i}</span></div>)}
-                                </div>
-                                <div className="flex-1 grid grid-cols-5 gap-1">
-                                    {Array.from({ length: 5 }, (_, probIndex) => (
-                                        Array.from({ length: 5 }, (_, impactIndex) => {
-                                            const impact = 5 - impactIndex;
-                                            const probability = probIndex + 1;
-                                            const riskCount = getRiskCount(impact, probability);
-                                            return (
-                                                <div
-                                                    key={`${impact}-${probability}`}
-                                                    className={cn(
-                                                        'w-full h-16 rounded-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105',
-                                                        getCellColor(impact, probability)
-                                                    )}
-                                                >
-                                                    {riskCount > 0 && (
-                                                        <Badge className="bg-black/50 text-white">{riskCount}</Badge>
-                                                    )}
-                                                </div>
-                                            );
-                                        }).reverse()
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="flex justify-around text-center text-sm font-bold mt-2 ml-16">
-                                {[1, 2, 3, 4, 5].map(p => <div key={p} className="w-16"><span>{p}</span></div>)}
-                            </div>
-                            <div className="text-center mt-4 font-bold text-lg text-gold-400">{t('compliance.probability')}</div>
+                        <CardContent className="flex-1">
+                           <RiskLandscape data={risks} />
                         </CardContent>
-                        <div className="absolute left-6 top-1/2 -translate-y-1/2 transform -rotate-90 font-bold text-lg text-gold-400">{t('compliance.impact')}</div>
                     </Card>
                 </motion.div>
 
@@ -336,5 +293,3 @@ const ComplianceMonitor: React.FC = () => {
 };
 
 export default ComplianceMonitor;
-
-    
