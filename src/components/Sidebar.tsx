@@ -22,7 +22,7 @@ const allMenuItems = [
   { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'], requiredStatus: 'improvement' },
   { name: 'review', icon: Send, view: 'review-submit', roles: ['company'], requiredStatus: 'review' },
   { name: 'approvals', icon: GitPullRequest, view: 'approval-requests', roles: ['admin'], requiredStatus: 'none' },
-  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin'], requiredStatus: 'none' },
+  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin', 'company'], requiredStatus: 'none' },
   { name: 'settings', icon: Settings, view: 'settings', roles: ['admin'], requiredStatus: 'none' },
 ];
 
@@ -87,8 +87,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
 
       // Logic for submitted/approved state
       if (submissionStatus === 'submitted' || submissionStatus === 'approved') {
-          // Only allow access to improvement plan and review/submit page
-          return item.view !== 'improvement-plan' && item.view !== 'review-submit';
+          const allowedViews = ['improvement-plan', 'review-submit'];
+          if (submissionStatus === 'approved') {
+              allowedViews.push('reports');
+          }
+          return !allowedViews.includes(item.view);
       }
 
       // Logic for draft/returned state (progressive enabling)

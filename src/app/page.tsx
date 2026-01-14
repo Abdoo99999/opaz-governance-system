@@ -64,10 +64,16 @@ const AppContent = () => {
     const companyId = getSelectedCompany()?.id;
     if (userRole === 'company' && companyId) {
         const status = getCompanySubmissionStatus(companyId);
-        if ((status === 'submitted' || status === 'approved') && view !== 'improvement-plan' && view !== 'review-submit') {
-            toast({
+        // Define allowed views for submitted/approved status
+        const allowedViews = ['improvement-plan', 'review-submit'];
+        if (status === 'approved') {
+            allowedViews.push('reports');
+        }
+
+        if ((status === 'submitted' || status === 'approved') && !allowedViews.includes(view)) {
+             toast({
                 title: "الصفحة مقفلة",
-                description: "البيانات قيد المراجعة ولا يمكن تعديلها حالياً.",
+                description: "البيانات قيد المراجعة أو معتمدة ولا يمكن تعديلها حالياً.",
                 variant: 'destructive',
             });
             return;
@@ -95,7 +101,7 @@ const AppContent = () => {
       case 'approval-requests':
         return userRole === 'admin' ? <ApprovalRequests onNavigate={handleNavigate} /> : <CompanyRegistry userRole={userRole} />;
       case 'reports':
-        return userRole === 'admin' ? <Reports /> : <CompanyRegistry userRole={userRole} />; // Fallback for company user
+         return <Reports />;
       case 'settings':
         return userRole === 'admin' ? <Settings /> : <CompanyRegistry userRole={userRole} />; // Fallback for company user
       default:
