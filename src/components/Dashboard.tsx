@@ -346,34 +346,36 @@ const Dashboard = () => {
                       <CardTitle className="text-sm font-medium text-blue-200/80">{t('dashboard.omanization')}</CardTitle>
                        <Users className="h-4 w-4 text-blue-300/70" />
                   </CardHeader>
-                  <CardContent className="h-28 relative">
-                       <ResponsiveContainer width="100%" height="100%">
-                            <RadialBarChart 
-                                cx="50%" 
-                                cy="50%" 
-                                innerRadius="65%" 
-                                outerRadius="100%" 
-                                barSize={10} 
-                                data={omanizationData}
-                                startAngle={90}
-                                endAngle={-270}
-                            >
-                                <PolarAngleAxis
-                                    type="number"
-                                    domain={[0, 100]}
-                                    angleAxisId={0}
-                                    tick={false}
-                                />
-                                <RadialBar
-                                    background
-                                    dataKey='value'
-                                    cornerRadius={5}
-                                    className="fill-blue-500"
-                                />
-                            </RadialBarChart>
-                        </ResponsiveContainer>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                            <div className="text-2xl font-bold text-blue-400">{dashboardData.omanizationRate}%</div>
+                  <CardContent className="h-[100px] flex items-center justify-center">
+                       <div className="w-24 h-24 relative">
+                           <ResponsiveContainer width="100%" height="100%">
+                                <RadialBarChart 
+                                    cx="50%" 
+                                    cy="50%" 
+                                    innerRadius="70%" 
+                                    outerRadius="100%" 
+                                    barSize={8} 
+                                    data={omanizationData}
+                                    startAngle={90}
+                                    endAngle={-270}
+                                >
+                                    <PolarAngleAxis
+                                        type="number"
+                                        domain={[0, 100]}
+                                        angleAxisId={0}
+                                        tick={false}
+                                    />
+                                    <RadialBar
+                                        background={{ fill: 'rgba(255,255,255,0.1)'}}
+                                        dataKey='value'
+                                        cornerRadius={4}
+                                        className="fill-blue-500"
+                                    />
+                                </RadialBarChart>
+                            </ResponsiveContainer>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-2xl font-bold text-blue-300">{dashboardData.omanizationRate}%</span>
+                            </div>
                         </div>
                   </CardContent>
               </Card>
@@ -508,3 +510,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    
