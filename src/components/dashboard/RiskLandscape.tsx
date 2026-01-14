@@ -1,166 +1,89 @@
 
 "use client";
-import React, { useMemo } from 'react';
-import {
-  ResponsiveContainer,
-  ScatterChart,
-  XAxis,
-  YAxis,
-  ZAxis,
-  Tooltip,
-  Scatter,
-  ReferenceArea,
-  Cell,
-  CartesianGrid
-} from 'recharts';
+import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 
-const getRiskZone = (prob: number, impact: number) => {
-    const score = prob * impact;
-    if (score >= 15) return { name: 'Critical', color: 'rgba(255, 59, 59, 0.8)', textColor: '#FF3B3B' };
-    if (score >= 10) return { name: 'High', color: 'rgba(255, 165, 0, 0.7)', textColor: '#FFA500' };
-    if (score >= 5) return { name: 'Medium', color: 'rgba(212, 175, 55, 0.6)', textColor: '#D4AF37' };
-    return { name: 'Low', color: 'rgba(0, 224, 150, 0.5)', textColor: '#00E096' };
+const riskLevels = [
+  { level: 'Low', color: 'bg-emerald-600/50', label: 'منخفض' },
+  { level: 'Medium', color: 'bg-yellow-600/50', label: 'متوسط' },
+  { level: 'High', color: 'bg-orange-600/50', label: 'مرتفع' },
+  { level: 'Critical', color: 'bg-red-700/60', label: 'حرج' },
+];
+
+const impactLabels = ['ضئيل', 'بسيط', 'متوسط', 'كبير', 'كارثي'];
+const probabilityLabels = ['نادر', 'غير محتمل', 'ممكن', 'محتمل', 'مؤكد'];
+
+const getRiskLevel = (impact: number, probability: number) => {
+  const score = impact * probability;
+  if (score >= 15) return 3; // Critical
+  if (score >= 10) return 2; // High
+  if (score >= 5) return 1; // Medium
+  return 0; // Low
 };
-
-const CustomShape = (props: any) => {
-    const { cx, cy, payload } = props;
-    if (cx === null || cy === null || !payload) return null;
-
-    const zone = getRiskZone(payload.x, payload.y);
-    const size = payload.z * 15 + 10; // Base size + size per risk
-
-    return (
-        <g>
-            <defs>
-                <radialGradient id={`grad-${payload.x}-${payload.y}`}>
-                    <stop offset="0%" stopColor={zone.color} stopOpacity="1" />
-                    <stop offset="100%" stopColor={zone.color} stopOpacity="0.3" />
-                </radialGradient>
-                 <filter id="glow">
-                    <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
-                    <feMerge>
-                        <feMergeNode in="coloredBlur" />
-                        <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                </filter>
-            </defs>
-            <circle
-                cx={cx}
-                cy={cy}
-                r={size / 2}
-                fill={`url(#grad-${payload.x}-${payload.y})`}
-                filter="url(#glow)"
-                style={{ stroke: 'rgba(255,255,255,0.2)', strokeWidth: 1 }}
-            />
-            <text x={cx} y={cy} textAnchor="middle" dy=".3em" fill="#fff" fontSize="12" fontWeight="bold">
-                {payload.z}
-            </text>
-        </g>
-    );
-};
-
-const CustomTooltipContent = (props: any) => {
-    const { t } = useLanguage();
-    const { active, payload } = props;
-    if (active && payload && payload.length) {
-        const data = payload[0].payload;
-        const zone = getRiskZone(data.x, data.y);
-        return (
-            <div className="glass p-4 rounded-lg text-white">
-                <h4 style={{ color: zone.textColor, fontWeight: 'bold' }}>{t(`registry.risks.${zone.name.toLowerCase()}`)}</h4>
-                <p>{data.z} {t('dashboard.activeRisks')}</p>
-                <p className="text-xs text-gray-400">{t('compliance.impact')}: {data.y}, {t('compliance.probability')}: {data.x}</p>
-            </div>
-        );
-    }
-    return null;
-};
-
 
 interface RiskLandscapeProps {
     data: { impact: number; probability: number; }[];
 }
 
 const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
-    const { t, language } = useLanguage();
-
-    const processedData = useMemo(() => {
-        const grouped = data.reduce((acc, risk) => {
-            const key = `${risk.probability}-${risk.impact}`;
-            if (!acc[key]) {
-                acc[key] = { x: risk.probability, y: risk.impact, z: 0 };
-            }
-            acc[key].z += 1;
-            return acc;
-        }, {} as Record<string, { x: number; y: number; z: number; }>);
-        return Object.values(grouped);
-    }, [data]);
+    const { t } = useLanguage();
     
-    const impactLabels: Record<number, string> = {
-        1: t('registry.risks.low'),
-        3: t('registry.risks.medium'),
-        5: t('registry.risks.critical')
-    };
-    const probLabels: Record<number, string> = {
-        1: t('compliance.riskCategories.rare'),
-        3: t('compliance.riskCategories.likely'),
-        5: t('compliance.riskCategories.certain')
-    };
+    // Group risks by cell
+    const riskMatrix = Array(5).fill(null).map(() => Array(5).fill(0));
+    data.forEach(risk => {
+        if (risk.impact >= 1 && risk.impact <= 5 && risk.probability >= 1 && risk.probability <= 5) {
+            riskMatrix[5 - risk.impact][risk.probability - 1]++;
+        }
+    });
 
     return (
-        <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart
-                margin={{
-                    top: 20,
-                    right: 20,
-                    bottom: 40,
-                    left: 40,
-                }}
-            >
-                <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" strokeDasharray="3 3" />
+        <div className="flex flex-col h-full w-full aspect-square text-xs">
+            {/* Top Labels - Probability */}
+            <div className="flex items-center">
+                <div className="w-24 flex-shrink-0"></div>
+                <div className="flex-1 grid grid-cols-5 text-center text-gray-300">
+                    {probabilityLabels.map(label => (
+                        <div key={label} className="p-1 font-semibold">{label}</div>
+                    ))}
+                </div>
+            </div>
+            
+            <div className="flex flex-1">
+                {/* Side Labels - Impact */}
+                <div className="w-24 flex flex-col justify-around text-center text-gray-300">
+                    {impactLabels.slice().reverse().map(label => (
+                         <div key={label} className="p-1 font-semibold flex items-center justify-center h-full -rotate-90">{label}</div>
+                    ))}
+                </div>
                 
-                {/* Background Zones */}
-                <ReferenceArea x1={0} x2={2.5} y1={0} y2={2.5} fill="rgba(0, 224, 150, 0.05)" stroke="rgba(0, 224, 150, 0.1)" />
-                <ReferenceArea x1={2.5} x2={5.5} y1={0} y2={2.5} fill="rgba(212, 175, 55, 0.05)" stroke="rgba(212, 175, 55, 0.1)" />
-                <ReferenceArea x1={0} x2={2.5} y1={2.5} y2={5.5} fill="rgba(212, 175, 55, 0.05)" stroke="rgba(212, 175, 55, 0.1)" />
-                <ReferenceArea x1={2.5} x2={4} y1={2.5} y2={4} fill="rgba(255, 165, 0, 0.05)" stroke="rgba(255, 165, 0, 0.1)" />
-                <ReferenceArea x1={4} x2={5.5} y1={2.5} y2={5.5} fill="rgba(255, 59, 59, 0.07)" stroke="rgba(255, 59, 59, 0.1)" />
-                <ReferenceArea x1={2.5} x2={5.5} y1={4} y2={5.5} fill="rgba(255, 59, 59, 0.07)" stroke="rgba(255, 59, 59, 0.1)" />
-
-                <XAxis 
-                    type="number" 
-                    dataKey="x" 
-                    name={t('compliance.probability')} 
-                    domain={[0.5, 5.5]} 
-                    ticks={[1,2,3,4,5]}
-                    tickFormatter={(tick) => probLabels[tick] || ''}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#A0A0A0', fontSize: 12 }}
-                    label={{ value: t('compliance.probability'), position: 'insideBottom', dy: 30, fill: '#A0A0A0' }}
-                />
-                <YAxis 
-                    type="number" 
-                    dataKey="y" 
-                    name={t('compliance.impact')} 
-                    domain={[0.5, 5.5]}
-                    ticks={[1,2,3,4,5]}
-                    tickFormatter={(tick) => impactLabels[tick] || ''}
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#A0A0A0', fontSize: 12 }}
-                    label={{ value: t('compliance.impact'), angle: -90, position: 'insideLeft', dx: -30, fill: '#A0A0A0' }}
-                />
-                <ZAxis type="number" dataKey="z" range={[100, 1000]} />
-                
-                <Tooltip cursor={{ strokeDasharray: '3 3', stroke: 'rgba(255, 255, 255, 0.2)' }} content={<CustomTooltipContent />} />
-                
-                <Scatter data={processedData} shape={<CustomShape />} />
-
-            </ScatterChart>
-        </ResponsiveContainer>
+                {/* Grid */}
+                <div className="flex-1 grid grid-rows-5 gap-1">
+                    {riskMatrix.map((row, rowIndex) => (
+                        <div key={rowIndex} className="grid grid-cols-5 gap-1">
+                            {row.map((count, colIndex) => {
+                                const impact = 5 - rowIndex;
+                                const probability = colIndex + 1;
+                                const level = getRiskLevel(impact, probability);
+                                const riskInfo = riskLevels[level];
+                                return (
+                                    <div
+                                        key={`${rowIndex}-${colIndex}`}
+                                        className={`relative flex items-center justify-center rounded-md text-white transition-all duration-300 hover:scale-105 hover:shadow-lg ${riskInfo.color} ${count > 0 ? 'border border-white/20' : 'bg-white/5'}`}
+                                    >
+                                        {count > 0 && <span className="font-bold text-lg">{count}</span>}
+                                        <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-royal-800 ${riskInfo.color}`}></div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
     );
 };
 
+
 export default RiskLandscape;
+
+    

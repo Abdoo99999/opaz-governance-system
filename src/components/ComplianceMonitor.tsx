@@ -185,7 +185,7 @@ const ComplianceMonitor: React.FC = () => {
                                                 <Switch
                                                     checked={isCompliant}
                                                     onCheckedChange={() => handleToggle(item.id as keyof typeof complianceState)}
-                                                    className="data-[state=checked]:bg-success data-[state=unchecked]:bg-danger/50"
+                                                    className="data-[state=checked]:bg-success data-[state=unchecked]:bg-danger"
                                                 />
                                             </div>
                                         </div>
@@ -293,3 +293,5 @@ const ComplianceMonitor: React.FC = () => {
 };
 
 export default ComplianceMonitor;
+
+    
