@@ -5,7 +5,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Area,
-  AreaChart,
+  ComposedChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -508,7 +508,7 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart
+                        <ComposedChart
                             data={maturityPathData}
                             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                         >
@@ -526,7 +526,7 @@ const Dashboard = () => {
                             <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
                              <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#00E096" strokeWidth={2} dot={false} />
                             <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                        </AreaChart>
+                        </ComposedChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
@@ -538,5 +538,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
