@@ -263,7 +263,7 @@ const Dashboard = () => {
 
 
   const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
-  const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate }, {name: 'Remaining', value: 100 - dashboardData.omanizationRate}], [dashboardData.omanizationRate]);
+  const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate, fill: '#3b82f6' }], [dashboardData.omanizationRate]);
   const complianceData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
       { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
@@ -341,14 +341,40 @@ const Dashboard = () => {
               </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-              <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
+             <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium text-blue-200/80">{t('dashboard.omanization')}</CardTitle>
                        <Users className="h-4 w-4 text-blue-300/70" />
                   </CardHeader>
-                  <CardContent>
-                      <div className="text-4xl font-bold text-blue-400">{dashboardData.omanizationRate}%</div>
-                      <p className="text-xs text-blue-200/60 mt-1">{t('dashboard.nationalWorkforce')}</p>
+                  <CardContent className="h-28 relative">
+                       <ResponsiveContainer width="100%" height="100%">
+                            <RadialBarChart 
+                                cx="50%" 
+                                cy="50%" 
+                                innerRadius="65%" 
+                                outerRadius="100%" 
+                                barSize={10} 
+                                data={omanizationData}
+                                startAngle={90}
+                                endAngle={-270}
+                            >
+                                <PolarAngleAxis
+                                    type="number"
+                                    domain={[0, 100]}
+                                    angleAxisId={0}
+                                    tick={false}
+                                />
+                                <RadialBar
+                                    background
+                                    dataKey='value'
+                                    cornerRadius={5}
+                                    className="fill-blue-500"
+                                />
+                            </RadialBarChart>
+                        </ResponsiveContainer>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                            <div className="text-2xl font-bold text-blue-400">{dashboardData.omanizationRate}%</div>
+                        </div>
                   </CardContent>
               </Card>
           </motion.div>
@@ -482,5 +508,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
