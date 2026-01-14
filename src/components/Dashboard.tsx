@@ -286,7 +286,7 @@ const Dashboard = () => {
   const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate, fill: '#3b82f6' }], [dashboardData.omanizationRate]);
   const complianceData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
-      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
 
   const riskMapData = useMemo(() => {
