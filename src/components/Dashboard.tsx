@@ -37,6 +37,7 @@ import { INDICATORS, AXES } from '@/lib/data/indicators';
 import RiskLandscape from './dashboard/RiskLandscape';
 import { cn } from '@/lib/utils';
 import FinancialHub from './dashboard/FinancialHub';
+import { useYear } from '@/context/YearContext';
 
 
 const cardVariants = {
@@ -71,15 +72,6 @@ const radarDataTemplate = AXES.map(axis => ({
     A: 0, 
     fullMark: 150 
 }));
-
-const maturityPathData = [
-  { year: '2025', score: 3.2 },
-  { year: '2026', score: 3.5 },
-  { year: '2027', score: 3.9 },
-  { year: '2028', score: 4.2 },
-  { year: '2029', score: 4.6 },
-  { year: '2030', score: 5.0 },
-];
 
 const RadarCustomTick = (props: any) => {
     const { payload, x, y, textAnchor, index } = props;
@@ -152,13 +144,17 @@ const RadarCustomTick = (props: any) => {
 const Dashboard = () => {
   const { t, language } = useLanguage();
   const { getSelectedCompany, selectedCompanyId } = useCompany();
+  const { selectedYear } = useYear();
   const [dashboardData, setDashboardData] = useState(initialDashboardData);
   const [radarData, setRadarData] = useState(radarDataTemplate);
+  const [maturityPathData, setMaturityPathData] = useState([]);
 
   const selectedCompany = getSelectedCompany();
   
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    let currentMaturityScore = 0;
 
     if (selectedCompanyId && selectedCompanyId !== 'all') {
         const companiesStr = localStorage.getItem('oia_companies_registry');
@@ -173,7 +169,7 @@ const Dashboard = () => {
 
         const scores = Object.values(assessmentData.scores || {}) as number[];
         const totalScore = scores.reduce((sum, score) => sum + score, 0);
-        const maturityScore = scores.length > 0 ? totalScore / INDICATORS.length : 0;
+        currentMaturityScore = scores.length > 0 ? totalScore / INDICATORS.length : 0;
          
         const newRadarData = AXES.map(axis => {
             const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
@@ -199,7 +195,7 @@ const Dashboard = () => {
         const netProfit = (companyData?.revenue || 0) - (companyData?.expenses || 0);
         
         setDashboardData({
-            maturityScore: parseFloat(maturityScore.toFixed(1)),
+            maturityScore: parseFloat(currentMaturityScore.toFixed(1)),
             totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital / 1_000_000 : 0,
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
@@ -244,6 +240,7 @@ const Dashboard = () => {
         });
         
         const avgMaturity = allCompanies.length > 0 ? totalMaturity / allCompanies.length : 0;
+        currentMaturityScore = avgMaturity;
         const avgOmanization = allCompanies.length > 0 ? totalOmanization / allCompanies.length : 0;
         const avgROI = allCompanies.length > 0 ? totalROI / allCompanies.length : 0;
         
@@ -259,7 +256,26 @@ const Dashboard = () => {
         });
         setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
     }
-  }, [selectedCompanyId, language]);
+
+    // Generate maturity path data based on current score
+    const path = Array.from({ length: 7 }, (_, i) => {
+        const year = selectedYear - 2 + i;
+        const baseScore = currentMaturityScore || 3.0;
+        // Simulate a path: past was lower, future is higher
+        const companyScore = baseScore + (i - 2) * 0.2 + (Math.random() - 0.5) * 0.2;
+        const sectorAverage = baseScore * 0.9 + (i - 2) * 0.15 + (Math.random() - 0.5) * 0.15;
+        const target = 3.5 + i * 0.25;
+
+        return {
+            year: year.toString(),
+            companyScore: Math.max(1, Math.min(5, parseFloat(companyScore.toFixed(1)))),
+            sectorAverage: Math.max(1, Math.min(5, parseFloat(sectorAverage.toFixed(1)))),
+            target: Math.min(5, parseFloat(target.toFixed(1))),
+        };
+    });
+    setMaturityPathData(path as any);
+
+  }, [selectedCompanyId, language, selectedYear]);
 
 
   const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
@@ -288,8 +304,13 @@ const Dashboard = () => {
     if (active && payload && payload.length) {
       return (
         <div className="p-4 glass text-white rounded-lg">
-          <p className="label font-bold text-lg">{`${t('dashboard.maturityScore')}: ${payload[0].value}`}</p>
-          <p className="intro text-gray-300">{label}</p>
+           <p className="label font-bold text-lg mb-2">{`${t('reports.year')} ${label}`}</p>
+           {payload.map((p: any) => (
+             <div key={p.dataKey} style={{ color: p.color }} className="flex justify-between gap-4">
+                <span>{p.name}:</span>
+                <span className="font-bold">{p.value.toFixed(1)}</span>
+             </div>
+           ))}
         </div>
       );
     }
@@ -406,6 +427,41 @@ const Dashboard = () => {
             />
         </motion.div>
 
+        {/* Strategic Path Chart */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
+            <Card className={"glass h-full"}>
+                <CardHeader>
+                    <CardTitle className="text-gold-400 flex items-center gap-2">
+                        <Target />
+                        {t('dashboard.maturityPath')}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart
+                            data={maturityPathData}
+                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                            <defs>
+                                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#E5C565" stopOpacity={0.8}/>
+                                    <stop offset="95%" stopColor="#E5C565" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                            <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
+                            <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
+                            <Tooltip content={<CustomTooltip />} />
+                            <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
+                            <Area type="monotone" dataKey="companyScore" name={t('reports.companyScore')} stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                             <Line type="monotone" dataKey="sectorAverage" name={t('reports.sectorAverage')} stroke="#00E096" strokeWidth={2} dot={false} />
+                            <Line type="monotone" dataKey="target" name="المستهدف" stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </motion.div>
+
         {/* Strategic Radar */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
           <Card className={"glass h-full"}>
@@ -472,38 +528,6 @@ const Dashboard = () => {
             </motion.div>
         </div>
       </div>
-
-       {/* Strategic Path Chart */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
-            <Card className={"glass h-full"}>
-                <CardHeader>
-                    <CardTitle className="text-gold-400 flex items-center gap-2">
-                        <Target />
-                        {t('dashboard.maturityPath')}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart
-                            data={maturityPathData}
-                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                        >
-                            <defs>
-                                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#E5C565" stopOpacity={0.8}/>
-                                    <stop offset="95%" stopColor="#E5C565" stopOpacity={0}/>
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                            <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
-                            <YAxis domain={[0, 5]} tick={{ fill: '#A0A0A0' }} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Area type="monotone" dataKey="score" stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
-        </motion.div>
         
     </div>
   );
