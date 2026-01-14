@@ -13,16 +13,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { useCompany } from '@/context/CompanyContext';
 
 const allMenuItems = [
-  { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard', roles: ['admin'] },
+  { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard', roles: ['admin'], requiredStatus: 'none' },
   { name: 'registry', icon: Building2, view: 'companies', roles: ['admin', 'company'], requiredStatus: 'profile' },
   { name: 'assessment', icon: ClipboardCheck, view: 'maturity-assessment', roles: ['admin', 'company'], requiredStatus: 'assessment' },
-  { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor', roles: ['admin', 'company'], requiredStatus: 'final' },
-  { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'], requiredStatus: 'final' },
-  { name: 'financials', icon: FileText, view: 'financial-statements', roles: ['admin', 'company'], requiredStatus: 'final' },
-  { name: 'review', icon: Send, view: 'review-submit', roles: ['company'], requiredStatus: 'final' },
-  { name: 'approvals', icon: GitPullRequest, view: 'approval-requests', roles: ['admin'], requiredStatus: 'final' },
-  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin'], requiredStatus: 'final' },
-  { name: 'settings', icon: Settings, view: 'settings', roles: ['admin'], requiredStatus: 'final' },
+  { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor', roles: ['admin', 'company'], requiredStatus: 'compliance' },
+  { name: 'financials', icon: FileText, view: 'financial-statements', roles: ['admin', 'company'], requiredStatus: 'financials' },
+  { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'], requiredStatus: 'improvement' },
+  { name: 'review', icon: Send, view: 'review-submit', roles: ['company'], requiredStatus: 'review' },
+  { name: 'approvals', icon: GitPullRequest, view: 'approval-requests', roles: ['admin'], requiredStatus: 'none' },
+  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin'], requiredStatus: 'none' },
+  { name: 'settings', icon: Settings, view: 'settings', roles: ['admin'], requiredStatus: 'none' },
 ];
 
 interface SidebarProps {
@@ -38,23 +38,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
   const { selectedCompanyId } = useCompany();
 
   const getCompletionStatus = (companyId: string) => {
-    if (typeof window === 'undefined') return { profileComplete: false, assessmentComplete: false };
+    if (typeof window === 'undefined') return { profileComplete: false, assessmentComplete: false, complianceComplete: false, financialsComplete: false, improvementComplete: false };
 
-    // Check Profile Completion
+    // 1. Profile Completion
     const companiesStr = localStorage.getItem('oia_companies_registry');
     const companies = companiesStr ? JSON.parse(companiesStr) : [];
     const companyData = companies.find((c: any) => c.id === companyId);
-    const profileComplete = !!companyData?.legalForm;
+    const profileComplete = !!companyData?.legalForm; // A field that exists only after saving the form
 
-    // Check Assessment Completion
+    // 2. Assessment Completion
     const assessmentStr = localStorage.getItem(`oia_assessment_${companyId}`);
     const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
     const assessmentComplete = assessmentData.isComplete;
 
-    return { profileComplete, assessmentComplete };
+    // 3. Compliance Completion
+    const complianceStr = localStorage.getItem(`oia_compliance_${companyId}`);
+    const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {} };
+    const complianceComplete = Object.keys(complianceData.compliance || {}).length > 0;
+
+    // 4. Financials Completion
+    const financialsComplete = !!companyData?.revenue; // Check if revenue has been entered
+
+    // 5. Improvement Plan Completion
+    const improvementStr = localStorage.getItem(`oia_improvement_plan_${companyId}`);
+    const improvementTasks = improvementStr ? JSON.parse(improvementStr) : [];
+    const improvementComplete = improvementTasks.length > 0;
+
+
+    return { profileComplete, assessmentComplete, complianceComplete, financialsComplete, improvementComplete };
   };
   
-  const completionStatus = userRole === 'company' && selectedCompanyId ? getCompletionStatus(selectedCompanyId) : { profileComplete: true, assessmentComplete: true };
+  const completionStatus = userRole === 'company' && selectedCompanyId ? getCompletionStatus(selectedCompanyId) : { profileComplete: true, assessmentComplete: true, complianceComplete: true, financialsComplete: true, improvementComplete: true };
 
   const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
   
@@ -69,8 +83,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
               return false; // Always enabled
           case 'assessment':
               return !completionStatus.profileComplete;
-          case 'final':
+          case 'compliance':
               return !completionStatus.assessmentComplete;
+          case 'financials':
+              return !completionStatus.complianceComplete;
+          case 'improvement':
+              return !completionStatus.financialsComplete;
+          case 'review':
+              return !completionStatus.improvementComplete;
           default:
               return false;
       }
@@ -78,11 +98,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
   
   const getDisabledTooltip = (item: (typeof menuItems)[0]): string => {
        if (isMenuItemDisabled(item)) {
-           if (item.requiredStatus === 'assessment') {
-               return "يرجى إكمال بيانات الشركة أولاً";
-           }
-           if (item.requiredStatus === 'final') {
-               return "يرجى إكمال واعتماد تقييم النضج أولاً";
+           switch(item.requiredStatus) {
+               case 'assessment': return "يرجى إكمال بيانات الشركة أولاً";
+               case 'compliance': return "يرجى إكمال واعتماد تقييم النضج أولاً";
+               case 'financials': return "يرجى حفظ بيانات الامتثال والمخاطر أولاً";
+               case 'improvement': return "يرجى إدخال وحفظ القوائم المالية أولاً";
+               case 'review': return "يرجى إنشاء وحفظ خطة التحسين أولاً";
+               default: return "أكمل الخطوة السابقة أولاً";
            }
        }
        return '';
@@ -138,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                         <TooltipTrigger asChild>
                             {menuItemContent}
                         </TooltipTrigger>
-                        {(isOpen && isDisabled) || (!isOpen && tooltipContent) ? (
+                        {(isOpen && isDisabled && tooltipContent) || (!isOpen && tooltipContent) ? (
                             <TooltipContent side="left" className="glass text-white">
                                 <p>{tooltipContent}</p>
                             </TooltipContent>
