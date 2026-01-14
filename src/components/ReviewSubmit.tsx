@@ -150,7 +150,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
                         <div>
                             <h3 className="text-xl font-bold text-emerald-300">{t('approvals.status.approved')}</h3>
                             <p className="text-gray-300">تم اعتماد تقييمكم بنجاح. يمكنكم الآن استعراض الشهادة من صفحة التقارير.</p>
-                             <Button variant="outline" className="mt-2 text-emerald-300 border-emerald-400/50 hover:bg-emerald-400/10 hover:text-emerald-200">
+                             <Button onClick={() => onNavigate('reports')} variant="outline" className="mt-2 text-emerald-300 border-emerald-400/50 hover:bg-emerald-400/10 hover:text-emerald-200">
                                 <FileText className="mr-2 h-4 w-4"/>
                                 عرض شهادة النضج
                             </Button>
