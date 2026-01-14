@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Filter, ArrowRight, Check, Star, MessageSquare, Save, ArrowLeft } from 'lucide-react';
+import { Plus, Filter, ArrowRight, Check, Star, MessageSquare, Save, ArrowLeft, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -105,12 +105,12 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            className="bg-[#1e293b] p-4 mb-4 cursor-pointer flex flex-col h-fit border border-white/10 hover:border-white/20 transition-all rounded-lg"
+            className="bg-slate-800 p-4 mb-4 cursor-pointer flex flex-col h-fit border border-white/10 hover:border-white/20 transition-all rounded-lg"
             onClick={() => onOpenDetails(task)}
         >
             <div className="flex justify-between items-start mb-3">
                 <p className="text-xs text-gray-400">{task.dueDate}</p>
-                <Badge className={cn('text-white text-[10px] px-2 py-0.5', priorityConfig[task.priority].className)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
+                <Badge className={cn('text-white text-[10px] px-2 py-0.5', priorityConfig[task.priority].className, priorityConfig[task.priority].glowClassName)}>{t(`improvement.priorities.${task.priority.toLowerCase()}`)}</Badge>
             </div>
             
             <h4 className="font-bold text-sm mb-2 text-right leading-relaxed text-white">{language === 'ar' ? task.title_ar : task.title_en}</h4>
@@ -125,17 +125,23 @@ const TaskCard = ({ task, onMove, onOpenDetails, userRole }: { task: Task; onMov
 
 const KanbanLane = ({ title, tasks, status, onMove, onOpenDetails, userRole }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void, onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
     const { t } = useLanguage();
-    const statusConfig: Record<Status, { titleKey: string; className: string, badgeClass: string }> = {
-      'todo': { titleKey: 'improvement.lanes.todo', className: 'border-t-red-500', badgeClass: 'bg-red-500/20 text-red-300' },
-      'in-progress': { titleKey: 'improvement.lanes.inProgress', className: 'border-t-amber-400', badgeClass: 'bg-gold-500/20 text-gold-300' },
-      'done': { titleKey: 'improvement.lanes.done', className: 'border-t-emerald-500', badgeClass: 'bg-success/20 text-green-300' },
+    const statusConfig: Record<Status, { titleKey: string; icon: React.ElementType; bgClass: string, borderClass: string, badgeClass: string }> = {
+      'todo': { titleKey: 'improvement.lanes.todo', icon: AlertTriangle, bgClass: 'bg-red-900/10', borderClass: 'border-t-red-500', badgeClass: 'bg-red-500/20 text-red-300' },
+      'in-progress': { titleKey: 'improvement.lanes.inProgress', icon: Clock, bgClass: 'bg-amber-900/10', borderClass: 'border-t-amber-400', badgeClass: 'bg-gold-500/20 text-gold-300' },
+      'done': { titleKey: 'improvement.lanes.done', icon: CheckCircle, bgClass: 'bg-emerald-900/10', borderClass: 'border-t-emerald-500', badgeClass: 'bg-success/20 text-green-300' },
     };
 
+    const config = statusConfig[status];
+    const Icon = config.icon;
+
     return (
-        <div className={cn("glass flex flex-col h-full", statusConfig[status].className, "border-t-4")}>
+        <div className={cn("glass flex flex-col h-full", config.borderClass, "border-t-4", config.bgClass)}>
             <div className="flex justify-between items-center p-4 border-b border-white/10">
-                <h3 className="font-bold text-xl">{t(statusConfig[status].titleKey)}</h3>
-                <Badge className={cn("text-white", statusConfig[status].badgeClass)}>{tasks.length}</Badge>
+                <div className="flex items-center gap-3">
+                    <Icon className={cn("w-6 h-6", {"text-red-400": status==='todo', "text-amber-400": status==='in-progress', "text-emerald-400": status==='done'})}/>
+                    <h3 className="font-bold text-xl">{t(config.titleKey)}</h3>
+                </div>
+                <Badge className={cn("text-white text-base", config.badgeClass)}>{tasks.length}</Badge>
             </div>
             <div className="overflow-y-auto flex-1 p-4 custom-scrollbar">
                 <AnimatePresence>
