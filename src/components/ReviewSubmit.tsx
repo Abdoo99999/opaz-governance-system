@@ -30,7 +30,11 @@ type ChecklistItem = {
     view: string;
 };
 
-const ReviewSubmit: React.FC = () => {
+interface ReviewSubmitProps {
+    onNavigate: (view: string) => void;
+}
+
+const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany } = useCompany();
     const { toast } = useToast();
@@ -168,6 +172,7 @@ const ReviewSubmit: React.FC = () => {
 
             {renderStatusBanner()}
             
+            {(submissionStatus === 'draft' || submissionStatus === 'returned') && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                 <Card className="glass">
                     <CardHeader>
@@ -185,7 +190,7 @@ const ReviewSubmit: React.FC = () => {
                                         <span className={cn("font-bold", item.isComplete ? "text-success" : "text-danger")}>
                                             {item.isComplete ? t('review.status.complete') : t('review.status.incomplete')}
                                         </span>
-                                        <Button variant="outline" className="text-white border-white/20">{t('review.view')}</Button>
+                                        <Button variant="outline" className="text-white border-white/20" onClick={() => onNavigate(item.view)}>{t('review.view')}</Button>
                                     </div>
                                 </li>
                             ))}
@@ -193,6 +198,7 @@ const ReviewSubmit: React.FC = () => {
                     </CardContent>
                 </Card>
             </motion.div>
+            )}
 
             {(submissionStatus === 'draft' || submissionStatus === 'returned') && (
                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-8 text-center">

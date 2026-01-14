@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "@/components/Dashboard";
 import CompanyRegistry from "@/components/CompanyRegistry";
@@ -27,14 +27,19 @@ const AppContent = () => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [userRole, setUserRole] = useState<UserRole>('admin');
   const { toast } = useToast();
-  const { setSelectedCompanyId } = useCompany();
+  const { setSelectedCompanyId, getSelectedCompany, getCompanySubmissionStatus } = useCompany();
 
   const handleLogin = (role: UserRole, companyId?: string) => {
     setIsLoggedIn(true);
     setUserRole(role);
     if (role === 'company' && companyId) {
         setSelectedCompanyId(companyId);
-        setCurrentView('companies'); // Redirect company user to registry
+        const status = getCompanySubmissionStatus(companyId);
+        if (status === 'submitted' || status === 'approved') {
+            setCurrentView('review-submit');
+        } else {
+            setCurrentView('companies'); // Redirect company user to registry
+        }
     } else {
         setSelectedCompanyId('all'); // Admin defaults to all
         setCurrentView('dashboard');
@@ -56,6 +61,18 @@ const AppContent = () => {
   };
 
   const handleNavigate = (view: string) => {
+    const companyId = getSelectedCompany()?.id;
+    if (userRole === 'company' && companyId) {
+        const status = getCompanySubmissionStatus(companyId);
+        if ((status === 'submitted' || status === 'approved') && view !== 'improvement-plan' && view !== 'review-submit') {
+            toast({
+                title: "الصفحة مقفلة",
+                description: "البيانات قيد المراجعة ولا يمكن تعديلها حالياً.",
+                variant: 'destructive',
+            });
+            return;
+        }
+    }
     setCurrentView(view);
   };
 
@@ -74,7 +91,7 @@ const AppContent = () => {
       case 'financial-statements':
         return <FinancialStatements />;
       case 'review-submit':
-        return userRole === 'company' ? <ReviewSubmit /> : <CompanyRegistry userRole={userRole} />;
+        return <ReviewSubmit onNavigate={handleNavigate} />;
       case 'approval-requests':
         return userRole === 'admin' ? <ApprovalRequests onNavigate={handleNavigate} /> : <CompanyRegistry userRole={userRole} />;
       case 'reports':
