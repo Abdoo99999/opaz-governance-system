@@ -25,25 +25,21 @@ export default function AppLayout({ children, currentView, onNavigate, onLogout,
     setSidebarOpen(!isSidebarOpen);
   };
   
-  const isAssessmentView = currentView === 'maturity-assessment';
-
   return (
     <div className="flex h-screen bg-royal-900 text-foreground" dir={dir}>
-      {!isAssessmentView && (
-        <Sidebar 
-          isOpen={isSidebarOpen} 
-          currentView={currentView} 
-          onNavigate={onNavigate}
-          onLogout={onLogout} 
-          userRole={userRole}
-        />
-      )}
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        currentView={currentView} 
+        onNavigate={onNavigate}
+        onLogout={onLogout} 
+        userRole={userRole}
+      />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
           onToggleSidebar={toggleSidebar} 
           onNavigate={onNavigate}
           userRole={userRole}
-          isSidebarVisible={!isAssessmentView}
+          isSidebarVisible={true}
         />
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
           {React.cloneElement(children as React.ReactElement, { userRole: userRole, key: selectedCompanyId })}
