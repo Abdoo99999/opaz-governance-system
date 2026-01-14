@@ -85,7 +85,7 @@ const FinancialHub: React.FC<FinancialHubProps> = ({ roi, netProfit, equity }) =
 
     return (
         <div>
-            <h2 className="text-2xl font-bold text-gold-400 mb-4">{t('companyForm.financial.title')} Hub</h2>
+            <h2 className="text-2xl font-bold text-gold-400 mb-4">{t('dashboard.financial.hubTitle')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <ChartCard 
                     title={t('companyForm.financial.roi')}
@@ -96,21 +96,21 @@ const FinancialHub: React.FC<FinancialHubProps> = ({ roi, netProfit, equity }) =
                     isSemiCircle
                 />
                 <ChartCard 
-                    title="صافي الأرباح"
+                    title={t('dashboard.financial.netProfit')}
                     value={formatMillion(netProfit)}
                     unit="OMR"
                     chartData={profitData}
                     color="#10B981"
                 />
                 <ChartCard 
-                    title="حقوق الملكية"
+                    title={t('dashboard.financial.equity')}
                     value={formatMillion(equity)}
                     unit="OMR"
                     chartData={equityData}
                     color="#3b82f6"
                 />
                 <ChartCard 
-                    title="التدفق النقدي الحر"
+                    title={t('dashboard.financial.freeCashFlow')}
                     value={formatMillion(netProfit * 0.2)}
                     unit="OMR"
                     chartData={cashFlowData}

@@ -33,6 +33,28 @@ export const translations = {
       maturityScore: "مستوى النضج",
       compliant: "ممتثل",
       nonCompliant: "غير ممتثل",
+      financial: {
+        hubTitle: "محور الأداء المالي",
+        netProfit: "صافي الأرباح",
+        equity: "حقوق الملكية",
+        freeCashFlow: "التدفق النقدي الحر"
+      },
+      riskLabels: {
+          impact: {
+            minimal: 'ضئيل',
+            minor: 'بسيط',
+            moderate: 'متوسط',
+            major: 'كبير',
+            catastrophic: 'كارثي'
+          },
+          probability: {
+            rare: 'نادر',
+            unlikely: 'غير محتمل',
+            possible: 'ممكن',
+            likely: 'محتمل',
+            certain: 'مؤكد'
+          }
+      }
     },
     registry: {
       title: "سجل الشركات",
@@ -345,6 +367,28 @@ export const translations = {
       maturityScore: "Maturity Score",
       compliant: "Compliant",
       nonCompliant: "Non-Compliant",
+      financial: {
+        hubTitle: "Financial Position Hub",
+        netProfit: "Net Profit",
+        equity: "Equity",
+        freeCashFlow: "Free Cash Flow"
+      },
+      riskLabels: {
+          impact: {
+            minimal: 'Minimal',
+            minor: 'Minor',
+            moderate: 'Moderate',
+            major: 'Major',
+            catastrophic: 'Catastrophic'
+          },
+          probability: {
+            rare: 'Rare',
+            unlikely: 'Unlikely',
+            possible: 'Possible',
+            likely: 'Likely',
+            certain: 'Certain'
+          }
+      }
     },
     registry: {
         title: "Company Registry",

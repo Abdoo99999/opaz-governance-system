@@ -4,14 +4,11 @@ import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 
 const riskLevels = [
-  { level: 'Low', color: 'bg-emerald-600/50', label: 'منخفض' },
-  { level: 'Medium', color: 'bg-yellow-600/50', label: 'متوسط' },
-  { level: 'High', color: 'bg-orange-600/50', label: 'مرتفع' },
-  { level: 'Critical', color: 'bg-red-700/60', label: 'حرج' },
+  { level: 'Low', color: 'bg-emerald-600/50', label_ar: 'منخفض', label_en: 'Low' },
+  { level: 'Medium', color: 'bg-yellow-600/50', label_ar: 'متوسط', label_en: 'Medium' },
+  { level: 'High', color: 'bg-orange-600/50', label_ar: 'مرتفع', label_en: 'High' },
+  { level: 'Critical', color: 'bg-red-700/60', label_ar: 'حرج', label_en: 'Critical' },
 ];
-
-const impactLabels = ['ضئيل', 'بسيط', 'متوسط', 'كبير', 'كارثي'];
-const probabilityLabels = ['نادر', 'غير محتمل', 'ممكن', 'محتمل', 'مؤكد'];
 
 const getRiskLevel = (impact: number, probability: number) => {
   const score = impact * probability;
@@ -26,8 +23,23 @@ interface RiskLandscapeProps {
 }
 
 const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     
+    const impactLabels = [
+        t('dashboard.riskLabels.impact.minimal'),
+        t('dashboard.riskLabels.impact.minor'),
+        t('dashboard.riskLabels.impact.moderate'),
+        t('dashboard.riskLabels.impact.major'),
+        t('dashboard.riskLabels.impact.catastrophic'),
+    ];
+    const probabilityLabels = [
+        t('dashboard.riskLabels.probability.rare'),
+        t('dashboard.riskLabels.probability.unlikely'),
+        t('dashboard.riskLabels.probability.possible'),
+        t('dashboard.riskLabels.probability.likely'),
+        t('dashboard.riskLabels.probability.certain'),
+    ];
+
     // Group risks by cell
     const riskMatrix = Array(5).fill(null).map(() => Array(5).fill(0));
     data.forEach(risk => {
@@ -85,5 +97,3 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
 
 
 export default RiskLandscape;
-
-    
