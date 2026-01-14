@@ -37,7 +37,8 @@ export const translations = {
         hubTitle: "محور الأداء المالي",
         netProfit: "صافي الأرباح",
         equity: "حقوق الملكية",
-        freeCashFlow: "التدفق النقدي الحر"
+        freeCashFlow: "التدفق النقدي الحر",
+        roi: "العائد على الاستثمار"
       },
       riskLabels: {
           impact: {
@@ -253,7 +254,7 @@ export const translations = {
     },
     settings: {
         title: "الإعدادات المتقدمة",
-        subtitle: "إدارة متغيرات النظام والأوزان",
+        subtitle: "إدارة متغيرات النظام والبيانات",
         profile: {
             title: "الملف الشخصي للمشرف",
             role: "المشرف العام ومهندس النظام",
@@ -271,6 +272,16 @@ export const translations = {
             version: "OIA GRC v2.0 (Elite Edition)",
             license: "مرخص حصرياً لجهاز الاستثمار العماني",
             credits: "صمم وهندس بواسطة د. عبدالرحمن"
+        },
+        data: {
+            title: "إدارة البيانات",
+            description: "سيؤدي هذا الإجراء إلى حذف جميع البيانات المدخلة في التطبيق بشكل نهائي، بما في ذلك بيانات الشركات والتقييمات والمخاطر وخطط التحسين. استخدم هذا الخيار بحذر شديد.",
+            resetButton: "إعادة ضبط بيانات التطبيق",
+            confirmTitle: "هل أنت متأكد؟",
+            confirmDesc: "سيتم حذف جميع البيانات بشكل نهائي ولا يمكن التراجع عن هذا الإجراء. هل ترغب في المتابعة؟",
+            confirmButton: "نعم، قم بإعادة الضبط",
+            resetSuccessTitle: "تمت إعادة الضبط بنجاح",
+            resetSuccessDesc: "تم مسح جميع بيانات التطبيق. سيتم إعادة تحميل الصفحة الآن."
         }
     },
     companyForm: {
@@ -408,7 +419,8 @@ export const translations = {
         hubTitle: "Financial Position Hub",
         netProfit: "Net Profit",
         equity: "Equity",
-        freeCashFlow: "Free Cash Flow"
+        freeCashFlow: "Free Cash Flow",
+        roi: "Return on Investment"
       },
       riskLabels: {
           impact: {
@@ -624,7 +636,7 @@ export const translations = {
     },
     settings: {
         title: "Advanced Settings",
-        subtitle: "Manage system variables and weights",
+        subtitle: "Manage system variables and data",
         profile: {
             title: "Supervisor Profile",
             role: "General Supervisor & System Architect",
@@ -642,6 +654,16 @@ export const translations = {
             version: "OIA GRC v2.0 (Elite Edition)",
             license: "Exclusively licensed for Oman Investment Authority",
             credits: "Designed & Architected by Dr. Abdulrahman"
+        },
+        data: {
+            title: "Data Management",
+            description: "This action will permanently delete all data entered into the application, including company data, assessments, risks, and improvement plans. Use this option with extreme caution.",
+            resetButton: "Reset Application Data",
+            confirmTitle: "Are you sure?",
+            confirmDesc: "All data will be permanently deleted. This action cannot be undone. Do you wish to proceed?",
+            confirmButton: "Yes, Reset Data",
+            resetSuccessTitle: "Reset Successful",
+            resetSuccessDesc: "All application data has been cleared. The page will now reload."
         }
     },
     companyForm: {
@@ -743,5 +765,3 @@ export const translations = {
     }
   }
 };
-
-    
