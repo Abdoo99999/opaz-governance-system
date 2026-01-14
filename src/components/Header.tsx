@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Menu, Globe, LayoutDashboard } from 'lucide-react';
+import { Menu, Globe, LayoutDashboard, Calendar } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { COMPANIES } from '@/data/companies';
 import { UserRole } from '@/app/page';
+import { useYear } from '@/context/YearContext';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -27,6 +28,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onNavigate, userRole, isSidebarVisible }) => {
   const { language, setLanguage, t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId, getSelectedCompany } = useCompany();
+  const { selectedYear, setSelectedYear, availableYears } = useYear();
   const selectedCompany = getSelectedCompany();
 
   const handleLanguageChange = () => {
@@ -48,19 +50,36 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onNavigate, userRole, 
             </Button>
           )}
           {userRole === 'admin' ? (
-            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-              <SelectTrigger className="w-[280px] bg-royal-900/60 border-white/10 text-white rounded-lg h-12">
-                <SelectValue placeholder="Select Company" />
-              </SelectTrigger>
-              <SelectContent className="bg-royal-900 text-white border-white/20">
-                <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'All Companies'}</SelectItem>
-                {COMPANIES.map((company) => (
-                  <SelectItem key={company.id} value={company.id}>
-                    {language === 'ar' ? company.name_ar : company.name_en}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-3">
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger className="w-[280px] bg-royal-900/60 border-white/10 text-white rounded-lg h-12">
+                  <SelectValue placeholder="Select Company" />
+                </SelectTrigger>
+                <SelectContent className="bg-royal-900 text-white border-white/20">
+                  <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'All Companies'}</SelectItem>
+                  {COMPANIES.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {language === 'ar' ? company.name_ar : company.name_en}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+               <div className="flex items-center gap-2 bg-royal-900/60 border border-white/10 rounded-lg h-12 px-3">
+                 <Calendar className="w-5 h-5 text-gold-400"/>
+                 <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
+                    <SelectTrigger className="w-[120px] bg-transparent border-0 text-white h-auto p-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-royal-900 text-white border-white/20">
+                      {availableYears.map((year) => (
+                        <SelectItem key={year} value={String(year)}>
+                          {t('reports.year')} {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+               </div>
+            </div>
           ) : (
             selectedCompany && <div className="text-xl font-bold">{language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}</div>
           )}

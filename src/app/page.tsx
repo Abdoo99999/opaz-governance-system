@@ -17,6 +17,7 @@ import ApprovalRequests from '@/components/ApprovalRequests';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { CompanyProvider, useCompany } from '@/context/CompanyContext';
+import { YearProvider } from '@/context/YearContext';
 
 export type UserRole = 'admin' | 'company';
 
@@ -103,9 +104,11 @@ const AppContent = () => {
 export default function Home() {
   return (
     <LanguageProvider>
-      <CompanyProvider>
-        <AppContent />
-      </CompanyProvider>
+      <YearProvider>
+        <CompanyProvider>
+          <AppContent />
+        </CompanyProvider>
+      </YearProvider>
     </LanguageProvider>
   );
 }
