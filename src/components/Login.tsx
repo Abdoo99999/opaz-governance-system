@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -29,8 +30,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             className="w-full max-w-lg z-10"
         >
             <Card className="glass">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-2xl leading-relaxed font-bold text-gold-400">{t('appTitle')}</CardTitle>
+                <CardHeader className="text-center pb-4">
+                    <CardTitle className="text-2xl font-bold text-gold-400">{t('appTitle')}</CardTitle>
+                    <p className="text-gray-300 text-sm pt-2">{t('appSubtitle')}</p>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="admin" className="w-full">
@@ -97,3 +99,5 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 };
 
 export default Login;
+
+    

@@ -1,7 +1,8 @@
 
 export const translations = {
   ar: {
-    appTitle: "البرنامج الوطني لقياس نضج الحوكمة لشركات جهاز الاستثمار العماني",
+    appTitle: "البرنامج الالكتروني لقياس نضج الحوكمة",
+    appSubtitle: "لشركات جهاز الاستثمار العماني",
     menu: {
       dashboard: "لوحة القيادة",
       registry: "سجل الشركات",
@@ -393,7 +394,8 @@ export const translations = {
     }
   },
   en: {
-    appTitle: "National Program for Governance Maturity Measurement for OIA Companies",
+    appTitle: "Electronic Program for Governance Maturity Measurement",
+    appSubtitle: "for OIA Companies",
     menu: {
       dashboard: "Dashboard",
       registry: "Company Registry",
@@ -785,3 +787,5 @@ export const translations = {
     }
   }
 };
+
+    
