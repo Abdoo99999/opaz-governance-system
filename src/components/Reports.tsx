@@ -276,30 +276,14 @@ const Reports: React.FC = () => {
     
         const canvas = await html2canvas(reportRef.current, {
             scale: 2,
-            backgroundColor: '#ffffff', // Use white background for PDF
+            backgroundColor: null, // Keep original background
+            useCORS: true, 
             onclone: (document) => {
-                const reportElement = document.getElementById('report-content');
-                if (reportElement) {
-                    reportElement.style.backgroundColor = '#ffffff';
-                    document.querySelectorAll('.print-black-text').forEach(el => {
-                       (el as HTMLElement).style.color = '#000000';
-                    });
-                     document.querySelectorAll('.glass').forEach(el => {
-                        (el as HTMLElement).style.backgroundColor = '#f9fafb';
-                        (el as HTMLElement).style.color = '#000000';
-                        (el as HTMLElement).style.border = '1px solid #e5e7eb';
-                        (el as HTMLElement).style.boxShadow = 'none';
-
-                    });
-                     document.querySelectorAll('.recharts-text, .recharts-legend-item-text').forEach(el => {
-                         if (!(el as HTMLElement).style.fill || (el as HTMLElement).style.fill === 'rgb(255, 255, 255)'){
-                            (el as HTMLElement).style.fill = '#000000';
-                         }
-                    });
-                     document.querySelectorAll('.recharts-legend-wrapper, .recharts-cartesian-axis-tick-value').forEach(el => {
-                        (el as HTMLElement).style.color = '#000000';
-                    });
-                }
+                 // The font needs to be available to the cloned document
+                 const fontLink = document.createElement('link');
+                 fontLink.rel = 'stylesheet';
+                 fontLink.href = 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap';
+                 document.head.appendChild(fontLink);
             }
         });
     
@@ -319,7 +303,7 @@ const Reports: React.FC = () => {
         heightLeft -= pdfHeight;
     
         while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
+            position -= pdfHeight;
             pdf.addPage();
             pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pdfHeight;
@@ -588,7 +572,7 @@ const Reports: React.FC = () => {
                     </motion.div>
                      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
                          <Card className="glass">
-                            <CardHeader><CardTitle className="text-gold-400 print:text-black">{t('reports.criticalRisks')}</CardTitle></CardHeader>
+                            <CardHeader><CardTitle className="text-gold-400 print-text-black">{t('reports.criticalRisks')}</CardTitle></CardHeader>
                             <CardContent>
                                 <Table>
                                     <TableHeader>
