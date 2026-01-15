@@ -42,6 +42,7 @@ import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
 import type { Task } from '@/components/ImprovementPlan';
 import { cn } from '@/lib/utils';
+import { useYear } from '@/context/YearContext';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -52,7 +53,7 @@ const cardVariants = {
   }),
 };
 
-const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl";
+const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl";
 
 
 const RadarCustomTick = (props: any) => {
@@ -66,22 +67,18 @@ const RadarCustomTick = (props: any) => {
     const offset = 30; // 30px offset
 
     const angle = (360 / AXES.length) * index;
-
-    if (angle === 0 || angle === 180) { // Top and bottom
-        newY += (angle === 0 ? -offset : offset);
-    } else if (angle > 0 && angle < 180) { // Right side
-        newX += offset;
-    } else { // Left side
-        newX -= offset;
-    }
     
-    // Adjust Y for top/bottom quarters to avoid collision
-    if(angle > 0 && angle < 90) newY += offset / 2;
-    if(angle > 270 && angle < 360) newY += offset / 2;
-    if(angle > 90 && angle < 180) newY -= offset / 2;
-    if(angle > 180 && angle < 270) newY -= offset / 2;
-
-
+    if (angle === 0) newY -= offset; // Top
+    else if (angle === 180) newY += offset; // Bottom
+    else if (angle > 0 && angle < 180) newX += offset; // Right side
+    else newX -= offset; // Left side
+    
+    // Fine-tune Y for corners
+    if (angle > 0 && angle < 90) newY += offset / 3;
+    if (angle > 90 && angle < 180) newY -= offset / 4;
+    if (angle > 180 && angle < 270) newY -= offset / 4;
+    if (angle > 270 && angle < 360) newY += offset / 3;
+    
     if (value && value.length > wordWrapThreshold) {
         const words = value.split(' ');
         const lines = words.reduce((acc: string[], word: string) => {
@@ -132,6 +129,8 @@ const RadarCustomTick = (props: any) => {
 const Reports: React.FC = () => {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { selectedYear, setSelectedYear, availableYears } = useYear();
+
     const selectedCompany = getSelectedCompany();
     
     const [summaryData, setSummaryData] = useState({ maturity: 0, compliance: 0, risks: { high: 0, medium: 0, critical: 0 }, actions: 0 });
@@ -177,7 +176,7 @@ const Reports: React.FC = () => {
         const maturity = scores.length > 0 ? totalScore / INDICATORS.length : 0;
         
         const complianceItems = Object.values(complianceData.compliance || {});
-        const complianceRate = complianceItems.length > 0 ? (complianceItems.filter(v => v).length / complianceItems.length) * 100 : 0;
+        const complianceRate = complianceItems.length > 0 ? (complianceItems.filter((v: any) => v).length / complianceItems.length) * 100 : 0;
 
         const risks = complianceData.risks || [];
         const criticalRisks = risks.filter((r: any) => r.impact * r.probability >= 20).length;
@@ -265,7 +264,7 @@ const Reports: React.FC = () => {
             ] as any);
         }
 
-    }, [selectedCompanyId, language, t]);
+    }, [selectedCompanyId, language, t, selectedYear]);
 
     const handlePrint = () => {
         window.print();
@@ -303,16 +302,17 @@ const Reports: React.FC = () => {
             <header className="flex flex-col md:flex-row items-center justify-between mb-8 print:hidden">
                 <div>
                     <h1 className="text-3xl font-bold">{t('reports.title')} - {selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h1>
-                    <p className="text-gray-400 mt-1">{format(new Date(), "eeee, d MMMM yyyy")}</p>
+                    <p className="text-gray-300 mt-1">{format(new Date(), "eeee, d MMMM yyyy")}</p>
                 </div>
                 <div className="flex items-center gap-4 mt-4 md:mt-0">
-                    <Select defaultValue="2024">
+                    <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
                         <SelectTrigger className="w-[180px] glass text-white">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="bg-royal-900 text-white border-white/20">
-                            <SelectItem value="2024">{t('reports.year')} 2024</SelectItem>
-                            <SelectItem value="2023">{t('reports.year')} 2023</SelectItem>
+                             {availableYears.map(year => (
+                                <SelectItem key={year} value={String(year)}>{t('reports.year')} {year}</SelectItem>
+                             ))}
                         </SelectContent>
                     </Select>
                     <Button onClick={handlePrint} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
@@ -339,7 +339,7 @@ const Reports: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-gold-400">{summaryData.maturity}/5</div>
-                            <p className="text-xs text-gold-200/60">{t('reports.summary.maturitySub')}</p>
+                            <p className="text-xs text-gold-300/60">{t('reports.summary.maturitySub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -351,7 +351,7 @@ const Reports: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-green-400">{summaryData.compliance}%</div>
-                             <p className="text-xs text-green-200/60">{t('reports.summary.complianceSub')}</p>
+                             <p className="text-xs text-green-300/60">{t('reports.summary.complianceSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -365,7 +365,7 @@ const Reports: React.FC = () => {
                             <div className="text-xl font-bold">
                                <span className="text-danger">{summaryData.risks.critical} {t('registry.risks.critical')}</span> / <span className="text-yellow-400">{summaryData.risks.high} {t('registry.risks.high')}</span>
                             </div>
-                            <p className="text-xs text-red-200/60">{t('reports.summary.risksSub')}</p>
+                            <p className="text-xs text-red-300/60">{t('reports.summary.risksSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -377,7 +377,7 @@ const Reports: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-blue-400">{summaryData.actions} {t('reports.summary.pending')}</div>
-                            <p className="text-xs text-blue-200/60">{t('reports.summary.actionsSub')}</p>
+                            <p className="text-xs text-blue-300/60">{t('reports.summary.actionsSub')}</p>
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -393,13 +393,19 @@ const Reports: React.FC = () => {
                         <CardContent className="print:text-black">
                             <ResponsiveContainer width="100%" height={400}>
                                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                                     <defs>
+                                        <radialGradient id="radarFill">
+                                          <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
+                                          <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
+                                        </radialGradient>
+                                      </defs>
                                     <PolarGrid className="stroke-white/20 print:stroke-gray-300" />
                                     <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                                     <PolarRadiusAxis angle={30} domain={[0, 150]} className="hidden" />
                                     <Tooltip {...tooltipStyle} />
                                     <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
-                                    <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" fill="#D4AF37" fillOpacity={0.6} />
-                                    <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#00E096" fill="#00E096" fillOpacity={0.2} />
+                                    <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
+                                    <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
                                 </RadarChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -435,10 +441,10 @@ const Reports: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={riskDistributionData} layout="vertical" margin={{ right: 20 }}>
+                                <BarChart data={riskDistributionData} layout="vertical" margin={{ right: 20, left: 20 }}>
                                     <CartesianGrid horizontal={false} className="stroke-white/10 print:stroke-gray-200" />
                                     <XAxis type="number" tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
-                                    <YAxis dataKey="name" type="category" width={80} tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
+                                    <YAxis dataKey="name" type="category" width={60} tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
                                     <Tooltip {...tooltipStyle} />
                                     <Bar dataKey="count" barSize={30} radius={[0, 10, 10, 0]}>
                                         {riskDistributionData.map((entry, index) => (
@@ -459,7 +465,7 @@ const Reports: React.FC = () => {
                         <CardContent>
                              <ResponsiveContainer width="100%" height={300}>
                                 <PieChart>
-                                    <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5}>
+                                    <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} labelLine={false}>
                                         {improvementPlanData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={(entry as any).color} />
                                         ))}
@@ -487,17 +493,17 @@ const Reports: React.FC = () => {
                         <CardContent>
                              <Table>
                                 <TableHeader>
-                                    <TableRow className="border-white/10 hover:bg-white/5 print:border-gray-300">
-                                        <TableHead className="text-right text-white print:text-black">{t('reports.table.indicator')}</TableHead>
-                                        <TableHead className="text-right text-white print:text-black">{t('reports.table.axis')}</TableHead>
-                                        <TableHead className="text-center text-white print:text-black">{t('reports.table.score')}</TableHead>
-                                        <TableHead className="text-right text-white print:text-black">{t('reports.table.recommendation')}</TableHead>
+                                    <TableRow className="border-white/10 hover:bg-transparent print:border-gray-300">
+                                        <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.indicator')}</TableHead>
+                                        <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.axis')}</TableHead>
+                                        <TableHead className="text-center text-white font-bold print:text-black">{t('reports.table.score')}</TableHead>
+                                        <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.recommendation')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {topGapsData.map((gap: any) => (
                                         <TableRow key={gap.id} className="border-white/10 hover:bg-white/5 print:border-gray-200">
-                                            <TableCell>{gap.id}. {gap.name}</TableCell>
+                                            <TableCell className="font-medium">{gap.id}. {gap.name}</TableCell>
                                             <TableCell>{gap.axis}</TableCell>
                                             <TableCell className="text-center"><Badge variant="destructive">{gap.score}</Badge></TableCell>
                                             <TableCell>{t('reports.developPolicy')}</TableCell>
@@ -514,20 +520,20 @@ const Reports: React.FC = () => {
                         <CardContent>
                             <Table>
                                 <TableHeader>
-                                    <TableRow className="border-white/10 hover:bg-white/5 print:border-gray-300">
-                                        <TableHead className="text-right text-white print:text-black">{t('compliance.riskForm.description')}</TableHead>
-                                        <TableHead className="text-right text-white print:text-black">{t('compliance.riskForm.category')}</TableHead>
-                                        <TableHead className="text-center text-white print:text-black">{t('compliance.riskForm.impact')}</TableHead>
-                                        <TableHead className="text-center text-white print:text-black">{t('compliance.riskForm.probability')}</TableHead>
+                                    <TableRow className="border-white/10 hover:bg-transparent print:border-gray-300">
+                                        <TableHead className="text-right text-white font-bold print:text-black">{t('compliance.riskForm.description')}</TableHead>
+                                        <TableHead className="text-right text-white font-bold print:text-black">{t('compliance.riskForm.category')}</TableHead>
+                                        <TableHead className="text-center text-white font-bold print:text-black">{t('compliance.riskForm.impact')}</TableHead>
+                                        <TableHead className="text-center text-white font-bold print:text-black">{t('compliance.riskForm.probability')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {criticalRisksData.map((risk: any, index: number) => (
                                         <TableRow key={index} className="border-white/10 hover:bg-white/5 print:border-gray-200">
-                                            <TableCell>{risk.description}</TableCell>
+                                            <TableCell className="font-medium">{risk.description}</TableCell>
                                             <TableCell>{t(`compliance.riskCategories.${risk.category.toLowerCase()}`)}</TableCell>
-                                            <TableCell className="text-center"><Badge className="bg-danger/80">{risk.impact}</Badge></TableCell>
-                                            <TableCell className="text-center"><Badge className="bg-yellow-500/80">{risk.probability}</Badge></TableCell>
+                                            <TableCell className="text-center"><Badge className="bg-danger/80 text-danger-foreground">{risk.impact}</Badge></TableCell>
+                                            <TableCell className="text-center"><Badge className="bg-yellow-500/80 text-yellow-foreground">{risk.probability}</Badge></TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
