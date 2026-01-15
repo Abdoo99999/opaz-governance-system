@@ -5,6 +5,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Area,
+  AreaChart,
   ComposedChart,
   Bar,
   BarChart,
@@ -286,8 +287,15 @@ const Dashboard = () => {
   const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate, fill: '#3b82f6' }], [dashboardData.omanizationRate]);
   const compliancePieData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
-      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
+  
+  const sparklineData = useMemo(() => 
+    Array.from({ length: 10 }, () => ({
+      uv: dashboardData.totalAssets * (Math.random() * 0.4 + 0.8)
+    })), 
+  [dashboardData.totalAssets]);
+
 
   const riskMapData = useMemo(() => {
     return (dashboardData.risks || []).map((risk: any) => ({
@@ -354,15 +362,28 @@ const Dashboard = () => {
               </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-              <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70")}>
-                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70 relative overflow-hidden")}>
+                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10">
                       <CardTitle className="text-sm font-medium text-green-200/80">{t('dashboard.portfolioHealth')}</CardTitle>
                       <CheckCircle className="h-4 w-4 text-green-300/70" />
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="z-10">
                       <div className="text-4xl font-bold text-green-400">{dashboardData.totalAssets.toFixed(2)}M</div>
                       <p className="text-xs text-green-200/60 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
                   </CardContent>
+                  <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-20">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={sparklineData}>
+                            <defs>
+                                <linearGradient id="colorAssets" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#00E096" stopOpacity={0.5}/>
+                                    <stop offset="95%" stopColor="#00E096" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <Area type="monotone" dataKey="uv" stroke="#00E096" strokeWidth={2} fill="url(#colorAssets)" />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
               </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
@@ -412,7 +433,13 @@ const Dashboard = () => {
                       <AlertTriangle className="h-4 w-4 text-red-300/70" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold text-red-400">{(dashboardData.risks || []).length}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                        <div className="text-4xl font-bold text-red-400">{(dashboardData.risks || []).length}</div>
+                      </div>
                       <p className="text-xs text-red-200/60 mt-1">{t('dashboard.activeRisks')}</p>
                   </CardContent>
               </Card>
@@ -449,7 +476,7 @@ const Dashboard = () => {
                   <PolarGrid stroke="rgba(255,255,255,0.2)" />
                   <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                  <Radar name="Performance" dataKey="A" stroke="#E5C565" strokeWidth={2} fill="url(#radarFill)" />
+                  <Radar name="Performance" dataKey="A" stroke="#E5C565" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.2} />
                    <Tooltip {...tooltipStyle} />
                 </RadarChart>
               </ResponsiveContainer>
@@ -538,5 +565,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    

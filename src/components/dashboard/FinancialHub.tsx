@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
@@ -14,10 +14,7 @@ interface FinancialHubProps {
     equity: number;
 }
 
-const ChartCard = ({ title, value, unit, chartData, color, isSemiCircle = false }: { title: string, value: string, unit: string, chartData: any[], color: string, isSemiCircle?: boolean }) => {
-    const endAngle = isSemiCircle ? 0 : 360;
-    const startAngle = isSemiCircle ? 180 : 0;
-    
+const ChartCard = ({ title, value, unit, children, color }: { title: string, value: string, unit: string, children: React.ReactNode, color: string }) => {
     return (
         <Card className="glass relative overflow-hidden h-full flex flex-col justify-between transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl" style={{ borderColor: `${color}40`, '--glow-color': color } as React.CSSProperties}>
              <div className="absolute inset-0 opacity-10 bg-gradient-to-tr from-transparent via-[var(--glow-color)] to-transparent"></div>
@@ -25,35 +22,7 @@ const ChartCard = ({ title, value, unit, chartData, color, isSemiCircle = false 
 
             <CardContent className="p-4 flex flex-col items-center justify-center text-center flex-grow relative">
                 <div className="h-[100px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <RadialBarChart
-                            innerRadius="70%"
-                            outerRadius="100%"
-                            data={chartData}
-                            startAngle={startAngle}
-                            endAngle={endAngle}
-                            barSize={12}
-                        >
-                            <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                            <RadialBar
-                                background
-                                dataKey="value"
-                                angleAxisId={0}
-                                fill={color}
-                                cornerRadius={6}
-                                className="drop-shadow-[0_2px_4px_var(--glow-color)]"
-                            />
-                            <defs>
-                                <filter id={`glow-${color.slice(1)}`}>
-                                    <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-                                    <feMerge>
-                                        <feMergeNode in="blur" />
-                                        <feMergeNode in="SourceGraphic" />
-                                    </feMerge>
-                                </filter>
-                            </defs>
-                        </RadialBarChart>
-                    </ResponsiveContainer>
+                    {children}
                 </div>
                 <div className="mt-2 text-center">
                     <p className="text-gray-300 text-sm mb-1">{title}</p>
@@ -68,10 +37,16 @@ const ChartCard = ({ title, value, unit, chartData, color, isSemiCircle = false 
 const FinancialHub: React.FC<FinancialHubProps> = ({ roi, netProfit, equity }) => {
     const { t } = useLanguage();
     
-    const roiData = [{ name: 'ROI', value: roi * 10 }]; // Scale for 0-100 domain
-    const profitData = [{ name: 'Profit', value: 85 }]; // Example static value for full ring
+    const roiData = [{ name: 'ROI', value: roi }];
     const equityData = [{ name: 'Equity', value: 90 }];
     const cashFlowData = [{ name: 'Cash', value: 60 }];
+    
+    const profitData = [
+        { name: 'Q1', value: netProfit * 0.2 },
+        { name: 'Q2', value: netProfit * 0.3 },
+        { name: 'Q3', value: netProfit * 0.15 },
+        { name: 'Q4', value: netProfit * 0.35 },
+    ];
     
     const formatMillion = (num: number) => {
         if (num >= 1_000_000) {
@@ -91,31 +66,97 @@ const FinancialHub: React.FC<FinancialHubProps> = ({ roi, netProfit, equity }) =
                     title={t('companyForm.financial.roi')}
                     value={roi.toFixed(1)}
                     unit="%"
-                    chartData={roiData}
                     color="#D4AF37"
-                    isSemiCircle
-                />
+                >
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadialBarChart
+                            innerRadius="70%"
+                            outerRadius="100%"
+                            data={roiData}
+                            startAngle={180}
+                            endAngle={0}
+                            barSize={12}
+                        >
+                            <PolarAngleAxis type="number" domain={[0, 25]} angleAxisId={0} tick={false} />
+                            <RadialBar
+                                background
+                                dataKey="value"
+                                angleAxisId={0}
+                                fill="#D4AF37"
+                                cornerRadius={6}
+                                className="drop-shadow-[0_2px_4px_var(--glow-color)]"
+                            />
+                        </RadialBarChart>
+                    </ResponsiveContainer>
+                </ChartCard>
+                
                 <ChartCard 
                     title={t('dashboard.financial.netProfit')}
                     value={formatMillion(netProfit)}
                     unit="OMR"
-                    chartData={profitData}
                     color="#10B981"
-                />
+                >
+                     <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={profitData}>
+                           <defs>
+                                <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+                                    <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
+                                </linearGradient>
+                            </defs>
+                            <Bar dataKey="value" radius={[4, 4, 0, 0]} fill="url(#colorProfit)" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </ChartCard>
+
                 <ChartCard 
                     title={t('dashboard.financial.equity')}
                     value={formatMillion(equity)}
                     unit="OMR"
-                    chartData={equityData}
                     color="#3b82f6"
-                />
+                >
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadialBarChart
+                            innerRadius="70%"
+                            outerRadius="100%"
+                            data={equityData}
+                            barSize={12}
+                        >
+                            <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                            <RadialBar
+                                background
+                                dataKey="value"
+                                angleAxisId={0}
+                                fill="#3b82f6"
+                                cornerRadius={6}
+                            />
+                        </RadialBarChart>
+                    </ResponsiveContainer>
+                </ChartCard>
                 <ChartCard 
                     title={t('dashboard.financial.freeCashFlow')}
                     value={formatMillion(netProfit * 0.2)}
                     unit="OMR"
-                    chartData={cashFlowData}
                     color="#8b5cf6"
-                />
+                >
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadialBarChart
+                            innerRadius="70%"
+                            outerRadius="100%"
+                            data={cashFlowData}
+                            barSize={12}
+                        >
+                            <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                            <RadialBar
+                                background
+                                dataKey="value"
+                                angleAxisId={0}
+                                fill="#8b5cf6"
+                                cornerRadius={6}
+                            />
+                        </RadialBarChart>
+                    </ResponsiveContainer>
+                </ChartCard>
             </div>
         </div>
     );
