@@ -2,12 +2,13 @@
 "use client";
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { motion } from 'framer-motion';
 
 const riskLevels = [
-  { level: 'Low', color: 'bg-emerald-600/50', label_ar: 'منخفض', label_en: 'Low' },
-  { level: 'Medium', color: 'bg-yellow-600/50', label_ar: 'متوسط', label_en: 'Medium' },
-  { level: 'High', color: 'bg-orange-600/50', label_ar: 'مرتفع', label_en: 'High' },
-  { level: 'Critical', color: 'bg-red-700/60', label_ar: 'حرج', label_en: 'Critical' },
+  { level: 'Low', color: 'from-emerald-500/10 to-emerald-900/10', borderColor: 'border-emerald-500/20', label_ar: 'منخفض', label_en: 'Low' },
+  { level: 'Medium', color: 'from-yellow-500/10 to-yellow-800/10', borderColor: 'border-yellow-500/30', label_ar: 'متوسط', label_en: 'Medium' },
+  { level: 'High', color: 'from-orange-500/15 to-orange-800/15', borderColor: 'border-orange-500/40', label_ar: 'مرتفع', label_en: 'High' },
+  { level: 'Critical', color: 'from-red-500/20 to-red-800/20', borderColor: 'border-red-500/50', label_ar: 'حرج', label_en: 'Critical' },
 ];
 
 const getRiskLevel = (impact: number, probability: number) => {
@@ -49,47 +50,41 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
     });
 
     return (
-        <div className="flex flex-col h-full w-full aspect-square text-xs">
-            {/* Top Labels - Probability */}
-            <div className="flex items-center">
-                <div className="w-24 flex-shrink-0"></div>
-                <div className="flex-1 grid grid-cols-5 text-center text-gray-300">
-                    {probabilityLabels.map(label => (
-                        <div key={label} className="p-1 font-semibold">{label}</div>
-                    ))}
-                </div>
-            </div>
-            
-            <div className="flex flex-1">
-                {/* Side Labels - Impact */}
-                <div className="w-24 flex flex-col justify-around text-center text-gray-300">
-                    {impactLabels.slice().reverse().map(label => (
-                         <div key={label} className="p-1 font-semibold flex items-center justify-center h-full -rotate-90">{label}</div>
-                    ))}
-                </div>
+        <div className="flex flex-col h-full w-full text-xs">
+             <div className="grid grid-cols-6 gap-1 flex-grow">
+                {/* Y-Axis Header - Empty Top-Left Cell */}
+                <div />
                 
-                {/* Grid */}
-                <div className="flex-1 grid grid-rows-5 gap-1">
-                    {riskMatrix.map((row, rowIndex) => (
-                        <div key={rowIndex} className="grid grid-cols-5 gap-1">
-                            {row.map((count, colIndex) => {
-                                const impact = 5 - rowIndex;
-                                const probability = colIndex + 1;
-                                const level = getRiskLevel(impact, probability);
-                                const riskInfo = riskLevels[level];
-                                return (
-                                    <div
-                                        key={`${rowIndex}-${colIndex}`}
-                                        className={`relative flex items-center justify-center rounded-md text-white transition-all duration-300 hover:scale-105 hover:shadow-lg ${riskInfo.color} ${count > 0 ? 'border border-white/20' : 'bg-white/5'}`}
-                                    >
-                                        {count > 0 && <span className="font-bold text-lg">{count}</span>}
-                                        <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-royal-800 ${riskInfo.color}`}></div>
-                                    </div>
-                                );
-                            })}
+                {/* X-Axis Headers (Probability) */}
+                {probabilityLabels.map((label, i) => (
+                    <div key={i} className="flex items-center justify-center text-center text-gray-400 font-semibold p-1">
+                        {label}
+                    </div>
+                ))}
+
+                {/* Y-Axis Labels and Grid Cells */}
+                {riskMatrix.map((row, rowIndex) => (
+                    <React.Fragment key={rowIndex}>
+                        <div className="flex items-center justify-center text-center -rotate-90 text-gray-400 font-semibold p-1">
+                            {impactLabels[4-rowIndex]}
                         </div>
-                    ))}
-                </div>
+                        {row.map((count, colIndex) => {
+                            const impact = 5 - rowIndex;
+                            const probability = colIndex + 1;
+                            const level = getRiskLevel(impact, probability);
+                            const riskInfo = riskLevels[level];
+                            return (
+                                <motion.div
+                                    key={`${rowIndex}-${colIndex}`}
+                                    className={`relative flex items-center justify-center rounded-lg text-white transition-all duration-300 ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
+                                    whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
+                                >
+                                    {count > 0 && <span className="font-bold text-xl drop-shadow-lg">{count}</span>}
+                                </motion.div>
+                            );
+                        })}
+                    </React.Fragment>
+                ))}
             </div>
         </div>
     );
