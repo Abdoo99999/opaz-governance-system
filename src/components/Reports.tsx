@@ -53,7 +53,7 @@ const cardVariants = {
   }),
 };
 
-const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl";
+const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl print:shadow-none print:border-gray-200 print:bg-white";
 
 
 const RadarCustomTick = (props: any) => {
@@ -391,7 +391,7 @@ const Reports: React.FC = () => {
                 </div>
 
                 {/* Main Visuals */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 print:break-before-page">
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
                         <Card className="glass">
                             <CardHeader>
