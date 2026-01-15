@@ -43,6 +43,8 @@ import { INDICATORS, AXES } from '@/lib/data/indicators';
 import type { Task } from '@/components/ImprovementPlan';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -268,12 +270,52 @@ const Reports: React.FC = () => {
 
     }, [selectedCompanyId, language, t, selectedYear]);
 
-    const handleExport = () => {
+    const handleExport = async () => {
+        const input = reportRef.current;
+        if (!input) return;
+
         setIsExporting(true);
-        setTimeout(() => {
-            window.print();
+
+        try {
+            const canvas = await html2canvas(input, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#001220',
+                onclone: (document) => {
+                    const style = document.createElement('style');
+                    style.innerHTML = `@font-face { font-family: 'Cairo'; src: url('/fonts/Cairo-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; } @font-face { font-family: 'Cairo'; src: url('/fonts/Cairo-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; } @font-face { font-family: 'Cairo'; src: url('/fonts/Cairo-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; }`;
+                    document.head.appendChild(style);
+                }
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            const ratio = imgWidth / pdfWidth;
+            const canvasHeightInPdf = imgHeight / ratio;
+            
+            let heightLeft = canvasHeightInPdf;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, canvasHeightInPdf);
+            heightLeft -= pdfHeight;
+
+            while (heightLeft > 0) {
+                position = heightLeft - canvasHeightInPdf;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, canvasHeightInPdf);
+                heightLeft -= pdfHeight;
+            }
+
+            pdf.save('OIA-Strategic-Report.pdf');
+        } catch (error) {
+            console.error("Could not export PDF:", error);
+        } finally {
             setIsExporting(false);
-        }, 500); // Small delay to allow UI to update
+        }
     };
     
     const tooltipStyle = {
@@ -451,16 +493,16 @@ const Reports: React.FC = () => {
                                     <BarChart 
                                         data={riskDistributionData} 
                                         layout="vertical" 
-                                        margin={{ top: 0, right: 20, left: 60, bottom: 0 }}
+                                        margin={{ top: 0, right: 20, left: 20, bottom: 0 }}
                                     >
                                         <CartesianGrid horizontal={false} className="stroke-white/10 print:stroke-gray-200" />
                                         <XAxis type="number" tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
                                         <YAxis 
                                             dataKey="name" 
                                             type="category" 
-                                            width={80} 
-                                            tick={{ fill: '#9CA3AF' }} 
-                                            className="fill-white text-xs print:fill-black" 
+                                            width={120} 
+                                            tick={{ fontSize: 14, fill: '#9ca3af', dx: -10 }}
+                                            dx={-20}
                                         />
                                         <Tooltip {...tooltipStyle} />
                                         <Bar dataKey="count" barSize={30} radius={[0, 10, 10, 0]}>
