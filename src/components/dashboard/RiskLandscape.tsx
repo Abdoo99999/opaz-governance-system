@@ -86,7 +86,7 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data, onCellClick }) => {
                                     </>
                                 );
                                 
-                                const tooltipText = `${t('compliance.riskForm.impact')}: ${impactLabels[impact - 1]} • ${t('compliance.riskForm.probability')}: ${probabilityLabels[probability-1]}`;
+                                const tooltipText = `(${impact}) ${impactLabels[impact - 1]} * (${probability}) ${probabilityLabels[probability - 1]}`;
                                 const tooltipCount = count > 0 ? `(${count} ${t('dashboard.activeRisks')})` : `(${t('compliance.addRisk')})`;
 
                                 const cell = onCellClick ? (
@@ -125,5 +125,3 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data, onCellClick }) => {
 };
 
 export default RiskLandscape;
-
-    

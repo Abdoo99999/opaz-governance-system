@@ -163,17 +163,17 @@ const ComplianceMonitor: React.FC = () => {
                     )}
                  </div>
                  <div className="flex items-center gap-4">
-                     <Button onClick={() => {
-                        reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
-                        setIsModalOpen(true);
-                     }} className="bg-gold-500/10 text-gold-300 border border-gold-500/20 hover:bg-gold-500/20">
-                        <Plus className="ml-2 h-5 w-5" />
-                        {t('compliance.addRisk')}
-                     </Button>
-                    <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10">
+                    <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                         <Save className="ml-2 h-5 w-5" />
                         {t('compliance.saveButton')}
                     </Button>
+                     <Button onClick={() => {
+                        reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
+                        setIsModalOpen(true);
+                     }} variant="outline" className="text-gold-300 border border-gold-500/30 hover:bg-gold-500/20">
+                        <Plus className="ml-2 h-5 w-5" />
+                        {t('compliance.addRisk')}
+                     </Button>
                  </div>
             </header>
 
@@ -312,5 +312,3 @@ const ComplianceMonitor: React.FC = () => {
 };
 
 export default ComplianceMonitor;
-
-    
