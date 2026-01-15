@@ -441,10 +441,10 @@ const Reports: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={riskDistributionData} layout="vertical" margin={{ right: 20, left: 40 }}>
+                                <BarChart data={riskDistributionData} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
                                     <CartesianGrid horizontal={false} className="stroke-white/10 print:stroke-gray-200" />
                                     <XAxis type="number" tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
-                                    <YAxis dataKey="name" type="category" width={80} tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
+                                    <YAxis dataKey="name" type="category" width={120} tickMargin={10} tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
                                     <Tooltip {...tooltipStyle} />
                                     <Bar dataKey="count" barSize={30} radius={[0, 10, 10, 0]}>
                                         {riskDistributionData.map((entry, index) => (
@@ -547,5 +547,7 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+    
 
     
