@@ -142,7 +142,7 @@ export const translations = {
         allAxes: "كل المحاور",
         lanes: {
             todo: "مهام جديدة",
-            inProgress: "جاري المعالجة",
+            inProgress: "قيد التنفيذ",
             done: "تم الإنجاز"
         },
         priorities: {
@@ -251,7 +251,7 @@ export const translations = {
         },
         improvement: {
           completed: "تم الإنجاز",
-          inProgress: "جاري التنفيذ",
+          inProgress: "قيد التنفيذ",
           notStarted: "قيد الانتظار"
         },
         financial: {
@@ -535,7 +535,7 @@ export const translations = {
         allAxes: "All Axes",
         lanes: {
             todo: "Identified Gaps",
-            inProgress: "In Remediation",
+            inProgress: "In Progress",
             done: "Resolved"
         },
         priorities: {
@@ -787,3 +787,5 @@ export const translations = {
     }
   }
 };
+
+    

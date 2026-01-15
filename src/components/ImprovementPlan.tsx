@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { Plus, Filter, ArrowRight, Check, Star, MessageSquare, Save, ArrowLeft, AlertTriangle, Clock, CheckCircle, Upload, File as FileIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -64,7 +64,7 @@ const complianceQuestions: Record<string, {en: string, ar: string, axisId: numbe
 };
 
 
-const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole }: { task: Task; onMove: (taskId: number, newStatus: Status) => void; onComplete: (taskId: number, notes: string, file: File) => void; onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
+const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDraggedTask }: { task: Task; onMove: (taskId: number, newStatus: Status) => void; onComplete: (taskId: number, notes: string, file: File) => void; onOpenDetails: (task: Task) => void, userRole: UserRole, setDraggedTask: (task: Task | null) => void }) => {
     const { t } = useLanguage();
     const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
@@ -109,11 +109,11 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole }: { task:
         <>
             <motion.div
                 layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3 }}
-                className="bg-slate-800/50 p-4 mb-4 cursor-pointer flex flex-col h-fit border border-white/10 hover:border-white/20 transition-all rounded-lg"
+                draggable={true}
+                onDragStart={() => setDraggedTask(task)}
+                onDragEnd={() => setDraggedTask(null)}
+                whileDrag={{ scale: 1.05, boxShadow: "0px 5px 15px rgba(0,0,0,0.3)" }}
+                className="bg-slate-800/50 p-4 mb-4 cursor-grab active:cursor-grabbing flex flex-col h-fit border border-white/10 hover:border-white/20 transition-all rounded-lg"
                 onClick={() => onOpenDetails(task)}
             >
                 <div className="flex justify-between items-start mb-3">
@@ -142,8 +142,10 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole }: { task:
     );
 };
 
-const KanbanLane = ({ title, tasks, status, onMove, onComplete, onOpenDetails, userRole }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void; onComplete: (taskId: number, notes: string, file: File) => void; onOpenDetails: (task: Task) => void, userRole: UserRole }) => {
+const KanbanLane = ({ title, tasks, status, onMove, onComplete, onOpenDetails, userRole, draggedTask, setDraggedTask, onDrop }: { title: string, tasks: Task[], status: Status, onMove: (taskId: number, newStatus: Status) => void; onComplete: (taskId: number, notes: string, file: File) => void; onOpenDetails: (task: Task) => void, userRole: UserRole; draggedTask: Task | null; setDraggedTask: (task: Task | null) => void; onDrop: (status: Status) => void; }) => {
     const { t } = useLanguage();
+    const [isHovered, setIsHovered] = useState(false);
+
     const statusConfig: Record<Status, { titleKey: string; icon: React.ElementType; bgClass: string, borderClass: string, badgeClass: string }> = {
       'todo': { titleKey: 'improvement.lanes.todo', icon: AlertTriangle, bgClass: 'bg-red-900/10', borderClass: 'border-t-red-500', badgeClass: 'bg-red-500/20 text-red-300' },
       'in-progress': { titleKey: 'improvement.lanes.inProgress', icon: Clock, bgClass: 'bg-amber-900/10', borderClass: 'border-t-amber-400', badgeClass: 'bg-gold-500/20 text-gold-300' },
@@ -154,7 +156,25 @@ const KanbanLane = ({ title, tasks, status, onMove, onComplete, onOpenDetails, u
     const Icon = config.icon;
 
     return (
-        <div className={cn("glass flex flex-col h-full", config.borderClass, "border-t-4", config.bgClass)}>
+        <div 
+            onDrop={(e) => {
+                e.preventDefault();
+                onDrop(status);
+                setIsHovered(false);
+            }}
+            onDragOver={(e) => {
+                e.preventDefault();
+                setIsHovered(true);
+            }}
+            onDragLeave={() => setIsHovered(false)}
+            className={cn(
+                "glass flex flex-col h-full transition-colors duration-300", 
+                config.borderClass, 
+                "border-t-4", 
+                config.bgClass,
+                isHovered && "bg-gold-500/10"
+            )}
+        >
             <div className="flex justify-between items-center p-4 border-b border-white/10">
                 <div className="flex items-center gap-3">
                     <Icon className={cn("w-6 h-6", {"text-red-400": status==='todo', "text-amber-400": status==='in-progress', "text-emerald-400": status==='done'})}/>
@@ -165,7 +185,15 @@ const KanbanLane = ({ title, tasks, status, onMove, onComplete, onOpenDetails, u
             <div className="overflow-y-auto flex-1 p-4 custom-scrollbar">
                 <AnimatePresence>
                     {tasks.map(task => (
-                        <TaskCard key={task.id} task={task} onMove={onMove} onComplete={onComplete} onOpenDetails={onOpenDetails} userRole={userRole} />
+                        <TaskCard 
+                            key={task.id} 
+                            task={task} 
+                            onMove={onMove} 
+                            onComplete={onComplete} 
+                            onOpenDetails={onOpenDetails} 
+                            userRole={userRole}
+                            setDraggedTask={setDraggedTask}
+                        />
                     ))}
                 </AnimatePresence>
             </div>
@@ -313,6 +341,8 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
     const [filterPriority, setFilterPriority] = useState('All');
     const [filterAxis, setFilterAxis] = useState('All');
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+
 
     // RELOAD data when company changes
     useEffect(() => {
@@ -408,6 +438,11 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         );
     };
 
+    const handleDrop = (status: Status) => {
+        if (!draggedTask || draggedTask.status === status) return;
+        handleMoveTask(draggedTask.id, status);
+    };
+
     const handleCompleteTask = (taskId: number, notes: string, file: File) => {
         setTasks(prevTasks =>
             prevTasks.map(task =>
@@ -501,6 +536,9 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                         onComplete={handleCompleteTask}
                         onOpenDetails={handleOpenDetails}
                         userRole={userRole}
+                        draggedTask={draggedTask}
+                        setDraggedTask={setDraggedTask}
+                        onDrop={handleDrop}
                     />
                      <KanbanLane
                         key="in-progress"
@@ -511,6 +549,9 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                         onComplete={handleCompleteTask}
                         onOpenDetails={handleOpenDetails}
                         userRole={userRole}
+                        draggedTask={draggedTask}
+                        setDraggedTask={setDraggedTask}
+                        onDrop={handleDrop}
                     />
                      <KanbanLane
                         key="done"
@@ -521,6 +562,9 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                         onComplete={handleCompleteTask}
                         onOpenDetails={handleOpenDetails}
                         userRole={userRole}
+                        draggedTask={draggedTask}
+                        setDraggedTask={setDraggedTask}
+                        onDrop={handleDrop}
                     />
                 </div>
             )}
@@ -529,5 +573,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
+
+    
 
     
