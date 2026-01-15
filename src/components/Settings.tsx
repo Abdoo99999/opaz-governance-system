@@ -83,11 +83,16 @@ const Settings: React.FC = () => {
                                 <CardTitle>{t('settings.profile.title')}</CardTitle>
                             </CardHeader>
                             <CardContent className="flex flex-col items-center text-center">
-                                <Avatar className="h-32 w-32 border-4 border-gold-500/50 mb-4">
-                                    <AvatarImage src="https://picsum.photos/seed/architect/200/200" alt="Dr. Abdulrahman" data-ai-hint="person portrait professional" />
-                                    <AvatarFallback>DA</AvatarFallback>
+                                <Avatar className="h-32 w-32 border-4 border-gold-500/50 mb-4 bg-royal-800/50">
+                                   <div className="w-full h-full flex items-center justify-center">
+                                        <svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M25 85L35 25L45 85" stroke="#D4AF37" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+                                            <path d="M30 65H40" stroke="#D4AF37" strokeWidth="8" strokeLinecap="round"/>
+                                            <path d="M55 85V25L75 85V25" stroke="#D4AF37" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+                                        </svg>
+                                   </div>
                                 </Avatar>
-                                <h2 className="text-2xl font-bold text-gold-400">Dr. Abdulrahman</h2>
+                                <h2 className="text-2xl font-bold text-gold-400">Dr. Abdulrahman Al-Nofali</h2>
                                 <p className="text-gray-300">{t('settings.profile.role')}</p>
                             </CardContent>
                         </Card>

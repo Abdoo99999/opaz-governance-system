@@ -281,7 +281,7 @@ export const translations = {
             title: "معلومات النظام",
             version: "OIA GRC v2.0 (Elite Edition)",
             license: "مرخص حصرياً لجهاز الاستثمار العماني",
-            credits: "صمم وهندس بواسطة د. عبدالرحمن"
+            credits: "صمم وهندس بواسطة د. عبدالرحمن النوفلي"
         },
         data: {
             title: "إدارة البيانات",
@@ -674,7 +674,7 @@ export const translations = {
             title: "System Information",
             version: "OIA GRC v2.0 (Elite Edition)",
             license: "Exclusively licensed for Oman Investment Authority",
-            credits: "Designed & Architected by Dr. Abdulrahman"
+            credits: "Designed & Architected by Dr. Abdulrahman Al-Nofali"
         },
         data: {
             title: "Data Management",
@@ -787,5 +787,3 @@ export const translations = {
     }
   }
 };
-
-    
