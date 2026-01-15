@@ -125,11 +125,9 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
                 
                 <div className="flex-grow min-h-[1rem]"></div>
                 
-                 {(userRole === 'admin' || userRole === 'company') && (
-                    <div className="flex justify-between items-center p-3 bg-black/20 mt-4 -mx-4 -mb-4 rounded-b-lg min-h-[60px]">
-                        {userRole === 'admin' ? renderAdminButtons() : renderCompanyButtons()}
-                    </div>
-                )}
+                 <div className="flex justify-between items-center p-3 bg-black/20 mt-4 -mx-4 -mb-4 rounded-b-lg min-h-[60px]">
+                    {userRole === 'admin' ? renderAdminButtons() : renderCompanyButtons()}
+                 </div>
             </motion.div>
             <CompleteTaskModal 
                 isOpen={isCompleteModalOpen}
@@ -578,3 +576,4 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
     
 
     
+
