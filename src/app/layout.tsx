@@ -5,7 +5,7 @@ import { Cairo } from 'next/font/google';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
-  weight: ['400', '600', '700'],
+  weight: ['400', '700'],
   variable: '--font-cairo',
 });
 
