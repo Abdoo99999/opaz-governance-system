@@ -95,5 +95,8 @@
       .print-h-auto {
         height: auto !important;
       }
+      .print-break-inside-avoid {
+        break-inside: avoid;
+      }
     }
 }

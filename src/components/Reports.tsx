@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -335,7 +336,7 @@ const Reports: React.FC = () => {
                 </div>
 
                 {/* Top Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 print-break-inside-avoid">
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
                         <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -389,8 +390,8 @@ const Reports: React.FC = () => {
                 </div>
 
                 {/* Main Visuals */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 print-break-inside-avoid">
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5} className="print-break-inside-avoid">
                         <Card className="glass">
                             <CardHeader>
                                 <CardTitle className="text-gold-400 font-bold print-text-black">{t('reports.maturityAnalysis')}</CardTitle>
@@ -417,7 +418,7 @@ const Reports: React.FC = () => {
                         </Card>
                     </motion.div>
 
-                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6} className="print-break-inside-avoid">
                         <Card className="glass">
                             <CardHeader>
                                <CardTitle className="text-gold-400 font-bold print-text-black">{t('reports.financial.title')}</CardTitle>
@@ -439,7 +440,7 @@ const Reports: React.FC = () => {
                         </Card>
                     </motion.div>
 
-                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7} className="print-break-inside-avoid">
                          <Card className="glass">
                             <CardHeader>
                                <CardTitle className="text-gold-400 font-bold print-text-black">{t('reports.riskAnalysis')}</CardTitle>
@@ -472,7 +473,7 @@ const Reports: React.FC = () => {
                         </Card>
                     </motion.div>
 
-                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8} className="print-break-inside-avoid">
                          <Card className="glass">
                             <CardHeader>
                                <CardTitle className="text-gold-400 font-bold print-text-black">{t('reports.improvementStatus')}</CardTitle>
@@ -502,7 +503,7 @@ const Reports: React.FC = () => {
                 
                  {/* Detailed Tables */}
                 <div className="space-y-8 print:break-before-page">
-                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9} className="print-break-inside-avoid">
                          <Card className="glass">
                             <CardHeader><CardTitle className="text-gold-400 font-bold print-text-black">{t('reports.topGaps')}</CardTitle></CardHeader>
                             <CardContent>
@@ -529,7 +530,7 @@ const Reports: React.FC = () => {
                             </CardContent>
                         </Card>
                     </motion.div>
-                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
+                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10} className="print-break-inside-avoid">
                          <Card className="glass">
                             <CardHeader><CardTitle className="text-gold-400 font-bold print-text-black">{t('reports.criticalRisks')}</CardTitle></CardHeader>
                             <CardContent>
