@@ -89,5 +89,11 @@
       .print-text-black {
         color: #000 !important;
       }
+      .print-overflow-visible {
+        overflow: visible !important;
+      }
+      .print-h-auto {
+        height: auto !important;
+      }
     }
 }
