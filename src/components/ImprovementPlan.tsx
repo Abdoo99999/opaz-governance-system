@@ -71,7 +71,7 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
     const renderAdminButtons = () => {
         const buttonClasses = "border-gray-600 text-gray-300 hover:bg-gold-500 hover:text-black hover:border-gold-500";
         return (
-            <div className="flex-1 flex justify-between items-center gap-2">
+            <div className="flex justify-between items-center gap-2">
                 {task.status === 'in-progress' && (
                     <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'todo'); }}>
                         <ArrowLeft className="mr-1 h-4 w-4" /> {t('improvement.return')}
@@ -82,9 +82,6 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
                         <ArrowLeft className="mr-1 h-4 w-4" /> {t('improvement.reopen')}
                     </Button>
                 )}
-                 {task.status === 'todo' && (
-                    <div className="flex-1"></div>
-                )}
             </div>
         );
     };
@@ -92,7 +89,7 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
     const renderCompanyButtons = () => {
         const buttonClasses = "border-gray-600 text-gray-300 hover:bg-gold-500 hover:text-black hover:border-gold-500";
         return (
-             <div className="flex-1 flex justify-end items-center gap-2">
+             <div className="flex justify-end items-center gap-2">
                  {task.status === 'todo' && (
                     <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
                         {t('improvement.start')} <ArrowRight className="ml-1 h-4 w-4" />
@@ -115,7 +112,7 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
                 onDragStart={() => setDraggedTask(task)}
                 onDragEnd={() => setDraggedTask(null)}
                 whileDrag={{ scale: 1.05, boxShadow: "0px 5px 15px rgba(0,0,0,0.3)" }}
-                className="bg-slate-800/50 p-4 mb-4 cursor-grab active:cursor-grabbing flex flex-col h-fit border border-white/10 hover:border-white/20 transition-all rounded-lg"
+                className="bg-slate-800/50 p-4 mb-4 cursor-grab active:cursor-grabbing flex flex-col border border-white/10 hover:border-white/20 transition-all rounded-lg"
                 onClick={() => onOpenDetails(task)}
             >
                 <div className="flex justify-between items-start mb-3">
@@ -126,7 +123,7 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
                 <h4 className="font-bold text-sm mb-2 text-right leading-relaxed text-white">{task.title_ar}</h4>
                 {task.indicatorId && <p className="text-xs text-gold-400 mb-4 text-right">{t('improvement.linkedIndicator')} #{task.indicatorId}</p>}
                 
-                <div className="flex-grow"></div>
+                <div className="flex-grow min-h-[1rem]"></div>
                 
                  {(userRole === 'admin' || userRole === 'company') && (
                     <div className="flex justify-between items-center p-3 bg-black/20 mt-4 -mx-4 -mb-4 rounded-b-lg min-h-[60px]">

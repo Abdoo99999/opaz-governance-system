@@ -787,5 +787,3 @@ export const translations = {
     }
   }
 };
-
-    
