@@ -162,10 +162,19 @@ const ComplianceMonitor: React.FC = () => {
                         </Badge>
                     )}
                  </div>
-                <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Save className="ml-2 h-5 w-5" />
-                    {t('compliance.saveButton')}
-                </Button>
+                 <div className="flex items-center gap-4">
+                     <Button onClick={() => {
+                        reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
+                        setIsModalOpen(true);
+                     }} className="bg-gold-500/10 text-gold-300 border border-gold-500/20 hover:bg-gold-500/20">
+                        <Plus className="ml-2 h-5 w-5" />
+                        {t('compliance.addRisk')}
+                     </Button>
+                    <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10">
+                        <Save className="ml-2 h-5 w-5" />
+                        {t('compliance.saveButton')}
+                    </Button>
+                 </div>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
@@ -215,13 +224,6 @@ const ComplianceMonitor: React.FC = () => {
                     <Card className="glass h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
-                            <Button onClick={() => {
-                                reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
-                                setIsModalOpen(true);
-                            }} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                                <Plus className="ml-2 h-5 w-5" />
-                                {t('compliance.addRisk')}
-                            </Button>
                         </CardHeader>
                         <CardContent className="flex-1">
                            <RiskLandscape data={risks} onCellClick={handleRiskCellClick} />

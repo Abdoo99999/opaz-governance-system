@@ -3,6 +3,7 @@
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
 import { motion } from 'framer-motion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const riskLevels = [
   { level: 'Low', color: 'from-emerald-500/10 to-emerald-900/10', borderColor: 'border-emerald-500/20', label_ar: 'منخفض', label_en: 'Low' },
@@ -50,66 +51,78 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data, onCellClick }) => {
         }
     });
 
-    const cellBaseClasses = "relative flex items-center justify-center rounded-lg text-white transition-all duration-300";
+    const cellBaseClasses = "relative flex items-center justify-center w-full h-full rounded-lg text-white transition-all duration-300";
     const clickableClasses = onCellClick ? "cursor-pointer" : "";
 
     return (
-        <div className="flex flex-col h-full w-full text-xs">
-             <div className="grid grid-cols-6 gap-1 flex-grow">
-                {/* Y-Axis Header - Empty Top-Left Cell */}
-                <div />
-                
-                {/* X-Axis Headers (Probability) */}
-                {probabilityLabels.map((label, i) => (
-                    <div key={i} className="flex items-center justify-center text-center text-gray-400 font-semibold p-1">
-                        {label}
-                    </div>
-                ))}
-
-                {/* Y-Axis Labels and Grid Cells */}
-                {riskMatrix.map((row, rowIndex) => (
-                    <React.Fragment key={rowIndex}>
-                        <div className="flex items-center justify-center text-center -rotate-90 text-gray-400 font-semibold p-1">
-                            {impactLabels[4-rowIndex]}
+        <TooltipProvider>
+            <div className="flex flex-col h-full w-full text-xs">
+                 <div className="grid grid-cols-6 gap-1 flex-grow">
+                    {/* Y-Axis Header - Empty Top-Left Cell */}
+                    <div />
+                    
+                    {/* X-Axis Headers (Probability) */}
+                    {probabilityLabels.map((label, i) => (
+                        <div key={i} className="flex items-center justify-center text-center text-gray-400 font-semibold p-1">
+                            {label}
                         </div>
-                        {row.map((count, colIndex) => {
-                            const impact = 5 - rowIndex;
-                            const probability = colIndex + 1;
-                            const level = getRiskLevel(impact, probability);
-                            const riskInfo = riskLevels[level];
-                            
-                            const cellContent = (
-                                <>
-                                {count > 0 && <span className="font-bold text-xl drop-shadow-lg">{count}</span>}
-                                </>
-                            );
+                    ))}
 
-                            return onCellClick ? (
-                                <motion.button
-                                    key={`${rowIndex}-${colIndex}`}
-                                    onClick={() => onCellClick(impact, probability)}
-                                    className={`${cellBaseClasses} ${clickableClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
-                                    whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
-                                >
-                                    {cellContent}
-                                </motion.button>
-                            ) : (
-                                <motion.div
-                                    key={`${rowIndex}-${colIndex}`}
-                                    className={`${cellBaseClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
-                                    whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
-                                >
-                                    {cellContent}
-                                </motion.div>
-                            );
-                        })}
-                    </React.Fragment>
-                ))}
+                    {/* Y-Axis Labels and Grid Cells */}
+                    {riskMatrix.map((row, rowIndex) => (
+                        <React.Fragment key={rowIndex}>
+                            <div className="flex items-center justify-center text-center -rotate-90 text-gray-400 font-semibold p-1">
+                                {impactLabels[4-rowIndex]}
+                            </div>
+                            {row.map((count, colIndex) => {
+                                const impact = 5 - rowIndex;
+                                const probability = colIndex + 1;
+                                const level = getRiskLevel(impact, probability);
+                                const riskInfo = riskLevels[level];
+                                
+                                const cellContent = (
+                                    <>
+                                    {count > 0 && <span className="font-bold text-xl drop-shadow-lg">{count}</span>}
+                                    </>
+                                );
+                                
+                                const tooltipText = `${t('compliance.riskForm.impact')}: ${impactLabels[impact - 1]} • ${t('compliance.riskForm.probability')}: ${probabilityLabels[probability-1]}`;
+                                const tooltipCount = count > 0 ? `(${count} ${t('dashboard.activeRisks')})` : `(${t('compliance.addRisk')})`;
+
+                                const cell = onCellClick ? (
+                                    <motion.button
+                                        onClick={() => onCellClick(impact, probability)}
+                                        className={`${cellBaseClasses} ${clickableClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
+                                        whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
+                                    >
+                                        {cellContent}
+                                    </motion.button>
+                                ) : (
+                                    <motion.div
+                                        className={`${cellBaseClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
+                                        whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
+                                    >
+                                        {cellContent}
+                                    </motion.div>
+                                );
+
+                                return (
+                                    <Tooltip key={`${rowIndex}-${colIndex}`}>
+                                        <TooltipTrigger asChild>{cell}</TooltipTrigger>
+                                        <TooltipContent className="glass text-white">
+                                            <p>{tooltipText}</p>
+                                            <p className="text-center text-gray-400 text-xs">{tooltipCount}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                )
+                            })}
+                        </React.Fragment>
+                    ))}
+                </div>
             </div>
-        </div>
+        </TooltipProvider>
     );
 };
-
 
 export default RiskLandscape;
 
