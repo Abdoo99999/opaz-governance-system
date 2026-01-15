@@ -388,7 +388,8 @@ export const translations = {
       deleteConfirm: "هل أنت متأكد من رغبتك في حذف هذه الشركة؟ لا يمكن التراجع عن هذا الإجراء.",
       deleteSuccessTitle: "تم الحذف بنجاح",
       errorTitle: "خطأ",
-      fillAllFields: "يرجى تعبئة جميع الحقول المطلوبة."
+      fillAllFields: "يرجى تعبئة جميع الحقول المطلوبة.",
+      loading: "جاري التصدير..."
     }
   },
   en: {
@@ -779,7 +780,8 @@ export const translations = {
       deleteConfirm: "Are you sure you want to delete this company? This action cannot be undone.",
       deleteSuccessTitle: "Deleted Successfully",
       errorTitle: "Error",
-      fillAllFields: "Please fill all required fields."
+      fillAllFields: "Please fill all required fields.",
+      loading: "Exporting..."
     }
   }
 };

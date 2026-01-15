@@ -1,8 +1,10 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import {
   Bar,
   BarChart,
@@ -35,7 +37,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, FileDown, AlertCircle, CheckCircle, Wallet } from 'lucide-react';
+import { TrendingUp, FileDown, AlertCircle, CheckCircle, Wallet, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
@@ -130,6 +132,8 @@ const Reports: React.FC = () => {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany } = useCompany();
     const { selectedYear, setSelectedYear, availableYears } = useYear();
+    const reportRef = useRef<HTMLDivElement>(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     const selectedCompany = getSelectedCompany();
     
@@ -266,8 +270,52 @@ const Reports: React.FC = () => {
 
     }, [selectedCompanyId, language, t, selectedYear]);
 
-    const handlePrint = () => {
-        window.print();
+    const handleExport = async () => {
+        if (!reportRef.current) return;
+        setIsExporting(true);
+
+        const canvas = await html2canvas(reportRef.current, {
+            scale: 2,
+            backgroundColor: '#001220',
+            onclone: (document) => {
+                // Ensure text remains white for PDF
+                document.querySelectorAll('.print-black-text').forEach(el => {
+                    (el as HTMLElement).style.color = '#000000';
+                });
+            }
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: 'a4',
+        });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        
+        const width = pdfWidth;
+        const height = width / ratio;
+        
+        let position = 0;
+        let heightLeft = canvasHeight;
+
+        pdf.addImage(imgData, 'PNG', 0, position, width, height);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft > 0) {
+            position = heightLeft - canvasHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, width, height);
+            heightLeft -= pdfHeight;
+        }
+
+        pdf.save('OIA-Strategic-Report.pdf');
+        setIsExporting(false);
     };
     
     const tooltipStyle = {
@@ -293,13 +341,13 @@ const Reports: React.FC = () => {
                    <p className="text-gray-400 mt-2">{t('reports.selectCompanyToView')}</p>
                </div>
            </div>
-       );
-   }
+        );
+    }
 
     return (
-        <div className="p-4 md:p-6 lg:p-8 text-white print:p-0 print:bg-white print:text-black">
+        <div className="p-4 md:p-6 lg:p-8 text-white">
             {/* Header */}
-            <header className="flex flex-col md:flex-row items-center justify-between mb-8 print:hidden">
+            <header className="flex flex-col md:flex-row items-center justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-bold">{t('reports.title')} - {selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h1>
                     <p className="text-gray-300 mt-1">{format(new Date(), "eeee, d MMMM yyyy")}</p>
@@ -315,239 +363,249 @@ const Reports: React.FC = () => {
                              ))}
                         </SelectContent>
                     </Select>
-                    <Button onClick={handlePrint} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                        <FileDown className="ml-2 h-5 w-5" />
-                        {t('reports.export')}
+                    <Button onClick={handleExport} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isExporting}>
+                        {isExporting ? <Loader2 className="ml-2 h-5 w-5 animate-spin" /> : <FileDown className="ml-2 h-5 w-5" />}
+                        {isExporting ? t('common.loading') : t('reports.export')}
                     </Button>
                 </div>
             </header>
             
-            {/* For Print Header */}
-            <div className="hidden print:block text-center mb-8">
-                 <h1 className="text-3xl font-bold text-black">{t('reports.title')}</h1>
-                 <h2 className="text-xl font-semibold text-gray-700">{selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h2>
-                 <p className="text-gray-600 mt-1">OIA Governance System - {format(new Date(), "d MMMM yyyy")}</p>
-            </div>
+            <div id="report-content" ref={reportRef} className="p-8 bg-royal-900 print:bg-white print:p-4">
+                {/* For Print Header */}
+                <div className="hidden print:block text-center mb-8">
+                     <h1 className="text-3xl font-bold text-black print-black-text">{t('reports.title')}</h1>
+                     <h2 className="text-xl font-semibold text-gray-700 print-black-text">{selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h2>
+                     <p className="text-gray-600 mt-1 print-black-text">OIA Governance System - {format(new Date(), "d MMMM yyyy")}</p>
+                </div>
 
-            {/* Top Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-                    <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-gold-200/80 print:text-gray-600">{t('reports.summary.maturity')}</CardTitle>
-                            <TrendingUp className="w-4 h-4 text-gold-300/70" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold text-gold-400">{summaryData.maturity}/5</div>
-                            <p className="text-xs text-gold-300/60">{t('reports.summary.maturitySub')}</p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-                    <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70")}>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-green-200/80 print:text-gray-600">{t('reports.summary.compliance')}</CardTitle>
-                            <CheckCircle className="w-4 h-4 text-green-300/70" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold text-green-400">{summaryData.compliance}%</div>
-                             <p className="text-xs text-green-300/60">{t('reports.summary.complianceSub')}</p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-                    <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-red-200/80 print:text-gray-600">{t('reports.summary.risks')}</CardTitle>
-                            <AlertCircle className="w-4 h-4 text-red-300/70" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-xl font-bold">
-                               <span className="text-danger">{summaryData.risks.critical} {t('registry.risks.critical')}</span> / <span className="text-yellow-400">{summaryData.risks.high} {t('registry.risks.high')}</span>
-                            </div>
-                            <p className="text-xs text-red-300/60">{t('reports.summary.risksSub')}</p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-                    <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-blue-200/80 print:text-gray-600">{t('reports.summary.actions')}</CardTitle>
-                            <AlertCircle className="w-4 h-4 text-blue-300/70" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold text-blue-400">{summaryData.actions} {t('reports.summary.pending')}</div>
-                            <p className="text-xs text-blue-300/60">{t('reports.summary.actionsSub')}</p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            </div>
+                {/* Top Row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
+                        <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-gold-200/80 print:text-gray-600">{t('reports.summary.maturity')}</CardTitle>
+                                <TrendingUp className="w-4 h-4 text-gold-300/70" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-3xl font-bold text-gold-400">{summaryData.maturity}/5</div>
+                                <p className="text-xs text-gold-300/60">{t('reports.summary.maturitySub')}</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
+                        <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70")}>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-green-200/80 print:text-gray-600">{t('reports.summary.compliance')}</CardTitle>
+                                <CheckCircle className="w-4 h-4 text-green-300/70" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-3xl font-bold text-green-400">{summaryData.compliance}%</div>
+                                 <p className="text-xs text-green-300/60">{t('reports.summary.complianceSub')}</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
+                        <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-red-200/80 print:text-gray-600">{t('reports.summary.risks')}</CardTitle>
+                                <AlertCircle className="w-4 h-4 text-red-300/70" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-xl font-bold">
+                                   <span className="text-danger">{summaryData.risks.critical} {t('registry.risks.critical')}</span> / <span className="text-yellow-400">{summaryData.risks.high} {t('registry.risks.high')}</span>
+                                </div>
+                                <p className="text-xs text-red-300/60">{t('reports.summary.risksSub')}</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+                        <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
+                            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-blue-200/80 print:text-gray-600">{t('reports.summary.actions')}</CardTitle>
+                                <AlertCircle className="w-4 h-4 text-blue-300/70" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-3xl font-bold text-blue-400">{summaryData.actions} {t('reports.summary.pending')}</div>
+                                <p className="text-xs text-blue-300/60">{t('reports.summary.actionsSub')}</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
 
-            {/* Main Visuals */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-                    <Card className="glass">
-                        <CardHeader>
-                            <CardTitle className="text-gold-400 print:text-black">{t('reports.maturityAnalysis')}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="print:text-black">
-                            <ResponsiveContainer width="100%" height={400}>
-                                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                                     <defs>
-                                        <radialGradient id="radarFill">
-                                          <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
-                                          <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
-                                        </radialGradient>
-                                      </defs>
-                                    <PolarGrid className="stroke-white/20 print:stroke-gray-300" />
-                                    <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
-                                    <PolarRadiusAxis angle={30} domain={[0, 150]} className="hidden" />
-                                    <Tooltip {...tooltipStyle} />
-                                    <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
-                                    <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
-                                    <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
-                                </RadarChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                {/* Main Visuals */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+                        <Card className="glass">
+                            <CardHeader>
+                                <CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.maturityAnalysis')}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="print:text-black">
+                                <ResponsiveContainer width="100%" height={400}>
+                                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                                         <defs>
+                                            <radialGradient id="radarFill">
+                                              <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
+                                              <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
+                                            </radialGradient>
+                                          </defs>
+                                        <PolarGrid className="stroke-white/20 print:stroke-gray-300" />
+                                        <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
+                                        <PolarRadiusAxis angle={30} domain={[0, 150]} className="hidden" />
+                                        <Tooltip {...tooltipStyle} />
+                                        <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
+                                        <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
+                                        <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
+                                    </RadarChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
-                    <Card className="glass">
-                        <CardHeader>
-                           <CardTitle className="text-gold-400 print:text-black">{t('reports.financial.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                             <ResponsiveContainer width="100%" height={400}>
-                                <ComposedChart data={financialPerformanceData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                                    <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" />
-                                    <XAxis dataKey="name" tick={{ fill: '#A0A0A0' }} />
-                                    <YAxis tickFormatter={(value) => `${value / 1000000}M`} tick={{ fill: '#A0A0A0' }} />
-                                    <Tooltip {...tooltipStyle} formatter={formatCurrency} />
-                                    <Legend wrapperStyle={{ color: '#FFFFFF' }}/>
-                                    <Bar dataKey="revenue" name={t('reports.financial.revenue')} barSize={50} fill="#3b82f6" />
-                                    <Bar dataKey="expenses" name={t('reports.financial.expenses')} barSize={50} fill="#ef4444" />
-                                    <Line type="monotone" dataKey="netProfit" name={t('reports.financial.netProfit')} stroke="#00E096" strokeWidth={3} />
-                                </ComposedChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+                        <Card className="glass">
+                            <CardHeader>
+                               <CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.financial.title')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                 <ResponsiveContainer width="100%" height={400}>
+                                    <ComposedChart data={financialPerformanceData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                                        <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" />
+                                        <XAxis dataKey="name" tick={{ fill: '#A0A0A0' }} />
+                                        <YAxis tickFormatter={(value) => `${value / 1000000}M`} tick={{ fill: '#A0A0A0' }} />
+                                        <Tooltip {...tooltipStyle} formatter={formatCurrency} />
+                                        <Legend wrapperStyle={{ color: '#FFFFFF' }}/>
+                                        <Bar dataKey="revenue" name={t('reports.financial.revenue')} barSize={50} fill="#3b82f6" />
+                                        <Bar dataKey="expenses" name={t('reports.financial.expenses')} barSize={50} fill="#ef4444" />
+                                        <Line type="monotone" dataKey="netProfit" name={t('reports.financial.netProfit')} stroke="#00E096" strokeWidth={3} />
+                                    </ComposedChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
-                     <Card className="glass">
-                        <CardHeader>
-                           <CardTitle className="text-gold-400 print:text-black">{t('reports.riskAnalysis')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={riskDistributionData} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
-                                    <CartesianGrid horizontal={false} className="stroke-white/10 print:stroke-gray-200" />
-                                    <XAxis type="number" tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
-                                    <YAxis dataKey="name" type="category" width={120} tickMargin={10} tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
-                                    <Tooltip {...tooltipStyle} />
-                                    <Bar dataKey="count" barSize={30} radius={[0, 10, 10, 0]}>
-                                        {riskDistributionData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={(entry as any).color} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
+                         <Card className="glass">
+                            <CardHeader>
+                               <CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.riskAnalysis')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <BarChart 
+                                        data={riskDistributionData} 
+                                        layout="vertical" 
+                                        margin={{ top: 0, right: 20, left: 60, bottom: 0 }}
+                                    >
+                                        <CartesianGrid horizontal={false} className="stroke-white/10 print:stroke-gray-200" />
+                                        <XAxis type="number" tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
+                                        <YAxis 
+                                            dataKey="name" 
+                                            type="category" 
+                                            width={150} 
+                                            tickMargin={10} 
+                                            tick={{ fontSize: 14, fill: '#9ca3af', dx: -10 }} 
+                                            className="fill-white text-xs print:fill-black" 
+                                            dx={-20}
+                                        />
+                                        <Tooltip {...tooltipStyle} />
+                                        <Bar dataKey="count" barSize={30} radius={[0, 10, 10, 0]}>
+                                            {riskDistributionData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={(entry as any).color} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
-                     <Card className="glass">
-                        <CardHeader>
-                            <CardTitle className="text-gold-400 print:text-black">{t('reports.improvementStatus')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                             <ResponsiveContainer width="100%" height={300}>
-                                <PieChart>
-                                    <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} labelLine={false}>
-                                        {improvementPlanData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={(entry as any).color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip {...tooltipStyle}/>
-                                    <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
-                                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold print:fill-black">
-                                       {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
-                                    </text>
-                                     <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm print:fill-gray-600">
-                                       {t('reports.actions')}
-                                    </text>
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            </div>
-            
-             {/* Detailed Tables */}
-            <div className="space-y-8 print:break-before-page">
-                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
-                     <Card className="glass">
-                        <CardHeader><CardTitle className="text-gold-400 print:text-black">{t('reports.topGaps')}</CardTitle></CardHeader>
-                        <CardContent>
-                             <Table>
-                                <TableHeader>
-                                    <TableRow className="border-white/10 hover:bg-transparent print:border-gray-300">
-                                        <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.indicator')}</TableHead>
-                                        <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.axis')}</TableHead>
-                                        <TableHead className="text-center text-white font-bold print:text-black">{t('reports.table.score')}</TableHead>
-                                        <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.recommendation')}</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {topGapsData.map((gap: any) => (
-                                        <TableRow key={gap.id} className="border-white/10 hover:bg-white/5 print:border-gray-200">
-                                            <TableCell className="font-medium">{gap.id}. {gap.name}</TableCell>
-                                            <TableCell>{gap.axis}</TableCell>
-                                            <TableCell className="text-center"><Badge variant="destructive">{gap.score}</Badge></TableCell>
-                                            <TableCell>{t('reports.developPolicy')}</TableCell>
+                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+                         <Card className="glass">
+                            <CardHeader>
+                               <CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.improvementStatus')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                 <ResponsiveContainer width="100%" height={300}>
+                                    <PieChart>
+                                        <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} labelLine={false}>
+                                            {improvementPlanData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={(entry as any).color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip {...tooltipStyle}/>
+                                        <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
+                                        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold print:fill-black">
+                                            {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
+                                        </text>
+                                         <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm print:fill-gray-600">
+                                           {t('reports.actions')}
+                                        </text>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
+                
+                 {/* Detailed Tables */}
+                <div className="space-y-8 print:break-before-page">
+                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+                         <Card className="glass">
+                            <CardHeader><CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.topGaps')}</CardTitle></CardHeader>
+                            <CardContent>
+                                 <Table>
+                                    <TableHeader>
+                                        <TableRow className="border-white/10 hover:bg-transparent print:border-gray-300">
+                                            <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.indicator')}</TableHead>
+                                            <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.axis')}</TableHead>
+                                            <TableHead className="text-center text-white font-bold print:text-black">{t('reports.table.score')}</TableHead>
+                                            <TableHead className="text-right text-white font-bold print:text-black">{t('reports.table.recommendation')}</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
-                     <Card className="glass">
-                        <CardHeader><CardTitle className="text-gold-400 print:text-black">{t('reports.criticalRisks')}</CardTitle></CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="border-white/10 hover:bg-transparent print:border-gray-300">
-                                        <TableHead className="text-right text-white font-bold print:text-black">{t('compliance.riskForm.description')}</TableHead>
-                                        <TableHead className="text-right text-white font-bold print:text-black">{t('compliance.riskForm.category')}</TableHead>
-                                        <TableHead className="text-center text-white font-bold print:text-black">{t('compliance.riskForm.impact')}</TableHead>
-                                        <TableHead className="text-center text-white font-bold print:text-black">{t('compliance.riskForm.probability')}</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {criticalRisksData.map((risk: any, index: number) => (
-                                        <TableRow key={index} className="border-white/10 hover:bg-white/5 print:border-gray-200">
-                                            <TableCell className="font-medium">{risk.description}</TableCell>
-                                            <TableCell>{t(`compliance.riskCategories.${risk.category.toLowerCase()}`)}</TableCell>
-                                            <TableCell className="text-center"><Badge className="bg-danger/80 text-danger-foreground">{risk.impact}</Badge></TableCell>
-                                            <TableCell className="text-center"><Badge className="bg-yellow-500/80 text-yellow-foreground">{risk.probability}</Badge></TableCell>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {topGapsData.map((gap: any) => (
+                                            <TableRow key={gap.id} className="border-white/10 hover:bg-white/5 print:border-gray-200">
+                                                <TableCell className="font-medium">{gap.id}. {gap.name}</TableCell>
+                                                <TableCell>{gap.axis}</TableCell>
+                                                <TableCell className="text-center"><Badge variant="destructive">{gap.score}</Badge></TableCell>
+                                                <TableCell>{t('reports.developPolicy')}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
+                         <Card className="glass">
+                            <CardHeader><CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.criticalRisks')}</CardTitle></CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="border-white/10 hover:bg-transparent print:border-gray-300">
+                                            <TableHead className="text-right text-white font-bold print:text-black">{t('compliance.riskForm.description')}</TableHead>
+                                            <TableHead className="text-right text-white font-bold print:text-black">{t('compliance.riskForm.category')}</TableHead>
+                                            <TableHead className="text-center text-white font-bold print:text-black">{t('compliance.riskForm.impact')}</TableHead>
+                                            <TableHead className="text-center text-white font-bold print:text-black">{t('compliance.riskForm.probability')}</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {criticalRisksData.map((risk: any, index: number) => (
+                                            <TableRow key={index} className="border-white/10 hover:bg-white/5 print:border-gray-200">
+                                                <TableCell className="font-medium">{risk.description}</TableCell>
+                                                <TableCell>{t(`compliance.riskCategories.${risk.category.toLowerCase()}`)}</TableCell>
+                                                <TableCell className="text-center"><Badge className="bg-danger/80 text-danger-foreground">{risk.impact}</Badge></TableCell>
+                                                <TableCell className="text-center"><Badge className="bg-yellow-500/80 text-yellow-foreground">{risk.probability}</Badge></TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
             </div>
         </div>
     );
 };
 
 export default Reports;
-
-    
-
-    
