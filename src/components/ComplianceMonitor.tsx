@@ -74,6 +74,12 @@ const ComplianceMonitor: React.FC = () => {
     
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const { register, handleSubmit, control, reset, formState: { errors } } = useForm<RiskFormValues>({
+        resolver: zodResolver(riskSchema),
+        defaultValues: { impact: 1, probability: 1 }
+    });
+
+
     // RELOAD data when company changes
     useEffect(() => {
         if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
@@ -94,12 +100,9 @@ const ComplianceMonitor: React.FC = () => {
             setComplianceState(initialComplianceState);
             setRisks([]);
         }
-    }, [selectedCompanyId]);
-
-    const { register, handleSubmit, control, reset, formState: { errors } } = useForm<RiskFormValues>({
-        resolver: zodResolver(riskSchema),
-        defaultValues: { impact: 1, probability: 1 }
-    });
+        // Also reset the form when company changes
+        reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
+    }, [selectedCompanyId, reset]);
 
     const handleSave = () => {
         if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
@@ -124,7 +127,18 @@ const ComplianceMonitor: React.FC = () => {
     const onSubmitRisk = (data: RiskFormValues) => {
         setRisks(prev => [...prev, data]);
         setIsModalOpen(false);
-        reset();
+        reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
+    };
+
+    const handleRiskCellClick = (impact: number, probability: number) => {
+        reset({
+            impact: impact,
+            probability: probability,
+            description: '',
+            category: '',
+            mitigation: ''
+        });
+        setIsModalOpen(true);
     };
     
     if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
@@ -201,13 +215,16 @@ const ComplianceMonitor: React.FC = () => {
                     <Card className="glass h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
-                            <Button onClick={() => setIsModalOpen(true)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                            <Button onClick={() => {
+                                reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
+                                setIsModalOpen(true);
+                            }} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                                 <Plus className="ml-2 h-5 w-5" />
                                 {t('compliance.addRisk')}
                             </Button>
                         </CardHeader>
                         <CardContent className="flex-1">
-                           <RiskLandscape data={risks} />
+                           <RiskLandscape data={risks} onCellClick={handleRiskCellClick} />
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -250,7 +267,7 @@ const ComplianceMonitor: React.FC = () => {
                                         name="impact"
                                         control={control}
                                         render={({ field }) => (
-                                            <Select onValueChange={(v) => field.onChange(parseInt(v))} defaultValue={String(field.value)}>
+                                            <Select onValueChange={(v) => field.onChange(parseInt(v))} value={String(field.value)}>
                                                 <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue /></SelectTrigger>
                                                 <SelectContent className="bg-royal-900 text-white border-white/20">
                                                     {[1,2,3,4,5].map(i => <SelectItem key={i} value={String(i)}>{i}</SelectItem>)}
@@ -265,7 +282,7 @@ const ComplianceMonitor: React.FC = () => {
                                         name="probability"
                                         control={control}
                                         render={({ field }) => (
-                                            <Select onValueChange={(v) => field.onChange(parseInt(v))} defaultValue={String(field.value)}>
+                                            <Select onValueChange={(v) => field.onChange(parseInt(v))} value={String(field.value)}>
                                                 <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue /></SelectTrigger>
                                                 <SelectContent className="bg-royal-900 text-white border-white/20">
                                                     {[1,2,3,4,5].map(i => <SelectItem key={i} value={String(i)}>{i}</SelectItem>)}

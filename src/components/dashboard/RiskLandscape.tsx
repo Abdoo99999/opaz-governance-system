@@ -21,9 +21,10 @@ const getRiskLevel = (impact: number, probability: number) => {
 
 interface RiskLandscapeProps {
     data: { impact: number; probability: number; }[];
+    onCellClick?: (impact: number, probability: number) => void;
 }
 
-const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
+const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data, onCellClick }) => {
     const { t, language } = useLanguage();
     
     const impactLabels = [
@@ -49,6 +50,9 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
         }
     });
 
+    const cellBaseClasses = "relative flex items-center justify-center rounded-lg text-white transition-all duration-300";
+    const clickableClasses = onCellClick ? "cursor-pointer" : "";
+
     return (
         <div className="flex flex-col h-full w-full text-xs">
              <div className="grid grid-cols-6 gap-1 flex-grow">
@@ -73,13 +77,29 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
                             const probability = colIndex + 1;
                             const level = getRiskLevel(impact, probability);
                             const riskInfo = riskLevels[level];
-                            return (
-                                <motion.div
+                            
+                            const cellContent = (
+                                <>
+                                {count > 0 && <span className="font-bold text-xl drop-shadow-lg">{count}</span>}
+                                </>
+                            );
+
+                            return onCellClick ? (
+                                <motion.button
                                     key={`${rowIndex}-${colIndex}`}
-                                    className={`relative flex items-center justify-center rounded-lg text-white transition-all duration-300 ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
+                                    onClick={() => onCellClick(impact, probability)}
+                                    className={`${cellBaseClasses} ${clickableClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
                                     whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
                                 >
-                                    {count > 0 && <span className="font-bold text-xl drop-shadow-lg">{count}</span>}
+                                    {cellContent}
+                                </motion.button>
+                            ) : (
+                                <motion.div
+                                    key={`${rowIndex}-${colIndex}`}
+                                    className={`${cellBaseClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
+                                    whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
+                                >
+                                    {cellContent}
                                 </motion.div>
                             );
                         })}
@@ -92,3 +112,5 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data }) => {
 
 
 export default RiskLandscape;
+
+    
