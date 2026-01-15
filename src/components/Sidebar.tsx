@@ -22,7 +22,7 @@ const allMenuItems = [
   { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'], requiredStatus: 'improvement' },
   { name: 'review', icon: Send, view: 'review-submit', roles: ['company'], requiredStatus: 'review' },
   { name: 'approvals', icon: GitPullRequest, view: 'approval-requests', roles: ['admin'], requiredStatus: 'none' },
-  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin', 'company'], requiredStatus: 'none' },
+  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin'], requiredStatus: 'none' },
   { name: 'settings', icon: Settings, view: 'settings', roles: ['admin'], requiredStatus: 'none' },
 ];
 
@@ -122,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                case 'assessment': return "يرجى إكمال بيانات الشركة أولاً";
                case 'compliance': return "يرجى إكمال واعتماد تقييم النضج أولاً";
                case 'financials': return "يرجى حفظ بيانات الامتثال والمخاطر أولاً";
-               case 'improvement': return "يرجى إدخال وحفظ القوائم المالية أولاً";
+               case 'improvement': return "يرجى إنشاء وحفظ خطة التحسين أولاً";
                case 'review': return "يرجى إنشاء وحفظ خطة التحسين أولاً";
                default: return "أكمل الخطوة السابقة أولاً";
            }
@@ -219,3 +219,5 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
 };
 
 export default Sidebar;
+
+    
