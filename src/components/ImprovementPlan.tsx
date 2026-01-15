@@ -92,7 +92,7 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
     const renderCompanyButtons = () => {
         const buttonClasses = "border-gray-600 text-gray-300 hover:bg-gold-500 hover:text-black hover:border-gold-500";
         return (
-            <div className="flex-1 flex justify-end items-center gap-2">
+             <div className="flex-1 flex justify-end items-center gap-2">
                  {task.status === 'todo' && (
                     <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
                         {t('improvement.start')} <ArrowRight className="ml-1 h-4 w-4" />
@@ -129,7 +129,7 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
                 <div className="flex-grow"></div>
                 
                  {(userRole === 'admin' || userRole === 'company') && (
-                    <div className="flex justify-between items-center p-3 bg-black/20 mt-4 -mx-4 -mb-4 rounded-b-lg min-h-[50px]">
+                    <div className="flex justify-between items-center p-3 bg-black/20 mt-4 -mx-4 -mb-4 rounded-b-lg min-h-[60px]">
                         {userRole === 'admin' ? renderAdminButtons() : renderCompanyButtons()}
                     </div>
                 )}
