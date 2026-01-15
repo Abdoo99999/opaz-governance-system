@@ -273,47 +273,58 @@ const Reports: React.FC = () => {
     const handleExport = async () => {
         if (!reportRef.current) return;
         setIsExporting(true);
-
+    
         const canvas = await html2canvas(reportRef.current, {
             scale: 2,
-            backgroundColor: '#001220',
+            backgroundColor: '#ffffff', // Use white background for PDF
             onclone: (document) => {
-                // Ensure text remains white for PDF
-                document.querySelectorAll('.print-black-text').forEach(el => {
-                    (el as HTMLElement).style.color = '#000000';
-                });
+                const reportElement = document.getElementById('report-content');
+                if (reportElement) {
+                    reportElement.style.backgroundColor = '#ffffff';
+                    document.querySelectorAll('.print-black-text').forEach(el => {
+                       (el as HTMLElement).style.color = '#000000';
+                    });
+                     document.querySelectorAll('.glass').forEach(el => {
+                        (el as HTMLElement).style.backgroundColor = '#f9fafb';
+                        (el as HTMLElement).style.color = '#000000';
+                        (el as HTMLElement).style.border = '1px solid #e5e7eb';
+                        (el as HTMLElement).style.boxShadow = 'none';
+
+                    });
+                     document.querySelectorAll('.recharts-text, .recharts-legend-item-text').forEach(el => {
+                         if (!(el as HTMLElement).style.fill || (el as HTMLElement).style.fill === 'rgb(255, 255, 255)'){
+                            (el as HTMLElement).style.fill = '#000000';
+                         }
+                    });
+                     document.querySelectorAll('.recharts-legend-wrapper, .recharts-cartesian-axis-tick-value').forEach(el => {
+                        (el as HTMLElement).style.color = '#000000';
+                    });
+                }
             }
         });
-
+    
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF({
-            orientation: 'p',
-            unit: 'px',
-            format: 'a4',
-        });
-
+        const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
-        
-        const width = pdfWidth;
-        const height = width / ratio;
-        
+    
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgWidth = pdfWidth;
+        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+    
+        let heightLeft = imgHeight;
         let position = 0;
-        let heightLeft = canvasHeight;
-
-        pdf.addImage(imgData, 'PNG', 0, position, width, height);
+    
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
         heightLeft -= pdfHeight;
-
+    
         while (heightLeft > 0) {
-            position = heightLeft - canvasHeight;
+            position = heightLeft - imgHeight;
             pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, width, height);
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pdfHeight;
         }
-
+    
         pdf.save('OIA-Strategic-Report.pdf');
         setIsExporting(false);
     };
@@ -347,7 +358,7 @@ const Reports: React.FC = () => {
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white">
             {/* Header */}
-            <header className="flex flex-col md:flex-row items-center justify-between mb-8">
+            <header className="flex flex-col md:flex-row items-center justify-between mb-8 print:hidden">
                 <div>
                     <h1 className="text-3xl font-bold">{t('reports.title')} - {selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h1>
                     <p className="text-gray-300 mt-1">{format(new Date(), "eeee, d MMMM yyyy")}</p>
@@ -370,7 +381,7 @@ const Reports: React.FC = () => {
                 </div>
             </header>
             
-            <div id="report-content" ref={reportRef} className="p-8 bg-royal-900 print:bg-white print:p-4">
+            <div id="report-content" ref={reportRef} className="p-8 bg-royal-900">
                 {/* For Print Header */}
                 <div className="hidden print:block text-center mb-8">
                      <h1 className="text-3xl font-bold text-black print-black-text">{t('reports.title')}</h1>
@@ -383,50 +394,50 @@ const Reports: React.FC = () => {
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
                         <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-gold-200/80 print:text-gray-600">{t('reports.summary.maturity')}</CardTitle>
+                                <CardTitle className="text-sm font-medium text-gold-200/80 print-text-black">{t('reports.summary.maturity')}</CardTitle>
                                 <TrendingUp className="w-4 h-4 text-gold-300/70" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-3xl font-bold text-gold-400">{summaryData.maturity}/5</div>
-                                <p className="text-xs text-gold-300/60">{t('reports.summary.maturitySub')}</p>
+                                <div className="text-3xl font-bold text-gold-400 print-text-black">{summaryData.maturity}/5</div>
+                                <p className="text-xs text-gold-300/60 print-text-black">{t('reports.summary.maturitySub')}</p>
                             </CardContent>
                         </Card>
                     </motion.div>
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
                         <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70")}>
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-green-200/80 print:text-gray-600">{t('reports.summary.compliance')}</CardTitle>
+                                <CardTitle className="text-sm font-medium text-green-200/80 print-text-black">{t('reports.summary.compliance')}</CardTitle>
                                 <CheckCircle className="w-4 h-4 text-green-300/70" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-3xl font-bold text-green-400">{summaryData.compliance}%</div>
-                                 <p className="text-xs text-green-300/60">{t('reports.summary.complianceSub')}</p>
+                                <div className="text-3xl font-bold text-green-400 print-text-black">{summaryData.compliance}%</div>
+                                 <p className="text-xs text-green-300/60 print-text-black">{t('reports.summary.complianceSub')}</p>
                             </CardContent>
                         </Card>
                     </motion.div>
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
                         <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-red-200/80 print:text-gray-600">{t('reports.summary.risks')}</CardTitle>
+                                <CardTitle className="text-sm font-medium text-red-200/80 print-text-black">{t('reports.summary.risks')}</CardTitle>
                                 <AlertCircle className="w-4 h-4 text-red-300/70" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-xl font-bold">
+                                <div className="text-xl font-bold print-text-black">
                                    <span className="text-danger">{summaryData.risks.critical} {t('registry.risks.critical')}</span> / <span className="text-yellow-400">{summaryData.risks.high} {t('registry.risks.high')}</span>
                                 </div>
-                                <p className="text-xs text-red-300/60">{t('reports.summary.risksSub')}</p>
+                                <p className="text-xs text-red-300/60 print-text-black">{t('reports.summary.risksSub')}</p>
                             </CardContent>
                         </Card>
                     </motion.div>
                      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
                         <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
                             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium text-blue-200/80 print:text-gray-600">{t('reports.summary.actions')}</CardTitle>
+                                <CardTitle className="text-sm font-medium text-blue-200/80 print-text-black">{t('reports.summary.actions')}</CardTitle>
                                 <AlertCircle className="w-4 h-4 text-blue-300/70" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-3xl font-bold text-blue-400">{summaryData.actions} {t('reports.summary.pending')}</div>
-                                <p className="text-xs text-blue-300/60">{t('reports.summary.actionsSub')}</p>
+                                <div className="text-3xl font-bold text-blue-400 print-text-black">{summaryData.actions} {t('reports.summary.pending')}</div>
+                                <p className="text-xs text-blue-300/60 print-text-black">{t('reports.summary.actionsSub')}</p>
                             </CardContent>
                         </Card>
                     </motion.div>
@@ -437,9 +448,9 @@ const Reports: React.FC = () => {
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
                         <Card className="glass">
                             <CardHeader>
-                                <CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.maturityAnalysis')}</CardTitle>
+                                <CardTitle className="text-gold-400 print-text-black">{t('reports.maturityAnalysis')}</CardTitle>
                             </CardHeader>
-                            <CardContent className="print:text-black">
+                            <CardContent>
                                 <ResponsiveContainer width="100%" height={400}>
                                     <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                                          <defs>
@@ -464,14 +475,14 @@ const Reports: React.FC = () => {
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
                         <Card className="glass">
                             <CardHeader>
-                               <CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.financial.title')}</CardTitle>
+                               <CardTitle className="text-gold-400 print-text-black">{t('reports.financial.title')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                  <ResponsiveContainer width="100%" height={400}>
                                     <ComposedChart data={financialPerformanceData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                                         <CartesianGrid stroke="rgba(255, 255, 255, 0.1)" />
-                                        <XAxis dataKey="name" tick={{ fill: '#A0A0A0' }} />
-                                        <YAxis tickFormatter={(value) => `${value / 1000000}M`} tick={{ fill: '#A0A0A0' }} />
+                                        <XAxis dataKey="name" tick={{ fill: '#A0A0A0' }} className="print-text-black" />
+                                        <YAxis tickFormatter={(value) => `${value / 1000000}M`} tick={{ fill: '#A0A0A0' }} className="print-text-black" />
                                         <Tooltip {...tooltipStyle} formatter={formatCurrency} />
                                         <Legend wrapperStyle={{ color: '#FFFFFF' }}/>
                                         <Bar dataKey="revenue" name={t('reports.financial.revenue')} barSize={50} fill="#3b82f6" />
@@ -486,7 +497,7 @@ const Reports: React.FC = () => {
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
                          <Card className="glass">
                             <CardHeader>
-                               <CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.riskAnalysis')}</CardTitle>
+                               <CardTitle className="text-gold-400 print-text-black">{t('reports.riskAnalysis')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={300}>
@@ -521,7 +532,7 @@ const Reports: React.FC = () => {
                      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
                          <Card className="glass">
                             <CardHeader>
-                               <CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.improvementStatus')}</CardTitle>
+                               <CardTitle className="text-gold-400 print-text-black">{t('reports.improvementStatus')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                  <ResponsiveContainer width="100%" height={300}>
@@ -550,7 +561,7 @@ const Reports: React.FC = () => {
                 <div className="space-y-8 print:break-before-page">
                      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
                          <Card className="glass">
-                            <CardHeader><CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.topGaps')}</CardTitle></CardHeader>
+                            <CardHeader><CardTitle className="text-gold-400 print-text-black">{t('reports.topGaps')}</CardTitle></CardHeader>
                             <CardContent>
                                  <Table>
                                     <TableHeader>
@@ -564,10 +575,10 @@ const Reports: React.FC = () => {
                                     <TableBody>
                                         {topGapsData.map((gap: any) => (
                                             <TableRow key={gap.id} className="border-white/10 hover:bg-white/5 print:border-gray-200">
-                                                <TableCell className="font-medium">{gap.id}. {gap.name}</TableCell>
-                                                <TableCell>{gap.axis}</TableCell>
+                                                <TableCell className="font-medium print-text-black">{gap.id}. {gap.name}</TableCell>
+                                                <TableCell className="print-text-black">{gap.axis}</TableCell>
                                                 <TableCell className="text-center"><Badge variant="destructive">{gap.score}</Badge></TableCell>
-                                                <TableCell>{t('reports.developPolicy')}</TableCell>
+                                                <TableCell className="print-text-black">{t('reports.developPolicy')}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -577,7 +588,7 @@ const Reports: React.FC = () => {
                     </motion.div>
                      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
                          <Card className="glass">
-                            <CardHeader><CardTitle className="text-gold-400 print:text-black print-black-text">{t('reports.criticalRisks')}</CardTitle></CardHeader>
+                            <CardHeader><CardTitle className="text-gold-400 print:text-black">{t('reports.criticalRisks')}</CardTitle></CardHeader>
                             <CardContent>
                                 <Table>
                                     <TableHeader>
@@ -591,8 +602,8 @@ const Reports: React.FC = () => {
                                     <TableBody>
                                         {criticalRisksData.map((risk: any, index: number) => (
                                             <TableRow key={index} className="border-white/10 hover:bg-white/5 print:border-gray-200">
-                                                <TableCell className="font-medium">{risk.description}</TableCell>
-                                                <TableCell>{t(`compliance.riskCategories.${risk.category.toLowerCase()}`)}</TableCell>
+                                                <TableCell className="font-medium print-text-black">{risk.description}</TableCell>
+                                                <TableCell className="print-text-black">{t(`compliance.riskCategories.${risk.category.toLowerCase()}`)}</TableCell>
                                                 <TableCell className="text-center"><Badge className="bg-danger/80 text-danger-foreground">{risk.impact}</Badge></TableCell>
                                                 <TableCell className="text-center"><Badge className="bg-yellow-500/80 text-yellow-foreground">{risk.probability}</Badge></TableCell>
                                             </TableRow>
@@ -609,3 +620,5 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+    
