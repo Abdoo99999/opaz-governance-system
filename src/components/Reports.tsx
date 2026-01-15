@@ -276,19 +276,18 @@ const Reports: React.FC = () => {
     
         const canvas = await html2canvas(reportRef.current, {
             scale: 2,
-            backgroundColor: null, // Keep original background
             useCORS: true, 
             onclone: (document) => {
-                 // The font needs to be available to the cloned document
                  const fontLink = document.createElement('link');
                  fontLink.rel = 'stylesheet';
-                 fontLink.href = 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap';
+                 fontLink.href = 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap';
                  document.head.appendChild(fontLink);
-            }
+            },
+             backgroundColor: '#001220'
         });
     
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdf = new jsPDF('p', 'mm', 'a4', true);
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
     
@@ -299,13 +298,13 @@ const Reports: React.FC = () => {
         let heightLeft = imgHeight;
         let position = 0;
     
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
         heightLeft -= pdfHeight;
     
         while (heightLeft > 0) {
             position -= pdfHeight;
             pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
             heightLeft -= pdfHeight;
         }
     
@@ -604,5 +603,3 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
-
-    
