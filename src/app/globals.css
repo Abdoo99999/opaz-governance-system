@@ -86,7 +86,8 @@
         color: #000;
         box-shadow: none;
       }
+      .print-text-black {
+        color: #000 !important;
+      }
     }
 }
-
-    

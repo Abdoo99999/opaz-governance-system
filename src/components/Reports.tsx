@@ -3,8 +3,6 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import {
   Bar,
   BarChart,
@@ -270,46 +268,12 @@ const Reports: React.FC = () => {
 
     }, [selectedCompanyId, language, t, selectedYear]);
 
-    const handleExport = async () => {
-        if (!reportRef.current) return;
+    const handleExport = () => {
         setIsExporting(true);
-    
-        const canvas = await html2canvas(reportRef.current, {
-            scale: 2,
-            useCORS: true, 
-            onclone: (document) => {
-                 const fontLink = document.createElement('link');
-                 fontLink.rel = 'stylesheet';
-                 fontLink.href = 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap';
-                 document.head.appendChild(fontLink);
-            },
-             backgroundColor: '#001220'
-        });
-    
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4', true);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-    
-        const imgProps = pdf.getImageProperties(imgData);
-        const imgWidth = pdfWidth;
-        const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-    
-        let heightLeft = imgHeight;
-        let position = 0;
-    
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-        heightLeft -= pdfHeight;
-    
-        while (heightLeft > 0) {
-            position -= pdfHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
-            heightLeft -= pdfHeight;
-        }
-    
-        pdf.save('OIA-Strategic-Report.pdf');
-        setIsExporting(false);
+        setTimeout(() => {
+            window.print();
+            setIsExporting(false);
+        }, 500); // Small delay to allow UI to update
     };
     
     const tooltipStyle = {
@@ -364,12 +328,12 @@ const Reports: React.FC = () => {
                 </div>
             </header>
             
-            <div id="report-content" ref={reportRef} className="p-8 bg-royal-900">
+            <div id="report-content" ref={reportRef} className="p-8 bg-royal-900 print:bg-white print:p-0">
                 {/* For Print Header */}
                 <div className="hidden print:block text-center mb-8">
-                     <h1 className="text-3xl font-bold text-black print-black-text">{t('reports.title')}</h1>
-                     <h2 className="text-xl font-semibold text-gray-700 print-black-text">{selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h2>
-                     <p className="text-gray-600 mt-1 print-black-text">OIA Governance System - {format(new Date(), "d MMMM yyyy")}</p>
+                     <h1 className="text-3xl font-bold text-black print-text-black">{t('reports.title')}</h1>
+                     <h2 className="text-xl font-semibold text-gray-700 print-text-black">{selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h2>
+                     <p className="text-gray-600 mt-1 print-text-black">OIA Governance System - {format(new Date(), "d MMMM yyyy")}</p>
                 </div>
 
                 {/* Top Row */}
@@ -494,11 +458,9 @@ const Reports: React.FC = () => {
                                         <YAxis 
                                             dataKey="name" 
                                             type="category" 
-                                            width={150} 
-                                            tickMargin={10} 
-                                            tick={{ fontSize: 14, fill: '#9ca3af', dx: -10 }} 
+                                            width={80} 
+                                            tick={{ fill: '#9CA3AF' }} 
                                             className="fill-white text-xs print:fill-black" 
-                                            dx={-20}
                                         />
                                         <Tooltip {...tooltipStyle} />
                                         <Bar dataKey="count" barSize={30} radius={[0, 10, 10, 0]}>
