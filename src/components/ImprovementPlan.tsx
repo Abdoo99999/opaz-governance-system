@@ -82,7 +82,9 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
                         <ArrowLeft className="mr-1 h-4 w-4" /> {t('improvement.reopen')}
                     </Button>
                 )}
-                <div className="flex-grow"></div> 
+                 {task.status === 'todo' && (
+                    <div className="flex-1"></div>
+                )}
             </div>
         );
     };
@@ -127,7 +129,7 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
                 <div className="flex-grow"></div>
                 
                  {(userRole === 'admin' || userRole === 'company') && (
-                    <div className="flex justify-between items-center p-3 bg-black/20 mt-4 -mx-4 -mb-4 rounded-b-lg">
+                    <div className="flex justify-between items-center p-3 bg-black/20 mt-4 -mx-4 -mb-4 rounded-b-lg min-h-[50px]">
                         {userRole === 'admin' ? renderAdminButtons() : renderCompanyButtons()}
                     </div>
                 )}
@@ -573,6 +575,8 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
+
+    
 
     
 
