@@ -441,7 +441,7 @@ const Reports: React.FC = () => {
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={riskDistributionData} layout="vertical" margin={{ right: 20, left: 20 }}>
+                                <BarChart data={riskDistributionData} layout="vertical" margin={{ right: 20, left: 40 }}>
                                     <CartesianGrid horizontal={false} className="stroke-white/10 print:stroke-gray-200" />
                                     <XAxis type="number" tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
                                     <YAxis dataKey="name" type="category" width={60} tick={{ fill: '#9CA3AF' }} className="fill-white text-xs print:fill-black" />
