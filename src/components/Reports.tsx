@@ -1,9 +1,9 @@
-
-
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import {
   Bar,
   BarChart,
@@ -269,9 +269,58 @@ const Reports: React.FC = () => {
 
     }, [selectedCompanyId, language, t, selectedYear]);
 
-    const handleExport = () => {
-        if (typeof window !== 'undefined') {
-            window.print();
+    // --- ARABIC FONT FIX FOR EXPORT ---
+    const handleExport = async () => {
+        if (!reportRef.current) return;
+        setIsExporting(true);
+
+        try {
+            const canvas = await html2canvas(reportRef.current, {
+                scale: 2, 
+                useCORS: true, 
+                backgroundColor: '#051a14', 
+                logging: false,
+                // THIS IS THE SECRET FIX:
+                onclone: (documentClone) => {
+                    // 1. Force a font that supports Arabic ligatures (System Font) on all text
+                    const allElements = documentClone.querySelectorAll('*');
+                    allElements.forEach((el: any) => {
+                        // Apply to everything to be safe, especially SVG text
+                        el.style.fontFamily = 'Arial, sans-serif'; 
+                        el.style.letterSpacing = '0px'; // Prevent letter splitting
+                    });
+
+                    // 2. Specifically target SVG text (Recharts)
+                    const svgTexts = documentClone.querySelectorAll('text');
+                    svgTexts.forEach((el: any) => {
+                        el.style.fontFamily = 'Arial, sans-serif';
+                        el.style.direction = 'rtl'; // Force RTL direction
+                        el.style.unicodeBidi = 'embed';
+                    });
+                }
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            
+            const pdfWidth = canvas.width * 0.264583; 
+            const pdfHeight = canvas.height * 0.264583;
+
+            const pdf = new jsPDF({
+                orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+                unit: 'mm',
+                format: [pdfWidth, pdfHeight]
+            });
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            
+            const filename = `OIA-Strategic-Report-${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : 'Report'}-${selectedYear}.pdf`;
+            pdf.save(filename);
+            
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert("حدث خطأ أثناء تصدير التقرير، يرجى المحاولة مرة أخرى.");
+        } finally {
+            setIsExporting(false);
         }
     };
     
@@ -327,6 +376,7 @@ const Reports: React.FC = () => {
                 </div>
             </header>
             
+            {/* Report Content Ref */}
             <div id="report-content" ref={reportRef} className="p-8 bg-royal-900 print:bg-white print:p-0">
                 {/* For Print Header */}
                 <div className="hidden print:block text-center mb-8">

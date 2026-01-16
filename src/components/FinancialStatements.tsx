@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -175,7 +174,6 @@ const FinancialStatements: React.FC = () => {
   return (
     <div
       className="min-h-screen w-full p-4 md:p-6 lg:p-8 text-white"
-      style={{ background: '#051a14' }}
       dir={dir}
     >
       <header className="mb-8 max-w-4xl mx-auto">
@@ -191,14 +189,14 @@ const FinancialStatements: React.FC = () => {
           placeholder={t('financials.auditorPlaceholder')}
           value={auditorName}
           onChange={(e) => setAuditorName(e.target.value)}
-          className="h-12 bg-[#112620]/80 border-white/10 focus:border-gold-500 rounded-lg text-white text-center"
+          className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white text-center"
         />
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
         {/* Financial Position Card */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-          <Card className="glass bg-[#112620] border-white/10 h-full">
+          <Card className="glass h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <Landmark className="w-7 h-7 text-gold-500" />
               <CardTitle className="text-2xl">{t('financials.position.title')}</CardTitle>
@@ -236,7 +234,7 @@ const FinancialStatements: React.FC = () => {
 
         {/* Income Statement Card */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-          <Card className="glass bg-[#112620] border-white/10 h-full">
+          <Card className="glass h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <TrendingUp className="w-7 h-7 text-gold-500" />
               <CardTitle className="text-2xl">{t('financials.performance.title')}</CardTitle>
@@ -286,7 +284,7 @@ const FinancialStatements: React.FC = () => {
 
         {/* Free Cash Flow Card */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-            <Card className="glass bg-[#112620] border-white/10 h-full">
+            <Card className="glass h-full">
                 <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
                     <Filter className="w-7 h-7 text-gold-500" />
                     <CardTitle className="text-2xl">{t('financials.cashflow.title')}</CardTitle>
@@ -332,7 +330,7 @@ const FinancialStatements: React.FC = () => {
 
         {/* Investment Returns Card */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-          <Card className="glass bg-[#112620] border-white/10 h-full">
+          <Card className="glass h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <Target className="w-7 h-7 text-gold-500" />
               <CardTitle className="text-2xl">{t('financials.kpi.title')}</CardTitle>
@@ -367,7 +365,7 @@ const FinancialStatements: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5, duration: 0.5 }}
       >
-        <Card className="glass bg-[#112620] border-white/10">
+        <Card className="glass">
           <CardHeader>
             <CardTitle className="text-center text-xl text-gold-400">{t('financials.declaration.title')}</CardTitle>
           </CardHeader>
@@ -410,5 +408,3 @@ const FinancialStatements: React.FC = () => {
 };
 
 export default FinancialStatements;
-
-    

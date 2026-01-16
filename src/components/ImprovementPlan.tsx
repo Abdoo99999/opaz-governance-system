@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { Plus, Filter, ArrowRight, Check, Star, MessageSquare, Save, ArrowLeft, AlertTriangle, Clock, CheckCircle, Upload, File as FileIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Filter, ArrowRight, Check, MessageSquare, Save, ArrowLeft, AlertTriangle, Clock, CheckCircle, Upload, File as FileIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -71,7 +70,14 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
     const renderAdminButtons = () => {
         const buttonClasses = "border-gray-600 text-gray-300 hover:bg-gold-500 hover:text-black hover:border-gold-500";
         return (
-            <div className="flex justify-between items-center gap-2">
+            <div className="flex justify-end items-center gap-2 w-full">
+                {/* --- FIX: ADDED TODO BUTTON FOR ADMIN --- */}
+                {task.status === 'todo' && (
+                    <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
+                        {t('improvement.start')} <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                )}
+                
                 {task.status === 'in-progress' && (
                     <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'todo'); }}>
                         <ArrowLeft className="mr-1 h-4 w-4" /> {t('improvement.return')}
@@ -570,11 +576,3 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
-
-    
-
-    
-
-    
-
-    
