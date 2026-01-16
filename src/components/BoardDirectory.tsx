@@ -128,7 +128,13 @@ const BoardDirectory: React.FC = () => {
 
     const handleSaveMember = (data: MemberFormData) => {
         if (editingMember) {
-            setBoardMembers(prev => prev.map(m => m.id === editingMember.id ? { ...m, ...data, committees: data.committees || [] } : m));
+            setBoardMembers(prev => prev.map(m => m.id === editingMember.id ? { 
+                ...m, 
+                ...data, 
+                appointmentDate: format(data.appointmentDate, 'yyyy-MM-dd'),
+                expiryDate: format(data.expiryDate, 'yyyy-MM-dd'),
+                committees: data.committees || [] 
+            } : m));
             toast({ title: t('common.saveSuccessTitle'), description: `Updated member: ${data.name_en}` });
         } else {
             const newMember: BoardMember = {
