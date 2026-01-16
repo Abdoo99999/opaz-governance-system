@@ -124,7 +124,10 @@ export const translations = {
         name_en: 'الاسم بالإنجليزية',
         role: 'المنصب',
         appointmentDate: 'تاريخ التعيين',
-        expiryDate: 'تاريخ انتهاء الصلاحية'
+        expiryDate: 'تاريخ انتهاء الصلاحية',
+        cycleSettings: 'إعدادات الدورة',
+        termStartDate: 'تاريخ بدء الدورة',
+        termEndDate: 'تاريخ انتهاء الدورة',
       }
     },
     assessment: {
@@ -320,19 +323,13 @@ export const translations = {
         }
     },
     settings: {
-        title: "الإعدادات المتقدمة",
+        title: "الإعدادات",
         subtitle: "إدارة متغيرات النظام والبيانات",
         profile: {
             title: "الملف الشخصي للمشرف",
             role: "المشرف العام ومهندس النظام",
             email: "البريد الإلكتروني",
             phone: "رقم الهاتف",
-        },
-        weights: {
-            title: "أوزان محاور التقييم",
-            financial: "وزن المحور المالي",
-            leadership: "وزن محور القيادة",
-            reset: "إعادة تعيين للأوزان الافتراضية"
         },
         preferences: {
             title: "تفضيلات النظام",
@@ -580,7 +577,10 @@ export const translations = {
         name_en: 'Name (English)',
         role: 'Role',
         appointmentDate: 'Appointment Date',
-        expiryDate: 'Expiry Date'
+        expiryDate: 'Expiry Date',
+        cycleSettings: 'Cycle Settings',
+        termStartDate: 'Term Start Date',
+        termEndDate: 'Term End Date',
       }
     },
     assessment: {
@@ -776,19 +776,13 @@ export const translations = {
         }
     },
     settings: {
-        title: "Advanced Settings",
+        title: "Settings",
         subtitle: "Manage system variables and data",
         profile: {
             title: "Supervisor Profile",
             role: "General Supervisor & System Architect",
             email: "Email",
             phone: "Phone Number",
-        },
-        weights: {
-            title: "Assessment Axes Weights",
-            financial: "Financial Axis Weight",
-            leadership: "Leadership Axis Weight",
-            reset: "Reset to Default Weights"
         },
         preferences: {
             title: "System Preferences",

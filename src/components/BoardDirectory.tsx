@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -34,6 +33,7 @@ import { Label } from './ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar as CalendarComponent } from './ui/calendar';
 import { Checkbox } from './ui/checkbox';
+import { useCompany as useCompanyContext } from '@/context/CompanyContext';
 
 
 const expertiseColors: { [key: string]: string } = {
@@ -63,7 +63,6 @@ const typeOptions = ['Independent', 'Government', 'Executive'];
 const memberSchema = z.object({
   name_ar: z.string().min(1, 'الاسم بالعربية مطلوب'),
   name_en: z.string().min(1, 'الاسم بالانجليزية مطلوب'),
-  companyId: z.string().min(1, 'الشركة مطلوبة'),
   role: z.enum(['Chairman', 'Member']),
   type: z.enum(['Independent', 'Government', 'Executive']),
   expertise: z.enum(['Legal', 'Finance', 'Engineering', 'HR', 'Strategy', 'Technology', 'Marketing']),
@@ -77,15 +76,35 @@ type MemberFormData = z.infer<typeof memberSchema>;
 const BoardDirectory: React.FC = () => {
     const { t, language } = useLanguage();
     const { toast } = useToast();
-    const [selectedCompanyId, setSelectedCompanyId] = useState('all');
+    const { selectedCompanyId, setSelectedCompanyId } = useCompanyContext();
     const [boardMembers, setBoardMembers] = useState<BoardMember[]>(BOARD_MEMBERS);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<BoardMember | null>(null);
+    const [isCycleSettingsOpen, setIsCycleSettingsOpen] = useState(false);
+    const [boardCycleStart, setBoardCycleStart] = useState<Date | null>(null);
+    const [boardCycleEnd, setBoardCycleEnd] = useState<Date | null>(null);
+
 
     const filteredMembers = useMemo(() => {
         if (selectedCompanyId === 'all') return boardMembers;
         return boardMembers.filter(m => m.companyId === selectedCompanyId);
     }, [selectedCompanyId, boardMembers]);
+
+    useEffect(() => {
+        if (filteredMembers.length > 0) {
+            const appointmentDates = filteredMembers.map(m => parseISO(m.appointmentDate));
+            const expiryDates = filteredMembers.map(m => parseISO(m.expiryDate));
+
+            const boardStart = new Date(Math.min(...appointmentDates.map(d => d.getTime())));
+            const boardEnd = new Date(Math.max(...expiryDates.map(d => d.getTime())));
+            
+            setBoardCycleStart(boardStart);
+            setBoardCycleEnd(boardEnd);
+        } else {
+            setBoardCycleStart(null);
+            setBoardCycleEnd(null);
+        }
+    }, [filteredMembers]);
 
     const summaryData = useMemo(() => {
         const totalMembers = filteredMembers.length;
@@ -123,25 +142,19 @@ const BoardDirectory: React.FC = () => {
     }, [filteredMembers, t]);
 
     const boardTenure = useMemo(() => {
-        if (filteredMembers.length === 0) return { start: null, end: null, progress: 0 };
+        if (!boardCycleStart || !boardCycleEnd) return { start: null, end: null, progress: 0 };
         
-        const appointmentDates = filteredMembers.map(m => parseISO(m.appointmentDate));
-        const expiryDates = filteredMembers.map(m => parseISO(m.expiryDate));
-
-        const boardStart = new Date(Math.min(...appointmentDates.map(d => d.getTime())));
-        const boardEnd = new Date(Math.max(...expiryDates.map(d => d.getTime())));
-
-        const totalDuration = differenceInMonths(boardEnd, boardStart);
-        const elapsedDuration = differenceInMonths(new Date(), boardStart);
+        const totalDuration = differenceInMonths(boardCycleEnd, boardCycleStart);
+        const elapsedDuration = differenceInMonths(new Date(), boardCycleStart);
 
         const progress = totalDuration > 0 ? (elapsedDuration / totalDuration) * 100 : 0;
 
         return {
-            start: format(boardStart, 'MMM yyyy'),
-            end: format(boardEnd, 'MMM yyyy'),
+            start: format(boardCycleStart, 'MMM yyyy'),
+            end: format(boardCycleEnd, 'MMM yyyy'),
             progress: Math.min(100, Math.max(0, progress)),
         };
-    }, [filteredMembers]);
+    }, [boardCycleStart, boardCycleEnd]);
 
     const handleOpenForm = (member: BoardMember | null) => {
       setEditingMember(member);
@@ -159,10 +172,15 @@ const BoardDirectory: React.FC = () => {
             } : m));
             toast({ title: t('common.saveSuccessTitle'), description: `Updated member: ${data.name_en}` });
         } else {
+            if (selectedCompanyId === 'all') {
+                toast({ title: t('common.errorTitle'), description: t('common.selectCompanyToStart'), variant: 'destructive' });
+                return;
+            }
             const newMember: BoardMember = {
                 id: Math.max(0, ...boardMembers.map(m => m.id)) + 1,
                 avatar: `https://picsum.photos/seed/${Date.now()}/100/100`,
                 ...data,
+                companyId: selectedCompanyId,
                 appointmentDate: format(data.appointmentDate, 'yyyy-MM-dd'),
                 expiryDate: format(data.expiryDate, 'yyyy-MM-dd'),
                 committees: data.committees as any || [],
@@ -198,6 +216,10 @@ const BoardDirectory: React.FC = () => {
                      <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                         <Plus className="ml-2 h-5 w-5" />
                         {t('board_directory.addMember')}
+                    </Button>
+                    <Button onClick={() => setIsCycleSettingsOpen(true)} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">
+                        <Calendar className="ml-2 h-5 w-5" />
+                        {t('board_directory.form.cycleSettings')}
                     </Button>
                 </div>
             </header>
@@ -348,9 +370,19 @@ const BoardDirectory: React.FC = () => {
               onClose={() => setIsFormOpen(false)}
               onSave={handleSaveMember}
               member={editingMember}
-              companies={COMPANIES}
               t={t}
-              language={language}
+            />
+            <CycleSettingsDialog
+                isOpen={isCycleSettingsOpen}
+                onClose={() => setIsCycleSettingsOpen(false)}
+                startDate={boardCycleStart}
+                endDate={boardCycleEnd}
+                onSave={({ start, end }) => {
+                    setBoardCycleStart(start);
+                    setBoardCycleEnd(end);
+                    toast({ title: t('common.saveSuccessTitle'), description: "Board cycle dates updated." });
+                }}
+                t={t}
             />
         </div>
     );
@@ -363,30 +395,30 @@ interface BoardMemberFormDialogProps {
   onClose: () => void;
   onSave: (data: MemberFormData) => void;
   member: BoardMember | null;
-  companies: Company[];
   t: (key: string) => string;
-  language: 'ar' | 'en';
 }
 
-const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, onClose, onSave, member, companies, t, language }) => {
+const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, onClose, onSave, member, t }) => {
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
   });
 
   useEffect(() => {
-    if (member) {
-      reset({
-        ...member,
-        appointmentDate: parseISO(member.appointmentDate),
-        expiryDate: parseISO(member.expiryDate),
-      });
-    } else {
-      reset({
-        name_ar: '', name_en: '', companyId: undefined,
-        role: 'Member', type: 'Independent', expertise: 'Finance',
-        appointmentDate: new Date(), expiryDate: new Date(),
-        committees: []
-      });
+    if (isOpen) {
+      if (member) {
+        reset({
+          ...member,
+          appointmentDate: parseISO(member.appointmentDate),
+          expiryDate: parseISO(member.expiryDate),
+        });
+      } else {
+        reset({
+          name_ar: '', name_en: '',
+          role: 'Member', type: 'Independent', expertise: 'Finance',
+          appointmentDate: new Date(), expiryDate: new Date(),
+          committees: []
+        });
+      }
     }
   }, [member, isOpen, reset]);
 
@@ -406,18 +438,6 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
               <Label htmlFor="name_ar">{t('board_directory.form.name_ar')}</Label>
               <Input id="name_ar" {...register('name_ar')} className="bg-royal-900/50 border-white/10" dir="rtl"/>
               {errors.name_ar && <p className="text-red-500 text-sm mt-1">{errors.name_ar.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="companyId">{t('companyForm.identity.companyName')}</Label>
-              <Controller name="companyId" control={control} render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-royal-900 text-white border-white/20">
-                    {companies.map(c => <SelectItem key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name_en}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              )}/>
-               {errors.companyId && <p className="text-red-500 text-sm mt-1">{errors.companyId.message}</p>}
             </div>
              <div>
               <Label htmlFor="type">{t('board_directory.memberType')}</Label>
@@ -531,5 +551,78 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
     </Dialog>
   );
 };
+
+
+interface CycleSettingsDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (dates: { start: Date | null, end: Date | null }) => void;
+  startDate: Date | null;
+  endDate: Date | null;
+  t: (key: string) => string;
+}
+
+const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClose, onSave, startDate, endDate, t }) => {
+    const [start, setStart] = useState<Date | undefined>(startDate || undefined);
+    const [end, setEnd] = useState<Date | undefined>(endDate || undefined);
+    
+    useEffect(() => {
+        if(isOpen) {
+            setStart(startDate || undefined);
+            setEnd(endDate || undefined);
+        }
+    }, [isOpen, startDate, endDate]);
+
+    const handleSave = () => {
+        onSave({ start: start || null, end: end || null });
+        onClose();
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="glass text-white">
+                <DialogHeader>
+                    <DialogTitle className="text-gold-400 text-2xl">{t('board_directory.form.cycleSettings')}</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-6 py-4">
+                    <div>
+                        <Label>{t('board_directory.form.termStartDate')}</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !start && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {start ? format(start, "PPP") : <span>{t('common.pickDate')}</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={start} onSelect={setStart} initialFocus /></PopoverContent>
+                        </Popover>
+                    </div>
+                    <div>
+                        <Label>{t('board_directory.form.termEndDate')}</Label>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !end && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {end ? format(end, "PPP") : <span>{t('common.pickDate')}</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={end} onSelect={setEnd} initialFocus /></PopoverContent>
+                        </Popover>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="outline" className="text-white border-white/20">{t('common.cancel')}</Button>
+                    </DialogClose>
+                    <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                        <Save className="mr-2 h-4 w-4"/>
+                        {t('common.save')}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 
 export default BoardDirectory;
