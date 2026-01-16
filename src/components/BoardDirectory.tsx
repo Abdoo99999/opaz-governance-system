@@ -593,26 +593,36 @@ interface CycleSettingsDialogProps {
 }
 
 const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClose, onSave, startDate, endDate, t }) => {
-    const [start, setStart] = useState<Date | undefined>();
-    const [end, setEnd] = useState<Date | undefined>();
-    const [isStartOpen, setStartOpen] = useState(false);
-    const [isEndOpen, setEndOpen] = useState(false);
-    const [month, setMonth] = useState<Date | undefined>();
+    const [start, setStart] = useState('');
+    const [end, setEnd] = useState('');
 
+    const formatDateForInput = (date: Date | null): string => {
+        if (!date) return '';
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     useEffect(() => {
-        if(isOpen) {
-            const initialDate = startDate || new Date();
-            setStart(startDate ? new Date(startDate) : undefined);
-            setEnd(endDate ? new Date(endDate) : undefined);
-            setMonth(initialDate);
+        if (isOpen) {
+            setStart(formatDateForInput(startDate));
+            setEnd(formatDateForInput(endDate));
         }
     }, [isOpen, startDate, endDate]);
 
     const handleSave = () => {
-        onSave({ start: start || null, end: end || null });
+        const createDateFromInput = (dateString: string): Date | null => {
+            if (!dateString) return null;
+            const [year, month, day] = dateString.split('-').map(Number);
+            return new Date(year, month - 1, day);
+        };
+
+        onSave({ start: createDateFromInput(start), end: createDateFromInput(end) });
         onClose();
     };
+    
+    const inputClasses = "w-full bg-royal-800 border border-white/10 rounded-md p-3 text-white focus:ring-2 focus:ring-gold-400 focus:border-transparent outline-none appearance-none";
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -622,52 +632,26 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                 </DialogHeader>
                 <div className="grid gap-6 py-4">
                     <div>
-                        <Label>{t('board_directory.form.termStartDate')}</Label>
-                        <Popover open={isStartOpen} onOpenChange={setStartOpen}>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !start && "text-muted-foreground")}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {start ? format(start, "PPP") : <span>{t('common.pickDate')}</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <CalendarComponent 
-                                  mode="single" 
-                                  selected={start} 
-                                  onSelect={(date) => { setStart(date); setStartOpen(false); }} 
-                                  month={month}
-                                  onMonthChange={setMonth}
-                                  captionLayout="dropdown-buttons"
-                                  fromYear={2015}
-                                  toYear={2035}
-                                  initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <Label htmlFor="start-date">{t('board_directory.form.termStartDate')}</Label>
+                        <input
+                            id="start-date"
+                            type="date"
+                            value={start}
+                            onChange={(e) => setStart(e.target.value)}
+                            className={cn(inputClasses, "mt-2")}
+                            style={{ colorScheme: 'dark' }}
+                        />
                     </div>
                     <div>
-                        <Label>{t('board_directory.form.termEndDate')}</Label>
-                        <Popover open={isEndOpen} onOpenChange={setEndOpen}>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !end && "text-muted-foreground")}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {end ? format(end, "PPP") : <span>{t('common.pickDate')}</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <CalendarComponent 
-                                  mode="single" 
-                                  selected={end} 
-                                  onSelect={(date) => { setEnd(date); setEndOpen(false); }} 
-                                  month={month}
-                                  onMonthChange={setMonth}
-                                  captionLayout="dropdown-buttons"
-                                  fromYear={2015}
-                                  toYear={2035}
-                                  initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <Label htmlFor="end-date">{t('board_directory.form.termEndDate')}</Label>
+                         <input
+                            id="end-date"
+                            type="date"
+                            value={end}
+                            onChange={(e) => setEnd(e.target.value)}
+                            className={cn(inputClasses, "mt-2")}
+                            style={{ colorScheme: 'dark' }}
+                        />
                     </div>
                 </div>
                 <DialogFooter>
@@ -686,7 +670,3 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
 
 
 export default BoardDirectory;
-
-    
-
-    
