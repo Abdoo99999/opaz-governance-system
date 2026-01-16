@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save } from 'lucide-react';
+import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { COMPANIES, Company } from '@/data/companies';
 import { BOARD_MEMBERS, BoardMember } from '@/data/board-members';
@@ -86,6 +86,28 @@ const BoardDirectory: React.FC = () => {
         if (selectedCompanyId === 'all') return boardMembers;
         return boardMembers.filter(m => m.companyId === selectedCompanyId);
     }, [selectedCompanyId, boardMembers]);
+
+    const summaryData = useMemo(() => {
+        const totalMembers = filteredMembers.length;
+        if (totalMembers === 0) {
+            return { totalMembers: 0, independentMembersCount: 0, independentPercentage: 0, expiringSoon: 0, totalCommittees: 0 };
+        }
+        const independentMembersCount = filteredMembers.filter(m => m.type === 'Independent').length;
+        const independentPercentage = (independentMembersCount / totalMembers) * 100;
+        const expiringSoon = filteredMembers.filter(m => {
+            const diff = differenceInMonths(parseISO(m.expiryDate), new Date());
+            return diff >= 0 && diff <= 3;
+        }).length;
+        const totalCommittees = new Set(filteredMembers.flatMap(m => m.committees)).size;
+
+        return {
+            totalMembers,
+            independentMembersCount,
+            independentPercentage,
+            expiringSoon,
+            totalCommittees,
+        };
+    }, [filteredMembers]);
 
     const skillsMatrixData = useMemo(() => {
         const expertiseCounts = filteredMembers.reduce((acc, member) => {
@@ -179,6 +201,48 @@ const BoardDirectory: React.FC = () => {
                     </Button>
                 </div>
             </header>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <Card className="glass">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.summary.total_members')}</CardTitle>
+                        <Users className="h-5 w-5 text-gray-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-3xl font-bold text-gold-400">{summaryData.totalMembers}</div>
+                    </CardContent>
+                </Card>
+                <Card className="glass">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.summary.independent_members')}</CardTitle>
+                        <ShieldCheck className="h-5 w-5 text-gray-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-3xl font-bold text-gold-400">{summaryData.independentMembersCount}</div>
+                        <p className="text-xs text-gray-400">{summaryData.independentPercentage.toFixed(0)}% {t('board_directory.summary.of_board')}</p>
+                    </CardContent>
+                </Card>
+                <Card className="glass">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.summary.expiring_soon')}</CardTitle>
+                        <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className={`text-3xl font-bold ${summaryData.expiringSoon > 0 ? 'text-yellow-400' : 'text-gold-400'}`}>{summaryData.expiringSoon}</div>
+                        <p className="text-xs text-gray-400">{t('board_directory.summary.within_3_months')}</p>
+                    </CardContent>
+                </Card>
+                <Card className="glass">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.committees')}</CardTitle>
+                        <Layers className="h-5 w-5 text-gray-400" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-3xl font-bold text-gold-400">{summaryData.totalCommittees}</div>
+                         <p className="text-xs text-gray-400">{t('board_directory.summary.total_committees')}</p>
+                    </CardContent>
+                </Card>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="lg:col-span-2">
@@ -469,5 +533,3 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
 };
 
 export default BoardDirectory;
-
-    

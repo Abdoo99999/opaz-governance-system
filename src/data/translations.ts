@@ -85,6 +85,14 @@ export const translations = {
       committees: "عضوية اللجان",
       noCommittees: "لا يوجد",
       expiresSoon: "تنتهي العضوية قريباً",
+      summary: {
+        total_members: "إجمالي الأعضاء",
+        independent_members: "الأعضاء المستقلون",
+        of_board: "من المجلس",
+        expiring_soon: "عضويات تنتهي قريباً",
+        within_3_months: "خلال 3 أشهر",
+        total_committees: "لجنة عاملة"
+      },
       roles: {
         chairman: "رئيس المجلس",
         member: "عضو مجلس"
@@ -533,6 +541,14 @@ export const translations = {
       committees: "Committee Memberships",
       noCommittees: "None",
       expiresSoon: "Tenure expires soon",
+      summary: {
+        total_members: "Total Members",
+        independent_members: "Independent Members",
+        of_board: "of the board",
+        expiring_soon: "Tenures Expiring Soon",
+        within_3_months: "within 3 months",
+        total_committees: "Active Committees"
+      },
       roles: {
         chairman: "Chairman",
         member: "Board Member"
@@ -897,5 +913,3 @@ export const translations = {
     }
   }
 };
-
-    
