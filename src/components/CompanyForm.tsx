@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -32,15 +33,8 @@ const formSchema = z.object({
     financialYearEnd: z.date({ required_error: "A date is required." }),
     lastROI: z.number(),
     usoObligations: z.boolean(),
-    boardAppointmentDate: z.date({ required_error: "A date is required." }),
-    expiryDate: z.date(),
-    boardMembers: z.number().int().positive('Must be a positive number'),
-    independentMembers: z.number().int().positive('Must be a positive number'),
     totalEmployees: z.number().int().positive('Must be a positive number'),
     omaniEmployees: z.number().int().positive('Must be a positive number'),
-}).refine(data => data.independentMembers <= data.boardMembers, {
-    message: "Independent members cannot exceed total members",
-    path: ["independentMembers"],
 }).refine(data => data.omaniEmployees <= data.totalEmployees, {
     message: "Omani employees cannot exceed total employees",
     path: ["omaniEmployees"],
@@ -79,17 +73,12 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
             financialYearEnd: company?.financialYearEnd ? new Date(company.financialYearEnd) : new Date(),
             lastROI: company?.lastROI || 0,
             usoObligations: company?.usoObligations || false,
-            boardAppointmentDate: company?.boardAppointmentDate ? new Date(company.boardAppointmentDate) : new Date(),
-            expiryDate: company?.expiryDate ? new Date(company.expiryDate) : new Date(),
-            boardMembers: company?.boardMembers || 0,
-            independentMembers: company?.independentMembers || 0,
             totalEmployees: company?.totalEmployees || 0,
             omaniEmployees: company?.omaniEmployees || 0,
         },
     });
 
     const watchCompanyName = watch('companyName');
-    const watchBoardAppointmentDate = watch('boardAppointmentDate');
     const watchTotalEmployees = watch('totalEmployees');
     const watchOmaniEmployees = watch('omaniEmployees');
     
@@ -104,14 +93,6 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
             }
         }
     }, [watchCompanyName, setValue]);
-
-    useEffect(() => {
-        if (watchBoardAppointmentDate) {
-            const newExpiryDate = new Date(watchBoardAppointmentDate);
-            newExpiryDate.setFullYear(newExpiryDate.getFullYear() + 3);
-            setValue('expiryDate', newExpiryDate);
-        }
-    }, [watchBoardAppointmentDate, setValue]);
 
     const omanizationPercentage = (watchTotalEmployees > 0) ? (watchOmaniEmployees / watchTotalEmployees) * 100 : 0;
 
@@ -237,64 +218,9 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
                         </CardContent>
                     </Card>
                 </motion.div>
-                
-                {/* Card 3: Board Governance */}
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-                    <Card className="glass">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <Landmark className="w-6 h-6 text-gold-400" />
-                            <CardTitle>{t('companyForm.board.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                                <label>{t('companyForm.board.appointmentDate')}</label>
-                                <Controller
-                                    name="boardAppointmentDate"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button variant={"outline"} className={cn(inputStyles, "w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0 bg-royal-900 border-white/20">
-                                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                                            </PopoverContent>
-                                        </Popover>
-                                    )}
-                                />
-                                {errors.boardAppointmentDate && <p className="text-red-500 text-sm mt-1">{errors.boardAppointmentDate.message}</p>}
-                            </div>
-                             <div>
-                                <label>{t('companyForm.board.expiryDate')}</label>
-                                <Controller
-                                    name="expiryDate"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Input value={field.value ? format(field.value, "PPP") : ''} readOnly className={cn(inputStyles, "bg-royal-900/80")} />
-                                    )}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label>{t('companyForm.board.members')}</label>
-                                    <Input type="number" {...register('boardMembers', { valueAsNumber: true })} className={inputStyles} />
-                                     {errors.boardMembers && <p className="text-red-500 text-sm mt-1">{errors.boardMembers.message}</p>}
-                                </div>
-                                <div>
-                                    <label>{t('companyForm.board.independent')}</label>
-                                    <Input type="number" {...register('independentMembers', { valueAsNumber: true })} className={inputStyles} />
-                                    {errors.independentMembers && <p className="text-red-500 text-sm mt-1">{errors.independentMembers.message}</p>}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
 
-                {/* Card 4: Human Capital */}
-                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+                {/* Card 3: Human Capital */}
+                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4} className="lg:col-span-2">
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Users className="w-6 h-6 text-gold-400" />
@@ -329,5 +255,3 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
 };
 
 export default CompanyForm;
-
-    

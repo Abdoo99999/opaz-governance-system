@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,7 +32,13 @@ const riskVariant: { [key: string]: "default" | "secondary" | "destructive" | "o
     'High': 'destructive'
 }
 
-const CompanyRegistry: React.FC<{ userRole: UserRole }> = ({ userRole }) => {
+interface CompanyRegistryProps {
+    userRole: UserRole;
+    onNavigate: (view: string) => void;
+}
+
+
+const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate }) => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedCompanyForForm, setSelectedCompanyForForm] = useState<any>(null);
     const { t, language } = useLanguage();
@@ -153,10 +159,16 @@ const CompanyRegistry: React.FC<{ userRole: UserRole }> = ({ userRole }) => {
                         <header className="flex items-center justify-between mb-8">
                             <h1 className="text-3xl font-bold">{t('registry.title')}</h1>
                             {userRole === 'admin' && (
-                                <Button onClick={handleAddCompany} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                                    <Plus className="ml-2 h-5 w-5" />
-                                    {t('registry.addNew')}
-                                </Button>
+                                <div className="flex items-center gap-4">
+                                     <Button onClick={() => onNavigate('board-directory')} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">
+                                        <Users className="ml-2 h-5 w-5" />
+                                        {t('menu.board_directory')}
+                                    </Button>
+                                    <Button onClick={handleAddCompany} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                                        <Plus className="ml-2 h-5 w-5" />
+                                        {t('registry.addNew')}
+                                    </Button>
+                                </div>
                             )}
                         </header>
                         

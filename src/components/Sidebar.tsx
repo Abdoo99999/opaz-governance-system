@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban, Settings, LogOut, FileText, Send, GitPullRequest, Lock } from 'lucide-react';
+import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban, Settings, LogOut, FileText, Send, GitPullRequest, Lock, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { useLanguage } from '@/context/LanguageContext';
@@ -16,6 +16,7 @@ import type { SubmissionStatus } from '@/data/companies';
 const allMenuItems = [
   { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard', roles: ['admin'], requiredStatus: 'none' },
   { name: 'registry', icon: Building2, view: 'companies', roles: ['admin', 'company'], requiredStatus: 'profile' },
+  { name: 'board_directory', icon: Users, view: 'board-directory', roles: ['admin'], requiredStatus: 'none' },
   { name: 'assessment', icon: ClipboardCheck, view: 'maturity-assessment', roles: ['admin', 'company'], requiredStatus: 'assessment' },
   { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor', roles: ['admin', 'company'], requiredStatus: 'compliance' },
   { name: 'financials', icon: FileText, view: 'financial-statements', roles: ['admin', 'company'], requiredStatus: 'financials' },

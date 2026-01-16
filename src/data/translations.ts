@@ -1,3 +1,4 @@
+
 export const translations = {
   ar: {
     appTitle: "منظومة إتقان",
@@ -5,6 +6,7 @@ export const translations = {
     menu: {
       dashboard: "لوحة القيادة",
       registry: "سجل الشركات",
+      board_directory: "سجل المجالس",
       assessment: "تقييم النضج",
       compliance: "الامتثال والمخاطر",
       improvement: "خطة التحسين",
@@ -67,6 +69,45 @@ export const translations = {
         medium: "متوسط",
         high: "مرتفع",
         critical: "حرج"
+      }
+    },
+    board_directory: {
+      title: "سجل تشكيل المجالس واللجان",
+      subtitle: "عرض وتحليل تشكيلات مجالس الإدارة واللجان التابعة لها",
+      addMember: "إضافة عضو جديد",
+      skillsMatrix: "مصفوفة المهارات والخبرات",
+      boardTenure: "الدورة الحالية للمجلس",
+      currentTerm: "الدورة الحالية",
+      noData: "لا توجد بيانات لعرضها",
+      membersCount: "عدد الأعضاء",
+      memberType: "نوع العضوية",
+      expertise: "الخبرة الأساسية",
+      committees: "عضوية اللجان",
+      noCommittees: "لا يوجد",
+      expiresSoon: "تنتهي العضوية قريباً",
+      roles: {
+        chairman: "رئيس المجلس",
+        member: "عضو مجلس"
+      },
+      types: {
+        independent: "مستقل",
+        government: "ممثل حكومي",
+        executive: "تنفيذي"
+      },
+      expertise: {
+        legal: "قانونية",
+        finance: "مالية",
+        engineering: "هندسية",
+        hr: "موارد بشرية",
+        strategy: "استراتيجية",
+        technology: "تقنية",
+        marketing: "تسويق"
+      },
+      committee_names: {
+        audit: "التدقيق",
+        risk: "المخاطر",
+        hr: "الموارد البشرية",
+        nomination: "الترشيحات والمكافآت"
       }
     },
     assessment: {
@@ -404,6 +445,7 @@ export const translations = {
     menu: {
       dashboard: "Dashboard",
       registry: "Company Registry",
+      board_directory: "Board Directory",
       assessment: "Maturity Assessment",
       compliance: "Compliance & Risk",
       improvement: "Improvement Plan",
@@ -467,6 +509,45 @@ export const translations = {
             high: "High",
             critical: "Critical"
         }
+    },
+     board_directory: {
+      title: "Board & Committees Directory",
+      subtitle: "View and analyze board and committee compositions",
+      addMember: "Add New Member",
+      skillsMatrix: "Skills & Expertise Matrix",
+      boardTenure: "Current Board Tenure",
+      currentTerm: "Current Term",
+      noData: "No data to display",
+      membersCount: "Members",
+      memberType: "Membership Type",
+      expertise: "Primary Expertise",
+      committees: "Committee Memberships",
+      noCommittees: "None",
+      expiresSoon: "Tenure expires soon",
+      roles: {
+        chairman: "Chairman",
+        member: "Board Member"
+      },
+      types: {
+        independent: "Independent",
+        government: "Government Rep.",
+        executive: "Executive"
+      },
+      expertise: {
+        legal: "Legal",
+        finance: "Finance",
+        engineering: "Engineering",
+        hr: "Human Resources",
+        strategy: "Strategy",
+        technology: "Technology",
+        marketing: "Marketing"
+      },
+      committee_names: {
+        audit: "Audit",
+        risk: "Risk",
+        hr: "Human Resources",
+        nomination: "Nomination"
+      }
     },
     assessment: {
         title: "Assessment Axes",

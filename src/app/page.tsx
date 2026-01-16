@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import AppLayout from "@/components/AppLayout";
 import Dashboard from "@/components/Dashboard";
 import CompanyRegistry from "@/components/CompanyRegistry";
+import BoardDirectory from "@/components/BoardDirectory";
 import Assessment from "@/components/Assessment";
 import ComplianceMonitor from "@/components/ComplianceMonitor";
 import ImprovementPlan from "@/components/ImprovementPlan";
@@ -85,9 +86,11 @@ const AppContent = () => {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry userRole={userRole} />; // Fallback for company user
+        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry userRole={userRole} onNavigate={handleNavigate}/>; // Fallback for company user
       case 'companies':
-        return <CompanyRegistry userRole={userRole} />;
+        return <CompanyRegistry userRole={userRole} onNavigate={handleNavigate} />;
+      case 'board-directory':
+        return <BoardDirectory />;
       case 'maturity-assessment':
         return <Assessment onNavigate={handleNavigate} userRole={userRole} />;
       case 'compliance-monitor':
@@ -99,13 +102,13 @@ const AppContent = () => {
       case 'review-submit':
         return <ReviewSubmit onNavigate={handleNavigate} />;
       case 'approval-requests':
-        return userRole === 'admin' ? <ApprovalRequests onNavigate={handleNavigate} /> : <CompanyRegistry userRole={userRole} />;
+        return userRole === 'admin' ? <ApprovalRequests onNavigate={handleNavigate} /> : <CompanyRegistry userRole={userRole} onNavigate={handleNavigate}/>;
       case 'reports':
          return <Reports />;
       case 'settings':
-        return userRole === 'admin' ? <Settings /> : <CompanyRegistry userRole={userRole} />; // Fallback for company user
+        return userRole === 'admin' ? <Settings /> : <CompanyRegistry userRole={userRole} onNavigate={handleNavigate} />; // Fallback for company user
       default:
-        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry userRole={userRole} />;
+        return userRole === 'admin' ? <Dashboard /> : <CompanyRegistry userRole={userRole} onNavigate={handleNavigate}/>;
     }
   };
 
