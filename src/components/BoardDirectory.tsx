@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -17,10 +18,10 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers } from 'lucide-react';
+import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers, Flag } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { COMPANIES, Company } from '@/data/companies';
-import { BOARD_MEMBERS, BoardMember } from '@/data/board-members';
+import { BOARD_MEMBERS, BoardMember, NATIONALITIES } from '@/data/board-members';
 import { differenceInMonths, format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -63,6 +64,7 @@ const typeOptions = ['Independent', 'Government', 'Executive'];
 const memberSchema = z.object({
   name_ar: z.string().min(1, 'الاسم بالعربية مطلوب'),
   name_en: z.string().min(1, 'الاسم بالانجليزية مطلوب'),
+  nationality: z.string().min(1, 'الجنسية مطلوبة'),
   role: z.enum(['Chairman', 'Member']),
   type: z.enum(['Independent', 'Government', 'Executive']),
   expertise: z.enum(['Legal', 'Finance', 'Engineering', 'HR', 'Strategy', 'Technology', 'Marketing']),
@@ -76,7 +78,7 @@ type MemberFormData = z.infer<typeof memberSchema>;
 const BoardDirectory: React.FC = () => {
     const { t, language } = useLanguage();
     const { toast } = useToast();
-    const { selectedCompanyId, setSelectedCompanyId } = useCompanyContext();
+    const { selectedCompanyId } = useCompanyContext();
     const [boardMembers, setBoardMembers] = useState<BoardMember[]>(BOARD_MEMBERS);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<BoardMember | null>(null);
@@ -200,19 +202,6 @@ const BoardDirectory: React.FC = () => {
                     <p className="text-gray-400 mt-1">{t('board_directory.subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-4 mt-4 md:mt-0">
-                    <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-                        <SelectTrigger className="w-[280px] glass text-white">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-royal-900 text-white border-white/20">
-                            <SelectItem value="all">{t('common.selectAllCompanies')}</SelectItem>
-                            {COMPANIES.map(company => (
-                                <SelectItem key={company.id} value={company.id}>
-                                    {language === 'ar' ? company.name_ar : company.name_en}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
                      <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                         <Plus className="ml-2 h-5 w-5" />
                         {t('board_directory.addMember')}
@@ -329,6 +318,10 @@ const BoardDirectory: React.FC = () => {
                             </CardHeader>
                             <CardContent className="p-4 space-y-3 text-sm flex-grow">
                                 <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
+                                    <span className="text-gray-400">{t('board_directory.form.nationality')}</span>
+                                    <Badge variant="outline" className="border-purple-400/30 text-purple-300">{member.nationality}</Badge>
+                                </div>
+                                <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
                                     <span className="text-gray-400">{t('board_directory.memberType')}</span>
                                     <Badge variant="outline" className="border-blue-400/30 text-blue-300">{t(`board_directory.types.${member.type.toLowerCase()}`)}</Badge>
                                 </div>
@@ -408,12 +401,14 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
       if (member) {
         reset({
           ...member,
+          nationality: member.nationality || 'Omani',
           appointmentDate: parseISO(member.appointmentDate),
           expiryDate: parseISO(member.expiryDate),
         });
       } else {
         reset({
           name_ar: '', name_en: '',
+          nationality: 'Omani',
           role: 'Member', type: 'Independent', expertise: 'Finance',
           appointmentDate: new Date(), expiryDate: new Date(),
           committees: []
@@ -498,6 +493,17 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
               <Input id="name_en" {...register('name_en')} className="bg-royal-900/50 border-white/10" dir="ltr" />
                {errors.name_en && <p className="text-red-500 text-sm mt-1">{errors.name_en.message}</p>}
             </div>
+             <div>
+              <Label htmlFor="nationality">{t('board_directory.form.nationality')}</Label>
+              <Controller name="nationality" control={control} render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-royal-900 text-white border-white/20 max-h-60">
+                    {NATIONALITIES.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}/>
+            </div>
             <div>
               <Label htmlFor="role">{t('board_directory.form.role')}</Label>
               <Controller name="role" control={control} render={({ field }) => (
@@ -563,13 +569,15 @@ interface CycleSettingsDialogProps {
 }
 
 const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClose, onSave, startDate, endDate, t }) => {
-    const [start, setStart] = useState<Date | undefined>(startDate || undefined);
-    const [end, setEnd] = useState<Date | undefined>(endDate || undefined);
-    
+    const [start, setStart] = useState<Date | undefined>();
+    const [end, setEnd] = useState<Date | undefined>();
+    const [isStartOpen, setStartOpen] = useState(false);
+    const [isEndOpen, setEndOpen] = useState(false);
+
     useEffect(() => {
         if(isOpen) {
-            setStart(startDate || undefined);
-            setEnd(endDate || undefined);
+            setStart(startDate ? new Date(startDate) : undefined);
+            setEnd(endDate ? new Date(endDate) : undefined);
         }
     }, [isOpen, startDate, endDate]);
 
@@ -587,26 +595,30 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                 <div className="grid gap-6 py-4">
                     <div>
                         <Label>{t('board_directory.form.termStartDate')}</Label>
-                        <Popover>
+                        <Popover open={isStartOpen} onOpenChange={setStartOpen}>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !start && "text-muted-foreground")}>
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {start ? format(start, "PPP") : <span>{t('common.pickDate')}</span>}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={start} onSelect={setStart} initialFocus /></PopoverContent>
+                            <PopoverContent className="w-auto p-0">
+                                <CalendarComponent mode="single" selected={start} onSelect={(date) => { setStart(date); setStartOpen(false); }} initialFocus />
+                            </PopoverContent>
                         </Popover>
                     </div>
                     <div>
                         <Label>{t('board_directory.form.termEndDate')}</Label>
-                        <Popover>
+                        <Popover open={isEndOpen} onOpenChange={setEndOpen}>
                             <PopoverTrigger asChild>
                                 <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !end && "text-muted-foreground")}>
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {end ? format(end, "PPP") : <span>{t('common.pickDate')}</span>}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={end} onSelect={setEnd} initialFocus /></PopoverContent>
+                            <PopoverContent className="w-auto p-0">
+                                <CalendarComponent mode="single" selected={end} onSelect={(date) => { setEnd(date); setEndOpen(false); }} initialFocus />
+                            </PopoverContent>
                         </Popover>
                     </div>
                 </div>
@@ -626,3 +638,5 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
 
 
 export default BoardDirectory;
+
+    

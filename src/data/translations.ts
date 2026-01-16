@@ -122,6 +122,7 @@ export const translations = {
         title_edit: 'تعديل بيانات العضو',
         name_ar: 'الاسم بالعربية',
         name_en: 'الاسم بالإنجليزية',
+        nationality: 'الجنسية',
         role: 'المنصب',
         appointmentDate: 'تاريخ التعيين',
         expiryDate: 'تاريخ انتهاء الصلاحية',
@@ -575,6 +576,7 @@ export const translations = {
         title_edit: 'Edit Member Details',
         name_ar: 'Name (Arabic)',
         name_en: 'Name (English)',
+        nationality: 'Nationality',
         role: 'Role',
         appointmentDate: 'Appointment Date',
         expiryDate: 'Expiry Date',
@@ -907,3 +909,5 @@ export const translations = {
     }
   }
 };
+
+    
