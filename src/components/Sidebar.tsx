@@ -140,10 +140,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="h-24 flex items-center justify-center px-4">
-            <h1 className={cn("font-bold text-base text-center leading-snug text-gold-500 transition-opacity duration-300", !isOpen && 'opacity-0')}>
+          <div className="h-24 flex flex-col items-center justify-center px-4 text-center">
+            <h1 className={cn("font-bold text-xl text-gold-400 transition-opacity duration-300", !isOpen && 'opacity-0')}>
               {t('appTitle')}
             </h1>
+             <p className={cn("text-xs text-gray-400 transition-opacity duration-300 mt-1", !isOpen && 'opacity-0')}>
+                {t('appSubtitle')}
+            </p>
           </div>
           <nav className="flex-1 px-2 py-4">
             <ul>
@@ -219,5 +222,3 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
 };
 
 export default Sidebar;
-
-    

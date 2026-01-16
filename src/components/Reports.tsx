@@ -380,9 +380,13 @@ const Reports: React.FC = () => {
             <div id="report-content" ref={reportRef} className="p-8 bg-royal-900 print:bg-white print:p-0">
                 {/* For Print Header */}
                 <div className="hidden print:block text-center mb-8">
-                     <h1 className="text-3xl font-bold text-black print-text-black">{t('reports.title')}</h1>
-                     <h2 className="text-xl font-semibold text-gray-700 print-text-black">{selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}</h2>
-                     <p className="text-gray-600 mt-1 print-text-black">OIA Governance System - {format(new Date(), "d MMMM yyyy")}</p>
+                     <h1 className="text-3xl font-bold text-black print-text-black">{t('appTitle')}</h1>
+                     <h2 className="text-xl font-semibold text-gray-700 print-text-black">{t('appSubtitle')}</h2>
+                     <p className="text-gray-500 mt-2 print-text-black">
+                        {selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}
+                        {' - '}
+                        {format(new Date(), "d MMMM yyyy")}
+                     </p>
                 </div>
 
                 {/* Top Row */}

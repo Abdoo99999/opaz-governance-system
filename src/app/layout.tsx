@@ -11,8 +11,8 @@ const cairo = Cairo({
 
 
 export const metadata: Metadata = {
-  title: 'OIA Governance System',
-  description: 'Oman Investment Authority Governance System',
+  title: 'منظومة إتقان | جهاز الاستثمار العماني',
+  description: 'منظومة إتقان لحوكمة شركات جهاز الاستثمار العماني',
 };
 
 export default function RootLayout({

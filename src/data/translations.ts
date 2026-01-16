@@ -1,8 +1,7 @@
-
 export const translations = {
   ar: {
-    appTitle: "البرنامج الالكتروني لقياس نضج الحوكمة",
-    appSubtitle: "لشركات جهاز الاستثمار العماني",
+    appTitle: "منظومة إتقان",
+    appSubtitle: "لحوكمة شركات جهاز الاستثمار العماني",
     menu: {
       dashboard: "لوحة القيادة",
       registry: "سجل الشركات",
@@ -394,8 +393,8 @@ export const translations = {
     }
   },
   en: {
-    appTitle: "Electronic Program for Governance Maturity Measurement",
-    appSubtitle: "for OIA Companies",
+    appTitle: "ITQAN Platform",
+    appSubtitle: "For OIA Company Governance",
     menu: {
       dashboard: "Dashboard",
       registry: "Company Registry",
@@ -787,5 +786,3 @@ export const translations = {
     }
   }
 };
-
-    
