@@ -571,13 +571,19 @@ interface CycleSettingsDialogProps {
 const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClose, onSave, startDate, endDate, t }) => {
     const [start, setStart] = useState<Date | undefined>();
     const [end, setEnd] = useState<Date | undefined>();
+    const [startMonth, setStartMonth] = useState<Date | undefined>();
+    const [endMonth, setEndMonth] = useState<Date | undefined>();
     const [isStartOpen, setStartOpen] = useState(false);
     const [isEndOpen, setEndOpen] = useState(false);
 
     useEffect(() => {
         if(isOpen) {
-            setStart(startDate ? new Date(startDate) : undefined);
-            setEnd(endDate ? new Date(endDate) : undefined);
+            const initialStartDate = startDate ? new Date(startDate) : undefined;
+            const initialEndDate = endDate ? new Date(endDate) : undefined;
+            setStart(initialStartDate);
+            setEnd(initialEndDate);
+            setStartMonth(initialStartDate || new Date());
+            setEndMonth(initialEndDate || new Date());
         }
     }, [isOpen, startDate, endDate]);
 
@@ -603,7 +609,13 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
-                                <CalendarComponent mode="single" selected={start} onSelect={(date) => { setStart(date); setStartOpen(false); }} initialFocus />
+                                <CalendarComponent 
+                                  mode="single" 
+                                  selected={start} 
+                                  onSelect={(date) => { setStart(date as Date); setStartOpen(false); }} 
+                                  month={startMonth}
+                                  onMonthChange={setStartMonth}
+                                />
                             </PopoverContent>
                         </Popover>
                     </div>
@@ -617,7 +629,13 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
-                                <CalendarComponent mode="single" selected={end} onSelect={(date) => { setEnd(date); setEndOpen(false); }} initialFocus />
+                                <CalendarComponent 
+                                  mode="single" 
+                                  selected={end} 
+                                  onSelect={(date) => { setEnd(date as Date); setEndOpen(false); }} 
+                                  month={endMonth}
+                                  onMonthChange={setEndMonth}
+                                />
                             </PopoverContent>
                         </Popover>
                     </div>
@@ -638,5 +656,7 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
 
 
 export default BoardDirectory;
+
+    
 
     
