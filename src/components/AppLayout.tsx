@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -37,6 +36,7 @@ export default function AppLayout({ children, currentView, onNavigate, onLogout,
       />
       <div className={cn("flex-1 flex flex-col overflow-hidden print:overflow-visible print-h-auto")}>
         <Header 
+          currentView={currentView}
           onToggleSidebar={toggleSidebar} 
           onNavigate={onNavigate}
           userRole={userRole}

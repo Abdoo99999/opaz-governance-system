@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -19,13 +18,14 @@ import { UserRole } from '@/app/page';
 import { useYear } from '@/context/YearContext';
 
 interface HeaderProps {
+  currentView: string;
   onToggleSidebar: () => void;
   onNavigate: (view: string) => void;
   userRole: UserRole;
   isSidebarVisible: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onNavigate, userRole, isSidebarVisible }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigate, userRole, isSidebarVisible }) => {
   const { language, setLanguage, t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId, getSelectedCompany } = useCompany();
   const { selectedYear, setSelectedYear, availableYears } = useYear();
@@ -34,6 +34,8 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onNavigate, userRole, 
   const handleLanguageChange = () => {
     setLanguage(language === 'ar' ? 'en' : 'ar');
   };
+
+  const showFilters = currentView !== 'settings';
 
   return (
     <header className="sticky top-0 z-40 print:hidden">
@@ -49,7 +51,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onNavigate, userRole, 
                 {t('menu.dashboard')}
             </Button>
           )}
-          {userRole === 'admin' ? (
+          {userRole === 'admin' && showFilters ? (
             <div className="flex items-center gap-3">
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[280px] bg-royal-900/60 border-white/10 text-white rounded-lg h-12">
@@ -81,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onNavigate, userRole, 
                </div>
             </div>
           ) : (
-            selectedCompany && <div className="text-xl font-bold">{language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}</div>
+            userRole === 'company' && selectedCompany && <div className="text-xl font-bold">{language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}</div>
           )}
         </div>
         <div className="flex items-center gap-4">
