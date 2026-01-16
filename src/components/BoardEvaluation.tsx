@@ -67,6 +67,20 @@ const BoardEvaluation: React.FC = () => {
         if (selectedCompanyId === 'all') return [];
         return BOARD_MEMBERS.filter(m => m.companyId === selectedCompanyId);
     }, [selectedCompanyId]);
+
+    const calculateAttendance = (held: number, attended: number) => {
+        if (!held || held === 0) return 0;
+        return (attended / held) * 100;
+    };
+    
+    const calculateTotalScore = (evaluation: Evaluation | undefined) => {
+        if (!evaluation) return 0;
+        const attendanceScore = calculateAttendance(evaluation.meetingsHeld, evaluation.meetingsAttended);
+        const strategicScore = (evaluation.strategic / 5) * 100;
+        const technicalScore = (evaluation.technical / 5) * 100;
+        const weightedScore = (attendanceScore * 0.4) + (strategicScore * 0.3) + (technicalScore * 0.3);
+        return Math.round(weightedScore);
+    };
     
     const summaryData = useMemo(() => {
         const scores = filteredMembers.map(member => {
@@ -117,20 +131,6 @@ const BoardEvaluation: React.FC = () => {
     const handleOpenNotes = (evaluation: Evaluation) => {
         setSelectedMemberForNotes(evaluation);
         setNotes(evaluation.notes || '');
-    };
-
-    const calculateAttendance = (held: number, attended: number) => {
-        if (!held || held === 0) return 0;
-        return (attended / held) * 100;
-    };
-    
-    const calculateTotalScore = (evaluation: Evaluation | undefined) => {
-        if (!evaluation) return 0;
-        const attendanceScore = calculateAttendance(evaluation.meetingsHeld, evaluation.meetingsAttended);
-        const strategicScore = (evaluation.strategic / 5) * 100;
-        const technicalScore = (evaluation.technical / 5) * 100;
-        const weightedScore = (attendanceScore * 0.4) + (strategicScore * 0.3) + (technicalScore * 0.3);
-        return Math.round(weightedScore);
     };
     
     const getRecommendation = (score: number) => {
