@@ -571,19 +571,13 @@ interface CycleSettingsDialogProps {
 const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClose, onSave, startDate, endDate, t }) => {
     const [start, setStart] = useState<Date | undefined>();
     const [end, setEnd] = useState<Date | undefined>();
-    const [startMonth, setStartMonth] = useState<Date | undefined>();
-    const [endMonth, setEndMonth] = useState<Date | undefined>();
     const [isStartOpen, setStartOpen] = useState(false);
     const [isEndOpen, setEndOpen] = useState(false);
 
     useEffect(() => {
         if(isOpen) {
-            const initialStartDate = startDate ? new Date(startDate) : undefined;
-            const initialEndDate = endDate ? new Date(endDate) : undefined;
-            setStart(initialStartDate);
-            setEnd(initialEndDate);
-            setStartMonth(initialStartDate || new Date());
-            setEndMonth(initialEndDate || new Date());
+            setStart(startDate ? new Date(startDate) : undefined);
+            setEnd(endDate ? new Date(endDate) : undefined);
         }
     }, [isOpen, startDate, endDate]);
 
@@ -612,9 +606,11 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                                 <CalendarComponent 
                                   mode="single" 
                                   selected={start} 
-                                  onSelect={(date) => { setStart(date as Date); setStartOpen(false); }} 
-                                  month={startMonth}
-                                  onMonthChange={setStartMonth}
+                                  onSelect={(date) => { setStart(date); setStartOpen(false); }} 
+                                  captionLayout="dropdown-buttons"
+                                  fromYear={2015}
+                                  toYear={2035}
+                                  initialFocus
                                 />
                             </PopoverContent>
                         </Popover>
@@ -632,9 +628,11 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                                 <CalendarComponent 
                                   mode="single" 
                                   selected={end} 
-                                  onSelect={(date) => { setEnd(date as Date); setEndOpen(false); }} 
-                                  month={endMonth}
-                                  onMonthChange={setEndMonth}
+                                  onSelect={(date) => { setEnd(date); setEndOpen(false); }} 
+                                  captionLayout="dropdown-buttons"
+                                  fromYear={2015}
+                                  toYear={2035}
+                                  initialFocus
                                 />
                             </PopoverContent>
                         </Popover>
