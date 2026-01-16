@@ -109,13 +109,13 @@ const Settings: React.FC = () => {
                     <Card className="glass h-full">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Sliders className="w-6 h-6 text-gold-400" />
-                            <CardTitle>System Preferences</CardTitle>
+                            <CardTitle>{t('settings.preferences.title')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6 pt-2">
                             <div className="flex items-center justify-between p-3 bg-royal-900/40 rounded-lg">
                                 <div className='flex items-center gap-3'>
                                     <Languages className="w-5 h-5 text-gray-400"/>
-                                    <Label htmlFor="language-switch" className="text-lg">Language</Label>
+                                    <Label htmlFor="language-switch" className="text-lg">{t('settings.preferences.language')}</Label>
                                 </div>
                                 <div className='flex items-center gap-3'>
                                     <span className='text-gray-400'>EN</span>
@@ -130,14 +130,14 @@ const Settings: React.FC = () => {
                             <div className="flex items-center justify-between p-3 bg-royal-900/40 rounded-lg">
                                 <div className='flex items-center gap-3'>
                                     <SunMoon className="w-5 h-5 text-gray-400"/>
-                                    <Label htmlFor="theme-switch" className="text-lg">Theme</Label>
+                                    <Label htmlFor="theme-switch" className="text-lg">{t('settings.preferences.theme')}</Label>
                                 </div>
                                 <Switch id="theme-switch" disabled />
                             </div>
                              <div className="flex items-center justify-between p-3 bg-royal-900/40 rounded-lg">
                                 <div className='flex items-center gap-3'>
                                     <Bell className="w-5 h-5 text-gray-400"/>
-                                    <Label htmlFor="notifications-switch" className="text-lg">Notifications</Label>
+                                    <Label htmlFor="notifications-switch" className="text-lg">{t('settings.preferences.notifications')}</Label>
                                 </div>
                                 <Switch id="notifications-switch" defaultChecked disabled />
                             </div>

@@ -276,6 +276,12 @@ export const translations = {
             leadership: "وزن محور القيادة",
             reset: "إعادة تعيين للأوزان الافتراضية"
         },
+        preferences: {
+            title: "تفضيلات النظام",
+            language: "اللغة",
+            theme: "المظهر",
+            notifications: "الإشعارات"
+        },
         info: {
             title: "معلومات النظام",
             version: "OIA GRC v2.0 (Elite Edition)",
@@ -668,6 +674,12 @@ export const translations = {
             financial: "Financial Axis Weight",
             leadership: "Leadership Axis Weight",
             reset: "Reset to Default Weights"
+        },
+        preferences: {
+            title: "System Preferences",
+            language: "Language",
+            theme: "Theme",
+            notifications: "Notifications"
         },
         info: {
             title: "System Information",
