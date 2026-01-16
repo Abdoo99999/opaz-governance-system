@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Radar,
@@ -18,12 +18,22 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, Plus, Calendar, AlertTriangle } from 'lucide-react';
+import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import { COMPANIES } from '@/data/companies';
+import { COMPANIES, Company } from '@/data/companies';
 import { BOARD_MEMBERS, BoardMember } from '@/data/board-members';
 import { differenceInMonths, format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Calendar as CalendarComponent } from './ui/calendar';
+import { Checkbox } from './ui/checkbox';
 
 
 const expertiseColors: { [key: string]: string } = {
@@ -45,14 +55,37 @@ const cardVariants = {
   }),
 };
 
+const expertiseOptions = ['Legal', 'Finance', 'Engineering', 'HR', 'Strategy', 'Technology', 'Marketing'];
+const committeeOptions = ['Audit', 'Risk', 'HR', 'Nomination'];
+const roleOptions = ['Chairman', 'Member'];
+const typeOptions = ['Independent', 'Government', 'Executive'];
+
+const memberSchema = z.object({
+  name_ar: z.string().min(1, 'الاسم بالعربية مطلوب'),
+  name_en: z.string().min(1, 'الاسم بالانجليزية مطلوب'),
+  companyId: z.string().min(1, 'الشركة مطلوبة'),
+  role: z.enum(['Chairman', 'Member']),
+  type: z.enum(['Independent', 'Government', 'Executive']),
+  expertise: z.enum(['Legal', 'Finance', 'Engineering', 'HR', 'Strategy', 'Technology', 'Marketing']),
+  appointmentDate: z.date(),
+  expiryDate: z.date(),
+  committees: z.array(z.string()).optional(),
+});
+type MemberFormData = z.infer<typeof memberSchema>;
+
+
 const BoardDirectory: React.FC = () => {
     const { t, language } = useLanguage();
+    const { toast } = useToast();
     const [selectedCompanyId, setSelectedCompanyId] = useState('all');
+    const [boardMembers, setBoardMembers] = useState<BoardMember[]>(BOARD_MEMBERS);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [editingMember, setEditingMember] = useState<BoardMember | null>(null);
 
     const filteredMembers = useMemo(() => {
-        if (selectedCompanyId === 'all') return BOARD_MEMBERS;
-        return BOARD_MEMBERS.filter(m => m.companyId === selectedCompanyId);
-    }, [selectedCompanyId]);
+        if (selectedCompanyId === 'all') return boardMembers;
+        return boardMembers.filter(m => m.companyId === selectedCompanyId);
+    }, [selectedCompanyId, boardMembers]);
 
     const skillsMatrixData = useMemo(() => {
         const expertiseCounts = filteredMembers.reduce((acc, member) => {
@@ -88,6 +121,31 @@ const BoardDirectory: React.FC = () => {
         };
     }, [filteredMembers]);
 
+    const handleOpenForm = (member: BoardMember | null) => {
+      setEditingMember(member);
+      setIsFormOpen(true);
+    };
+
+    const handleSaveMember = (data: MemberFormData) => {
+        if (editingMember) {
+            setBoardMembers(prev => prev.map(m => m.id === editingMember.id ? { ...m, ...data, committees: data.committees || [] } : m));
+            toast({ title: t('common.saveSuccessTitle'), description: `Updated member: ${data.name_en}` });
+        } else {
+            const newMember: BoardMember = {
+                id: Math.max(0, ...boardMembers.map(m => m.id)) + 1,
+                avatar: `https://picsum.photos/seed/${Date.now()}/100/100`,
+                ...data,
+                appointmentDate: format(data.appointmentDate, 'yyyy-MM-dd'),
+                expiryDate: format(data.expiryDate, 'yyyy-MM-dd'),
+                committees: data.committees as any || [],
+            };
+            setBoardMembers(prev => [...prev, newMember]);
+            toast({ title: t('common.saveSuccessTitle'), description: `Added new member: ${data.name_en}` });
+        }
+        setIsFormOpen(false);
+    };
+
+
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white">
             <header className="flex flex-col md:flex-row items-center justify-between mb-8">
@@ -109,7 +167,7 @@ const BoardDirectory: React.FC = () => {
                             ))}
                         </SelectContent>
                     </Select>
-                     <Button className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                     <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                         <Plus className="ml-2 h-5 w-5" />
                         {t('board_directory.addMember')}
                     </Button>
@@ -161,7 +219,12 @@ const BoardDirectory: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredMembers.map((member, index) => (
                     <motion.div key={member.id} variants={cardVariants} initial="hidden" animate="visible" custom={index}>
-                        <Card className="glass overflow-hidden h-full flex flex-col">
+                        <Card className="glass overflow-hidden h-full flex flex-col relative">
+                            <div className="absolute top-2 left-2 flex gap-1 z-10">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gold-400 bg-black/20 hover:bg-black/40" onClick={(e) => { e.stopPropagation(); handleOpenForm(member); }}>
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                            </div>
                             <CardHeader className="flex flex-row items-center gap-4 p-4">
                                 <Avatar className="h-16 w-16 border-2 border-gold-500/30">
                                     <AvatarImage src={member.avatar} alt={member.name_en} data-ai-hint="person portrait" />
@@ -210,8 +273,195 @@ const BoardDirectory: React.FC = () => {
                     </motion.div>
                 ))}
             </div>
+            <BoardMemberFormDialog
+              isOpen={isFormOpen}
+              onClose={() => setIsFormOpen(false)}
+              onSave={handleSaveMember}
+              member={editingMember}
+              companies={COMPANIES}
+              t={t}
+              language={language}
+            />
         </div>
     );
 };
 
+
+// Form Dialog Component
+interface BoardMemberFormDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: MemberFormData) => void;
+  member: BoardMember | null;
+  companies: Company[];
+  t: (key: string) => string;
+  language: 'ar' | 'en';
+}
+
+const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, onClose, onSave, member, companies, t, language }) => {
+  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<MemberFormData>({
+    resolver: zodResolver(memberSchema),
+  });
+
+  useEffect(() => {
+    if (member) {
+      reset({
+        ...member,
+        appointmentDate: parseISO(member.appointmentDate),
+        expiryDate: parseISO(member.expiryDate),
+      });
+    } else {
+      reset({
+        name_ar: '', name_en: '', companyId: undefined,
+        role: 'Member', type: 'Independent', expertise: 'Finance',
+        appointmentDate: new Date(), expiryDate: new Date(),
+        committees: []
+      });
+    }
+  }, [member, isOpen, reset]);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="glass text-white max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="text-gold-400 text-2xl">
+            {member ? t('board_directory.form.title_edit') : t('board_directory.form.title_add')}
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSave)} className="grid grid-cols-2 gap-x-6 gap-y-4 pt-4">
+          
+          {/* Column 1 */}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="name_ar">{t('board_directory.form.name_ar')}</Label>
+              <Input id="name_ar" {...register('name_ar')} className="bg-royal-900/50 border-white/10" dir="rtl"/>
+              {errors.name_ar && <p className="text-red-500 text-sm mt-1">{errors.name_ar.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="companyId">{t('companyForm.identity.companyName')}</Label>
+              <Controller name="companyId" control={control} render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-royal-900 text-white border-white/20">
+                    {companies.map(c => <SelectItem key={c.id} value={c.id}>{language === 'ar' ? c.name_ar : c.name_en}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}/>
+               {errors.companyId && <p className="text-red-500 text-sm mt-1">{errors.companyId.message}</p>}
+            </div>
+             <div>
+              <Label htmlFor="type">{t('board_directory.memberType')}</Label>
+              <Controller name="type" control={control} render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-royal-900 text-white border-white/20">
+                    {typeOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.types.${opt.toLowerCase()}`)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}/>
+            </div>
+            <div>
+              <Label htmlFor="appointmentDate">{t('board_directory.form.appointmentDate')}</Label>
+              <Controller name="appointmentDate" control={control} render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !field.value && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                </Popover>
+              )}/>
+            </div>
+             <div>
+              <Label>{t('board_directory.committees')}</Label>
+              <Controller
+                name="committees"
+                control={control}
+                render={({ field }) => (
+                  <div className="p-3 bg-royal-900/40 rounded-lg grid grid-cols-2 gap-3">
+                    {committeeOptions.map(item => (
+                      <div key={item} className="flex items-center gap-2">
+                        <Checkbox
+                          id={item}
+                          checked={field.value?.includes(item)}
+                          onCheckedChange={(checked) => {
+                            return checked
+                              ? field.onChange([...(field.value || []), item])
+                              : field.onChange(field.value?.filter((value) => value !== item))
+                          }}
+                        />
+                        <Label htmlFor={item} className="text-sm font-medium">{t(`board_directory.committee_names.${item.toLowerCase()}`)}</Label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Column 2 */}
+          <div className="space-y-4">
+             <div>
+              <Label htmlFor="name_en">{t('board_directory.form.name_en')}</Label>
+              <Input id="name_en" {...register('name_en')} className="bg-royal-900/50 border-white/10" dir="ltr" />
+               {errors.name_en && <p className="text-red-500 text-sm mt-1">{errors.name_en.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="role">{t('board_directory.form.role')}</Label>
+              <Controller name="role" control={control} render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-royal-900 text-white border-white/20">
+                    {roleOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.roles.${opt.toLowerCase()}`)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}/>
+            </div>
+             <div>
+              <Label htmlFor="expertise">{t('board_directory.expertise_label')}</Label>
+               <Controller name="expertise" control={control} render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-royal-900 text-white border-white/20">
+                    {expertiseOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.expertise.${opt.toLowerCase()}`)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}/>
+            </div>
+            <div>
+              <Label htmlFor="expiryDate">{t('board_directory.form.expiryDate')}</Label>
+              <Controller name="expiryDate" control={control} render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !field.value && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                </Popover>
+              )}/>
+            </div>
+          </div>
+          
+          {/* Footer */}
+          <DialogFooter className="col-span-2 mt-4">
+              <DialogClose asChild>
+                <Button type="button" variant="outline" className="text-white border-white/20">{t('common.cancel')}</Button>
+              </DialogClose>
+              <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                <Save className="mr-2 h-4 w-4"/>
+                {t('common.save')}
+              </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export default BoardDirectory;
+
+    

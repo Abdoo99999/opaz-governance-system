@@ -108,6 +108,15 @@ export const translations = {
         risk: "المخاطر",
         hr: "الموارد البشرية",
         nomination: "الترشيحات والمكافآت"
+      },
+      form: {
+        title_add: 'إضافة عضو جديد',
+        title_edit: 'تعديل بيانات العضو',
+        name_ar: 'الاسم بالعربية',
+        name_en: 'الاسم بالإنجليزية',
+        role: 'المنصب',
+        appointmentDate: 'تاريخ التعيين',
+        expiryDate: 'تاريخ انتهاء الصلاحية'
       }
     },
     assessment: {
@@ -547,6 +556,15 @@ export const translations = {
         risk: "Risk",
         hr: "Human Resources",
         nomination: "Nomination"
+      },
+      form: {
+        title_add: 'Add New Member',
+        title_edit: 'Edit Member Details',
+        name_ar: 'Name (Arabic)',
+        name_en: 'Name (English)',
+        role: 'Role',
+        appointmentDate: 'Appointment Date',
+        expiryDate: 'Expiry Date'
       }
     },
     assessment: {
@@ -879,3 +897,5 @@ export const translations = {
     }
   }
 };
+
+    
