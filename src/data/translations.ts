@@ -129,6 +129,12 @@ export const translations = {
         cycleSettings: 'إعدادات الدورة',
         termStartDate: 'تاريخ بدء الدورة',
         termEndDate: 'تاريخ انتهاء الدورة',
+        qualification: 'المؤهل العلمي',
+      },
+      qualifications: {
+        bachelor: 'بكالوريوس',
+        master: 'ماجستير',
+        phd: 'دكتوراه'
       }
     },
     assessment: {
@@ -583,6 +589,12 @@ export const translations = {
         cycleSettings: 'Cycle Settings',
         termStartDate: 'Term Start Date',
         termEndDate: 'Term End Date',
+        qualification: 'Academic Qualification',
+      },
+      qualifications: {
+        bachelor: 'Bachelor',
+        master: 'Master',
+        phd: 'PhD'
       }
     },
     assessment: {

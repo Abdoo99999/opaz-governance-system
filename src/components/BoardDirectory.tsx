@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers, Flag } from 'lucide-react';
+import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers, Flag, GraduationCap } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { COMPANIES, Company } from '@/data/companies';
 import { BOARD_MEMBERS, BoardMember, NATIONALITIES } from '@/data/board-members';
@@ -60,6 +60,7 @@ const expertiseOptions = ['Legal', 'Finance', 'Engineering', 'HR', 'Strategy', '
 const committeeOptions = ['Audit', 'Risk', 'HR', 'Nomination'];
 const roleOptions = ['Chairman', 'Member'];
 const typeOptions = ['Independent', 'Government', 'Executive'];
+const qualificationOptions = ['Bachelor', 'Master', 'PhD'] as const;
 
 const memberSchema = z.object({
   name_ar: z.string().min(1, 'الاسم بالعربية مطلوب'),
@@ -67,6 +68,7 @@ const memberSchema = z.object({
   nationality: z.string().min(1, 'الجنسية مطلوبة'),
   role: z.enum(['Chairman', 'Member']),
   type: z.enum(['Independent', 'Government', 'Executive']),
+  qualification: z.enum(qualificationOptions),
   expertise: z.enum(['Legal', 'Finance', 'Engineering', 'HR', 'Strategy', 'Technology', 'Marketing']),
   appointmentDate: z.date(),
   expiryDate: z.date(),
@@ -325,6 +327,15 @@ const BoardDirectory: React.FC = () => {
                                     <span className="text-gray-400">{t('board_directory.memberType')}</span>
                                     <Badge variant="outline" className="border-blue-400/30 text-blue-300">{t(`board_directory.types.${member.type.toLowerCase()}`)}</Badge>
                                 </div>
+                                {member.qualification && (
+                                    <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
+                                        <span className="text-gray-400">{t('board_directory.form.qualification')}</span>
+                                        <Badge variant="outline" className="border-green-400/30 text-green-300 gap-1">
+                                            <GraduationCap className="h-3 w-3" />
+                                            {t(`board_directory.qualifications.${member.qualification.toLowerCase()}`)}
+                                        </Badge>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
                                     <span className="text-gray-400">{t('board_directory.expertise_label')}</span>
                                     <Badge style={{ backgroundColor: `${expertiseColors[member.expertise]}30`, color: expertiseColors[member.expertise], borderColor: `${expertiseColors[member.expertise]}50` }}>
@@ -402,6 +413,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
         reset({
           ...member,
           nationality: member.nationality || 'Omani',
+          qualification: member.qualification || 'Bachelor',
           appointmentDate: parseISO(member.appointmentDate),
           expiryDate: parseISO(member.expiryDate),
         });
@@ -410,6 +422,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
           name_ar: '', name_en: '',
           nationality: 'Omani',
           role: 'Member', type: 'Independent', expertise: 'Finance',
+          qualification: 'Bachelor',
           appointmentDate: new Date(), expiryDate: new Date(),
           committees: []
         });
@@ -515,6 +528,17 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                 </Select>
               )}/>
             </div>
+            <div>
+                <Label htmlFor="qualification">{t('board_directory.form.qualification')}</Label>
+                <Controller name="qualification" control={control} render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-royal-900 text-white border-white/20">
+                        {qualificationOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.qualifications.${opt.toLowerCase()}`)}</SelectItem>)}
+                    </SelectContent>
+                    </Select>
+                )}/>
+            </div>
              <div>
               <Label htmlFor="expertise">{t('board_directory.expertise_label')}</Label>
                <Controller name="expertise" control={control} render={({ field }) => (
@@ -573,11 +597,15 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
     const [end, setEnd] = useState<Date | undefined>();
     const [isStartOpen, setStartOpen] = useState(false);
     const [isEndOpen, setEndOpen] = useState(false);
+    const [month, setMonth] = useState<Date | undefined>();
+
 
     useEffect(() => {
         if(isOpen) {
+            const initialDate = startDate || new Date();
             setStart(startDate ? new Date(startDate) : undefined);
             setEnd(endDate ? new Date(endDate) : undefined);
+            setMonth(initialDate);
         }
     }, [isOpen, startDate, endDate]);
 
@@ -607,6 +635,8 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                                   mode="single" 
                                   selected={start} 
                                   onSelect={(date) => { setStart(date); setStartOpen(false); }} 
+                                  month={month}
+                                  onMonthChange={setMonth}
                                   captionLayout="dropdown-buttons"
                                   fromYear={2015}
                                   toYear={2035}
@@ -629,6 +659,8 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                                   mode="single" 
                                   selected={end} 
                                   onSelect={(date) => { setEnd(date); setEndOpen(false); }} 
+                                  month={month}
+                                  onMonthChange={setMonth}
                                   captionLayout="dropdown-buttons"
                                   fromYear={2015}
                                   toYear={2035}
