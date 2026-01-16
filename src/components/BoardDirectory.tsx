@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -12,17 +11,16 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers, Flag, GraduationCap, Upload, Download, FileText } from 'lucide-react';
+import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers, Upload, Download } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { COMPANIES, Company } from '@/data/companies';
 import { BOARD_MEMBERS, BoardMember, NATIONALITIES } from '@/data/board-members';
-import { differenceInMonths, format, parseISO } from 'date-fns';
+import { differenceInMonths, format, parse, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -37,7 +35,7 @@ import { Checkbox } from './ui/checkbox';
 import { useCompany as useCompanyContext } from '@/context/CompanyContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 
 const expertiseColors: { [key: string]: string } = {
@@ -97,8 +95,10 @@ const BoardDirectory: React.FC = () => {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<BoardMember | null>(null);
     const [isCycleSettingsOpen, setIsCycleSettingsOpen] = useState(false);
-    const [boardCycleStart, setBoardCycleStart] = useState<Date | null>(null);
-    const [boardCycleEnd, setBoardCycleEnd] = useState<Date | null>(null);
+    
+    // Board Cycle State - now expects string 'YYYY-MM-DD' for native date input
+    const [boardCycleStart, setBoardCycleStart] = useState<string | null>(null);
+    const [boardCycleEnd, setBoardCycleEnd] = useState<string | null>(null);
     
     const [minutes, setMinutes] = useState<MeetingMinute[]>([]);
     const [isMinuteModalOpen, setIsMinuteModalOpen] = useState(false);
@@ -128,7 +128,9 @@ const BoardDirectory: React.FC = () => {
         };
         const updatedMinutes = [...minutes, newMinute];
         setMinutes(updatedMinutes);
-        localStorage.setItem(`board_minutes_${selectedCompanyId}`, JSON.stringify(updatedMinutes));
+        if (selectedCompanyId) {
+          localStorage.setItem(`board_minutes_${selectedCompanyId}`, JSON.stringify(updatedMinutes));
+        }
         toast({ title: t('common.saveSuccessTitle'), description: t('board_directory.minutes.minuteAdded') });
         setIsMinuteModalOpen(false);
     };
@@ -139,6 +141,7 @@ const BoardDirectory: React.FC = () => {
         return boardMembers.filter(m => m.companyId === selectedCompanyId);
     }, [selectedCompanyId, boardMembers]);
 
+    // Effect to set initial board cycle from member dates
     useEffect(() => {
         if (filteredMembers.length > 0) {
             const appointmentDates = filteredMembers.map(m => parseISO(m.appointmentDate));
@@ -147,8 +150,9 @@ const BoardDirectory: React.FC = () => {
             const boardStart = new Date(Math.min(...appointmentDates.map(d => d.getTime())));
             const boardEnd = new Date(Math.max(...expiryDates.map(d => d.getTime())));
             
-            setBoardCycleStart(boardStart);
-            setBoardCycleEnd(boardEnd);
+            // Set as 'YYYY-MM-DD' string
+            setBoardCycleStart(format(boardStart, 'yyyy-MM-dd'));
+            setBoardCycleEnd(format(boardEnd, 'yyyy-MM-dd'));
         } else {
             setBoardCycleStart(null);
             setBoardCycleEnd(null);
@@ -192,15 +196,18 @@ const BoardDirectory: React.FC = () => {
 
     const boardTenure = useMemo(() => {
         if (!boardCycleStart || !boardCycleEnd) return { start: null, end: null, progress: 0 };
-        
-        const totalDuration = differenceInMonths(boardCycleEnd, boardCycleStart);
-        const elapsedDuration = differenceInMonths(new Date(), boardCycleStart);
+
+        const startDate = parse(boardCycleStart, 'yyyy-MM-dd', new Date());
+        const endDate = parse(boardCycleEnd, 'yyyy-MM-dd', new Date());
+
+        const totalDuration = differenceInMonths(endDate, startDate);
+        const elapsedDuration = differenceInMonths(new Date(), startDate);
 
         const progress = totalDuration > 0 ? (elapsedDuration / totalDuration) * 100 : 0;
 
         return {
-            start: format(boardCycleStart, 'MMM yyyy'),
-            end: format(boardCycleEnd, 'MMM yyyy'),
+            start: format(startDate, 'MMM yyyy'),
+            end: format(endDate, 'MMM yyyy'),
             progress: Math.min(100, Math.max(0, progress)),
         };
     }, [boardCycleStart, boardCycleEnd]);
@@ -248,18 +255,20 @@ const BoardDirectory: React.FC = () => {
                     <h1 className="text-3xl font-bold">{t('board_directory.title')}</h1>
                     <p className="text-gray-400 mt-1">{t('board_directory.subtitle')}</p>
                 </div>
-                 {/* This div will be used by the active tab to inject its buttons */}
-                 <div id="board-directory-actions" className="flex items-center gap-4 mt-4 md:mt-0"></div>
             </header>
 
-            <Tabs defaultValue="members" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-royal-900/50 mb-8">
-                    <TabsTrigger value="members">{t('board_directory.tabs.members')}</TabsTrigger>
-                    <TabsTrigger value="minutes">{t('board_directory.tabs.minutes')}</TabsTrigger>
+            <Tabs defaultValue="members" className="w-full" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                <TabsList className="grid w-full grid-cols-2 bg-transparent p-1 h-auto border border-gold-400 rounded-lg">
+                    <TabsTrigger value="members" className="data-[state=active]:bg-gold-400 data-[state=active]:text-black text-gold-400 rounded-md">
+                        {t('board_directory.tabs.members')}
+                    </TabsTrigger>
+                    <TabsTrigger value="minutes" className="data-[state=active]:bg-gold-400 data-[state=active]:text-black text-gold-400 rounded-md">
+                        {t('board_directory.tabs.minutes')}
+                    </TabsTrigger>
                 </TabsList>
 
                 {/* MEMBERS TAB */}
-                <TabsContent value="members">
+                <TabsContent value="members" className="mt-8">
                     <MembersContent
                         summaryData={summaryData}
                         skillsMatrixData={skillsMatrixData}
@@ -273,7 +282,7 @@ const BoardDirectory: React.FC = () => {
                 </TabsContent>
 
                 {/* MINUTES TAB */}
-                <TabsContent value="minutes">
+                <TabsContent value="minutes" className="mt-8">
                    <MinutesContent
                         minutes={minutes}
                         setIsMinuteModalOpen={setIsMinuteModalOpen}
@@ -315,38 +324,18 @@ const BoardDirectory: React.FC = () => {
 // Members Tab Content Component
 const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMembers, handleOpenForm, setIsCycleSettingsOpen, t, language }: any) => {
 
-    // Inject buttons into the header
-    useEffect(() => {
-        const actionsContainer = document.getElementById('board-directory-actions');
-        if (actionsContainer) {
-            const buttons = (
-                <>
-                    <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                        <Plus className="ml-2 h-5 w-5" />
-                        {t('board_directory.addMember')}
-                    </Button>
-                    <Button onClick={() => setIsCycleSettingsOpen(true)} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">
-                        <Calendar className="ml-2 h-5 w-5" />
-                        {t('board_directory.form.cycleSettings')}
-                    </Button>
-                </>
-            );
-            const tempDiv = document.createElement('div');
-            // A bit of a hack to get React components into a DOM element managed outside React
-            const root = require('react-dom/client').createRoot(tempDiv);
-            root.render(buttons);
-            actionsContainer.innerHTML = '';
-            actionsContainer.appendChild(tempDiv);
-        }
-        return () => {
-             if (actionsContainer) {
-                actionsContainer.innerHTML = '';
-            }
-        }
-    }, [t, handleOpenForm, setIsCycleSettingsOpen]);
-
     return (
         <>
+            <div className="flex items-center justify-end gap-4 mb-8">
+                <Button onClick={() => setIsCycleSettingsOpen(true)} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">
+                    <Calendar className="ml-2 h-5 w-5" />
+                    {t('board_directory.form.cycleSettings')}
+                </Button>
+                <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                    <Plus className="ml-2 h-5 w-5" />
+                    {t('board_directory.addMember')}
+                </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card className="glass">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -463,7 +452,6 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                                     <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
                                         <span className="text-gray-400">{t('board_directory.form.qualification')}</span>
                                         <Badge variant="outline" className="border-green-400/30 text-green-300 gap-1">
-                                            <GraduationCap className="h-3 w-3" />
                                             {t(`board_directory.qualifications.${member.qualification.toLowerCase()}`)}
                                         </Badge>
                                     </div>
@@ -508,73 +496,57 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
 
 // Minutes Tab Content Component
 const MinutesContent = ({ minutes, setIsMinuteModalOpen, t }: any) => {
-    
-    // Inject buttons into the header
-    useEffect(() => {
-        const actionsContainer = document.getElementById('board-directory-actions');
-        if (actionsContainer) {
-            const button = (
-                <Button onClick={() => setIsMinuteModalOpen(true)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+    return (
+        <>
+            <div className="flex justify-end mb-8">
+                 <Button onClick={() => setIsMinuteModalOpen(true)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                     <Upload className="ml-2 h-5 w-5" />
                     {t('board_directory.minutes.upload')}
                 </Button>
-            );
-             const tempDiv = document.createElement('div');
-            const root = require('react-dom/client').createRoot(tempDiv);
-            root.render(button);
-            actionsContainer.innerHTML = '';
-            actionsContainer.appendChild(tempDiv);
-        }
-         return () => {
-             if (actionsContainer) {
-                actionsContainer.innerHTML = '';
-            }
-        }
-    }, [t, setIsMinuteModalOpen]);
-
-    return (
-        <Card className="glass">
-            <CardHeader>
-                <CardTitle className="text-gold-400">{t('board_directory.minutes.title')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Table>
-                    <TableHeader>
-                        <TableRow className="border-b-white/10 hover:bg-transparent">
-                            <TableHead className="text-white font-bold">{t('board_directory.minutes.date')}</TableHead>
-                            <TableHead className="text-white font-bold">{t('board_directory.minutes.meetingTitle')}</TableHead>
-                            <TableHead className="text-white font-bold">{t('board_directory.minutes.type')}</TableHead>
-                            <TableHead className="text-center text-white font-bold">{t('board_directory.minutes.attendees')}</TableHead>
-                            <TableHead className="text-center text-white font-bold">{t('board_directory.minutes.actions')}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {minutes.map((minute: MeetingMinute) => (
-                            <TableRow key={minute.id} className="border-b-white/10 hover:bg-white/5">
-                                <TableCell>{format(parseISO(minute.date), 'd MMMM yyyy')}</TableCell>
-                                <TableCell className="font-medium">{minute.title}</TableCell>
-                                <TableCell>
-                                    <Badge variant="outline">{t(`board_directory.minutes.types.${minute.type.toLowerCase()}`)}</Badge>
-                                </TableCell>
-                                <TableCell className="text-center">{minute.attendees}</TableCell>
-                                <TableCell className="text-center">
-                                    <Button variant="ghost" size="icon" className="text-gold-400 hover:text-gold-300">
-                                        <Download className="h-5 w-5" />
-                                    </Button>
-                                </TableCell>
+            </div>
+            <Card className="glass">
+                <CardHeader>
+                    <CardTitle className="text-gold-400">{t('board_directory.minutes.title')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow className="border-b-white/10 hover:bg-transparent">
+                                <TableHead className="text-white font-bold">{t('board_directory.minutes.date')}</TableHead>
+                                <TableHead className="text-white font-bold">{t('board_directory.minutes.meetingTitle')}</TableHead>
+                                <TableHead className="text-white font-bold">{t('board_directory.minutes.type')}</TableHead>
+                                <TableHead className="text-center text-white font-bold">{t('board_directory.minutes.attendees')}</TableHead>
+                                <TableHead className="text-center text-white font-bold">{t('board_directory.minutes.actions')}</TableHead>
                             </TableRow>
-                        ))}
-                         {minutes.length === 0 && (
-                            <TableRow>
-                                <TableCell colSpan={5} className="text-center text-gray-400 py-8">
-                                    {t('board_directory.minutes.noMinutes')}
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </CardContent>
-        </Card>
+                        </TableHeader>
+                        <TableBody>
+                            {minutes.map((minute: MeetingMinute) => (
+                                <TableRow key={minute.id} className="border-b-white/10 hover:bg-white/5">
+                                    <TableCell>{format(parseISO(minute.date), 'd MMMM yyyy')}</TableCell>
+                                    <TableCell className="font-medium">{minute.title}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline">{t(`board_directory.minutes.types.${minute.type.toLowerCase()}`)}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-center">{minute.attendees}</TableCell>
+                                    <TableCell className="text-center">
+                                        <Button variant="ghost" size="icon" className="text-gold-400 hover:text-gold-300">
+                                            <Download className="h-5 w-5" />
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                            {minutes.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center text-gray-400 py-8">
+                                        {t('board_directory.minutes.noMinutes')}
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </>
     );
 };
 
@@ -590,7 +562,7 @@ interface BoardMemberFormDialogProps {
 }
 
 const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, onClose, onSave, member, t }) => {
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<MemberFormData>({
+  const { handleSubmit, control, reset, formState: { errors } } = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
   });
 
@@ -631,7 +603,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
           <div className="space-y-4">
             <div>
               <Label htmlFor="name_ar">{t('board_directory.form.name_ar')}</Label>
-              <Input id="name_ar" {...register('name_ar')} className="bg-royal-900/50 border-white/10" dir="rtl"/>
+              <Input id="name_ar" {...control.register('name_ar')} className="bg-royal-900/50 border-white/10" dir="rtl"/>
               {errors.name_ar && <p className="text-red-500 text-sm mt-1">{errors.name_ar.message}</p>}
             </div>
              <div>
@@ -655,7 +627,9 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                       {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035} />
+                  </PopoverContent>
                 </Popover>
               )}/>
             </div>
@@ -690,7 +664,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
           <div className="space-y-4">
              <div>
               <Label htmlFor="name_en">{t('board_directory.form.name_en')}</Label>
-              <Input id="name_en" {...register('name_en')} className="bg-royal-900/50 border-white/10" dir="ltr" />
+              <Input id="name_en" {...control.register('name_en')} className="bg-royal-900/50 border-white/10" dir="ltr" />
                {errors.name_en && <p className="text-red-500 text-sm mt-1">{errors.name_en.message}</p>}
             </div>
              <div>
@@ -747,7 +721,9 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                       {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035}/>
+                    </PopoverContent>
                 </Popover>
               )}/>
             </div>
@@ -773,15 +749,15 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
 interface CycleSettingsDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (dates: { start: Date | null, end: Date | null }) => void;
-  startDate: Date | null;
-  endDate: Date | null;
+  onSave: (dates: { start: string | null, end: string | null }) => void;
+  startDate: string | null;
+  endDate: string | null;
   t: (key: string) => string;
 }
 
 const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClose, onSave, startDate, endDate, t }) => {
-    const [start, setStart] = useState<Date | undefined>(startDate || undefined);
-    const [end, setEnd] = useState<Date | undefined>(endDate || undefined);
+    const [start, setStart] = useState<string | undefined>(startDate || undefined);
+    const [end, setEnd] = useState<string | undefined>(endDate || undefined);
     
     // Use an effect to sync state with props when the dialog opens
     useEffect(() => {
@@ -796,6 +772,8 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
         onClose();
     };
 
+    const inputStyles = "w-full bg-royal-800 border border-white/10 rounded-md p-3 text-white focus:ring-2 focus:ring-gold-400 focus:border-transparent outline-none appearance-none";
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="glass text-white">
@@ -804,32 +782,26 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                 </DialogHeader>
                 <div className="grid gap-6 py-4">
                     <div>
-                        <Label htmlFor="start-date">{t('board_directory.form.termStartDate')}</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal mt-2 bg-royal-900/50 border-white/10", !start && "text-muted-foreground")}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {start ? format(start, "PPP") : <span>{t('common.pickDate')}</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar mode="single" selected={start} onSelect={setStart} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035} />
-                            </PopoverContent>
-                        </Popover>
+                        <Label htmlFor="start-date" className="text-gray-300">{t('board_directory.form.termStartDate')}</Label>
+                        <input
+                            id="start-date"
+                            type="date"
+                            value={start || ''}
+                            onChange={(e) => setStart(e.target.value)}
+                            className={cn(inputStyles, "mt-2")}
+                            style={{colorScheme: 'dark'}}
+                        />
                     </div>
                      <div>
-                        <Label htmlFor="end-date">{t('board_directory.form.termEndDate')}</Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal mt-2 bg-royal-900/50 border-white/10", !end && "text-muted-foreground")}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {end ? format(end, "PPP") : <span>{t('common.pickDate')}</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar mode="single" selected={end} onSelect={setEnd} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035} />
-                            </PopoverContent>
-                        </Popover>
+                        <Label htmlFor="end-date" className="text-gray-300">{t('board_directory.form.termEndDate')}</Label>
+                        <input
+                            id="end-date"
+                            type="date"
+                            value={end || ''}
+                            onChange={(e) => setEnd(e.target.value)}
+                            className={cn(inputStyles, "mt-2")}
+                            style={{colorScheme: 'dark'}}
+                        />
                     </div>
                 </div>
                 <DialogFooter>
@@ -894,7 +866,7 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
                                   {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
                                 </Button>
                               </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                              <PopoverContent className="w-auto p-0" align="start"><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035} /></PopoverContent>
                             </Popover>
                         )} />
                     </div>

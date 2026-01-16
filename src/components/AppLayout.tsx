@@ -34,7 +34,7 @@ export default function AppLayout({ children, currentView, onNavigate, onLogout,
         onLogout={onLogout} 
         userRole={userRole}
       />
-      <div className={cn("flex-1 flex flex-col overflow-hidden print:overflow-visible print-h-auto")}>
+      <div className={cn("flex-1 flex flex-col overflow-hidden print:overflow-visible print:h-auto")}>
         <Header 
           currentView={currentView}
           onToggleSidebar={toggleSidebar} 
@@ -42,7 +42,7 @@ export default function AppLayout({ children, currentView, onNavigate, onLogout,
           userRole={userRole}
           isSidebarVisible={true}
         />
-        <main className={cn("flex-1 overflow-x-hidden overflow-y-auto print:overflow-visible print-h-auto")}>
+        <main className={cn("flex-1 overflow-x-hidden overflow-y-auto print:overflow-visible print:h-auto")}>
           {React.cloneElement(children as React.ReactElement, { userRole: userRole, key: selectedCompanyId })}
         </main>
       </div>

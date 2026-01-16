@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, FileDown, Star, TrendingUp, Check, X, Pencil, Award, UserX, UserCheck } from 'lucide-react';
+import { Save, FileDown, TrendingUp, Check, X, Pencil, Award, UserX, UserCheck } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { useYear } from '@/context/YearContext';
@@ -41,6 +41,20 @@ const BoardEvaluation: React.FC = () => {
     
     const getStorageKey = () => `board_evaluation_${selectedCompanyId}_${selectedYear}`;
 
+    const calculateAttendance = (held: number, attended: number) => {
+        if (!held || held === 0) return 0;
+        return (attended / held) * 100;
+    };
+    
+    const calculateTotalScore = (evaluation: Evaluation | undefined) => {
+        if (!evaluation) return 0;
+        const attendanceScore = calculateAttendance(evaluation.meetingsHeld, evaluation.meetingsAttended);
+        const strategicScore = (evaluation.strategic / 5) * 100;
+        const technicalScore = (evaluation.technical / 5) * 100;
+        const weightedScore = (attendanceScore * 0.4) + (strategicScore * 0.3) + (technicalScore * 0.3);
+        return Math.round(weightedScore);
+    };
+
     useEffect(() => {
         if (!selectedCompanyId || selectedCompanyId === 'all') {
             setEvaluations([]);
@@ -68,20 +82,6 @@ const BoardEvaluation: React.FC = () => {
         return BOARD_MEMBERS.filter(m => m.companyId === selectedCompanyId);
     }, [selectedCompanyId]);
 
-    const calculateAttendance = (held: number, attended: number) => {
-        if (!held || held === 0) return 0;
-        return (attended / held) * 100;
-    };
-    
-    const calculateTotalScore = (evaluation: Evaluation | undefined) => {
-        if (!evaluation) return 0;
-        const attendanceScore = calculateAttendance(evaluation.meetingsHeld, evaluation.meetingsAttended);
-        const strategicScore = (evaluation.strategic / 5) * 100;
-        const technicalScore = (evaluation.technical / 5) * 100;
-        const weightedScore = (attendanceScore * 0.4) + (strategicScore * 0.3) + (technicalScore * 0.3);
-        return Math.round(weightedScore);
-    };
-    
     const summaryData = useMemo(() => {
         const scores = filteredMembers.map(member => {
             const evaluation = evaluations.find(e => e.memberId === member.id);
@@ -103,7 +103,7 @@ const BoardEvaluation: React.FC = () => {
         const reviewRequiredCount = scores.filter(s => s < 70).length;
 
         return { averageScore, topPerformer, reviewRequiredCount };
-    }, [evaluations, filteredMembers]);
+    }, [evaluations, filteredMembers, calculateTotalScore]);
 
 
     const handleEvaluationChange = (memberId: number, field: keyof Evaluation, value: number | string) => {
@@ -147,7 +147,6 @@ const BoardEvaluation: React.FC = () => {
         });
     };
 
-    const handleExport = () => { toast({ title: "Export Initiated", description: "Generating PDF report..." }); };
 
     if (selectedCompanyId === 'all') {
          return (
@@ -161,26 +160,26 @@ const BoardEvaluation: React.FC = () => {
     }
 
     return (
-        <div className="p-4 md:p-6 lg:p-8 text-white">
-            <header className="flex flex-col md:flex-row items-center justify-between mb-8">
+        <div className="p-4 md:p-6 lg:p-8 text-white print:bg-white print:text-black">
+            <header className="flex flex-col md:flex-row items-center justify-between mb-8 print:hidden">
                 <h1 className="text-3xl font-bold">{t('board_evaluation.title')}</h1>
             </header>
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Card className="glass">
+                <Card className="glass print:shadow-none print:border print:border-gray-200">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-300">{t('board_evaluation.summary.avgScore')}</CardTitle>
-                        <TrendingUp className="h-5 w-5 text-gray-400" />
+                        <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('board_evaluation.summary.avgScore')}</CardTitle>
+                        <TrendingUp className="h-5 w-5 text-gray-400 print:text-gray-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold text-gold-400">{summaryData.averageScore.toFixed(1)} / 100</div>
+                        <div className="text-3xl font-bold text-gold-400 print:text-black">{summaryData.averageScore.toFixed(1)} / 100</div>
                     </CardContent>
                 </Card>
-                <Card className="glass">
+                <Card className="glass print:shadow-none print:border print:border-gray-200">
                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-300">{t('board_evaluation.summary.topPerformer')}</CardTitle>
-                        <Award className="h-5 w-5 text-gray-400" />
+                        <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('board_evaluation.summary.topPerformer')}</CardTitle>
+                        <Award className="h-5 w-5 text-gray-400 print:text-gray-500" />
                     </CardHeader>
                     <CardContent>
                         {summaryData.topPerformer ? (
@@ -189,36 +188,36 @@ const BoardEvaluation: React.FC = () => {
                                     <AvatarImage src={summaryData.topPerformer.avatar} />
                                     <AvatarFallback>{summaryData.topPerformer.name_en.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <span className="font-bold">{summaryData.topPerformer.name_en}</span>
+                                <span className="font-bold print:text-black">{summaryData.topPerformer.name_en}</span>
                             </div>
                         ) : (
-                            <div className="text-lg font-bold text-gold-400">-</div>
+                            <div className="text-lg font-bold text-gold-400 print:text-black">-</div>
                         )}
                     </CardContent>
                 </Card>
-                 <Card className="glass">
+                 <Card className="glass print:shadow-none print:border print:border-gray-200">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-300">{t('board_evaluation.summary.reviewRequired')}</CardTitle>
-                        <UserX className="h-5 w-5 text-yellow-400" />
+                        <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('board_evaluation.summary.reviewRequired')}</CardTitle>
+                        <UserX className="h-5 w-5 text-yellow-400 print:text-yellow-500" />
                     </CardHeader>
                     <CardContent>
-                         <div className={`text-3xl font-bold ${summaryData.reviewRequiredCount > 0 ? 'text-yellow-400' : 'text-gold-400'}`}>{summaryData.reviewRequiredCount}</div>
+                         <div className={`text-3xl font-bold ${summaryData.reviewRequiredCount > 0 ? 'text-yellow-400 print:text-yellow-500' : 'text-gold-400 print:text-black'}`}>{summaryData.reviewRequiredCount}</div>
                     </CardContent>
                 </Card>
             </div>
             
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <Card className="glass">
+                <Card className="glass print:shadow-none print:border print:border-gray-200">
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
-                                <TableRow className="border-b-white/10 hover:bg-transparent">
-                                    <TableHead className="text-white font-bold">{t('board_evaluation.memberInfo')}</TableHead>
-                                    <TableHead className="text-white font-bold">{t('board_evaluation.attendance')}</TableHead>
-                                    <TableHead className="text-white font-bold">{t('board_evaluation.strategic')}</TableHead>
-                                    <TableHead className="text-white font-bold">{t('board_evaluation.technical')}</TableHead>
-                                    <TableHead className="text-center text-white font-bold">{t('board_evaluation.totalScore')}</TableHead>
-                                    <TableHead className="text-center text-white font-bold">{t('board_evaluation.recommendation')}</TableHead>
+                                <TableRow className="border-b-white/10 hover:bg-transparent print:border-b-gray-300">
+                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.memberInfo')}</TableHead>
+                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.attendance')}</TableHead>
+                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.strategic')}</TableHead>
+                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.technical')}</TableHead>
+                                    <TableHead className="text-center text-white font-bold print:text-black">{t('board_evaluation.totalScore')}</TableHead>
+                                    <TableHead className="text-center text-white font-bold print:text-black">{t('board_evaluation.recommendation')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -228,7 +227,7 @@ const BoardEvaluation: React.FC = () => {
                                     const recommendation = getRecommendation(totalScore);
 
                                     return (
-                                        <TableRow key={member.id} className="border-b-white/10 hover:bg-white/5">
+                                        <TableRow key={member.id} className="border-b-white/10 hover:bg-white/5 print:border-b-gray-200">
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-12 w-12 border-2 border-gold-500/30">
@@ -236,44 +235,44 @@ const BoardEvaluation: React.FC = () => {
                                                         <AvatarFallback>{member.name_en.charAt(0)}</AvatarFallback>
                                                     </Avatar>
                                                     <div>
-                                                        <p className="font-bold">{t(member.name_ar, member.name_en)}</p>
-                                                        <p className="text-sm text-gray-400">{t(`board_directory.roles.${member.role.toLowerCase()}`)}</p>
+                                                        <p className="font-bold print:text-black">{t(member.name_ar, member.name_en)}</p>
+                                                        <p className="text-sm text-gray-400 print:text-gray-600">{t(`board_directory.roles.${member.role.toLowerCase()}`)}</p>
                                                     </div>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2 w-48">
-                                                    <Input type="number" className="w-16 h-8 glass" value={evaluation?.meetingsAttended || ''} onChange={e => handleEvaluationChange(member.id, 'meetingsAttended', parseInt(e.target.value) || 0)} />
+                                                    <Input type="number" className="w-16 h-8 glass print:border-gray-300 print:bg-gray-100" value={evaluation?.meetingsAttended || ''} onChange={e => handleEvaluationChange(member.id, 'meetingsAttended', parseInt(e.target.value) || 0)} />
                                                     <span className="text-gray-400">/</span>
-                                                    <Input type="number" className="w-16 h-8 glass" value={evaluation?.meetingsHeld || ''} onChange={e => handleEvaluationChange(member.id, 'meetingsHeld', parseInt(e.target.value) || 0)} />
-                                                    <Badge variant="outline" className="text-xs">{calculateAttendance(evaluation?.meetingsHeld || 0, evaluation?.meetingsAttended || 0).toFixed(0)}%</Badge>
+                                                    <Input type="number" className="w-16 h-8 glass print:border-gray-300 print:bg-gray-100" value={evaluation?.meetingsHeld || ''} onChange={e => handleEvaluationChange(member.id, 'meetingsHeld', parseInt(e.target.value) || 0)} />
+                                                    <Badge variant="outline" className="text-xs print:border-gray-400 print:text-black">{calculateAttendance(evaluation?.meetingsHeld || 0, evaluation?.meetingsAttended || 0).toFixed(0)}%</Badge>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-3 w-48">
                                                     <Slider value={[evaluation?.strategic || 0]} onValueChange={([val]) => handleEvaluationChange(member.id, 'strategic', val)} max={5} step={0.5} className="w-32" />
-                                                    <span className="font-bold text-gold-400 w-8 text-center">{(evaluation?.strategic || 0).toFixed(1)}</span>
+                                                    <span className="font-bold text-gold-400 w-8 text-center print:text-black">{(evaluation?.strategic || 0).toFixed(1)}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                  <div className="flex items-center gap-3 w-48">
                                                      <Slider value={[evaluation?.technical || 0]} onValueChange={([val]) => handleEvaluationChange(member.id, 'technical', val)} max={5} step={0.5} className="w-32" />
-                                                    <span className="font-bold text-gold-400 w-8 text-center">{(evaluation?.technical || 0).toFixed(1)}</span>
+                                                    <span className="font-bold text-gold-400 w-8 text-center print:text-black">{(evaluation?.technical || 0).toFixed(1)}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <Badge className={cn("text-lg", recommendation.badgeClass)}>
+                                                <Badge className={cn("text-lg print:text-black print:border print:border-gray-400 print:bg-gray-100", recommendation.badgeClass)}>
                                                     {totalScore}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <div className="flex items-center justify-center gap-2">
-                                                    <Badge className={cn("flex items-center gap-1", recommendation.badgeClass)}>
+                                                    <Badge className={cn("flex items-center gap-1 print:text-black print:border print:border-gray-400 print:bg-gray-100", recommendation.badgeClass)}>
                                                         {recommendation.icon}
                                                         {recommendation.text}
                                                     </Badge>
                                                     {evaluation && (
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gold-400" onClick={() => handleOpenNotes(evaluation)}>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gold-400 print:hidden" onClick={() => handleOpenNotes(evaluation)}>
                                                             <Pencil className="h-4 w-4" />
                                                         </Button>
                                                     )}
@@ -288,12 +287,12 @@ const BoardEvaluation: React.FC = () => {
                 </Card>
             </motion.div>
 
-            <div className="mt-8 flex justify-end gap-4">
+            <div className="mt-8 flex justify-end gap-4 print:hidden">
                 <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                     <Save className="mr-2 h-5 w-5"/>
                     {t('board_evaluation.save')}
                 </Button>
-                <Button onClick={handleExport} variant="outline" className="text-white border-white/20 hover:bg-white/10">
+                <Button onClick={() => window.print()} variant="outline" className="text-white border-white/20 hover:bg-white/10">
                      <FileDown className="mr-2 h-5 w-5"/>
                     {t('board_evaluation.export')}
                 </Button>
