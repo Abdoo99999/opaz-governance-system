@@ -94,6 +94,26 @@ export const translations = {
         within_3_months: "خلال 3 أشهر",
         total_committees: "لجنة عاملة"
       },
+      tabs: {
+        members: "الأعضاء والمهارات",
+        minutes: "الاجتماعات والمحاضر"
+      },
+      minutes: {
+        title: "مستودع محاضر الاجتماعات",
+        upload: "رفع محضر جديد",
+        date: "تاريخ الاجتماع",
+        meetingTitle: "عنوان الاجتماع/المحضر",
+        type: "نوع الاجتماع",
+        attendees: "الحضور",
+        actions: "إجراءات",
+        noMinutes: "لا توجد محاضر محفوظة لهذه الشركة.",
+        minuteAdded: "تمت إضافة المحضر بنجاح.",
+        types: {
+            quarterly: "دوري",
+            emergency: "طارئ",
+            committee: "لجنة"
+        }
+      },
       roles: {
         chairman: "رئيس المجلس",
         member: "عضو مجلس"
@@ -149,9 +169,20 @@ export const translations = {
         recommendation: "التوصية",
         renew: "تجديد العضوية",
         review: "إعادة نظر",
+        goodStanding: "وضع جيد",
         save: "حفظ التقييم",
         export: "تصدير التقرير",
-        saveSuccessDesc: "تم حفظ بيانات تقييم المجلس بنجاح."
+        saveSuccessDesc: "تم حفظ بيانات تقييم المجلس بنجاح.",
+        summary: {
+            avgScore: "متوسط أداء المجلس",
+            topPerformer: "العضو الأعلى أداءً",
+            reviewRequired: "أعضاء للمراجعة"
+        },
+        notes: {
+            title: "ملاحظات التقييم",
+            placeholder: "أضف ملاحظات أو مبررات للتقييم...",
+            saved: "تم حفظ الملاحظات."
+        }
     },
     assessment: {
         title: "محاور التقييم",
@@ -570,6 +601,26 @@ export const translations = {
         within_3_months: "within 3 months",
         total_committees: "Active Committees"
       },
+      tabs: {
+        members: "Members & Skills",
+        minutes: "Meetings & Minutes"
+      },
+      minutes: {
+        title: "Meeting Minutes Repository",
+        upload: "Upload Minute",
+        date: "Meeting Date",
+        meetingTitle: "Meeting Title / Minute",
+        type: "Meeting Type",
+        attendees: "Attendees",
+        actions: "Actions",
+        noMinutes: "No minutes have been saved for this company.",
+        minuteAdded: "Minute added successfully.",
+        types: {
+            quarterly: "Quarterly",
+            emergency: "Emergency",
+            committee: "Committee"
+        }
+      },
       roles: {
         chairman: "Chairman",
         member: "Board Member"
@@ -625,9 +676,20 @@ export const translations = {
         recommendation: "Recommendation",
         renew: "Renew Membership",
         review: "Review / Replace",
+        goodStanding: "Good Standing",
         save: "Save Evaluation",
         export: "Export Report",
-        saveSuccessDesc: "Board evaluation data has been saved successfully."
+        saveSuccessDesc: "Board evaluation data has been saved successfully.",
+        summary: {
+            avgScore: "Avg. Board Score",
+            topPerformer: "Top Performer",
+            reviewRequired: "Members to Review"
+        },
+        notes: {
+            title: "Evaluation Notes",
+            placeholder: "Add notes or justifications for the evaluation...",
+            saved: "Notes saved."
+        }
     },
     assessment: {
         title: "Assessment Axes",

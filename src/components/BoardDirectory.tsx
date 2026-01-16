@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers, Flag, GraduationCap } from 'lucide-react';
+import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers, Flag, GraduationCap, Upload, Download, FileText } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { COMPANIES, Company } from '@/data/companies';
 import { BOARD_MEMBERS, BoardMember, NATIONALITIES } from '@/data/board-members';
@@ -35,6 +35,9 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Calendar as CalendarComponent } from './ui/calendar';
 import { Checkbox } from './ui/checkbox';
 import { useCompany as useCompanyContext } from '@/context/CompanyContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { Textarea } from './ui/textarea';
 
 
 const expertiseColors: { [key: string]: string } = {
@@ -76,6 +79,15 @@ const memberSchema = z.object({
 });
 type MemberFormData = z.infer<typeof memberSchema>;
 
+interface MeetingMinute {
+    id: number;
+    date: string;
+    type: 'Quarterly' | 'Emergency' | 'Committee';
+    title: string;
+    attendees: number;
+    fileName: string;
+}
+
 
 const BoardDirectory: React.FC = () => {
     const { t, language } = useLanguage();
@@ -87,6 +99,39 @@ const BoardDirectory: React.FC = () => {
     const [isCycleSettingsOpen, setIsCycleSettingsOpen] = useState(false);
     const [boardCycleStart, setBoardCycleStart] = useState<Date | null>(null);
     const [boardCycleEnd, setBoardCycleEnd] = useState<Date | null>(null);
+    
+    const [minutes, setMinutes] = useState<MeetingMinute[]>([]);
+    const [isMinuteModalOpen, setIsMinuteModalOpen] = useState(false);
+    
+    // Load/Save Minutes from localStorage
+    useEffect(() => {
+        if (selectedCompanyId && selectedCompanyId !== 'all' && typeof window !== 'undefined') {
+            const savedMinutes = localStorage.getItem(`board_minutes_${selectedCompanyId}`);
+            if (savedMinutes) {
+                setMinutes(JSON.parse(savedMinutes));
+            } else {
+                setMinutes([]); // Reset if no data for this company
+            }
+        } else {
+            setMinutes([]); // Reset if 'All Companies' is selected
+        }
+    }, [selectedCompanyId]);
+
+    const handleSaveMinute = (data: { date: Date; type: any; title: string; file: File }) => {
+        const newMinute: MeetingMinute = {
+            id: Date.now(),
+            date: format(data.date, 'yyyy-MM-dd'),
+            type: data.type,
+            title: data.title,
+            attendees: 10, // Mocked for now
+            fileName: data.file.name,
+        };
+        const updatedMinutes = [...minutes, newMinute];
+        setMinutes(updatedMinutes);
+        localStorage.setItem(`board_minutes_${selectedCompanyId}`, JSON.stringify(updatedMinutes));
+        toast({ title: t('common.saveSuccessTitle'), description: t('board_directory.minutes.minuteAdded') });
+        setIsMinuteModalOpen(false);
+    };
 
 
     const filteredMembers = useMemo(() => {
@@ -198,13 +243,85 @@ const BoardDirectory: React.FC = () => {
 
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white">
-            <header className="flex flex-col md:flex-row items-center justify-between mb-8">
+            <header className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-bold">{t('board_directory.title')}</h1>
                     <p className="text-gray-400 mt-1">{t('board_directory.subtitle')}</p>
                 </div>
-                <div className="flex items-center gap-4 mt-4 md:mt-0">
-                     <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                 {/* This div will be used by the active tab to inject its buttons */}
+                 <div id="board-directory-actions" className="flex items-center gap-4 mt-4 md:mt-0"></div>
+            </header>
+
+            <Tabs defaultValue="members" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-royal-900/50 mb-8">
+                    <TabsTrigger value="members">{t('board_directory.tabs.members')}</TabsTrigger>
+                    <TabsTrigger value="minutes">{t('board_directory.tabs.minutes')}</TabsTrigger>
+                </TabsList>
+
+                {/* MEMBERS TAB */}
+                <TabsContent value="members">
+                    <MembersContent
+                        summaryData={summaryData}
+                        skillsMatrixData={skillsMatrixData}
+                        boardTenure={boardTenure}
+                        filteredMembers={filteredMembers}
+                        handleOpenForm={handleOpenForm}
+                        setIsCycleSettingsOpen={setIsCycleSettingsOpen}
+                        t={t}
+                        language={language}
+                    />
+                </TabsContent>
+
+                {/* MINUTES TAB */}
+                <TabsContent value="minutes">
+                   <MinutesContent
+                        minutes={minutes}
+                        setIsMinuteModalOpen={setIsMinuteModalOpen}
+                        t={t}
+                    />
+                </TabsContent>
+            </Tabs>
+            
+            <BoardMemberFormDialog
+              isOpen={isFormOpen}
+              onClose={() => setIsFormOpen(false)}
+              onSave={handleSaveMember}
+              member={editingMember}
+              t={t}
+            />
+            <CycleSettingsDialog
+                isOpen={isCycleSettingsOpen}
+                onClose={() => setIsCycleSettingsOpen(false)}
+                startDate={boardCycleStart}
+                endDate={boardCycleEnd}
+                onSave={({ start, end }) => {
+                    setBoardCycleStart(start);
+                    setBoardCycleEnd(end);
+                    toast({ title: t('common.saveSuccessTitle'), description: "Board cycle dates updated." });
+                }}
+                t={t}
+            />
+            <MinuteUploadDialog
+                isOpen={isMinuteModalOpen}
+                onClose={() => setIsMinuteModalOpen(false)}
+                onSave={handleSaveMinute}
+                t={t}
+            />
+        </div>
+    );
+};
+
+
+// Members Tab Content Component
+const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMembers, handleOpenForm, setIsCycleSettingsOpen, t, language }: any) => {
+
+    // Inject buttons into the header
+    useEffect(() => {
+        const actionsContainer = document.getElementById('board-directory-actions');
+        if (actionsContainer) {
+            const buttons = (
+                <>
+                    <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                         <Plus className="ml-2 h-5 w-5" />
                         {t('board_directory.addMember')}
                     </Button>
@@ -212,9 +329,24 @@ const BoardDirectory: React.FC = () => {
                         <Calendar className="ml-2 h-5 w-5" />
                         {t('board_directory.form.cycleSettings')}
                     </Button>
-                </div>
-            </header>
+                </>
+            );
+            const tempDiv = document.createElement('div');
+            // A bit of a hack to get React components into a DOM element managed outside React
+            const root = require('react-dom/client').createRoot(tempDiv);
+            root.render(buttons);
+            actionsContainer.innerHTML = '';
+            actionsContainer.appendChild(tempDiv);
+        }
+        return () => {
+             if (actionsContainer) {
+                actionsContainer.innerHTML = '';
+            }
+        }
+    }, [t, handleOpenForm, setIsCycleSettingsOpen]);
 
+    return (
+        <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <Card className="glass">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -300,7 +432,7 @@ const BoardDirectory: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredMembers.map((member, index) => (
+                {filteredMembers.map((member: BoardMember, index: number) => (
                     <motion.div key={member.id} variants={cardVariants} initial="hidden" animate="visible" custom={index}>
                         <Card className="glass overflow-hidden h-full flex flex-col relative">
                             <div className="absolute top-2 left-2 flex gap-1 z-10">
@@ -369,28 +501,83 @@ const BoardDirectory: React.FC = () => {
                     </motion.div>
                 ))}
             </div>
-            <BoardMemberFormDialog
-              isOpen={isFormOpen}
-              onClose={() => setIsFormOpen(false)}
-              onSave={handleSaveMember}
-              member={editingMember}
-              t={t}
-            />
-            <CycleSettingsDialog
-                isOpen={isCycleSettingsOpen}
-                onClose={() => setIsCycleSettingsOpen(false)}
-                startDate={boardCycleStart}
-                endDate={boardCycleEnd}
-                onSave={({ start, end }) => {
-                    setBoardCycleStart(start);
-                    setBoardCycleEnd(end);
-                    toast({ title: t('common.saveSuccessTitle'), description: "Board cycle dates updated." });
-                }}
-                t={t}
-            />
-        </div>
+        </>
     );
 };
+
+
+// Minutes Tab Content Component
+const MinutesContent = ({ minutes, setIsMinuteModalOpen, t }: any) => {
+    
+    // Inject buttons into the header
+    useEffect(() => {
+        const actionsContainer = document.getElementById('board-directory-actions');
+        if (actionsContainer) {
+            const button = (
+                <Button onClick={() => setIsMinuteModalOpen(true)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                    <Upload className="ml-2 h-5 w-5" />
+                    {t('board_directory.minutes.upload')}
+                </Button>
+            );
+             const tempDiv = document.createElement('div');
+            const root = require('react-dom/client').createRoot(tempDiv);
+            root.render(button);
+            actionsContainer.innerHTML = '';
+            actionsContainer.appendChild(tempDiv);
+        }
+         return () => {
+             if (actionsContainer) {
+                actionsContainer.innerHTML = '';
+            }
+        }
+    }, [t, setIsMinuteModalOpen]);
+
+    return (
+        <Card className="glass">
+            <CardHeader>
+                <CardTitle className="text-gold-400">{t('board_directory.minutes.title')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow className="border-b-white/10 hover:bg-transparent">
+                            <TableHead className="text-white font-bold">{t('board_directory.minutes.date')}</TableHead>
+                            <TableHead className="text-white font-bold">{t('board_directory.minutes.meetingTitle')}</TableHead>
+                            <TableHead className="text-white font-bold">{t('board_directory.minutes.type')}</TableHead>
+                            <TableHead className="text-center text-white font-bold">{t('board_directory.minutes.attendees')}</TableHead>
+                            <TableHead className="text-center text-white font-bold">{t('board_directory.minutes.actions')}</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {minutes.map((minute: MeetingMinute) => (
+                            <TableRow key={minute.id} className="border-b-white/10 hover:bg-white/5">
+                                <TableCell>{format(parseISO(minute.date), 'd MMMM yyyy')}</TableCell>
+                                <TableCell className="font-medium">{minute.title}</TableCell>
+                                <TableCell>
+                                    <Badge variant="outline">{t(`board_directory.minutes.types.${minute.type.toLowerCase()}`)}</Badge>
+                                </TableCell>
+                                <TableCell className="text-center">{minute.attendees}</TableCell>
+                                <TableCell className="text-center">
+                                    <Button variant="ghost" size="icon" className="text-gold-400 hover:text-gold-300">
+                                        <Download className="h-5 w-5" />
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                         {minutes.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center text-gray-400 py-8">
+                                    {t('board_directory.minutes.noMinutes')}
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
+};
+
 
 
 // Form Dialog Component
@@ -468,7 +655,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                       {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                  <PopoverContent className="w-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
                 </Popover>
               )}/>
             </div>
@@ -560,7 +747,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                       {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                  <PopoverContent className="w-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
                 </Popover>
               )}/>
             </div>
@@ -593,36 +780,21 @@ interface CycleSettingsDialogProps {
 }
 
 const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClose, onSave, startDate, endDate, t }) => {
-    const [start, setStart] = useState('');
-    const [end, setEnd] = useState('');
-
-    const formatDateForInput = (date: Date | null): string => {
-        if (!date) return '';
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
+    const [start, setStart] = useState<Date | undefined>(startDate || undefined);
+    const [end, setEnd] = useState<Date | undefined>(endDate || undefined);
+    
+    // Use an effect to sync state with props when the dialog opens
     useEffect(() => {
         if (isOpen) {
-            setStart(formatDateForInput(startDate));
-            setEnd(formatDateForInput(endDate));
+            setStart(startDate || undefined);
+            setEnd(endDate || undefined);
         }
     }, [isOpen, startDate, endDate]);
 
     const handleSave = () => {
-        const createDateFromInput = (dateString: string): Date | null => {
-            if (!dateString) return null;
-            const [year, month, day] = dateString.split('-').map(Number);
-            return new Date(year, month - 1, day);
-        };
-
-        onSave({ start: createDateFromInput(start), end: createDateFromInput(end) });
+        onSave({ start: start || null, end: end || null });
         onClose();
     };
-    
-    const inputClasses = "w-full bg-royal-800 border border-white/10 rounded-md p-3 text-white focus:ring-2 focus:ring-gold-400 focus:border-transparent outline-none appearance-none";
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -633,25 +805,31 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                 <div className="grid gap-6 py-4">
                     <div>
                         <Label htmlFor="start-date">{t('board_directory.form.termStartDate')}</Label>
-                        <input
-                            id="start-date"
-                            type="date"
-                            value={start}
-                            onChange={(e) => setStart(e.target.value)}
-                            className={cn(inputClasses, "mt-2")}
-                            style={{ colorScheme: 'dark' }}
-                        />
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal mt-2 bg-royal-900/50 border-white/10", !start && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {start ? format(start, "PPP") : <span>{t('common.pickDate')}</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar mode="single" selected={start} onSelect={setStart} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035} />
+                            </PopoverContent>
+                        </Popover>
                     </div>
-                    <div>
+                     <div>
                         <Label htmlFor="end-date">{t('board_directory.form.termEndDate')}</Label>
-                         <input
-                            id="end-date"
-                            type="date"
-                            value={end}
-                            onChange={(e) => setEnd(e.target.value)}
-                            className={cn(inputClasses, "mt-2")}
-                            style={{ colorScheme: 'dark' }}
-                        />
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal mt-2 bg-royal-900/50 border-white/10", !end && "text-muted-foreground")}>
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {end ? format(end, "PPP") : <span>{t('common.pickDate')}</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar mode="single" selected={end} onSelect={setEnd} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035} />
+                            </PopoverContent>
+                        </Popover>
                     </div>
                 </div>
                 <DialogFooter>
@@ -666,6 +844,90 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
             </DialogContent>
         </Dialog>
     );
+};
+
+
+// Minute Upload Dialog Component
+const minuteSchema = z.object({
+  title: z.string().min(3, 'Title is required'),
+  date: z.date(),
+  type: z.enum(['Quarterly', 'Emergency', 'Committee']),
+  file: z.instanceof(File).refine(file => file.size > 0, 'File is required'),
+});
+type MinuteFormData = z.infer<typeof minuteSchema>;
+
+interface MinuteUploadDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (data: MinuteFormData) => void;
+  t: (key: string) => string;
+}
+
+const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose, onSave, t }) => {
+  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<MinuteFormData>({
+    resolver: zodResolver(minuteSchema),
+    defaultValues: { type: 'Quarterly', date: new Date() }
+  });
+  
+  useEffect(() => { if(isOpen) reset() }, [isOpen, reset]);
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="glass text-white">
+            <DialogHeader>
+                <DialogTitle className="text-gold-400">{t('board_directory.minutes.upload')}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit(onSave)} className="space-y-4 pt-4">
+                 <div>
+                    <Label>{t('board_directory.minutes.meetingTitle')}</Label>
+                    <Input {...register('title')} className="bg-royal-900/50 border-white/10 mt-1" />
+                    {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <Label>{t('board_directory.minutes.date')}</Label>
+                        <Controller name="date" control={control} render={({ field }) => (
+                           <Popover>
+                              <PopoverTrigger asChild>
+                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal mt-1 bg-royal-900/50 border-white/10", !field.value && "text-muted-foreground")}>
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0"><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                            </Popover>
+                        )} />
+                    </div>
+                    <div>
+                        <Label>{t('board_directory.minutes.type')}</Label>
+                        <Controller name="type" control={control} render={({ field }) => (
+                             <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger className="bg-royal-900/50 border-white/10 mt-1"><SelectValue /></SelectTrigger>
+                                <SelectContent className="bg-royal-900 text-white border-white/20">
+                                    <SelectItem value="Quarterly">{t('board_directory.minutes.types.quarterly')}</SelectItem>
+                                    <SelectItem value="Emergency">{t('board_directory.minutes.types.emergency')}</SelectItem>
+                                    <SelectItem value="Committee">{t('board_directory.minutes.types.committee')}</SelectItem>
+                                </SelectContent>
+                             </Select>
+                        )} />
+                    </div>
+                </div>
+                 <div>
+                    <Label>{t('board_directory.minutes.file')}</Label>
+                    <Controller name="file" control={control} render={({ field }) => (
+                        <Input type="file" onChange={(e) => field.onChange(e.target.files?.[0])} className="bg-royal-900/50 border-white/10 mt-1 file:text-gold-400" />
+                    )} />
+                    {errors.file && <p className="text-red-500 text-xs mt-1">{errors.file.message as string}</p>}
+                </div>
+
+                <DialogFooter className="pt-4">
+                    <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
+                    <Button type="submit" className="bg-gold-500 text-royal-900">{t('common.save')}</Button>
+                </DialogFooter>
+            </form>
+        </DialogContent>
+    </Dialog>
+  );
 };
 
 
