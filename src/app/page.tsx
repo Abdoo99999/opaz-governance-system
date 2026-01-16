@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -6,6 +5,7 @@ import AppLayout from "@/components/AppLayout";
 import Dashboard from "@/components/Dashboard";
 import CompanyRegistry from "@/components/CompanyRegistry";
 import BoardDirectory from "@/components/BoardDirectory";
+import BoardEvaluation from "@/components/BoardEvaluation";
 import Assessment from "@/components/Assessment";
 import ComplianceMonitor from "@/components/ComplianceMonitor";
 import ImprovementPlan from "@/components/ImprovementPlan";
@@ -91,6 +91,8 @@ const AppContent = () => {
         return <CompanyRegistry userRole={userRole} onNavigate={handleNavigate} />;
       case 'board-directory':
         return <BoardDirectory />;
+      case 'board-evaluation':
+        return <BoardEvaluation />;
       case 'maturity-assessment':
         return <Assessment onNavigate={handleNavigate} userRole={userRole} />;
       case 'compliance-monitor':

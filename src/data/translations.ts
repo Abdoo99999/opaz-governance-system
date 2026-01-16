@@ -7,6 +7,7 @@ export const translations = {
       dashboard: "لوحة القيادة",
       registry: "سجل الشركات",
       board_directory: "سجل المجالس",
+      board_evaluation: "تقييم أداء المجلس",
       assessment: "تقييم النضج",
       compliance: "الامتثال والمخاطر",
       improvement: "خطة التحسين",
@@ -136,6 +137,21 @@ export const translations = {
         master: 'ماجستير',
         phd: 'دكتوراه'
       }
+    },
+    board_evaluation: {
+        title: "تقييم أداء أعضاء المجلس",
+        cycle: "دورة التقييم",
+        memberInfo: "العضو",
+        attendance: "الالتزام بالحضور",
+        strategic: "المساهمة الاستراتيجية",
+        technical: "القيمة الفنية",
+        totalScore: "النتيجة النهائية",
+        recommendation: "التوصية",
+        renew: "تجديد العضوية",
+        review: "إعادة نظر",
+        save: "حفظ التقييم",
+        export: "تصدير التقرير",
+        saveSuccessDesc: "تم حفظ بيانات تقييم المجلس بنجاح."
     },
     assessment: {
         title: "محاور التقييم",
@@ -330,36 +346,36 @@ export const translations = {
         }
     },
     settings: {
-        title: "الإعدادات",
-        subtitle: "إدارة متغيرات النظام والبيانات",
-        profile: {
-            title: "الملف الشخصي للمشرف",
-            role: "المشرف العام ومهندس النظام",
-            email: "البريد الإلكتروني",
-            phone: "رقم الهاتف",
-        },
-        preferences: {
-            title: "تفضيلات النظام",
-            language: "اللغة",
-            theme: "المظهر",
-            notifications: "الإشعارات"
-        },
-        info: {
-            title: "معلومات النظام",
-            version: "OIA GRC v2.0 (Elite Edition)",
-            license: "مرخص حصرياً لجهاز الاستثمار العماني",
-            credits: "صمم وهندس بواسطة د. عبدالرحمن النوفلي"
-        },
-        data: {
-            title: "إدارة البيانات",
-            description: "سيؤدي هذا الإجراء إلى حذف جميع البيانات المدخلة في التطبيق بشكل نهائي، بما في ذلك بيانات الشركات والتقييمات والمخاطر وخطط التحسين. استخدم هذا الخيار بحذر شديد.",
-            resetButton: "إعادة ضبط بيانات التطبيق",
-            confirmTitle: "هل أنت متأكد؟",
-            confirmDesc: "سيتم حذف جميع البيانات بشكل نهائي ولا يمكن التراجع عن هذا الإجراء. هل ترغب في المتابعة؟",
-            confirmButton: "نعم، قم بإعادة الضبط",
-            resetSuccessTitle: "تمت إعادة الضبط بنجاح",
-            resetSuccessDesc: "تم مسح جميع بيانات التطبيق. سيتم إعادة تحميل الصفحة الآن."
-        }
+      title: "الإعدادات",
+      subtitle: "إدارة متغيرات النظام والبيانات",
+      profile: {
+          title: "الملف الشخصي للمشرف",
+          role: "المشرف العام ومهندس النظام",
+          email: "البريد الإلكتروني",
+          phone: "رقم الهاتف",
+      },
+      preferences: {
+          title: "تفضيلات النظام",
+          language: "اللغة",
+          theme: "المظهر",
+          notifications: "الإشعارات"
+      },
+      info: {
+          title: "معلومات النظام",
+          version: "OIA GRC v2.0 (Elite Edition)",
+          license: "مرخص حصرياً لجهاز الاستثمار العماني",
+          credits: "صمم وهندس بواسطة د. عبدالرحمن النوفلي"
+      },
+      data: {
+          title: "إدارة البيانات",
+          description: "سيؤدي هذا الإجراء إلى حذف جميع البيانات المدخلة في التطبيق بشكل نهائي، بما في ذلك بيانات الشركات والتقييمات والمخاطر وخطط التحسين. استخدم هذا الخيار بحذر شديد.",
+          resetButton: "إعادة ضبط بيانات التطبيق",
+          confirmTitle: "هل أنت متأكد؟",
+          confirmDesc: "سيتم حذف جميع البيانات بشكل نهائي ولا يمكن التراجع عن هذا الإجراء. هل ترغب في المتابعة؟",
+          confirmButton: "نعم، قم بإعادة الضبط",
+          resetSuccessTitle: "تمت إعادة الضبط بنجاح",
+          resetSuccessDesc: "تم مسح جميع بيانات التطبيق. سيتم إعادة تحميل الصفحة الآن."
+      }
     },
     companyForm: {
         identity: {
@@ -467,6 +483,7 @@ export const translations = {
       dashboard: "Dashboard",
       registry: "Company Registry",
       board_directory: "Board Directory",
+      board_evaluation: "Board Evaluation",
       assessment: "Maturity Assessment",
       compliance: "Compliance & Risk",
       improvement: "Improvement Plan",
@@ -596,6 +613,21 @@ export const translations = {
         master: 'Master',
         phd: 'PhD'
       }
+    },
+    board_evaluation: {
+        title: "Board Performance Evaluation",
+        cycle: "Evaluation Cycle",
+        memberInfo: "Member",
+        attendance: "Attendance",
+        strategic: "Strategic Contribution",
+        technical: "Technical Value",
+        totalScore: "Final Score",
+        recommendation: "Recommendation",
+        renew: "Renew Membership",
+        review: "Review / Replace",
+        save: "Save Evaluation",
+        export: "Export Report",
+        saveSuccessDesc: "Board evaluation data has been saved successfully."
     },
     assessment: {
         title: "Assessment Axes",
@@ -790,36 +822,36 @@ export const translations = {
         }
     },
     settings: {
-        title: "Settings",
-        subtitle: "Manage system variables and data",
-        profile: {
-            title: "Supervisor Profile",
-            role: "General Supervisor & System Architect",
-            email: "Email",
-            phone: "Phone Number",
-        },
-        preferences: {
-            title: "System Preferences",
-            language: "Language",
-            theme: "Theme",
-            notifications: "Notifications"
-        },
-        info: {
-            title: "System Information",
-            version: "OIA GRC v2.0 (Elite Edition)",
-            license: "Exclusively licensed for Oman Investment Authority",
-            credits: "Designed & Architected by Dr. Abdulrahman Al-Nofali"
-        },
-        data: {
-            title: "Data Management",
-            description: "This action will permanently delete all data entered into the application, including company data, assessments, risks, and improvement plans. Use this option with extreme caution.",
-            resetButton: "Reset Application Data",
-            confirmTitle: "Are you sure?",
-            confirmDesc: "All data will be permanently deleted. This action cannot be undone. Do you wish to proceed?",
-            confirmButton: "Yes, Reset Data",
-            resetSuccessTitle: "Reset Successful",
-            resetSuccessDesc: "All application data has been cleared. The page will now reload."
-        }
+      title: "Settings",
+      subtitle: "Manage system variables and data",
+      profile: {
+          title: "Supervisor Profile",
+          role: "General Supervisor & System Architect",
+          email: "Email",
+          phone: "Phone Number",
+      },
+      preferences: {
+          title: "System Preferences",
+          language: "Language",
+          theme: "Theme",
+          notifications: "Notifications"
+      },
+      info: {
+          title: "System Information",
+          version: "OIA GRC v2.0 (Elite Edition)",
+          license: "Exclusively licensed for Oman Investment Authority",
+          credits: "Designed & Architected by Dr. Abdulrahman Al-Nofali"
+      },
+      data: {
+          title: "Data Management",
+          description: "This action will permanently delete all data entered into the application, including company data, assessments, risks, and improvement plans. Use this option with extreme caution.",
+          resetButton: "Reset Application Data",
+          confirmTitle: "Are you sure?",
+          confirmDesc: "All data will be permanently deleted. This action cannot be undone. Do you wish to proceed?",
+          confirmButton: "Yes, Reset Data",
+          resetSuccessTitle: "Reset Successful",
+          resetSuccessDesc: "All application data has been cleared. The page will now reload."
+      }
     },
     companyForm: {
         identity: {
@@ -921,5 +953,3 @@ export const translations = {
     }
   }
 };
-
-    
