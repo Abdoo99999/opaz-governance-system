@@ -178,7 +178,7 @@ const BoardDirectory: React.FC = () => {
                                     <Badge variant="outline" className="border-blue-400/30 text-blue-300">{t(`board_directory.types.${member.type.toLowerCase()}`)}</Badge>
                                 </div>
                                 <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
-                                    <span className="text-gray-400">{t('board_directory.expertise')}</span>
+                                    <span className="text-gray-400">{t('board_directory.expertise_label')}</span>
                                     <Badge style={{ backgroundColor: `${expertiseColors[member.expertise]}30`, color: expertiseColors[member.expertise], borderColor: `${expertiseColors[member.expertise]}50` }}>
                                         {t(`board_directory.expertise.${member.expertise.toLowerCase()}`)}
                                     </Badge>
