@@ -208,10 +208,10 @@ const ComplianceMonitor: React.FC = () => {
              <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-8">
                 <Card className="glass">
                     <CardHeader>
-                        <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
+                        <CardTitle className="text-2xl font-bold text-gold-400">1 - {t('dashboard.riskMap')}</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                        <div className="h-[350px] w-full max-w-md mx-auto">
+                    <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                        <div className="lg:col-span-2 h-[350px] w-full max-w-2xl mx-auto">
                            <RiskLandscape data={risks} onCellClick={handleRiskCellClick} />
                         </div>
                         <div className="space-y-4">
@@ -240,7 +240,7 @@ const ComplianceMonitor: React.FC = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
                 <Card className="glass">
                     <CardHeader>
-                        <CardTitle className="text-2xl font-bold text-gold-400">{t('compliance.statutoryTitle')}</CardTitle>
+                        <CardTitle className="text-2xl font-bold text-gold-400">2 - {t('compliance.statutoryTitle')}</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                         {complianceItems.map(item => {
@@ -248,15 +248,7 @@ const ComplianceMonitor: React.FC = () => {
                             return (
                                 <div key={item.id} className="border border-white/10 rounded-lg p-4 flex items-center justify-between bg-black/20 min-h-[80px]">
                                     <div className="flex-1 pr-4">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            {!isCompliant && (
-                                                <Badge variant="destructive" className="flex items-center gap-1 shrink-0">
-                                                    <AlertTriangle size={14} />
-                                                    {t('compliance.nonCompliant')}
-                                                </Badge>
-                                            )}
-                                             <p className="text-md font-semibold leading-tight">{t(item.question)}</p>
-                                        </div>
+                                        <p className="text-md font-semibold leading-tight">{t(item.question)}</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 w-48">
                                         <Button
