@@ -134,7 +134,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
             <form className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Card 1: Identity */}
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-                    <Card className="glass">
+                    <Card className="glass h-full">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Building className="w-6 h-6 text-gold-400" />
                             <CardTitle>{t('companyForm.identity.title')}</CardTitle>
@@ -186,7 +186,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
 
                 {/* Card 2: Financial Position */}
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-                    <Card className="glass">
+                    <Card className="glass h-full">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Wallet className="w-6 h-6 text-gold-400" />
                             <CardTitle>{t('companyForm.financial.title')}</CardTitle>
@@ -247,7 +247,10 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
                         </CardHeader>
                         <CardContent className="space-y-6">
                              <div>
-                                <h4 className="font-semibold text-lg text-gray-300 mb-2">{t('dashboard.omanization')}</h4>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h4 className="font-semibold text-lg text-gray-300">{t('dashboard.omanization')}</h4>
+                                    <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">{omanizationPercentage.toFixed(1)}%</Badge>
+                                </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label>{t('companyForm.icv.totalEmployees')}</label>
@@ -259,13 +262,6 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
                                         <Input type="number" {...register('omaniEmployees', { valueAsNumber: true })} className={inputStyles} />
                                         {errors.omaniEmployees && <p className="text-red-500 text-sm mt-1">{errors.omaniEmployees.message}</p>}
                                     </div>
-                                </div>
-                                <div className="pt-4">
-                                    <div className="flex justify-between items-center text-sm text-gray-300 mb-2">
-                                        <span>{t('dashboard.omanization')}</span>
-                                        <span>{omanizationPercentage.toFixed(1)}%</span>
-                                    </div>
-                                    <Progress value={omanizationPercentage} className="h-3" />
                                 </div>
                             </div>
 
@@ -306,3 +302,5 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
 };
 
 export default CompanyForm;
+
+    
