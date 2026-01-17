@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -8,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
 import { AlertTriangle, Plus, Save } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -138,8 +136,8 @@ const ComplianceMonitor: React.FC = () => {
         });
     };
 
-    const handleToggle = (id: keyof typeof complianceState) => {
-        setComplianceState(prev => ({ ...prev, [id]: !prev[id] }));
+    const handleComplianceChange = (id: keyof ComplianceState, value: boolean) => {
+        setComplianceState(prev => ({ ...prev, [id]: value }));
     };
 
     const onSubmitRisk = (data: RiskFormValues) => {
@@ -196,55 +194,69 @@ const ComplianceMonitor: React.FC = () => {
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
+                {/* Left Section: Risk Management */}
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+                    <Card className="glass h-fit">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                           <RiskLandscape data={risks} onCellClick={handleRiskCellClick} />
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
                 {/* Right Section: Statutory Compliance */}
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
                     <Card className="glass h-full">
                         <CardHeader>
                             <CardTitle className="text-2xl font-bold text-gold-400">{t('compliance.statutoryTitle')}</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-6">
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {complianceItems.map(item => {
                                 const isCompliant = complianceState[item.id as keyof typeof complianceState];
                                 return (
-                                    <motion.div
-                                        key={item.id}
-                                        className={cn(
-                                            "glass p-4 transition-all duration-300",
-                                            isCompliant ? "border-success/80" : "border-danger/80"
-                                        )}
-                                        animate={{ borderColor: isCompliant ? 'rgba(0, 224, 150, 0.8)' : 'rgba(255, 59, 59, 0.8)' }}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <p className="text-lg flex-1">{t(item.question)}</p>
-                                            <div className="flex items-center gap-4">
+                                    <div key={item.id} className="border border-white/10 rounded-lg p-3 flex flex-col justify-between bg-black/20">
+                                        <div>
+                                            <div className="flex justify-between items-start mb-3 gap-2">
+                                                <p className="text-md flex-1 font-semibold leading-tight">{t(item.question)}</p>
                                                 {!isCompliant && (
-                                                    <Badge variant="destructive" className="flex items-center gap-1">
+                                                    <Badge variant="destructive" className="flex items-center gap-1 shrink-0">
                                                         <AlertTriangle size={14} />
                                                         {t('compliance.nonCompliant')}
                                                     </Badge>
                                                 )}
-                                                <Switch
-                                                    checked={isCompliant}
-                                                    onCheckedChange={() => handleToggle(item.id as keyof typeof complianceState)}
-                                                    className="data-[state=checked]:bg-success data-[state=unchecked]:bg-danger"
-                                                />
                                             </div>
                                         </div>
-                                    </motion.div>
+                                        <div className="grid grid-cols-2 gap-2 mt-auto">
+                                            <Button
+                                                size="sm"
+                                                className={cn(
+                                                    "font-bold transition-all h-9",
+                                                    isCompliant
+                                                        ? 'bg-success text-white hover:bg-success/90'
+                                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                                )}
+                                                onClick={() => handleComplianceChange(item.id as keyof ComplianceState, true)}
+                                            >
+                                                {t('dashboard.compliant')}
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className={cn(
+                                                    "font-bold transition-all h-9",
+                                                    !isCompliant
+                                                        ? 'bg-danger text-white hover:bg-danger/90'
+                                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                                )}
+                                                onClick={() => handleComplianceChange(item.id as keyof ComplianceState, false)}
+                                            >
+                                                {t('compliance.nonCompliant')}
+                                            </Button>
+                                        </div>
+                                    </div>
                                 );
                             })}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-
-                {/* Left Section: Risk Management */}
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-                    <Card className="glass h-full flex flex-col">
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-1">
-                           <RiskLandscape data={risks} onCellClick={handleRiskCellClick} />
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -330,5 +342,3 @@ const ComplianceMonitor: React.FC = () => {
 };
 
 export default ComplianceMonitor;
-
-    
