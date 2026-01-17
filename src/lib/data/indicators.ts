@@ -28,70 +28,71 @@ export const INDICATORS: Indicator[] = [
     // Axis 1: السياسات واللوائح
     { id: 1, axisId: 1, text_ar: "مدى التوافق التنظيمي للشركة مع ميثاق جهاز الاستثمار العماني.", text_en: "Regulatory Alignment with OIA Charter" },
     { id: 2, axisId: 1, text_ar: "وضوح وكفاءة مصفوفة الصلاحيات (RACI Matrix).", text_en: "Clarity and Efficiency of Authority Matrix (RACI)" },
-    { id: 3, axisId: 1, text_ar: "وجود وتطبيق سياسة لتفويض السلطات.", text_en: "Existence and Application of a Delegation of Authority Policy" },
-    { id: 4, axisId: 1, text_ar: "وجود وتطبيق لائحة عمل مجلس الإدارة.", text_en: "Existence and Application of Board of Directors' Bylaws" },
-    { id: 5, axisId: 1, text_ar: "اكتمال ومراجعة السياسات الأساسية (مالية، موارد بشرية، مشتريات).", text_en: "Completeness and Review of Core Policies (Financial, HR, Procurement)" },
+    { id: 3, axisId: 1, text_ar: "فاعلية تطبيق سياسة تفويض السلطات في تسريع القرار.", text_en: "Effectiveness of Delegation of Authority Policy in decision making" },
+    { id: 4, axisId: 1, text_ar: "مدى الالتزام بتطبيق لائحة عمل مجلس الإدارة.", text_en: "Commitment to applying Board of Directors' Bylaws" },
+    { id: 5, axisId: 1, text_ar: "دورية تحديث السياسات الأساسية (مالية، موارد بشرية) لمواكبة المتغيرات.", text_en: "Periodicity of updating Core Policies to keep up with changes" },
 
     // Axis 2: هيكل الحوكمة
-    { id: 6, axisId: 2, text_ar: "وضوح الهيكل التنظيمي للشركة.", text_en: "Clarity of the Company's Organizational Structure" },
-    { id: 7, axisId: 2, text_ar: "وجود وتفعيل لجان مجلس الإدارة (التدقيق، الترشيحات والمكافآت).", text_en: "Existence and Activation of Board Committees (Audit, Nominations & Remunerations)" },
-    { id: 8, axisId: 2, text_ar: "استقلالية وموضوعية أعضاء لجان المجلس.", text_en: "Independence and Objectivity of Committee Members" },
-    { id: 9, axisId: 2, text_ar: "وجود أمين سر للمجلس يتمتع بالخبرة والكفاءة.", text_en: "Presence of an Experienced and Competent Board Secretary" },
-    { id: 10, axisId: 2, text_ar: "كفاءة آليات التواصل والتنسيق بين لجان المجلس والإدارة التنفيذية.", text_en: "Efficiency of Communication and Coordination Mechanisms between Board Committees and Executive Management" },
+    { id: 6, axisId: 2, text_ar: "وضوح الهيكل التنظيمي للشركة وتناغمه مع الاستراتيجية.", text_en: "Clarity of Organizational Structure and alignment with Strategy" },
+    // Re-numbered (was 9) -> Now 7
+    { id: 7, axisId: 2, text_ar: "كفاءة ودور أمين سر المجلس في دعم الأعضاء.", text_en: "Competence and role of Board Secretary in supporting members" },
+    // Re-numbered (was 10) -> Now 8
+    { id: 8, axisId: 2, text_ar: "كفاءة آليات التواصل والتنسيق بين لجان المجلس والإدارة التنفيذية.", text_en: "Efficiency of Communication between Board Committees and Executive Management" },
 
     // Axis 3: مجلس الإدارة
-    { id: 11, axisId: 3, text_ar: "توازن تشكيل المجلس من حيث الخبرات والتنوع.", text_en: "Balance in Board Composition in terms of Expertise and Diversity" },
-    { id: 12, axisId: 3, text_ar: "نسبة الأعضاء المستقلين وغير التنفيذيين في المجلس.", text_en: "Percentage of Independent and Non-Executive Members on the Board" },
-    { id: 13, axisId: 3, text_ar: "وجود آلية واضحة لتقييم أداء المجلس وأعضائه.", text_en: "Existence of a Clear Mechanism for Evaluating the Performance of the Board and its Members" },
-    { id: 14, axisId: 3, text_ar: "فعالية اجتماعات المجلس (التحضير، جدول الأعمال، إدارة النقاش، محاضر الاجتماعات).", text_en: "Effectiveness of Board Meetings (Preparation, Agenda, Discussion Management, Minutes)" },
-    { id: 15, axisId: 3, text_ar: "مستوى مشاركة ومساهمة الأعضاء في مداولات المجلس.", text_en: "Level of Member Participation and Contribution in Board Deliberations" },
+    // Re-numbered (was 13) -> Now 9
+    { id: 9, axisId: 3, text_ar: "أثر مخرجات تقييم المجلس على تحسين الأداء.", text_en: "Impact of Board Evaluation outcomes on performance improvement" },
+    // Re-numbered (was 14) -> Now 10
+    { id: 10, axisId: 3, text_ar: "جودة النقاشات في اجتماعات المجلس وعمق القرارات الاستراتيجية.", text_en: "Quality of discussions in Board meetings and depth of strategic decisions" },
 
     // Axis 4: الإدارة التنفيذية
-    { id: 16, axisId: 4, text_ar: "وجود رئيس تنفيذي يتمتع بالصلاحيات الكافية.", text_en: "Presence of a CEO with Sufficient Authority" },
-    { id: 17, axisId: 4, text_ar: "وضوح الفصل بين مهام رئيس المجلس والرئيس التنفيذي.", text_en: "Clear Separation of Duties between the Chairman and the CEO" },
-    { id: 18, axisId: 4, text_ar: "وجود خطة تعاقب وظيفي واضحة للوظائف القيادية.", text_en: "Existence of a Clear Succession Plan for Leadership Positions" },
-    { id: 19, axisId: 4, text_ar: "كفاءة آلية تقييم أداء الإدارة التنفيذية وربطها بالأهداف الاستراتيجية.", text_en: "Efficiency of the Performance Evaluation Mechanism for Executive Management and its Link to Strategic Goals" },
-    { id: 20, axisId: 4, text_ar: "جودة وكفاية التقارير المقدمة من الإدارة التنفيذية للمجلس.", text_en: "Quality and Adequacy of Reports Submitted by Executive Management to the Board" },
+    // Re-numbered (was 16) -> Now 11
+    { id: 11, axisId: 4, text_ar: "مدى تمكين الرئيس التنفيذي من الصلاحيات اللازمة للتنفيذ.", text_en: "Extent of CEO empowerment with necessary execution authorities" },
+    // Re-numbered (was 18) -> Now 12
+    { id: 12, axisId: 4, text_ar: "واقعية وفاعلية خطة التعاقب الوظيفي للقيادات.", text_en: "Realism and effectiveness of Succession Plan for leaders" },
+    // Re-numbered (was 19) -> Now 13
+    { id: 13, axisId: 4, text_ar: "ارتباط تقييم الإدارة التنفيذية بمؤشرات الأداء المؤسسي (KPIs).", text_en: "Linkage of Executive Evaluation to Corporate KPIs" },
+    // Re-numbered (was 20) -> Now 14
+    { id: 14, axisId: 4, text_ar: "جودة ودقة التقارير المقدمة من الإدارة للمجلس لاتخاذ القرار.", text_en: "Quality and accuracy of Management Reports submitted to the Board" },
 
     // Axis 5: إدارة المخاطر والامتثال
-    { id: 21, axisId: 5, text_ar: "وجود إطار عمل متكامل لإدارة المخاطر بالشركة.", text_en: "Existence of an Integrated Risk Management Framework in the Company" },
-    { id: 22, axisId: 5, text_ar: "تحديد وتقييم المخاطر الاستراتيجية والتشغيلية بشكل دوري.", text_en: "Regular Identification and Assessment of Strategic and Operational Risks" },
-    { id: 23, axisId: 5, text_ar: "وجود سجل للمخاطر وخطة للتعامل معها.", text_en: "Existence of a Risk Register and a Plan to Address Risks" },
-    { id: 24, axisId: 5, text_ar: "وجود وظيفة امتثال مستقلة وفعالة.", text_en: "Existence of an Independent and Effective Compliance Function" },
-    { id: 25, axisId: 5, text_ar: "مدى الالتزام بالمتطلبات القانونية والتنظيمية.", text_en: "Extent of Compliance with Legal and Regulatory Requirements" },
+    { id: 15, axisId: 5, text_ar: "نضج ثقافة إدارة المخاطر لدى الموظفين والقيادة.", text_en: "Maturity of Risk Management culture among employees and leadership" },
+    { id: 16, axisId: 5, text_ar: "شمولية تقييم المخاطر الاستراتيجية والتشغيلية.", text_en: "Comprehensiveness of Strategic and Operational Risk Assessment" },
+    { id: 17, axisId: 5, text_ar: "فاعلية خطط الاستجابة والتعامل مع المخاطر المرصودة.", text_en: "Effectiveness of Response Plans for identified risks" },
+    { id: 18, axisId: 5, text_ar: "استقلالية وقوة وظيفة الامتثال في الشركة.", text_en: "Independence and strength of the Compliance function" },
+    { id: 19, axisId: 5, text_ar: "سجل الشركة في الالتزام وعدم وجود مخالفات جسيمة.", text_en: "Company's track record in compliance and absence of major violations" },
 
     // Axis 6: التدقيق الداخلي
-    { id: 26, axisId: 6, text_ar: "استقلالية وظيفة التدقيق الداخلي وحصولها على الموارد الكافية.", text_en: "Independence of the Internal Audit Function and its Access to Adequate Resources" },
-    { id: 27, axisId: 6, text_ar: "وجود خطة تدقيق داخلي سنوية مبنية على تقييم المخاطر.", text_en: "Existence of an Annual Internal Audit Plan Based on Risk Assessment" },
-    { id: 28, axisId: 6, text_ar: "جودة تنفيذ عمليات التدقيق الداخلي والتقارير الصادرة عنها.", text_en: "Quality of Internal Audit Execution and the Resulting Reports" },
-    { id: 29, axisId: 6, text_ar: "متابعة تنفيذ توصيات التدقيق الداخلي والخارجي.", text_en: "Follow-up on the Implementation of Internal and External Audit Recommendations" },
-    { id: 30, axisId: 6, text_ar: "فعالية قنوات التواصل بين التدقيق الداخلي ولجنة التدقيق والمجلس.", text_en: "Effectiveness of Communication Channels between Internal Audit, the Audit Committee, and the Board" },
+    { id: 20, axisId: 6, text_ar: "مستوى الحيادية والاستقلال للمدقق الداخلي.", text_en: "Level of impartiality and independence of Internal Auditor" },
+    { id: 21, axisId: 6, text_ar: "تغطية خطة التدقيق للمناطق عالية الخطورة.", text_en: "Audit Plan coverage of high-risk areas" },
+    { id: 22, axisId: 6, text_ar: "القيمة المضافة من تقارير التدقيق الداخلي في تحسين العمليات.", text_en: "Value added by Internal Audit reports in improving processes" },
+    { id: 23, axisId: 6, text_ar: "سرعة وجدية الإدارة في إغلاق ملاحظات التدقيق.", text_en: "Speed and seriousness of Management in closing audit observations" },
+    { id: 24, axisId: 6, text_ar: "فاعلية التواصل بين المدقق الداخلي ولجنة التدقيق.", text_en: "Effectiveness of communication between Internal Auditor and Audit Committee" },
 
     // Axis 7: حقوق المساهمين
-    { id: 31, axisId: 7, text_ar: "وضوح سياسة توزيع الأرباح.", text_en: "Clarity of the Dividend Distribution Policy" },
-    { id: 32, axisId: 7, text_ar: "عدالة وشفافية التعامل مع جميع المساهمين (جهاز الاستثمار العماني).", text_en: "Fair and Transparent Treatment of all Shareholders (Oman Investment Authority)" },
-    { id: 33, axisId: 7, text_ar: "سهولة حصول المساهم على المعلومات الجوهرية.", text_en: "Ease of Access for Shareholders to Material Information" },
-    { id: 34, axisId: 7, text_ar: "وجود آلية للتعامل مع المعاملات مع الأطراف ذات العلاقة.", text_en: "Existence of a Mechanism for Handling Related Party Transactions" },
-    { id: 35, axisId: 7, text_ar: "حماية أصول الشركة وعدم استغلالها لتحقيق مصالح شخصية.", text_en: "Protection of Company Assets and Prevention of their Use for Personal Gain" },
+    { id: 25, axisId: 7, text_ar: "وضوح واستقرار سياسة توزيع الأرباح.", text_en: "Clarity and stability of Dividend Distribution Policy" },
+    { id: 26, axisId: 7, text_ar: "العدالة في التعامل مع جميع الأطراف المعنية.", text_en: "Fairness in dealing with all stakeholders" },
+    { id: 27, axisId: 7, text_ar: "سهولة وسرعة الوصول للمعلومات الجوهرية.", text_en: "Ease and speed of access to material information" },
+    { id: 28, axisId: 7, text_ar: "دقة ضبط التعاملات مع الأطراف ذات العلاقة (RPTs).", text_en: "Strict control over Related Party Transactions (RPTs)" },
+    { id: 29, axisId: 7, text_ar: "كفاءة آليات حماية أصول الشركة.", text_en: "Efficiency of Company Asset Protection mechanisms" },
 
     // Axis 8: الإفصاح والشفافية
-    { id: 36, axisId: 8, text_ar: "جودة ودقة التقارير المالية وغير المالية السنوية.", text_en: "Quality and Accuracy of Annual Financial and Non-Financial Reports" },
-    { id: 37, axisId: 8, text_ar: "الالتزام بالإفصاح عن المعلومات الجوهرية في الوقت المناسب.", text_en: "Commitment to Timely Disclosure of Material Information" },
-    { id: 38, axisId: 8, text_ar: "شفافية الإفصاح عن مكافآت أعضاء مجلس الإدارة والإدارة التنفيذية.", text_en: "Transparency in Disclosing Remuneration of Board Members and Executive Management" },
-    { id: 39, axisId: 8, text_ar: "وجود قناة تواصل فعالة مع جهاز الاستثمار العماني.", text_en: "Existence of an Effective Communication Channel with the Oman Investment Authority" },
-    { id: 40, axisId: 8, text_ar: "استخدام الموقع الإلكتروني للشركة كأداة فعالة للإفصاح.", text_en: "Use of the Company's Website as an Effective Disclosure Tool" },
+    { id: 30, axisId: 8, text_ar: "الشفافية في عرض التحديات وليس فقط الإنجازات.", text_en: "Transparency in presenting challenges, not just achievements" },
+    { id: 31, axisId: 8, text_ar: "الالتزام بالتوقيتات الزمنية للإفصاحات الدورية.", text_en: "Adherence to timelines for periodic disclosures" },
+    { id: 32, axisId: 8, text_ar: "وضوح تفاصيل مكافآت الإدارة العليا في التقرير السنوي.", text_en: "Clarity of Senior Management remuneration details in Annual Report" },
+    { id: 33, axisId: 8, text_ar: "فاعلية التنسيق المستمر مع جهاز الاستثمار العماني.", text_en: "Effectiveness of continuous coordination with OIA" },
+    { id: 34, axisId: 8, text_ar: "حداثة وشمولية المعلومات على الموقع الإلكتروني.", text_en: "Recency and comprehensiveness of information on the website" },
 
     // Axis 9: الاستدامة (ESG)
-    { id: 41, axisId: 9, text_ar: "دمج اعتبارات الاستدامة (البيئية والاجتماعية والحوكمة) في استراتيجية الشركة.", text_en: "Integration of Sustainability Considerations (ESG) into the Company's Strategy" },
-    { id: 42, axisId: 9, text_ar: "وجود تقرير استدامة سنوي وفق المعايير المعترف بها.", text_en: "Existence of an Annual Sustainability Report in Accordance with Recognized Standards" },
-    { id: 43, axisId: 9, text_ar: "قياس وإدارة الأثر البيئي لعمليات الشركة.", text_en: "Measurement and Management of the Environmental Impact of the Company's Operations" },
-    { id: 44, axisId: 9, text_ar: "تطبيق مبادرات وبرامج المسؤولية الاجتماعية.", text_en: "Implementation of Social Responsibility Initiatives and Programs" },
-    { id: 45, axisId: 9, text_ar: "الالتزام بأخلاقيات العمل ومكافحة الفساد.", text_en: "Commitment to Business Ethics and Anti-Corruption" },
+    { id: 35, axisId: 9, text_ar: "مدى دمج الاستدامة في صلب القرارات الاستثمارية.", text_en: "Integration of Sustainability into core investment decisions" },
+    { id: 36, axisId: 9, text_ar: "فاعلية مبادرات تقليل البصمة الكربونية والأثر البيئي.", text_en: "Effectiveness of carbon footprint reduction initiatives" },
+    { id: 37, axisId: 9, text_ar: "الأثر الاجتماعي الملموس لمبادرات المسؤولية الاجتماعية.", text_en: "Tangible social impact of CSR initiatives" },
+    { id: 38, axisId: 9, text_ar: "قوة الممارسات الأخلاقية وثقافة مكافحة الفساد.", text_en: "Strength of ethical practices and anti-corruption culture" },
 
     // Axis 10: التحول الرقمي والابتكار
-    { id: 46, axisId: 10, text_ar: "وجود استراتيجية واضحة للتحول الرقمي.", text_en: "Existence of a Clear Digital Transformation Strategy" },
-    { id: 47, axisId: 10, text_ar: "تخصيص الموارد اللازمة (المالية والبشرية) لدعم التحول الرقمي.", text_en: "Allocation of Necessary Resources (Financial and Human) to Support Digital Transformation" },
-    { id: 48, axisId: 10, text_ar: "مستوى أمن المعلومات والأمن السيبراني في الشركة.", text_en: "Level of Information Security and Cybersecurity in the Company" },
-    { id: 49, axisId: 10, text_ar: "استخدام التكنولوجيا لتحسين كفاءة العمليات الداخلية وخدمة العملاء.", text_en: "Use of Technology to Improve Internal Process Efficiency and Customer Service" },
-    { id: 50, axisId: 10, text_ar: "تبني ثقافة الابتكار وتشجيع المبادرات الجديدة.", text_en: "Adoption of an Innovation Culture and Encouragement of New Initiatives" }
+    { id: 39, axisId: 10, text_ar: "وضوح خارطة الطريق للتحول الرقمي.", text_en: "Clarity of Digital Transformation roadmap" },
+    { id: 40, axisId: 10, text_ar: "كفاية الميزانية المرصودة للتقنية والابتكار.", text_en: "Adequacy of budget allocated for Tech and Innovation" },
+    { id: 41, axisId: 10, text_ar: "نضج إجراءات الأمن السيبراني وحماية البيانات.", text_en: "Maturity of Cybersecurity and Data Protection procedures" },
+    { id: 42, axisId: 10, text_ar: "استخدام البيانات (Data Analytics) في اتخاذ القرار.", text_en: "Use of Data Analytics in decision making" },
+    { id: 43, axisId: 10, text_ar: "حجم العوائد أو التوفير الناتج عن مبادرات الابتكار.", text_en: "Volume of returns or savings resulting from Innovation initiatives" }
 ];
