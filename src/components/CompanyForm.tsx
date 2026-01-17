@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
 import { COMPANIES } from '@/data/companies';
+import { Badge } from './ui/badge';
 
 const sectors = [...new Set(COMPANIES.map(c => c.sector))];
 const legalForms = ['Holding', 'SAOC', 'SAOG'];
@@ -33,18 +34,27 @@ const formSchema = z.object({
     financialYearEnd: z.date({ required_error: "A date is required." }),
     lastROI: z.number(),
     usoObligations: z.boolean(),
-    totalEmployees: z.number().int().positive('Must be a positive number'),
-    omaniEmployees: z.number().int().positive('Must be a positive number'),
+    totalEmployees: z.number().int().gte(0, 'Must be a non-negative number'),
+    omaniEmployees: z.number().int().gte(0, 'Must be a non-negative number'),
+    totalSpending: z.number().gte(0, 'Must be a non-negative number').optional(),
+    localSpending: z.number().gte(0, 'Must be a non-negative number').optional(),
+    smeSpending: z.number().gte(0, 'Must be a non-negative number').optional(),
 }).refine(data => data.omaniEmployees <= data.totalEmployees, {
     message: "Omani employees cannot exceed total employees",
     path: ["omaniEmployees"],
+}).refine(data => (data.localSpending || 0) <= (data.totalSpending || 0), {
+    message: "Local spending cannot exceed total spending",
+    path: ["localSpending"],
+}).refine(data => (data.smeSpending || 0) <= (data.localSpending || 0), {
+    message: "SME spending cannot exceed local spending",
+    path: ["smeSpending"],
 });
 
 
 type CompanyFormValues = z.infer<typeof formSchema>;
 
 interface CompanyFormProps {
-    company?: Partial<CompanyFormValues> & { name_en?: string, name_ar?: string };
+    company?: Partial<CompanyFormValues> & { name_en?: string, name_ar?: string, totalSpending?: number, localSpending?: number, smeSpending?: number };
     onClose: () => void;
     onSave: (data: CompanyFormValues) => void;
 }
@@ -75,13 +85,19 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
             usoObligations: company?.usoObligations || false,
             totalEmployees: company?.totalEmployees || 0,
             omaniEmployees: company?.omaniEmployees || 0,
+            totalSpending: company?.totalSpending || 0,
+            localSpending: company?.localSpending || 0,
+            smeSpending: company?.smeSpending || 0,
         },
     });
 
     const watchCompanyName = watch('companyName');
     const watchTotalEmployees = watch('totalEmployees');
     const watchOmaniEmployees = watch('omaniEmployees');
-    
+    const watchTotalSpending = watch('totalSpending');
+    const watchLocalSpending = watch('localSpending');
+    const watchSmeSpending = watch('smeSpending');
+
     const companyOptions = COMPANIES.map(c => ({ value: c.name_en, label: language === 'ar' ? c.name_ar : c.name_en }));
 
     useEffect(() => {
@@ -95,6 +111,9 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
     }, [watchCompanyName, setValue]);
 
     const omanizationPercentage = (watchTotalEmployees > 0) ? (watchOmaniEmployees / watchTotalEmployees) * 100 : 0;
+    const icvPercentage = (watchTotalSpending && watchTotalSpending > 0) ? (watchLocalSpending || 0) / watchTotalSpending * 100 : 0;
+    const smePercentage = (watchTotalSpending && watchTotalSpending > 0) ? (watchSmeSpending || 0) / watchTotalSpending * 100 : 0;
+
 
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white h-full overflow-y-auto">
@@ -219,32 +238,64 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
                     </Card>
                 </motion.div>
 
-                {/* Card 3: Human Capital */}
+                {/* Card 3: ICV & National Impact */}
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4} className="lg:col-span-2">
                     <Card className="glass">
                         <CardHeader className="flex flex-row items-center gap-4">
-                            <Users className="w-6 h-6 text-gold-400" />
-                            <CardTitle>{t('companyForm.hr.title')}</CardTitle>
+                            <Landmark className="w-6 h-6 text-gold-400" />
+                            <CardTitle>{t('companyForm.icv.title')}</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label>{t('companyForm.hr.totalEmployees')}</label>
-                                    <Input type="number" {...register('totalEmployees', { valueAsNumber: true })} className={inputStyles} />
-                                    {errors.totalEmployees && <p className="text-red-500 text-sm mt-1">{errors.totalEmployees.message}</p>}
+                        <CardContent className="space-y-6">
+                             <div>
+                                <h4 className="font-semibold text-lg text-gray-300 mb-2">{t('dashboard.omanization')}</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label>{t('companyForm.icv.totalEmployees')}</label>
+                                        <Input type="number" {...register('totalEmployees', { valueAsNumber: true })} className={inputStyles} />
+                                        {errors.totalEmployees && <p className="text-red-500 text-sm mt-1">{errors.totalEmployees.message}</p>}
+                                    </div>
+                                    <div>
+                                        <label>{t('companyForm.icv.omanis')}</label>
+                                        <Input type="number" {...register('omaniEmployees', { valueAsNumber: true })} className={inputStyles} />
+                                        {errors.omaniEmployees && <p className="text-red-500 text-sm mt-1">{errors.omaniEmployees.message}</p>}
+                                    </div>
                                 </div>
-                                <div>
-                                    <label>{t('companyForm.hr.omanis')}</label>
-                                    <Input type="number" {...register('omaniEmployees', { valueAsNumber: true })} className={inputStyles} />
-                                    {errors.omaniEmployees && <p className="text-red-500 text-sm mt-1">{errors.omaniEmployees.message}</p>}
+                                <div className="pt-4">
+                                    <div className="flex justify-between items-center text-sm text-gray-300 mb-2">
+                                        <span>{t('dashboard.omanization')}</span>
+                                        <span>{omanizationPercentage.toFixed(1)}%</span>
+                                    </div>
+                                    <Progress value={omanizationPercentage} className="h-3" />
                                 </div>
                             </div>
-                            <div className="pt-4">
-                                <div className="flex justify-between items-center text-sm text-gray-300 mb-2">
-                                    <span>{t('dashboard.omanization')}</span>
-                                    <span>{omanizationPercentage.toFixed(1)}%</span>
+
+                            <hr className="border-white/10" />
+
+                            <div>
+                                <h4 className="font-semibold text-lg text-gray-300 mb-4">{t('companyForm.icv.spendingTitle')}</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label>{t('companyForm.icv.totalSpending')}</label>
+                                        <Input type="number" {...register('totalSpending', { valueAsNumber: true })} className={inputStyles} placeholder="OMR" />
+                                        {errors.totalSpending && <p className="text-red-500 text-sm mt-1">{errors.totalSpending.message}</p>}
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label>{t('companyForm.icv.localSpending')}</label>
+                                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">{icvPercentage.toFixed(1)}% ICV</Badge>
+                                        </div>
+                                        <Input type="number" {...register('localSpending', { valueAsNumber: true })} className={inputStyles} placeholder="OMR" />
+                                        {errors.localSpending && <p className="text-red-500 text-sm mt-1">{errors.localSpending.message}</p>}
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label>{t('companyForm.icv.smeSpending')}</label>
+                                            <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">{smePercentage.toFixed(1)}% {t('companyForm.icv.smeShort')}</Badge>
+                                        </div>
+                                        <Input type="number" {...register('smeSpending', { valueAsNumber: true })} className={inputStyles} placeholder="OMR" />
+                                        {errors.smeSpending && <p className="text-red-500 text-sm mt-1">{errors.smeSpending.message}</p>}
+                                    </div>
                                 </div>
-                                <Progress value={omanizationPercentage} className="h-3" />
                             </div>
                         </CardContent>
                     </Card>

@@ -104,7 +104,7 @@ export const translations = {
         date: "تاريخ الاجتماع",
         meetingTitle: "عنوان الاجتماع/المحضر",
         type: "نوع الاجتماع",
-        attendees: "الحضور",
+        attendees: "الحاضرون",
         actions: "إجراءات",
         noMinutes: "لا توجد محاضر محفوظة لهذه الشركة.",
         minuteAdded: "تمت إضافة المحضر بنجاح.",
@@ -430,10 +430,17 @@ export const translations = {
             members: "عدد الأعضاء",
             independent: "الأعضاء المستقلون",
         },
-        hr: {
-            title: "رأس المال البشري",
+        icv: {
+            title: "القيمة المحلية والأثر الوطني",
+            spendingTitle: "المناقصات والإنفاق المحلي",
             totalEmployees: "إجمالي الموظفين",
             omanis: "عدد العمانيين",
+            totalSpending: "إجمالي قيمة المناقصات السنوية",
+            localSpending: "المسندة لشركات محلية",
+            smeSpending: "المسندة للمؤسسات الصغيرة والمتوسطة",
+            icvPercentage: "قيمة محلية مضافة",
+            smePercentage: "حصة المؤسسات الصغيرة والمتوسطة",
+            smeShort: "مصغرة ومتوسطة"
         }
     },
     approvals: {
@@ -937,10 +944,17 @@ export const translations = {
             members: "No. of Members",
             independent: "Independent Members",
         },
-        hr: {
-            title: "Human Capital",
+        icv: {
+            title: "ICV & National Impact",
+            spendingTitle: "Tenders & Local Spending",
             totalEmployees: "Total Employees",
             omanis: "No. of Omanis",
+            totalSpending: "Total Annual Spending (OMR)",
+            localSpending: "Assigned to Local Companies",
+            smeSpending: "Assigned to SMEs",
+            icvPercentage: "ICV Percentage",
+            smePercentage: "SME Share",
+            smeShort: "SMEs"
         }
     },
     approvals: {
