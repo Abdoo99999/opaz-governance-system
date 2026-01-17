@@ -45,7 +45,7 @@ export const translations = {
       },
       icv: {
           title: "المناقصات والإنفاق المحلي",
-          totalTenders: "إجمالي المناقصات",
+          totalTenders: "الإجمالي",
           omanizationRate: "نسبة التعمين",
           smeSpending: "المؤسسات الصغيرة (SMEs)",
           localSpending: "الشركات المحلية",
@@ -354,6 +354,7 @@ export const translations = {
         selectCompanyToView: "يرجى اختيار شركة لعرض تقريرها التفصيلي.",
         year: "عام",
         export: "تصدير PDF",
+        boardAndIcvAnalysis: "تحليل المجلس والقيمة المحلية",
         summary: {
             maturity: "النضج العام",
             maturitySub: "+0.2 عن العام الماضي",
@@ -582,7 +583,7 @@ export const translations = {
       },
       icv: {
           title: "Tenders & Local Spending",
-          totalTenders: "Total Tenders",
+          totalTenders: "Total",
           omanizationRate: "Omanization Rate",
           smeSpending: "SMEs",
           localSpending: "Local Companies",
@@ -891,6 +892,7 @@ export const translations = {
         selectCompanyToView: "Please select a company to view its detailed report.",
         year: "Year",
         export: "Export PDF",
+        boardAndIcvAnalysis: "Board & National Value Analysis",
         summary: {
             maturity: "Overall Maturity",
             maturitySub: "+0.2 from last year",
@@ -1075,3 +1077,5 @@ export const translations = {
     }
   }
 };
+
+    

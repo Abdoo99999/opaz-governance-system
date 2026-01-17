@@ -143,6 +143,8 @@ const Reports: React.FC = () => {
     const [topGapsData, setTopGapsData] = useState([]);
     const [criticalRisksData, setCriticalRisksData] = useState([]);
     const [financialPerformanceData, setFinancialPerformanceData] = useState([]);
+    const [boardIndependenceData, setBoardIndependenceData] = useState([]);
+    const [icvBarData, setIcvBarData] = useState([]);
 
 
     useEffect(() => {
@@ -154,6 +156,8 @@ const Reports: React.FC = () => {
              setTopGapsData([]);
              setCriticalRisksData([]);
              setFinancialPerformanceData([]);
+             setBoardIndependenceData([]);
+             setIcvBarData([]);
             return;
         }
 
@@ -267,6 +271,25 @@ const Reports: React.FC = () => {
             ] as any);
         }
 
+        // 7. Board Composition Chart
+        setBoardIndependenceData([
+            { name: t('dashboard.boardComposition.independent'), value: 60, color: '#D4AF37' },
+            { name: t('dashboard.boardComposition.nonIndependent'), value: 40, color: '#3b82f6' },
+        ] as any);
+
+        // 8. ICV Bar Chart
+        if (companyData) {
+            const totalSpending = companyData.totalSpending || 0;
+            const localSpending = companyData.localSpending || 0;
+            const smeSpending = companyData.smeSpending || 0;
+            setIcvBarData([
+                { name: t('dashboard.icv.totalTenders'), value: totalSpending },
+                { name: t('dashboard.icv.localSpending'), value: localSpending },
+                { name: t('dashboard.icv.smeSpending'), value: smeSpending },
+            ] as any);
+        }
+
+
     }, [selectedCompanyId, language, t, selectedYear]);
 
     // --- ARABIC FONT FIX FOR EXPORT ---
@@ -337,6 +360,21 @@ const Reports: React.FC = () => {
     };
     
     const formatCurrency = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'OMR', minimumFractionDigits: 0 }).format(value);
+    
+    const RADIAN = Math.PI / 180;
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+      const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
+      const x = cx + radius * Math.cos(-midAngle * RADIAN);
+      const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+      if (percent === 0) return null;
+
+      return (
+        <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="font-bold drop-shadow-md print:fill-black">
+          {`${(percent * 100).toFixed(0)}%`}
+        </text>
+      );
+    };
 
 
     if (!selectedCompanyId || selectedCompanyId === 'all') {
@@ -493,7 +531,68 @@ const Reports: React.FC = () => {
                             </CardContent>
                         </Card>
                     </motion.div>
+                </div>
 
+                {/* Board & ICV Analysis */}
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 print-break-inside-avoid">
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7} className="print-break-inside-avoid">
+                        <Card className="glass">
+                            <CardHeader>
+                               <CardTitle className="text-gold-400 font-bold print-text-black">{t('dashboard.boardComposition.title')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
+                                     <PieChart>
+                                        <Pie 
+                                          data={boardIndependenceData} 
+                                          dataKey="value" 
+                                          nameKey="name" 
+                                          cx="50%" 
+                                          cy="50%" 
+                                          innerRadius={0} 
+                                          outerRadius={90} 
+                                          paddingAngle={5} 
+                                          labelLine={false}
+                                          label={renderCustomizedLabel}
+                                        >
+                                            {boardIndependenceData.map((entry: any, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip {...tooltipStyle} />
+                                        <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}} className="print-text-black"/>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                    <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8} className="print-break-inside-avoid">
+                        <Card className="glass">
+                            <CardHeader>
+                               <CardTitle className="text-gold-400 font-bold print-text-black">{t('dashboard.icv.title')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <BarChart data={icvBarData} margin={{ top: 20, right: 20, left: -10, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                                        <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} className="print-text-black" />
+                                        <YAxis tickFormatter={(value) => `${value / 1_000_000}M`} tick={{ fill: '#A0A0A0' }} className="print-text-black"/>
+                                        <Tooltip {...tooltipStyle} formatter={formatCurrency} />
+                                        <Bar dataKey="value" name={t('dashboard.icv.spending')} barSize={40} radius={[4, 4, 0, 0]}>
+                                            {(icvBarData as any[]).map((entry, index) => {
+                                                const colors = ['#6b7280', '#3b82f6', '#00E096'];
+                                                return <Cell key={`cell-${index}`} fill={colors[index]} />;
+                                            })}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </div>
+
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 print-break-inside-avoid">
                     <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7} className="print-break-inside-avoid">
                          <Card className="glass">
                             <CardHeader>
@@ -618,3 +717,5 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+    
