@@ -1,13 +1,14 @@
+
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Plus, Save } from 'lucide-react';
+import { AlertTriangle, Plus, Save, ShieldAlert } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -94,6 +95,16 @@ const ComplianceMonitor: React.FC = () => {
         resolver: zodResolver(riskSchema),
         defaultValues: { impact: 1, probability: 1 }
     });
+    
+    const riskCounts = useMemo(() => {
+        return (risks || []).reduce((acc, risk) => {
+            const score = risk.impact * risk.probability;
+            if (score >= 15) acc.critical++;
+            else if (score >= 10) acc.high++;
+            else if (score >= 5) acc.medium++;
+            return acc;
+        }, { critical: 0, high: 0, medium: 0 });
+    }, [risks]);
 
 
     // RELOAD data when company changes
@@ -192,153 +203,173 @@ const ComplianceMonitor: React.FC = () => {
                      </Button>
                  </div>
             </header>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
-                {/* Left Section: Risk Management */}
-                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-                    <Card className="glass h-fit">
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
+            
+            {/* Section A: Risk Dashboard */}
+             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-8">
+                <Card className="glass">
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold text-gold-400">{t('dashboard.riskMap')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div className="h-[350px] w-full max-w-md mx-auto">
                            <RiskLandscape data={risks} onCellClick={handleRiskCellClick} />
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                        </div>
+                        <div className="space-y-4">
+                            <h3 className="font-bold text-lg text-center lg:text-right">{t('reports.summary.risks')}</h3>
+                            <div className="flex justify-around items-center bg-black/20 p-4 rounded-lg">
+                                 <div className="text-center">
+                                    <p className="text-4xl font-bold text-danger">{riskCounts.critical}</p>
+                                    <p className="text-sm text-gray-400">{t('registry.risks.critical')}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-4xl font-bold text-orange-400">{riskCounts.high}</p>
+                                    <p className="text-sm text-gray-400">{t('registry.risks.high')}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-4xl font-bold text-yellow-400">{riskCounts.medium}</p>
+                                    <p className="text-sm text-gray-400">{t('registry.risks.medium')}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
 
-                {/* Right Section: Statutory Compliance */}
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-                    <Card className="glass h-full">
-                        <CardHeader>
-                            <CardTitle className="text-2xl font-bold text-gold-400">{t('compliance.statutoryTitle')}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {complianceItems.map(item => {
-                                const isCompliant = complianceState[item.id as keyof typeof complianceState];
-                                return (
-                                    <div key={item.id} className="border border-white/10 rounded-lg p-3 flex flex-col justify-between bg-black/20">
-                                        <div>
-                                            <div className="flex justify-between items-start mb-3 gap-2">
-                                                <p className="text-md flex-1 font-semibold leading-tight">{t(item.question)}</p>
-                                                {!isCompliant && (
-                                                    <Badge variant="destructive" className="flex items-center gap-1 shrink-0">
-                                                        <AlertTriangle size={14} />
-                                                        {t('compliance.nonCompliant')}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2 mt-auto">
-                                            <Button
-                                                size="sm"
-                                                className={cn(
-                                                    "font-bold transition-all h-9",
-                                                    isCompliant
-                                                        ? 'bg-success text-white hover:bg-success/90'
-                                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-                                                )}
-                                                onClick={() => handleComplianceChange(item.id as keyof ComplianceState, true)}
-                                            >
-                                                {t('dashboard.compliant')}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                className={cn(
-                                                    "font-bold transition-all h-9",
-                                                    !isCompliant
-                                                        ? 'bg-danger text-white hover:bg-danger/90'
-                                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-                                                )}
-                                                onClick={() => handleComplianceChange(item.id as keyof ComplianceState, false)}
-                                            >
-                                                {t('compliance.nonCompliant')}
-                                            </Button>
+
+            {/* Section B: Compliance Checklist */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+                <Card className="glass">
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold text-gold-400">{t('compliance.statutoryTitle')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                        {complianceItems.map(item => {
+                            const isCompliant = complianceState[item.id as keyof typeof complianceState];
+                            return (
+                                <div key={item.id} className="border border-white/10 rounded-lg p-4 flex items-center justify-between bg-black/20 min-h-[80px]">
+                                    <div className="flex-1 pr-4">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {!isCompliant && (
+                                                <Badge variant="destructive" className="flex items-center gap-1 shrink-0">
+                                                    <AlertTriangle size={14} />
+                                                    {t('compliance.nonCompliant')}
+                                                </Badge>
+                                            )}
+                                             <p className="text-md font-semibold leading-tight">{t(item.question)}</p>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                                    <div className="grid grid-cols-2 gap-2 w-48">
+                                        <Button
+                                            size="sm"
+                                            className={cn(
+                                                "font-bold transition-all h-10",
+                                                isCompliant
+                                                    ? 'bg-success text-white hover:bg-success/90'
+                                                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                            )}
+                                            onClick={() => handleComplianceChange(item.id as keyof ComplianceState, true)}
+                                        >
+                                            {t('dashboard.compliant')}
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            className={cn(
+                                                "font-bold transition-all h-10",
+                                                !isCompliant
+                                                    ? 'bg-danger text-white hover:bg-danger/90'
+                                                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                            )}
+                                            onClick={() => handleComplianceChange(item.id as keyof ComplianceState, false)}
+                                        >
+                                            {t('compliance.nonCompliant')}
+                                        </Button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </CardContent>
+                </Card>
+            </motion.div>
 
-                {/* Add Risk Modal */}
-                <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-                    <DialogContent className="glass text-white max-w-2xl">
-                        <DialogHeader>
-                            <DialogTitle className="text-gold-400 text-2xl">{t('compliance.addRisk')}</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={handleSubmit(onSubmitRisk)} className="space-y-6 pt-4">
+            {/* Add Risk Modal */}
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent className="glass text-white max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-gold-400 text-2xl">{t('compliance.addRisk')}</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit(onSubmitRisk)} className="space-y-6 pt-4">
+                        <div>
+                            <label className="text-gray-300">{t('compliance.riskForm.description')}</label>
+                            <Input {...register('description')} className="bg-royal-900/50 border-white/10 mt-2" />
+                            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
+                        </div>
+                        <div>
+                            <label className="text-gray-300">{t('compliance.riskForm.category')}</label>
+                            <Controller
+                                name="category"
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
+                                        <SelectContent className="bg-royal-900 text-white border-white/20">
+                                            <SelectItem value="Financial">{t('compliance.riskCategories.financial')}</SelectItem>
+                                            <SelectItem value="Operational">{t('compliance.riskCategories.operational')}</SelectItem>
+                                            <SelectItem value="Strategic">{t('compliance.riskCategories.strategic')}</SelectItem>
+                                            <SelectItem value="Cyber">{t('compliance.riskCategories.cyber')}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                            {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
                             <div>
-                                <label className="text-gray-300">{t('compliance.riskForm.description')}</label>
-                                <Input {...register('description')} className="bg-royal-900/50 border-white/10 mt-2" />
-                                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
-                            </div>
-                            <div>
-                                <label className="text-gray-300">{t('compliance.riskForm.category')}</label>
+                                <label className="text-gray-300">{t('compliance.riskForm.impact')}</label>
                                 <Controller
-                                    name="category"
+                                    name="impact"
                                     control={control}
                                     render={({ field }) => (
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
+                                        <Select onValueChange={(v) => field.onChange(parseInt(v))} value={String(field.value)}>
+                                            <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue /></SelectTrigger>
                                             <SelectContent className="bg-royal-900 text-white border-white/20">
-                                                <SelectItem value="Financial">{t('compliance.riskCategories.financial')}</SelectItem>
-                                                <SelectItem value="Operational">{t('compliance.riskCategories.operational')}</SelectItem>
-                                                <SelectItem value="Strategic">{t('compliance.riskCategories.strategic')}</SelectItem>
-                                                <SelectItem value="Cyber">{t('compliance.riskCategories.cyber')}</SelectItem>
+                                                {[1,2,3,4,5].map(i => <SelectItem key={i} value={String(i)}>{i}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     )}
                                 />
-                                {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>}
-                            </div>
-                            <div className="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label className="text-gray-300">{t('compliance.riskForm.impact')}</label>
-                                    <Controller
-                                        name="impact"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Select onValueChange={(v) => field.onChange(parseInt(v))} value={String(field.value)}>
-                                                <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue /></SelectTrigger>
-                                                <SelectContent className="bg-royal-900 text-white border-white/20">
-                                                    {[1,2,3,4,5].map(i => <SelectItem key={i} value={String(i)}>{i}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-gray-300">{t('compliance.riskForm.probability')}</label>
-                                    <Controller
-                                        name="probability"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <Select onValueChange={(v) => field.onChange(parseInt(v))} value={String(field.value)}>
-                                                <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue /></SelectTrigger>
-                                                <SelectContent className="bg-royal-900 text-white border-white/20">
-                                                    {[1,2,3,4,5].map(i => <SelectItem key={i} value={String(i)}>{i}</SelectItem>)}
-                                                </SelectContent>
-                                            </Select>
-                                        )}
-                                    />
-                                </div>
                             </div>
                             <div>
-                                <label className="text-gray-300">{t('compliance.riskForm.mitigation')}</label>
-                                <Textarea {...register('mitigation')} className="bg-royal-900/50 border-white/10 mt-2" />
-                                {errors.mitigation && <p className="text-red-500 text-sm mt-1">{errors.mitigation.message}</p>}
+                                <label className="text-gray-300">{t('compliance.riskForm.probability')}</label>
+                                <Controller
+                                    name="probability"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select onValueChange={(v) => field.onChange(parseInt(v))} value={String(field.value)}>
+                                            <SelectTrigger className="bg-royal-900/50 border-white/10 mt-2"><SelectValue /></SelectTrigger>
+                                            <SelectContent className="bg-royal-900 text-white border-white/20">
+                                                {[1,2,3,4,5].map(i => <SelectItem key={i} value={String(i)}>{i}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
                             </div>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="text-white border-white/20">{t('common.cancel')}</Button>
-                                <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400">{t('common.save')}</Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-            </div>
+                        </div>
+                        <div>
+                            <label className="text-gray-300">{t('compliance.riskForm.mitigation')}</label>
+                            <Textarea {...register('mitigation')} className="bg-royal-900/50 border-white/10 mt-2" />
+                            {errors.mitigation && <p className="text-red-500 text-sm mt-1">{errors.mitigation.message}</p>}
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="text-white border-white/20">{t('common.cancel')}</Button>
+                            <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400">{t('common.save')}</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
 
 export default ComplianceMonitor;
+
+    
