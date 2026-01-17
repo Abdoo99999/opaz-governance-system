@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -16,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, Plus, Calendar, AlertTriangle, Edit, CalendarIcon, Save, ShieldCheck, Layers, Upload, Download } from 'lucide-react';
+import { Users, Plus, Calendar, AlertTriangle, Edit, Save, ShieldCheck, Layers, Upload, Download } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { COMPANIES, Company } from '@/data/companies';
 import { BOARD_MEMBERS, BoardMember, NATIONALITIES } from '@/data/board-members';
@@ -29,8 +30,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Calendar as CalendarComponent } from './ui/calendar';
 import { Checkbox } from './ui/checkbox';
 import { useCompany as useCompanyContext } from '@/context/CompanyContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -619,19 +618,20 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
             </div>
             <div>
               <Label htmlFor="appointmentDate">{t('board_directory.form.appointmentDate')}</Label>
-              <Controller name="appointmentDate" control={control} render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !field.value && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035} />
-                  </PopoverContent>
-                </Popover>
-              )}/>
+               <Controller
+                name="appointmentDate"
+                control={control}
+                render={({ field: { onChange, value, ...rest } }) => (
+                    <Input
+                    {...rest}
+                    type="date"
+                    className="bg-royal-900/50 border-white/10"
+                    style={{ colorScheme: 'dark' }}
+                    value={value ? format(value, 'yyyy-MM-dd') : ''}
+                    onChange={(e) => onChange(e.target.valueAsDate)}
+                    />
+                )}
+                />
             </div>
              <div>
               <Label>{t('board_directory.committees')}</Label>
@@ -713,19 +713,20 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
             </div>
             <div>
               <Label htmlFor="expiryDate">{t('board_directory.form.expiryDate')}</Label>
-              <Controller name="expiryDate" control={control} render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal bg-royal-900/50 border-white/10", !field.value && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035}/>
-                    </PopoverContent>
-                </Popover>
-              )}/>
+              <Controller
+                name="expiryDate"
+                control={control}
+                render={({ field: { onChange, value, ...rest } }) => (
+                    <Input
+                    {...rest}
+                    type="date"
+                    className="bg-royal-900/50 border-white/10"
+                    style={{ colorScheme: 'dark' }}
+                    value={value ? format(value, 'yyyy-MM-dd') : ''}
+                    onChange={(e) => onChange(e.target.valueAsDate)}
+                    />
+                )}
+                />
             </div>
           </div>
           
@@ -858,17 +859,20 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <Label>{t('board_directory.minutes.date')}</Label>
-                        <Controller name="date" control={control} render={({ field }) => (
-                           <Popover>
-                              <PopoverTrigger asChild>
-                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal mt-1 bg-royal-900/50 border-white/10", !field.value && "text-muted-foreground")}>
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
-                                  {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0" align="start"><CalendarComponent mode="single" selected={field.value} onSelect={field.onChange} initialFocus captionLayout="dropdown-buttons" fromYear={2015} toYear={2035} /></PopoverContent>
-                            </Popover>
-                        )} />
+                        <Controller
+                            name="date"
+                            control={control}
+                            render={({ field: { onChange, value, ...rest } }) => (
+                                <Input
+                                {...rest}
+                                type="date"
+                                className="bg-royal-900/50 border-white/10 mt-1"
+                                style={{ colorScheme: 'dark' }}
+                                value={value ? format(value, 'yyyy-MM-dd') : ''}
+                                onChange={(e) => onChange(e.target.valueAsDate)}
+                                />
+                            )}
+                        />
                     </div>
                     <div>
                         <Label>{t('board_directory.minutes.type')}</Label>
@@ -904,3 +908,5 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
 
 export default BoardDirectory;
+
+    
