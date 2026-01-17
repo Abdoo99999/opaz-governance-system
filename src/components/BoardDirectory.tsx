@@ -512,9 +512,9 @@ const MinutesContent = ({ minutes, setIsMinuteModalOpen, t }: any) => {
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b-white/10 hover:bg-transparent">
-                                <TableHead className="text-white font-bold">{t('board_directory.minutes.date')}</TableHead>
-                                <TableHead className="text-white font-bold">{t('board_directory.minutes.meetingTitle')}</TableHead>
-                                <TableHead className="text-white font-bold">{t('board_directory.minutes.type')}</TableHead>
+                                <TableHead className="text-right text-white font-bold">{t('board_directory.minutes.date')}</TableHead>
+                                <TableHead className="text-right text-white font-bold">{t('board_directory.minutes.meetingTitle')}</TableHead>
+                                <TableHead className="text-right text-white font-bold">{t('board_directory.minutes.type')}</TableHead>
                                 <TableHead className="text-center text-white font-bold">{t('board_directory.minutes.attendees')}</TableHead>
                                 <TableHead className="text-center text-white font-bold">{t('board_directory.minutes.actions')}</TableHead>
                             </TableRow>
@@ -522,9 +522,9 @@ const MinutesContent = ({ minutes, setIsMinuteModalOpen, t }: any) => {
                         <TableBody>
                             {minutes.map((minute: MeetingMinute) => (
                                 <TableRow key={minute.id} className="border-b-white/10 hover:bg-white/5">
-                                    <TableCell>{format(parseISO(minute.date), 'd MMMM yyyy')}</TableCell>
-                                    <TableCell className="font-medium">{minute.title}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="text-right">{format(parseISO(minute.date), 'd MMMM yyyy')}</TableCell>
+                                    <TableCell className="text-right font-medium">{minute.title}</TableCell>
+                                    <TableCell className="text-right">
                                         <Badge variant="outline">{t(`board_directory.minutes.types.${minute.type.toLowerCase()}`)}</Badge>
                                     </TableCell>
                                     <TableCell className="text-center">{minute.attendees}</TableCell>
