@@ -65,6 +65,8 @@ const initialDashboardData = {
   risks: [],
   lastROI: 0,
   netProfit: 0,
+  smeSpending: 0,
+  boardOmanization: 0,
 };
 
 const radarDataTemplate = AXES.map(axis => ({ 
@@ -204,6 +206,8 @@ const Dashboard = () => {
             risks: complianceData?.risks || [],
             lastROI: companyData?.lastROI || 0,
             netProfit: netProfit,
+            smeSpending: (companyData?.smeSpending / companyData?.totalSpending * 100) || 0,
+            boardOmanization: 85, // Dummy data
         });
 
     } else {
@@ -214,6 +218,8 @@ const Dashboard = () => {
         let totalAssets = 0;
         let totalROI = 0;
         let totalNetProfit = 0;
+        let totalSmeSpending = 0;
+        let totalSpending = 0;
         let allRisks: any[] = [];
 
         allCompanies.forEach((comp: any) => {
@@ -238,12 +244,15 @@ const Dashboard = () => {
             totalAssets += comp.authorizedCapital || 0;
             totalROI += comp.lastROI || 0;
             totalNetProfit += (comp.revenue || 0) - (comp.expenses || 0);
+            totalSmeSpending += comp.smeSpending || 0;
+            totalSpending += comp.totalSpending || 0;
         });
         
         const avgMaturity = allCompanies.length > 0 ? totalMaturity / allCompanies.length : 0;
         currentMaturityScore = avgMaturity;
         const avgOmanization = allCompanies.length > 0 ? totalOmanization / allCompanies.length : 0;
         const avgROI = allCompanies.length > 0 ? totalROI / allCompanies.length : 0;
+        const avgSmeSpending = totalSpending > 0 ? (totalSmeSpending / totalSpending) * 100 : 0;
         
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
@@ -254,6 +263,8 @@ const Dashboard = () => {
             risks: allRisks,
             lastROI: avgROI,
             netProfit: totalNetProfit,
+            smeSpending: avgSmeSpending,
+            boardOmanization: 85, // Dummy data
         });
         setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
     }
@@ -285,11 +296,18 @@ const Dashboard = () => {
 
   const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
   const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate, fill: '#3b82f6' }], [dashboardData.omanizationRate]);
+  const smeData = useMemo(() => [{ name: 'SME', value: dashboardData.smeSpending, fill: '#14b8a6' }], [dashboardData.smeSpending]);
+  
   const compliancePieData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
       { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
   
+   const boardIndependenceData = useMemo(() => [
+        { name: t('dashboard.boardComposition.independent'), value: 60, color: '#D4AF37' },
+        { name: t('dashboard.boardComposition.nonIndependent'), value: 40, color: '#3b82f6' },
+    ], [t]);
+
   const sparklineData = useMemo(() => 
     Array.from({ length: 10 }, () => ({
       uv: dashboardData.totalAssets * (Math.random() * 0.4 + 0.8)
@@ -445,6 +463,76 @@ const Dashboard = () => {
               </Card>
           </motion.div>
       </div>
+      
+      {/* Visual Insights Row */}
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+                <Card className={"glass h-full"}>
+                    <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={200}>
+                            <PieChart>
+                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="60%" outerRadius="80%" paddingAngle={5} labelLine={false}>
+                                    {boardIndependenceData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip {...tooltipStyle} />
+                                <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}}/>
+                                 <text x="50%" y="45%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
+                                    {dashboardData.boardOmanization}%
+                                </text>
+                                 <text x="50%" y="60%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
+                                    {t('dashboard.boardComposition.omanization')}
+                                </text>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
+             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+                <Card className={"glass h-full"}>
+                     <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex justify-around items-center h-[200px]">
+                        <div className="flex flex-col items-center">
+                            <div className="w-24 h-24 relative">
+                               <ResponsiveContainer width="100%" height="100%">
+                                    <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={8} data={omanizationData} startAngle={90} endAngle={-270}>
+                                        <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                                        <RadialBar background={{ fill: 'rgba(255,255,255,0.1)'}} dataKey='value' cornerRadius={4} className="fill-emerald-500" />
+                                    </RadialBarChart>
+                                </ResponsiveContainer>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-2xl font-bold text-emerald-300">{dashboardData.omanizationRate}%</span>
+                                </div>
+                            </div>
+                            <p className="text-sm mt-2 text-gray-300">{t('dashboard.icv.omanizationRate')}</p>
+                            <p className="text-xs text-gray-500">{t('dashboard.icv.target')}: 90%</p>
+                        </div>
+                        <div className="flex flex-col items-center">
+                           <div className="w-24 h-24 relative">
+                               <ResponsiveContainer width="100%" height="100%">
+                                    <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={8} data={smeData} startAngle={90} endAngle={-270}>
+                                        <PolarAngleAxis type="number" domain={[0, 15]} angleAxisId={0} tick={false} />
+                                        <RadialBar background={{ fill: 'rgba(255,255,255,0.1)'}} dataKey='value' cornerRadius={4} className="fill-cyan-500" />
+                                    </RadialBarChart>
+                                </ResponsiveContainer>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-2xl font-bold text-cyan-300">{dashboardData.smeSpending.toFixed(1)}%</span>
+                                </div>
+                            </div>
+                            <p className="text-sm mt-2 text-gray-300">{t('dashboard.icv.smeSpending')}</p>
+                            <p className="text-xs text-gray-500">{t('dashboard.icv.target')}: 10%</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+       </div>
+
 
       {/* Main Charts Row */}
       <div className="grid grid-cols-1 gap-8">

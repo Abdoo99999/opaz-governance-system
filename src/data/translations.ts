@@ -36,6 +36,19 @@ export const translations = {
       maturityScore: "مستوى النضج",
       compliant: "ممتثل",
       nonCompliant: "غير ممتثل",
+      boardComposition: {
+        title: "تحليل تكوين المجلس",
+        independence: "استقلالية المجلس",
+        independent: "أعضاء مستقلون",
+        nonIndependent: "أعضاء غير مستقلين",
+        omanization: "التعمين في المجالس"
+      },
+      icv: {
+          title: "القيمة المحلية والأثر الوطني",
+          omanizationRate: "نسبة التعمين",
+          smeSpending: "الإنفاق على المؤسسات الصغيرة والمتوسطة",
+          target: "المستهدف"
+      },
       financial: {
         hubTitle: "محور الأداء المالي",
         netProfit: "صافي الأرباح",
@@ -556,6 +569,19 @@ export const translations = {
       maturityScore: "Maturity Score",
       compliant: "Compliant",
       nonCompliant: "Non-Compliant",
+      boardComposition: {
+        title: "Board Composition Analysis",
+        independence: "Board Independence",
+        independent: "Independent Members",
+        nonIndependent: "Non-Independent",
+        omanization: "Omanization in Boards"
+      },
+      icv: {
+          title: "ICV & National Impact",
+          omanizationRate: "Omanization Rate",
+          smeSpending: "SME Spending",
+          target: "Target"
+      },
       financial: {
         hubTitle: "Financial Position Hub",
         netProfit: "Net Profit",
