@@ -606,7 +606,7 @@ const Dashboard = () => {
                   <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                   <Tooltip {...tooltipStyle} />
-                  <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF' }} iconType="circle" />
+                  <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
                   <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
                   <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
                 </RadarChart>
@@ -698,4 +698,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
