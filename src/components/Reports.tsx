@@ -376,6 +376,29 @@ const Reports: React.FC = () => {
       );
     };
 
+    const renderCustomLegend = (props: any) => {
+        const { payload } = props;
+        if (!payload || payload.length === 0) return null;
+
+        const companyScorePayload = payload.find((p: any) => p.dataKey === 'company');
+        const sectorAveragePayload = payload.find((p: any) => p.dataKey === 'sector');
+
+        if (!companyScorePayload || !sectorAveragePayload) return null;
+
+        return (
+            <div className="w-full flex justify-between items-center" style={{ position: 'absolute', bottom: '20px', paddingLeft: '60px', paddingRight: '60px' }}>
+                <div className="flex items-center gap-2">
+                     <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: sectorAveragePayload.color }} />
+                     <span className="text-white print-text-black">{sectorAveragePayload.value}</span>
+                </div>
+                 <div className="flex items-center gap-2">
+                     <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: companyScorePayload.color }} />
+                     <span className="text-white print-text-black">{companyScorePayload.value}</span>
+                </div>
+            </div>
+        );
+    };
+
 
     if (!selectedCompanyId || selectedCompanyId === 'all') {
         return (
@@ -501,7 +524,7 @@ const Reports: React.FC = () => {
                                         <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                                         <PolarRadiusAxis angle={30} domain={[0, 150]} className="hidden" />
                                         <Tooltip {...tooltipStyle} />
-                                        <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
+                                        <Legend content={renderCustomLegend} />
                                         <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
                                         <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
                                     </RadarChart>
@@ -717,5 +740,3 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
-
-    
