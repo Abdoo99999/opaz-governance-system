@@ -44,10 +44,12 @@ export const translations = {
         omanization: "التعمين في المجالس"
       },
       icv: {
-          title: "القيمة المحلية والأثر الوطني",
+          title: "المناقصات والإنفاق المحلي",
+          totalTenders: "إجمالي المناقصات السنوية",
           omanizationRate: "نسبة التعمين",
           smeSpending: "الإنفاق على المؤسسات الصغيرة والمتوسطة",
           localSpending: "الإنفاق على الشركات المحلية",
+          spending: "قيمة المناقصات",
           actualSpending: "الإنفاق الفعلي",
           target: "المستهدف"
       },
@@ -579,10 +581,12 @@ export const translations = {
         omanization: "Omanization in Boards"
       },
       icv: {
-          title: "ICV & National Impact",
+          title: "Tenders & Local Spending",
+          totalTenders: "Total Annual Tenders",
           omanizationRate: "Omanization Rate",
           smeSpending: "SME Spending",
           localSpending: "Local Spending",
+          spending: "Tender Value",
           actualSpending: "Actual Spending",
           target: "Target"
       },
@@ -1071,5 +1075,3 @@ export const translations = {
     }
   }
 };
-
-    

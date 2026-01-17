@@ -62,7 +62,7 @@ const initialDashboardData = {
   totalAssets: 0, 
   omanizationRate: 0,
   compliantItems: 0,
-  totalComplianceItems: 4,
+  totalComplianceItems: 10,
   risks: [],
   lastROI: 0,
   netProfit: 0,
@@ -144,6 +144,21 @@ const RadarCustomTick = (props: any) => {
     );
 };
 
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  if (percent === 0) return null;
+
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="font-bold drop-shadow-md">
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
 
 const Dashboard = () => {
   const { t, language } = useLanguage();
@@ -199,12 +214,14 @@ const Dashboard = () => {
         
         const netProfit = (companyData?.revenue || 0) - (companyData?.expenses || 0);
         
-        const localSpendingPercentage = companyData?.totalSpending > 0 ? ((companyData.localSpending || 0) / companyData.totalSpending) * 100 : 0;
-        const smeSpendingPercentage = companyData?.totalSpending > 0 ? ((companyData.smeSpending || 0) / companyData.totalSpending) * 100 : 0;
-        
+        const totalSpending = companyData?.totalSpending || 0;
+        const localSpending = companyData?.localSpending || 0;
+        const smeSpending = companyData?.smeSpending || 0;
+
         setIcvBarData([
-            { name: t('dashboard.icv.localSpending'), [t('dashboard.icv.actualSpending')]: localSpendingPercentage },
-            { name: t('dashboard.icv.smeSpending'), [t('dashboard.icv.actualSpending')]: smeSpendingPercentage },
+            { name: t('dashboard.icv.totalTenders'), value: totalSpending },
+            { name: t('dashboard.icv.localSpending'), value: localSpending },
+            { name: t('dashboard.icv.smeSpending'), value: smeSpending },
         ] as any);
 
         setDashboardData({
@@ -212,11 +229,11 @@ const Dashboard = () => {
             totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital / 1_000_000 : 0,
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
-            totalComplianceItems: complianceItems.length || 4,
+            totalComplianceItems: complianceItems.length || 10,
             risks: complianceData?.risks || [],
             lastROI: companyData?.lastROI || 0,
             netProfit: netProfit,
-            smeSpending: (companyData?.smeSpending / companyData?.totalSpending * 100) || 0,
+            smeSpending: (smeSpending / totalSpending * 100) || 0,
             boardOmanization: 85, // Dummy data
         });
 
@@ -264,12 +281,11 @@ const Dashboard = () => {
         currentMaturityScore = avgMaturity;
         const avgOmanization = allCompanies.length > 0 ? totalOmanization / allCompanies.length : 0;
         const avgROI = allCompanies.length > 0 ? totalROI / allCompanies.length : 0;
-        const avgSmeSpending = totalSpending > 0 ? (totalSmeSpending / totalSpending) * 100 : 0;
-        const avgLocalSpending = totalSpending > 0 ? (totalLocalSpending / totalSpending) * 100 : 0;
         
         setIcvBarData([
-            { name: t('dashboard.icv.localSpending'), [t('dashboard.icv.actualSpending')]: avgLocalSpending },
-            { name: t('dashboard.icv.smeSpending'), [t('dashboard.icv.actualSpending')]: avgSmeSpending },
+            { name: t('dashboard.icv.totalTenders'), value: totalSpending },
+            { name: t('dashboard.icv.localSpending'), value: totalLocalSpending },
+            { name: t('dashboard.icv.smeSpending'), value: totalSmeSpending },
         ] as any);
 
         setDashboardData({
@@ -277,11 +293,11 @@ const Dashboard = () => {
             totalAssets: totalAssets / 1_000_000,
             omanizationRate: Math.round(avgOmanization),
             compliantItems: totalCompliant,
-            totalComplianceItems: totalItems || 4,
+            totalComplianceItems: totalItems || 10,
             risks: allRisks,
             lastROI: avgROI,
             netProfit: totalNetProfit,
-            smeSpending: avgSmeSpending,
+            smeSpending: (totalSmeSpending / totalSpending) * 100 || 0,
             boardOmanization: 85, // Dummy data
         });
         setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
@@ -317,7 +333,7 @@ const Dashboard = () => {
   
   const compliancePieData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
-      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
   
    const boardIndependenceData = useMemo(() => [
@@ -375,6 +391,12 @@ const Dashboard = () => {
         itemStyle: { color: '#fff' },
         labelStyle: { color: '#D4AF37' }
     };
+    
+    const currencyFormatter = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'OMR', notation: 'compact' }).format(value);
+
+    const compliancePercentage = dashboardData.totalComplianceItems > 0
+        ? Math.round((dashboardData.compliantItems / dashboardData.totalComplianceItems) * 100)
+        : 0;
 
   return (
     <div className="p-4 md:p-6 lg:p-8 text-white space-y-8">
@@ -502,12 +524,13 @@ const Dashboard = () => {
                             <BarChart data={icvBarData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
                                 <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} />
-                                <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} tick={{ fill: '#A0A0A0' }} />
-                                <Tooltip {...tooltipStyle} formatter={(value: number) => `${value.toFixed(1)}%`} />
-                                <Bar dataKey={t('dashboard.icv.actualSpending')} name={t('dashboard.icv.actualSpending')} barSize={40} radius={[4, 4, 0, 0]}>
-                                    {icvBarData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={index === 0 ? '#3b82f6' : '#00E096'} />
-                                    ))}
+                                <YAxis tickFormatter={(value) => `${value / 1_000_000}M`} tick={{ fill: '#A0A0A0' }} />
+                                <Tooltip {...tooltipStyle} formatter={currencyFormatter} />
+                                <Bar dataKey="value" name={t('dashboard.icv.spending')} barSize={40} radius={[4, 4, 0, 0]}>
+                                    {(icvBarData as any[]).map((entry, index) => {
+                                        const colors = ['#6b7280', '#3b82f6', '#00E096'];
+                                        return <Cell key={`cell-${index}`} fill={colors[index]} />;
+                                    })}
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
@@ -531,7 +554,8 @@ const Dashboard = () => {
                                   innerRadius={0} 
                                   outerRadius={90} 
                                   paddingAngle={5} 
-                                  label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                                  labelLine={false}
+                                  label={renderCustomizedLabel}
                                 >
                                     {boardIndependenceData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -594,6 +618,9 @@ const Dashboard = () => {
                                 </Pie>
                                  <Tooltip {...tooltipStyle} />
                                 <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}}/>
+                                 <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold print:fill-black">
+                                    {`${compliancePercentage}%`}
+                                </text>
                             </PieChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -655,5 +682,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
