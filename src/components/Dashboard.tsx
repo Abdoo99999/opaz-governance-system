@@ -39,6 +39,7 @@ import RiskLandscape from './dashboard/RiskLandscape';
 import { cn } from '@/lib/utils';
 import FinancialHub from './dashboard/FinancialHub';
 import { useYear } from '@/context/YearContext';
+import { Progress } from '@/components/ui/progress';
 
 
 const cardVariants = {
@@ -464,80 +465,7 @@ const Dashboard = () => {
           </motion.div>
       </div>
       
-      {/* Visual Insights Row */}
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-                <Card className={"glass h-full"}>
-                    <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <PieChart>
-                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius="60%" outerRadius="80%" paddingAngle={5} labelLine={false}>
-                                    {boardIndependenceData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip {...tooltipStyle} />
-                                <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}}/>
-                                 <text x="50%" y="45%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
-                                    {dashboardData.boardOmanization}%
-                                </text>
-                                 <text x="50%" y="60%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
-                                    {t('dashboard.boardComposition.omanization')}
-                                </text>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
-             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-                <Card className={"glass h-full"}>
-                     <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex justify-around items-center h-[200px]">
-                        <div className="flex flex-col items-center">
-                            <div className="w-24 h-24 relative">
-                               <ResponsiveContainer width="100%" height="100%">
-                                    <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={8} data={omanizationData} startAngle={90} endAngle={-270}>
-                                        <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                                        <RadialBar background={{ fill: 'rgba(255,255,255,0.1)'}} dataKey='value' cornerRadius={4} className="fill-emerald-500" />
-                                    </RadialBarChart>
-                                </ResponsiveContainer>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-2xl font-bold text-emerald-300">{dashboardData.omanizationRate}%</span>
-                                </div>
-                            </div>
-                            <p className="text-sm mt-2 text-gray-300">{t('dashboard.icv.omanizationRate')}</p>
-                            <p className="text-xs text-gray-500">{t('dashboard.icv.target')}: 90%</p>
-                        </div>
-                        <div className="flex flex-col items-center">
-                           <div className="w-24 h-24 relative">
-                               <ResponsiveContainer width="100%" height="100%">
-                                    <RadialBarChart cx="50%" cy="50%" innerRadius="70%" outerRadius="100%" barSize={8} data={smeData} startAngle={90} endAngle={-270}>
-                                        <PolarAngleAxis type="number" domain={[0, 15]} angleAxisId={0} tick={false} />
-                                        <RadialBar background={{ fill: 'rgba(255,255,255,0.1)'}} dataKey='value' cornerRadius={4} className="fill-cyan-500" />
-                                    </RadialBarChart>
-                                </ResponsiveContainer>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-2xl font-bold text-cyan-300">{dashboardData.smeSpending.toFixed(1)}%</span>
-                                </div>
-                            </div>
-                            <p className="text-sm mt-2 text-gray-300">{t('dashboard.icv.smeSpending')}</p>
-                            <p className="text-xs text-gray-500">{t('dashboard.icv.target')}: 10%</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            </motion.div>
-       </div>
-
-
-      {/* Main Charts Row */}
-      <div className="grid grid-cols-1 gap-8">
-        
-        {/* Financial Hub */}
+      {/* Financial Hub */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
             <FinancialHub
                 roi={dashboardData.lastROI}
@@ -546,6 +474,9 @@ const Dashboard = () => {
             />
         </motion.div>
 
+      {/* Main Charts Row */}
+      <div className="grid grid-cols-1 gap-8">
+        
         {/* Strategic Radar */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
           <Card className={"glass h-full"}>
@@ -648,6 +579,60 @@ const Dashboard = () => {
         </motion.div>
       </div>
         
+    {/* Visual Insights Row - Moved Down */}
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+                <Card className={"glass h-full"}>
+                    <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="40%" innerRadius="60%" outerRadius="80%" paddingAngle={5} labelLine={false}>
+                                    {boardIndependenceData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip {...tooltipStyle} />
+                                <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}}/>
+                                 <text x="50%" y="35%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
+                                    {dashboardData.boardOmanization}%
+                                </text>
+                                 <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
+                                    {t('dashboard.boardComposition.omanization')}
+                                </text>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
+             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+                <Card className={"glass h-full"}>
+                     <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-8 pt-6">
+                        <div>
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-300 font-medium">{t('dashboard.icv.omanizationRate')}</span>
+                                <span className="font-bold text-emerald-400">{dashboardData.omanizationRate}%</span>
+                            </div>
+                            <Progress value={dashboardData.omanizationRate} className="h-2 [&>div]:bg-emerald-500" />
+                            <p className="text-xs text-gray-500 mt-1 text-right">{t('dashboard.icv.target')}: 90%</p>
+                        </div>
+                        <div>
+                           <div className="flex justify-between mb-2">
+                                <span className="text-gray-300 font-medium">{t('dashboard.icv.smeSpending')}</span>
+                                <span className="font-bold text-cyan-400">{dashboardData.smeSpending.toFixed(1)}%</span>
+                            </div>
+                            <Progress value={(dashboardData.smeSpending / 10) * 100} className="h-2 [&>div]:bg-cyan-500" />
+                            <p className="text-xs text-gray-500 mt-1 text-right">{t('dashboard.icv.target')}: 10%</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+       </div>
     </div>
   );
 };
