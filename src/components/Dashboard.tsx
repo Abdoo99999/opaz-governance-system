@@ -152,6 +152,7 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(initialDashboardData);
   const [radarData, setRadarData] = useState(radarDataTemplate);
   const [maturityPathData, setMaturityPathData] = useState([]);
+  const [icvBarData, setIcvBarData] = useState([]);
 
   const selectedCompany = getSelectedCompany();
   
@@ -198,6 +199,14 @@ const Dashboard = () => {
         
         const netProfit = (companyData?.revenue || 0) - (companyData?.expenses || 0);
         
+        const localSpendingPercentage = companyData?.totalSpending > 0 ? ((companyData.localSpending || 0) / companyData.totalSpending) * 100 : 0;
+        const smeSpendingPercentage = companyData?.totalSpending > 0 ? ((companyData.smeSpending || 0) / companyData.totalSpending) * 100 : 0;
+        
+        setIcvBarData([
+            { name: t('dashboard.icv.localSpending'), [t('dashboard.icv.actualSpending')]: localSpendingPercentage },
+            { name: t('dashboard.icv.smeSpending'), [t('dashboard.icv.actualSpending')]: smeSpendingPercentage },
+        ] as any);
+
         setDashboardData({
             maturityScore: parseFloat(currentMaturityScore.toFixed(1)),
             totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital / 1_000_000 : 0,
@@ -222,6 +231,7 @@ const Dashboard = () => {
         let totalSmeSpending = 0;
         let totalSpending = 0;
         let allRisks: any[] = [];
+        let totalLocalSpending = 0;
 
         allCompanies.forEach((comp: any) => {
             const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
@@ -246,6 +256,7 @@ const Dashboard = () => {
             totalROI += comp.lastROI || 0;
             totalNetProfit += (comp.revenue || 0) - (comp.expenses || 0);
             totalSmeSpending += comp.smeSpending || 0;
+            totalLocalSpending += comp.localSpending || 0;
             totalSpending += comp.totalSpending || 0;
         });
         
@@ -254,7 +265,13 @@ const Dashboard = () => {
         const avgOmanization = allCompanies.length > 0 ? totalOmanization / allCompanies.length : 0;
         const avgROI = allCompanies.length > 0 ? totalROI / allCompanies.length : 0;
         const avgSmeSpending = totalSpending > 0 ? (totalSmeSpending / totalSpending) * 100 : 0;
+        const avgLocalSpending = totalSpending > 0 ? (totalLocalSpending / totalSpending) * 100 : 0;
         
+        setIcvBarData([
+            { name: t('dashboard.icv.localSpending'), [t('dashboard.icv.actualSpending')]: avgLocalSpending },
+            { name: t('dashboard.icv.smeSpending'), [t('dashboard.icv.actualSpending')]: avgSmeSpending },
+        ] as any);
+
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
             totalAssets: totalAssets / 1_000_000,
@@ -292,12 +309,11 @@ const Dashboard = () => {
     });
     setMaturityPathData(path as any);
 
-  }, [selectedCompanyId, language, selectedYear]);
+  }, [selectedCompanyId, language, selectedYear, t]);
 
 
   const maturityGaugeData = useMemo(() => [{ name: 'Maturity', value: dashboardData.maturityScore }], [dashboardData.maturityScore]);
   const omanizationData = useMemo(() => [{ name: 'Omanization', value: dashboardData.omanizationRate, fill: '#3b82f6' }], [dashboardData.omanizationRate]);
-  const smeData = useMemo(() => [{ name: 'SME', value: dashboardData.smeSpending, fill: '#14b8a6' }], [dashboardData.smeSpending]);
   
   const compliancePieData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
@@ -466,19 +482,75 @@ const Dashboard = () => {
       </div>
       
       {/* Financial Hub */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
             <FinancialHub
                 roi={dashboardData.lastROI}
                 netProfit={dashboardData.netProfit}
                 equity={dashboardData.totalAssets * 1_000_000}
             />
         </motion.div>
+        
+        {/* ICV & Governance Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+                <Card className={"glass h-full"}>
+                     <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-8 pt-6">
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={icvBarData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                                <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} />
+                                <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} tick={{ fill: '#A0A0A0' }} />
+                                <Tooltip {...tooltipStyle} formatter={(value: number) => `${value.toFixed(1)}%`} />
+                                <Bar dataKey={t('dashboard.icv.actualSpending')} name={t('dashboard.icv.actualSpending')} barSize={40} radius={[4, 4, 0, 0]}>
+                                    {icvBarData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={index === 0 ? '#3b82f6' : '#00E096'} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+                <Card className={"glass h-full"}>
+                    <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                                <Pie 
+                                  data={boardIndependenceData} 
+                                  dataKey="value" 
+                                  nameKey="name" 
+                                  cx="50%" 
+                                  cy="50%" 
+                                  innerRadius={0} 
+                                  outerRadius={90} 
+                                  paddingAngle={5} 
+                                  label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                                >
+                                    {boardIndependenceData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip {...tooltipStyle} />
+                                <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}}/>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
+       </div>
 
       {/* Main Charts Row */}
       <div className="grid grid-cols-1 gap-8">
         
         {/* Strategic Radar */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
           <Card className={"glass h-full"}>
             <CardHeader>
               <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
@@ -505,7 +577,7 @@ const Dashboard = () => {
         
         {/* Compliance and Risk */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-gold-400">
@@ -528,7 +600,7 @@ const Dashboard = () => {
                 </Card>
             </motion.div>
 
-             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-gold-400">
@@ -544,7 +616,7 @@ const Dashboard = () => {
         </div>
 
         {/* Strategic Path Chart */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
             <Card className={"glass h-full"}>
                 <CardHeader>
                     <CardTitle className="text-gold-400 flex items-center gap-2">
@@ -578,63 +650,10 @@ const Dashboard = () => {
             </Card>
         </motion.div>
       </div>
-        
-    {/* Visual Insights Row - Moved Down */}
-       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-                <Card className={"glass h-full"}>
-                    <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="40%" innerRadius="60%" outerRadius="80%" paddingAngle={5} labelLine={false}>
-                                    {boardIndependenceData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip {...tooltipStyle} />
-                                <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}}/>
-                                 <text x="50%" y="35%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
-                                    {dashboardData.boardOmanization}%
-                                </text>
-                                 <text x="50%" y="48%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
-                                    {t('dashboard.boardComposition.omanization')}
-                                </text>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
-             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-                <Card className={"glass h-full"}>
-                     <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-8 pt-6">
-                        <div>
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-300 font-medium">{t('dashboard.icv.omanizationRate')}</span>
-                                <span className="font-bold text-emerald-400">{dashboardData.omanizationRate}%</span>
-                            </div>
-                            <Progress value={dashboardData.omanizationRate} className="h-2 [&>div]:bg-emerald-500" />
-                            <p className="text-xs text-gray-500 mt-1 text-right">{t('dashboard.icv.target')}: 90%</p>
-                        </div>
-                        <div>
-                           <div className="flex justify-between mb-2">
-                                <span className="text-gray-300 font-medium">{t('dashboard.icv.smeSpending')}</span>
-                                <span className="font-bold text-cyan-400">{dashboardData.smeSpending.toFixed(1)}%</span>
-                            </div>
-                            <Progress value={(dashboardData.smeSpending / 10) * 100} className="h-2 [&>div]:bg-cyan-500" />
-                            <p className="text-xs text-gray-500 mt-1 text-right">{t('dashboard.icv.target')}: 10%</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            </motion.div>
-       </div>
     </div>
   );
 };
 
 export default Dashboard;
+
+    

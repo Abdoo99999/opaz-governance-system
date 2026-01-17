@@ -47,6 +47,8 @@ export const translations = {
           title: "القيمة المحلية والأثر الوطني",
           omanizationRate: "نسبة التعمين",
           smeSpending: "الإنفاق على المؤسسات الصغيرة والمتوسطة",
+          localSpending: "الإنفاق على الشركات المحلية",
+          actualSpending: "الإنفاق الفعلي",
           target: "المستهدف"
       },
       financial: {
@@ -580,6 +582,8 @@ export const translations = {
           title: "ICV & National Impact",
           omanizationRate: "Omanization Rate",
           smeSpending: "SME Spending",
+          localSpending: "Local Spending",
+          actualSpending: "Actual Spending",
           target: "Target"
       },
       financial: {
