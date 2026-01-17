@@ -73,7 +73,8 @@ const initialDashboardData = {
 const radarDataTemplate = AXES.map(axis => ({ 
     subject: axis.title_en,
     subject_ar: axis.title_ar,
-    A: 0, 
+    company: 0,
+    sector: 0,
     fullMark: 150 
 }));
 
@@ -145,7 +146,7 @@ const RadarCustomTick = (props: any) => {
 };
 
 const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
   const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
@@ -165,7 +166,7 @@ const Dashboard = () => {
   const { getSelectedCompany, selectedCompanyId } = useCompany();
   const { selectedYear } = useYear();
   const [dashboardData, setDashboardData] = useState(initialDashboardData);
-  const [radarData, setRadarData] = useState(radarDataTemplate);
+  const [radarData, setRadarData] = useState([]);
   const [maturityPathData, setMaturityPathData] = useState([]);
   const [icvBarData, setIcvBarData] = useState([]);
 
@@ -196,9 +197,11 @@ const Dashboard = () => {
             const axisScores = axisIndicators.map(ind => assessmentData.scores?.[ind.id] || 0);
             const axisSum = axisScores.reduce((a, b) => a + b, 0);
             const companyValue = axisScores.length > 0 ? (axisSum / (axisScores.length * 5)) * 150 : 0;
+            const sectorValue = companyValue * (0.85 + Math.random() * 0.3); // mock sector average
             return {
                 subject: language === 'ar' ? axis.title_ar : axis.title_en,
-                A: companyValue,
+                company: companyValue,
+                sector: sectorValue,
                 fullMark: 150,
             };
         });
@@ -288,6 +291,18 @@ const Dashboard = () => {
             { name: t('dashboard.icv.smeSpending'), value: totalSmeSpending },
         ] as any);
 
+        const allCompaniesRadarData = AXES.map(axis => {
+            const companyValue = Math.random() * 100 + 40; // mock aggregate company score
+            const sectorValue = companyValue * (0.85 + Math.random() * 0.3); // mock aggregate sector score
+            return {
+                subject: language === 'ar' ? axis.title_ar : axis.title_en,
+                company: companyValue,
+                sector: sectorValue,
+                fullMark: 150
+            };
+        });
+        setRadarData(allCompaniesRadarData);
+
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
             totalAssets: totalAssets / 1_000_000,
@@ -300,7 +315,6 @@ const Dashboard = () => {
             smeSpending: (totalSmeSpending / totalSpending) * 100 || 0,
             boardOmanization: 85, // Dummy data
         });
-        setRadarData(radarDataTemplate.map(item => ({...item, subject: language === 'ar' ? item.subject_ar : item.subject, A: Math.random() * 120 + 30})));
     }
 
     // Generate maturity path data based on current score
@@ -591,8 +605,10 @@ const Dashboard = () => {
                   <PolarGrid stroke="rgba(255,255,255,0.2)" />
                   <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                   <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                  <Radar name="Performance" dataKey="A" stroke="#E5C565" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.2} />
-                   <Tooltip {...tooltipStyle} />
+                  <Tooltip {...tooltipStyle} />
+                  <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
+                  <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
+                  <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
                 </RadarChart>
               </ResponsiveContainer>
             </CardContent>
