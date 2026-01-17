@@ -26,6 +26,12 @@ const complianceItems = [
     { id: 'quorum', question: 'compliance.questions.quorum' },
     { id: 'doa', question: 'compliance.questions.doa' },
     { id: 'conflict', question: 'compliance.questions.conflict' },
+    { id: 'legalStatus', question: 'compliance.questions.legalStatus' },
+    { id: 'dividends', question: 'compliance.questions.dividends' },
+    { id: 'agmApproval', question: 'compliance.questions.agmApproval' },
+    { id: 'reporting', question: 'compliance.questions.reporting' },
+    { id: 'legalIssues', question: 'compliance.questions.legalIssues' },
+    { id: 'minutesArchiving', question: 'compliance.questions.minutesArchiving' },
 ];
 
 const riskSchema = z.object({
@@ -43,6 +49,12 @@ type ComplianceState = {
     quorum: boolean;
     doa: boolean;
     conflict: boolean;
+    legalStatus: boolean;
+    dividends: boolean;
+    agmApproval: boolean;
+    reporting: boolean;
+    legalIssues: boolean;
+    minutesArchiving: boolean;
 };
 
 const initialComplianceState: ComplianceState = {
@@ -50,6 +62,12 @@ const initialComplianceState: ComplianceState = {
     quorum: true,
     doa: false,
     conflict: true,
+    legalStatus: true,
+    dividends: true,
+    agmApproval: false,
+    reporting: true,
+    legalIssues: true,
+    minutesArchiving: false,
 };
 
 const ComplianceMonitor: React.FC = () => {
@@ -312,3 +330,5 @@ const ComplianceMonitor: React.FC = () => {
 };
 
 export default ComplianceMonitor;
+
+    

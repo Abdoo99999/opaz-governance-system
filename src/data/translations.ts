@@ -230,7 +230,13 @@ export const translations = {
             auditor: "هل تم تعيين مدقق حسابات خارجي؟",
             quorum: "هل اكتمل نصاب اجتماعات المجلس (4 مرات سنوياً)؟",
             doa: "هل توجد لائحة صلاحيات مالية وإدارية معتمدة؟",
-            conflict: "هل تم الإفصاح عن تعارض المصالح للأعضاء؟"
+            conflict: "هل تم الإفصاح عن تعارض المصالح للأعضاء؟",
+            legalStatus: "هل السجل التجاري والشهادات الضريبية سارية المفعول؟",
+            dividends: "هل تم تحويل أرباح جهاز الاستثمار في الموعد المحدد؟",
+            agmApproval: "هل تم اعتماد القوائم المالية من الجمعية العامة السنوية؟",
+            reporting: "هل تم نشر التقرير السنوي المدقق للجمهور؟",
+            legalIssues: "هل تخلو الشركة من قضايا قانونية جوهرية غير مفصح عنها؟",
+            minutesArchiving: "هل جميع محاضر اجتماعات المجلس واللجان موقعة ومؤرشفة؟"
         },
         riskForm: {
             description: "وصف الخطر",
@@ -744,7 +750,13 @@ export const translations = {
             auditor: "Has an external auditor been appointed?",
             quorum: "Has the board meeting quorum been met (4 times annually)?",
             doa: "Is there an approved Delegation of Authority policy?",
-            conflict: "Have conflicts of interest been disclosed by members?"
+            conflict: "Have conflicts of interest been disclosed by members?",
+            legalStatus: "Are Commercial Registration & Tax Certificates valid?",
+            dividends: "Were OIA dividends transferred on schedule?",
+            agmApproval: "Were financial statements approved by the AGM?",
+            reporting: "Was the audited Annual Report published to the public?",
+            legalIssues: "Is the company free from undisclosed material legal cases?",
+            minutesArchiving: "Are all Board & Committee minutes signed and archived?"
         },
         riskForm: {
             description: "Risk Description",
@@ -1029,3 +1041,5 @@ export const translations = {
     }
   }
 };
+
+    
