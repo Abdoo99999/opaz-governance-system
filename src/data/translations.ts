@@ -45,10 +45,10 @@ export const translations = {
       },
       icv: {
           title: "المناقصات والإنفاق المحلي",
-          totalTenders: "إجمالي المناقصات السنوية",
+          totalTenders: "إجمالي المناقصات",
           omanizationRate: "نسبة التعمين",
-          smeSpending: "الإنفاق على المؤسسات الصغيرة والمتوسطة",
-          localSpending: "الإنفاق على الشركات المحلية",
+          smeSpending: "المؤسسات الصغيرة (SMEs)",
+          localSpending: "الشركات المحلية",
           spending: "قيمة المناقصات",
           actualSpending: "الإنفاق الفعلي",
           target: "المستهدف"
@@ -339,7 +339,7 @@ export const translations = {
       kpi: {
         title: "مؤشرات الأداء",
         dividends: "توزيعات الأرباح المعلنة",
-        roi: "العائد على الاستثمار (ROI)"
+        roi: "العائد على الاستثمار"
       },
       declaration: {
         title: "المرفقات والإقرار",
@@ -582,10 +582,10 @@ export const translations = {
       },
       icv: {
           title: "Tenders & Local Spending",
-          totalTenders: "Total Annual Tenders",
+          totalTenders: "Total Tenders",
           omanizationRate: "Omanization Rate",
-          smeSpending: "SME Spending",
-          localSpending: "Local Spending",
+          smeSpending: "SMEs",
+          localSpending: "Local Companies",
           spending: "Tender Value",
           actualSpending: "Actual Spending",
           target: "Target"
