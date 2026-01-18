@@ -13,9 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Building, Wallet, Landmark, Users, ArrowLeft, Save } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon } from 'lucide-react';
-import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
@@ -202,18 +199,15 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
                                 <Controller
                                     name="financialYearEnd"
                                     control={control}
-                                    render={({ field }) => (
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button variant={"outline"} className={cn(inputStyles, "w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
-                                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {field.value ? format(field.value, "PPP") : <span>{t('common.pickDate')}</span>}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0 bg-royal-900 border-white/20">
-                                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                                            </PopoverContent>
-                                        </Popover>
+                                    render={({ field: { onChange, value, ...rest } }) => (
+                                        <Input
+                                            {...rest}
+                                            type="date"
+                                            className={cn(inputStyles, "w-full justify-start text-left font-normal")}
+                                            style={{ colorScheme: 'dark' }}
+                                            value={value ? format(new Date(value), 'yyyy-MM-dd') : ''}
+                                            onChange={(e) => onChange(e.target.valueAsDate)}
+                                        />
                                     )}
                                 />
                                  {errors.financialYearEnd && <p className="text-red-500 text-sm mt-1">{errors.financialYearEnd.message}</p>}
@@ -302,5 +296,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
 };
 
 export default CompanyForm;
+
+    
 
     

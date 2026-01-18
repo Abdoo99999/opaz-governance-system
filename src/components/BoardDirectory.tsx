@@ -90,7 +90,13 @@ const BoardDirectory: React.FC = () => {
     const { t, language } = useLanguage();
     const { toast } = useToast();
     const { selectedCompanyId } = useCompanyContext();
-    const [boardMembers, setBoardMembers] = useState<BoardMember[]>(BOARD_MEMBERS);
+    
+    const [boardMembers, setBoardMembers] = useState<BoardMember[]>(() => {
+        if (typeof window === 'undefined') return BOARD_MEMBERS;
+        const savedMembers = localStorage.getItem('oia_board_members');
+        return savedMembers ? JSON.parse(savedMembers) : BOARD_MEMBERS;
+    });
+
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingMember, setEditingMember] = useState<BoardMember | null>(null);
     const [isCycleSettingsOpen, setIsCycleSettingsOpen] = useState(false);
@@ -116,13 +122,13 @@ const BoardDirectory: React.FC = () => {
         }
     }, [selectedCompanyId]);
 
-    const handleSaveMinute = (data: { date: Date; type: any; title: string; file: File }) => {
+    const handleSaveMinute = (data: { date: Date; type: any; title: string; attendees: number; file: File }) => {
         const newMinute: MeetingMinute = {
             id: Date.now(),
             date: format(data.date, 'yyyy-MM-dd'),
             type: data.type,
             title: data.title,
-            attendees: 10, // Mocked for now
+            attendees: data.attendees,
             fileName: data.file.name,
         };
         const updatedMinutes = [...minutes, newMinute];
@@ -246,6 +252,14 @@ const BoardDirectory: React.FC = () => {
         setIsFormOpen(false);
     };
 
+    const handleSaveAll = () => {
+        localStorage.setItem('oia_board_members', JSON.stringify(boardMembers));
+        toast({
+            title: t('common.saveSuccessTitle'),
+            description: t('board_directory.saveSuccessDesc'),
+        });
+    };
+
 
     return (
         <div className="p-4 md:p-6 lg:p-8 text-white">
@@ -275,6 +289,7 @@ const BoardDirectory: React.FC = () => {
                         filteredMembers={filteredMembers}
                         handleOpenForm={handleOpenForm}
                         setIsCycleSettingsOpen={setIsCycleSettingsOpen}
+                        onSaveAll={handleSaveAll}
                         t={t}
                         language={language}
                     />
@@ -321,11 +336,15 @@ const BoardDirectory: React.FC = () => {
 
 
 // Members Tab Content Component
-const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMembers, handleOpenForm, setIsCycleSettingsOpen, t, language }: any) => {
+const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMembers, handleOpenForm, setIsCycleSettingsOpen, onSaveAll, t, language }: any) => {
 
     return (
         <>
             <div className="flex items-center justify-end gap-4 mb-8">
+                 <Button onClick={onSaveAll} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                    <Save className="ml-2 h-5 w-5" />
+                    {t('common.save')}
+                </Button>
                 <Button onClick={() => setIsCycleSettingsOpen(true)} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">
                     <Calendar className="ml-2 h-5 w-5" />
                     {t('board_directory.form.cycleSettings')}
@@ -825,6 +844,7 @@ const minuteSchema = z.object({
   title: z.string().min(3, 'Title is required'),
   date: z.date(),
   type: z.enum(['Quarterly', 'Emergency', 'Committee']),
+  attendees: z.number().min(1, 'Attendees number is required'),
   file: z.instanceof(File).refine(file => file.size > 0, 'File is required'),
 });
 type MinuteFormData = z.infer<typeof minuteSchema>;
@@ -839,10 +859,10 @@ interface MinuteUploadDialogProps {
 const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose, onSave, t }) => {
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<MinuteFormData>({
     resolver: zodResolver(minuteSchema),
-    defaultValues: { type: 'Quarterly', date: new Date() }
+    defaultValues: { type: 'Quarterly', date: new Date(), attendees: 1 }
   });
   
-  useEffect(() => { if(isOpen) reset() }, [isOpen, reset]);
+  useEffect(() => { if(isOpen) reset({ type: 'Quarterly', date: new Date(), attendees: 1, title: '', file: undefined }) }, [isOpen, reset]);
   
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -873,6 +893,7 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
                                 />
                             )}
                         />
+                         {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
                     </div>
                     <div>
                         <Label>{t('board_directory.minutes.type')}</Label>
@@ -887,6 +908,11 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
                              </Select>
                         )} />
                     </div>
+                </div>
+                <div>
+                    <Label>{t('board_directory.minutes.attendees')}</Label>
+                    <Input type="number" {...register('attendees', { valueAsNumber: true })} className="bg-royal-900/50 border-white/10 mt-1" />
+                    {errors.attendees && <p className="text-red-500 text-xs mt-1">{errors.attendees.message}</p>}
                 </div>
                  <div>
                     <Label>{t('board_directory.minutes.file')}</Label>
@@ -908,5 +934,7 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
 
 export default BoardDirectory;
+
+    
 
     

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -186,9 +187,15 @@ const Reports: React.FC = () => {
         const complianceRate = complianceItems.length > 0 ? (complianceItems.filter((v: any) => v).length / complianceItems.length) * 100 : 0;
 
         const risks = complianceData.risks || [];
-        const criticalRisks = risks.filter((r: any) => r.impact * r.probability >= 20).length;
-        const highRisks = risks.filter((r: any) => r.impact * r.probability >= 15 && r.impact * r.probability < 20).length;
-        const mediumRisks = risks.filter((r: any) => r.impact * r.probability >= 5 && r.impact * r.probability < 15).length;
+        
+        const riskCounts = (risks || []).reduce((acc: any, risk: any) => {
+            const score = risk.impact * risk.probability;
+            if (score >= 20) acc.Extreme++;
+            else if (score >= 15) acc.High++;
+            else if (score >= 5) acc.Medium++;
+            else acc.Low++;
+            return acc;
+        }, { Extreme: 0, High: 0, Medium: 0, Low: 0 });
 
         const totalActions = improvementPlanTasks.length; 
         const completedActions = improvementPlanTasks.filter(t => t.status === 'done').length;
@@ -196,7 +203,7 @@ const Reports: React.FC = () => {
         setSummaryData({
             maturity: parseFloat(maturity.toFixed(1)),
             compliance: Math.round(complianceRate),
-            risks: { high: highRisks, medium: mediumRisks, critical: criticalRisks },
+            risks: { high: riskCounts.High, medium: riskCounts.Medium, critical: riskCounts.Extreme },
             actions: totalActions - completedActions
         });
 
@@ -216,15 +223,6 @@ const Reports: React.FC = () => {
         setRadarData(newRadarData as any);
         
         // 3. Risk Distribution
-        const riskCounts = risks.reduce((acc: any, risk: any) => {
-            const score = risk.impact * risk.probability;
-            if (score >= 20) acc.Extreme += 1;
-            else if (score >= 15) acc.High += 1;
-            else if (score >= 5) acc.Medium += 1;
-            else acc.Low += 1;
-            return acc;
-        }, { Extreme: 0, High: 0, Medium: 0, Low: 0 });
-
         setRiskDistributionData([
             { name: t('reports.riskLevels.low'), count: riskCounts.Low, color: '#00E096' },
             { name: t('reports.riskLevels.medium'), count: riskCounts.Medium, color: '#FFD700' },
@@ -740,3 +738,6 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+
+    

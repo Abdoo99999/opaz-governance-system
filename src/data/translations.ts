@@ -99,6 +99,7 @@ export const translations = {
       title: "سجل تشكيل المجالس واللجان",
       subtitle: "عرض وتحليل تشكيلات مجالس الإدارة واللجان التابعة لها",
       addMember: "إضافة عضو جديد",
+      saveSuccessDesc: "تم حفظ بيانات سجل المجلس بنجاح.",
       skillsMatrix: "مصفوفة المهارات والخبرات",
       boardTenure: "الدورة الحالية للمجلس",
       currentTerm: "الدورة الحالية",
@@ -127,7 +128,7 @@ export const translations = {
         date: "تاريخ الاجتماع",
         meetingTitle: "عنوان الاجتماع/المحضر",
         type: "نوع الاجتماع",
-        attendees: "الحاضرون",
+        attendees: "عدد الحاضرين",
         actions: "إجراءات",
         noMinutes: "لا توجد محاضر محفوظة لهذه الشركة.",
         minuteAdded: "تمت إضافة المحضر بنجاح.",
@@ -345,7 +346,7 @@ export const translations = {
       kpi: {
         title: "مؤشرات الأداء",
         dividends: "توزيعات الأرباح المعلنة",
-        roi: "العائد على الاستثمار"
+        roi: "العائد على الاستثمار (ROI)"
       },
       declaration: {
         title: "المرفقات والإقرار",
@@ -643,6 +644,7 @@ export const translations = {
       title: "Board & Committees Directory",
       subtitle: "View and analyze board and committee compositions",
       addMember: "Add New Member",
+      saveSuccessDesc: "Board directory data has been saved successfully.",
       skillsMatrix: "Skills & Expertise Matrix",
       boardTenure: "Current Board Tenure",
       currentTerm: "Current Term",
@@ -1089,3 +1091,5 @@ export const translations = {
     }
   }
 };
+
+    
