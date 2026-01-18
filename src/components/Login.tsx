@@ -21,9 +21,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div 
-        className="relative h-screen w-screen items-center justify-center bg-cover bg-center text-white" 
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1591348122299-4684b5536484?q=80&w=1974&auto=format&fit=crop')" }}
-        data-ai-hint="grand mosque"
+        className="relative h-screen w-screen items-center justify-center bg-login-background bg-cover bg-center text-white" 
         dir={dir}
     >
         <div className="absolute inset-0 bg-black/60" />

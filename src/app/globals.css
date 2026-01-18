@@ -58,6 +58,9 @@
 }
 
 @layer components {
+    .bg-login-background {
+      background-image: url('https://images.unsplash.com/photo-1591348122299-4684b5536484?q=80&w=1974&auto=format&fit=crop');
+    }
     .glass {
         backdrop-filter: blur(12px);
         background-color: rgba(28, 41, 60, 0.4) !important;
