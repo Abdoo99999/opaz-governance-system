@@ -572,27 +572,32 @@ const Dashboard = () => {
 
        {/* Row 3: Highlights & Action */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
               <Card className={"glass h-full"}>
                   <CardHeader>
-                      <CardTitle className="text-gold-400">{t('dashboard.improvementStatus.title')}</CardTitle>
+                      <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
                           <PieChart>
-                              <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} labelLine={false}>
-                                  {(improvementPlanData as any[]).map((entry, index) => (
+                              <Pie 
+                                data={boardIndependenceData} 
+                                dataKey="value" 
+                                nameKey="name" 
+                                cx="50%" 
+                                cy="50%" 
+                                innerRadius={0} 
+                                outerRadius={90} 
+                                paddingAngle={5} 
+                                labelLine={false}
+                                label={renderCustomizedLabel}
+                              >
+                                  {boardIndependenceData.map((entry, index) => (
                                       <Cell key={`cell-${index}`} fill={entry.color} />
                                   ))}
                               </Pie>
-                              <Tooltip {...tooltipStyle}/>
-                              <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
-                              <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
-                                  {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
-                              </text>
-                              <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
-                                {t('reports.actions')}
-                              </text>
+                              <Tooltip {...tooltipStyle} />
+                              <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}}/>
                           </PieChart>
                       </ResponsiveContainer>
                   </CardContent>
@@ -633,32 +638,27 @@ const Dashboard = () => {
 
       {/* Row 5: Operations & Governance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
+                        <CardTitle className="text-gold-400">{t('dashboard.improvementStatus.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
-                                <Pie 
-                                  data={boardIndependenceData} 
-                                  dataKey="value" 
-                                  nameKey="name" 
-                                  cx="50%" 
-                                  cy="50%" 
-                                  innerRadius={0} 
-                                  outerRadius={90} 
-                                  paddingAngle={5} 
-                                  labelLine={false}
-                                  label={renderCustomizedLabel}
-                                >
-                                    {boardIndependenceData.map((entry, index) => (
+                                <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} labelLine={false}>
+                                    {(improvementPlanData as any[]).map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                     ))}
                                 </Pie>
-                                <Tooltip {...tooltipStyle} />
-                                <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}}/>
+                                <Tooltip {...tooltipStyle}/>
+                                <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
+                                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
+                                    {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
+                                </text>
+                                <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
+                                  {t('reports.actions')}
+                                </text>
                             </PieChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -757,9 +757,9 @@ const Dashboard = () => {
                           <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend wrapperStyle={{ color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                          <Line type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#fbbf24" strokeWidth={3} />
-                          <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#34d399" strokeWidth={2} dot={false} />
-                          <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#818cf8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                          <Line type="monotone" dataKey="companyScore" name={t('reports.companyScore')} stroke="#fbbf24" strokeWidth={3} />
+                          <Line type="monotone" dataKey="sectorAverage" name={t('reports.sectorAverage')} stroke="#34d399" strokeWidth={2} dot={false} />
+                          <Line type="monotone" dataKey="target" name={t('dashboard.maturityPath')} stroke="#818cf8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
                       </ComposedChart>
                   </ResponsiveContainer>
               </CardContent>
