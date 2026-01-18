@@ -7,16 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
-import { COMPANIES } from '@/data/companies';
 
-// Mock data
-const topPerformersData = [
-    { name_ar: COMPANIES[0].name_ar, name_en: COMPANIES[0].name_en, score: 98.2 },
-    { name_ar: COMPANIES[2].name_ar, name_en: COMPANIES[2].name_en, score: 95.7 },
-    { name_ar: COMPANIES[4].name_ar, name_en: COMPANIES[4].name_en, score: 92.1 },
-    { name_ar: COMPANIES[1].name_ar, name_en: COMPANIES[1].name_en, score: 89.5 },
-    { name_ar: COMPANIES[3].name_ar, name_en: COMPANIES[3].name_en, score: 88.0 },
-];
+export interface Performer {
+    name_ar: string;
+    name_en: string;
+    score: number; // Expecting a score from 0 to 5
+}
+
+interface TopPerformersProps {
+    data: Performer[];
+}
 
 const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -30,9 +30,9 @@ const itemVariants = {
 
 const RankIcon = ({ rank }: { rank: number }) => {
     const iconProps = { className: "w-8 h-8" };
-    if (rank === 1) return <Trophy {...iconProps} className="text-gold-400" fill="#D4AF37" />;
-    if (rank === 2) return <Medal {...iconProps} className="text-slate-400" fill="#c0c0c0" />;
-    if (rank === 3) return <Award {...iconProps} className="text-orange-400" fill="#cd7f32" />;
+    if (rank === 1) return <Trophy {...iconProps} className="text-gold-400" fill="currentColor" />;
+    if (rank === 2) return <Medal {...iconProps} className="text-slate-400" fill="currentColor" />;
+    if (rank === 3) return <Award {...iconProps} className="text-orange-400" fill="currentColor" />;
     return <span className="font-bold text-lg text-gray-500 w-8 text-center">{rank}</span>;
 };
 
@@ -43,7 +43,7 @@ const getProgressBarClass = (rank: number) => {
     return "[&>div]:bg-blue-500";
 };
 
-const TopPerformers = () => {
+const TopPerformers: React.FC<TopPerformersProps> = ({ data }) => {
     const { t, language } = useLanguage();
 
     return (
@@ -58,8 +58,10 @@ const TopPerformers = () => {
                     initial="hidden"
                     animate="visible"
                 >
-                    {topPerformersData.map((performer, index) => {
+                    {data.map((performer, index) => {
                         const rank = index + 1;
+                        const progressValue = performer.score * 20; // Convert 0-5 score to 0-100 for progress bar
+
                         return (
                             <motion.li
                                 key={performer.name_en}
@@ -82,7 +84,7 @@ const TopPerformers = () => {
                                             {language === 'ar' ? performer.name_ar : performer.name_en}
                                         </h4>
                                         <Progress 
-                                            value={performer.score} 
+                                            value={progressValue} 
                                             className={cn("h-1.5 mt-1", getProgressBarClass(rank))}
                                         />
                                     </div>
