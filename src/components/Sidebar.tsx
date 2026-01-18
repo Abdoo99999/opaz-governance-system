@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Building2, ShieldAlert, LineChart, Kanban, Settings, LogOut, FileText, Send, GitPullRequest, Lock, Users, ClipboardEdit, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,19 +11,20 @@ import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useCompany } from '@/context/CompanyContext';
 import type { SubmissionStatus } from '@/data/companies';
+import { useYear } from '@/context/YearContext';
 
 const allMenuItems = [
   { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard', roles: ['admin'], requiredStatus: 'none' },
   { name: 'registry', icon: Building2, view: 'companies', roles: ['admin', 'company'], requiredStatus: 'profile' },
-  { name: 'board_directory', icon: Users, view: 'board-directory', roles: ['admin', 'company'], requiredStatus: 'none' },
-  { name: 'board_evaluation', icon: ClipboardEdit, view: 'board-evaluation', roles: ['admin', 'company'], requiredStatus: 'none' },
+  { name: 'board_directory', icon: Users, view: 'board-directory', roles: ['admin', 'company'], requiredStatus: 'board' },
+  { name: 'board_evaluation', icon: ClipboardEdit, view: 'board-evaluation', roles: ['admin', 'company'], requiredStatus: 'evaluation' },
   { name: 'assessment', icon: Star, view: 'maturity-assessment', roles: ['admin', 'company'], requiredStatus: 'assessment' },
   { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor', roles: ['admin', 'company'], requiredStatus: 'compliance' },
   { name: 'financials', icon: FileText, view: 'financial-statements', roles: ['admin', 'company'], requiredStatus: 'financials' },
   { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'], requiredStatus: 'improvement' },
   { name: 'review', icon: Send, view: 'review-submit', roles: ['company'], requiredStatus: 'review' },
   { name: 'approvals', icon: GitPullRequest, view: 'approval-requests', roles: ['admin'], requiredStatus: 'none' },
-  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin', 'company'], requiredStatus: 'none' },
+  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin'], requiredStatus: 'none' },
   { name: 'settings', icon: Settings, view: 'settings', roles: ['admin'], requiredStatus: 'none' },
 ];
 
@@ -38,36 +39,105 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLogout, userRole }) => {
   const { t } = useLanguage();
   const { selectedCompanyId, getCompanySubmissionStatus } = useCompany();
+  const { selectedYear } = useYear();
 
-  const completionStatus = userRole === 'company' && selectedCompanyId ? { submissionStatus: getCompanySubmissionStatus(selectedCompanyId) } : null;
+  const [completion, setCompletion] = useState({
+      profile: false, board: false, evaluation: false, assessment: false, compliance: false, financials: false
+  });
+
+  useEffect(() => {
+    if (userRole === 'company' && selectedCompanyId && typeof window !== 'undefined') {
+        const getCompletionStates = () => {
+            const allCompaniesStr = localStorage.getItem('oia_companies_registry');
+            const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
+            const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
+            const profileComplete = !!companyData?.legalForm;
+
+            const boardMembersStr = localStorage.getItem('oia_board_members');
+            const allBoardMembers = boardMembersStr ? JSON.parse(boardMembersStr) : [];
+            const companyMembers = allBoardMembers.filter((m: any) => m.companyId === selectedCompanyId);
+            const boardComplete = companyMembers.length > 0;
+
+            const evaluationStr = localStorage.getItem(`board_evaluation_${selectedCompanyId}_${selectedYear}`);
+            const evaluationData = evaluationStr ? JSON.parse(evaluationStr) : [];
+            const evaluationComplete = evaluationData.length > 0;
+
+            const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+            const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
+            const assessmentComplete = assessmentData.isComplete === true;
+            
+            const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+            const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {} };
+            const complianceComplete = Object.keys(complianceData.compliance || {}).length > 0;
+
+            const financialsComplete = !!companyData?.auditorName;
+
+            setCompletion({
+                profile: profileComplete,
+                board: boardComplete,
+                evaluation: evaluationComplete,
+                assessment: assessmentComplete,
+                compliance: complianceComplete,
+                financials: financialsComplete,
+            });
+        };
+        getCompletionStates();
+    }
+  }, [selectedCompanyId, userRole, currentView, selectedYear]);
+
+  const submissionStatus = userRole === 'company' && selectedCompanyId 
+      ? getCompanySubmissionStatus(selectedCompanyId) 
+      : 'draft';
 
   const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
   
   const pendingApprovals = 3; 
 
   const isMenuItemDisabled = (item: (typeof menuItems)[0]) => {
-      if (userRole !== 'company' || !completionStatus) return false;
+      if (userRole !== 'company') return false;
       
-      const { submissionStatus } = completionStatus;
-
-      // Logic for submitted/approved state
+      // Logic for submitted/approved state (highest priority)
       if (submissionStatus === 'submitted' || submissionStatus === 'approved') {
-          const allowedViews = ['improvement-plan', 'review-submit'];
-          if (submissionStatus === 'approved') {
-              allowedViews.push('reports');
+          const allowedViews = ['review-submit', 'improvement-plan'];
+           if (submissionStatus === 'approved') {
+              allowedViews.push('reports'); // This won't be in sidebar, but logic is sound for navigation
           }
           return !allowedViews.includes(item.view);
       }
 
-      // If status is 'draft' or 'returned', nothing is disabled.
-      return false;
+      // Logic for sequential unlocking (if draft or returned)
+      switch(item.view) {
+          case 'companies': return false;
+          case 'board-directory': return !completion.profile;
+          case 'board-evaluation': return !completion.profile || !completion.board;
+          case 'maturity-assessment': return !completion.profile || !completion.board || !completion.evaluation;
+          case 'compliance-monitor': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment;
+          case 'financial-statements': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment || !completion.compliance;
+          case 'improvement-plan': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment;
+          case 'review-submit': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment || !completion.compliance || !completion.financials;
+          default: return false;
+      }
   };
   
   const getDisabledTooltip = (item: (typeof menuItems)[0]): string => {
        if (isMenuItemDisabled(item)) {
-           if (completionStatus?.submissionStatus === 'submitted' || completionStatus?.submissionStatus === 'approved') {
+           if (submissionStatus === 'submitted' || submissionStatus === 'approved') {
                return "البيانات قيد المراجعة، هذه الصفحة مقفلة حالياً.";
            }
+            
+            let requiredStep = '';
+            switch (item.view) {
+                case 'board-directory': requiredStep = t('menu.company_profile'); break;
+                case 'board-evaluation': requiredStep = t('menu.board_directory'); break;
+                case 'maturity-assessment': requiredStep = t('menu.board_evaluation'); break;
+                case 'compliance-monitor': requiredStep = t('menu.assessment'); break;
+                case 'financial-statements': requiredStep = t('menu.compliance'); break;
+                case 'improvement-plan': requiredStep = t('menu.assessment'); break;
+                case 'review-submit': requiredStep = t('menu.financials'); break;
+            }
+            if (requiredStep) {
+                return `يجب إكمال وحفظ بيانات '${requiredStep}' أولاً.`;
+            }
        }
        return '';
   };
@@ -127,7 +197,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                         <TooltipTrigger asChild>
                             {menuItemContent}
                         </TooltipTrigger>
-                        {(isOpen && isDisabled && tooltipContent) || (!isOpen && tooltipContent) ? (
+                        {( (isOpen && isDisabled) || (!isOpen) ) && tooltipContent ? (
                             <TooltipContent side="left" className="glass text-white">
                                 <p>{tooltipContent}</p>
                             </TooltipContent>
