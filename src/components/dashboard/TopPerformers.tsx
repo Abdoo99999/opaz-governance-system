@@ -37,9 +37,9 @@ const RankIcon = ({ rank }: { rank: number }) => {
 };
 
 const getProgressBarClass = (rank: number) => {
-    if (rank === 1) return "[&>div]:bg-gradient-to-r [&>div]:from-gold-400 [&>div]:to-gold-500";
-    if (rank === 2) return "[&>div]:bg-gradient-to-r [&>div]:from-cyan-400 [&>div]:to-cyan-500";
-    if (rank === 3) return "[&>div]:bg-gradient-to-r [&>div]:from-orange-400 [&>div]:to-orange-500";
+    if (rank === 1) return "[&>div]:bg-gold-500";
+    if (rank === 2) return "[&>div]:bg-cyan-400";
+    if (rank === 3) return "[&>div]:bg-orange-600";
     return "[&>div]:bg-blue-500";
 };
 
@@ -65,8 +65,14 @@ const TopPerformers = () => {
                                 key={performer.name_en}
                                 variants={itemVariants}
                                 className={cn(
-                                    "p-3 rounded-lg transition-all",
-                                    rank === 1 ? 'bg-yellow-500/10 border border-yellow-500/20 shadow-lg shadow-yellow-500/5' : 'bg-black/20'
+                                    "p-3 rounded-r-lg transition-all",
+                                    rank === 1
+                                        ? 'bg-gradient-to-r from-yellow-500/20 to-transparent border-l-4 border-yellow-500'
+                                        : rank === 2
+                                        ? 'bg-black/20 border-l-4 border-gray-400'
+                                        : rank === 3
+                                        ? 'bg-black/20 border-l-4 border-orange-600'
+                                        : 'bg-black/20 border-l-4 border-transparent'
                                 )}
                             >
                                 <div className="flex items-center gap-4">

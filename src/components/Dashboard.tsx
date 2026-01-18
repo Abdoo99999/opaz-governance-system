@@ -677,8 +677,8 @@ const Dashboard = () => {
                           >
                               <defs>
                                   <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="5%" stopColor="#E5C565" stopOpacity={0.8}/>
-                                      <stop offset="95%" stopColor="#E5C565" stopOpacity={0}/>
+                                      <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.8}/>
+                                      <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
                                   </linearGradient>
                               </defs>
                               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
@@ -686,9 +686,9 @@ const Dashboard = () => {
                               <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
                               <Tooltip content={<CustomTooltip />} />
                               <Legend wrapperStyle={{ color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                              <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                              <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#8884d8" strokeWidth={2} dot={false} />
-                              <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                              <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                              <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#34d399" strokeWidth={2} dot={false} />
+                              <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#818cf8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
                           </ComposedChart>
                       </ResponsiveContainer>
                   </CardContent>
