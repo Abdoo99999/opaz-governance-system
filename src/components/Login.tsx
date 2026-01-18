@@ -20,35 +20,42 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [selectedCompany, setSelectedCompany] = useState<string | undefined>(undefined);
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center bg-royal-900 text-white" dir={dir}>
-        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
-        <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="w-full max-w-lg z-10"
-        >
-            <Card className="glass">
-                <CardHeader className="text-center pb-6 pt-8">
-                    <CardTitle className="text-4xl font-bold text-gold-400">{t('appTitle')}</CardTitle>
-                    <p className="text-gray-300 text-md pt-2">{t('appSubtitle')}</p>
-                </CardHeader>
-                <CardContent>
-                    <Tabs defaultValue="admin" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 bg-royal-900/50">
-                            <TabsTrigger value="admin">{t('common.admin')}</TabsTrigger>
-                            <TabsTrigger value="company">{t('common.company')}</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="admin">
-                            {renderLoginForm('admin')}
-                        </TabsContent>
-                        <TabsContent value="company">
-                            {renderLoginForm('company')}
-                        </TabsContent>
-                    </Tabs>
-                </CardContent>
-            </Card>
-        </motion.div>
+    <div 
+        className="relative h-screen w-screen items-center justify-center bg-cover bg-center text-white" 
+        style={{ backgroundImage: "url('https://picsum.photos/seed/muscat-arch/1920/1080')" }}
+        data-ai-hint="oman architecture"
+        dir={dir}
+    >
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="relative z-10 flex h-full w-full items-center justify-center">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="w-full max-w-lg"
+            >
+                <Card className="glass">
+                    <CardHeader className="text-center pb-6 pt-8">
+                        <CardTitle className="text-4xl font-bold text-gold-400">{t('appTitle')}</CardTitle>
+                        <p className="text-gray-300 text-md pt-2">{t('appSubtitle')}</p>
+                    </CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="admin" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 bg-royal-900/50">
+                                <TabsTrigger value="admin">{t('common.admin')}</TabsTrigger>
+                                <TabsTrigger value="company">{t('common.company')}</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="admin">
+                                {renderLoginForm('admin')}
+                            </TabsContent>
+                            <TabsContent value="company">
+                                {renderLoginForm('company')}
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                </Card>
+            </motion.div>
+        </div>
     </div>
   );
 
@@ -63,7 +70,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
     
     return (
-        <form onSubmit={role === 'company' ? handleCompanyLogin : (e) => { e.preventDefault(); onLogin(role); }} className="space-y-6 pt-6">
+        <form onSubmit={role === 'company' ? handleCompanyLogin : (e) => { e.preventDefault(); onLogin(role); }} className="space-y-6 pt-6" dir="rtl">
             {role === 'company' && (
                 <div className="space-y-2">
                     <label htmlFor="companySelect" className="block text-right px-1">{t('companyForm.identity.companyName')}</label>

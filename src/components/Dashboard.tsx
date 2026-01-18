@@ -1,8 +1,11 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { format } from 'date-fns';
 import {
   Area,
   AreaChart,
@@ -28,7 +31,8 @@ import {
   YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon, Wallet, BarChart2, Briefcase, FileText } from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon, Wallet, BarChart2, Briefcase, FileText, FileDown, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { INDICATORS, AXES } from '@/lib/data/indicators';
@@ -55,7 +59,7 @@ const cardVariants = {
   }),
 };
 
-const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl";
+const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl print:shadow-none print:border-gray-200 print:bg-white";
 
 const RADIAN = Math.PI / 180;
 const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
@@ -66,7 +70,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   if (percent === 0) return null;
 
   return (
-    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="font-bold drop-shadow-md">
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="font-bold drop-shadow-md print:fill-black">
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   );
@@ -76,6 +80,8 @@ const Dashboard = () => {
   const { t, language } = useLanguage();
   const { getSelectedCompany, selectedCompanyId } = useCompany();
   const { selectedYear } = useYear();
+  const dashboardRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // State for all dashboard data
   const [maturityScore, setMaturityScore] = useState(0);
@@ -374,6 +380,55 @@ const Dashboard = () => {
     return t('menu.dashboard');
   }, [selectedCompany, language, t]);
   
+    const handleExport = async () => {
+        if (!dashboardRef.current) return;
+        setIsExporting(true);
+
+        try {
+            const canvas = await html2canvas(dashboardRef.current, {
+                scale: 2, 
+                useCORS: true, 
+                backgroundColor: '#001220',
+                logging: false,
+                onclone: (documentClone) => {
+                    const allElements = documentClone.querySelectorAll('*');
+                    allElements.forEach((el: any) => {
+                        el.style.fontFamily = 'Arial, sans-serif'; 
+                        el.style.letterSpacing = '0px';
+                    });
+                    const svgTexts = documentClone.querySelectorAll('text');
+                    svgTexts.forEach((el: any) => {
+                        el.style.fontFamily = 'Arial, sans-serif';
+                        el.style.direction = 'rtl';
+                        el.style.unicodeBidi = 'embed';
+                    });
+                }
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            
+            const pdfWidth = canvas.width * 0.264583; 
+            const pdfHeight = canvas.height * 0.264583;
+
+            const pdf = new jsPDF({
+                orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+                unit: 'mm',
+                format: [pdfWidth, pdfHeight]
+            });
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            
+            const filename = `OIA-Executive-Dashboard-${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : 'Overall'}-${selectedYear}.pdf`;
+            pdf.save(filename);
+            
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert("حدث خطأ أثناء تصدير التقرير، يرجى المحاولة مرة أخرى.");
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -412,9 +467,22 @@ const Dashboard = () => {
         : 0;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 text-white space-y-8">
-       <header className="flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-8 text-white space-y-8" ref={dashboardRef}>
+       {/* For Print Header */}
+        <div className="hidden print:block text-center mb-8">
+            <h1 className="text-3xl font-bold text-black print-text-black">{t('appTitle')}</h1>
+            <h2 className="text-xl font-semibold text-gray-700 print-text-black">{dashboardTitle}</h2>
+            <p className="text-gray-500 mt-2 print-text-black">
+                {format(new Date(), "d MMMM yyyy")}
+            </p>
+        </div>
+
+       <header className="flex items-center justify-between print:hidden">
           <h1 className="text-3xl font-bold">{dashboardTitle}</h1>
+           <Button onClick={handleExport} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isExporting}>
+                {isExporting ? <Loader2 className="ml-2 h-5 w-5 animate-spin" /> : <FileDown className="ml-2 h-5 w-5" />}
+                {isExporting ? t('common.loading') : t('reports.export')}
+            </Button>
       </header>
 
       {/* Row 1 & 2 : KPIs Row */}
@@ -422,26 +490,26 @@ const Dashboard = () => {
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0}>
               <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-gold-200/80">{t('dashboard.maturityGauge')}</CardTitle>
+                      <CardTitle className="text-sm font-medium text-gold-200/80 print-text-black">{t('dashboard.maturityGauge')}</CardTitle>
                       <TrendingUp className="h-4 w-4 text-gold-300/70" />
                   </CardHeader>
                   <CardContent>
-                      <div className="text-4xl font-bold text-gold-400">{maturityScore.toFixed(1)} / 5</div>
-                      <p className="text-xs text-gold-200/60 mt-1">{t('dashboard.overallScore')}</p>
+                      <div className="text-4xl font-bold text-gold-400 print-text-black">{maturityScore.toFixed(1)} / 5</div>
+                      <p className="text-xs text-gold-200/60 print-text-black mt-1">{t('dashboard.overallScore')}</p>
                   </CardContent>
               </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
               <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70 relative overflow-hidden")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10">
-                      <CardTitle className="text-sm font-medium text-green-200/80">{t('dashboard.portfolioHealth')}</CardTitle>
+                      <CardTitle className="text-sm font-medium text-green-200/80 print-text-black">{t('dashboard.portfolioHealth')}</CardTitle>
                       <CheckCircle className="h-4 w-4 text-green-300/70" />
                   </CardHeader>
                   <CardContent className="z-10">
-                      <div className="text-4xl font-bold text-green-400">{currencyFormatter(totalAssets)}</div>
-                      <p className="text-xs text-green-200/60 mt-1">{t('dashboard.totalAssets')}</p>
+                      <div className="text-4xl font-bold text-green-400 print-text-black">{currencyFormatter(totalAssets)}</div>
+                      <p className="text-xs text-green-200/60 print-text-black mt-1">{t('dashboard.totalAssets')}</p>
                   </CardContent>
-                  <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-20">
+                  <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-20 print:hidden">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={sparklineData}>
                             <defs>
@@ -459,7 +527,7 @@ const Dashboard = () => {
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
              <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-blue-200/80">{t('dashboard.omanization')}</CardTitle>
+                      <CardTitle className="text-sm font-medium text-blue-200/80 print-text-black">{t('dashboard.omanization')}</CardTitle>
                        <Users className="h-4 w-4 text-blue-300/70" />
                   </CardHeader>
                   <CardContent className="h-[100px] flex items-center justify-center">
@@ -476,11 +544,11 @@ const Dashboard = () => {
                                     endAngle={-270}
                                 >
                                     <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-                                    <RadialBar background={{ fill: 'rgba(255,255,255,0.1)'}} dataKey='value' cornerRadius={4} className="fill-blue-500" />
+                                    <RadialBar background={{ fill: 'rgba(255,255,255,0.1)'}} dataKey='value' cornerRadius={4} className="fill-blue-500 print:fill-blue-500" />
                                 </RadialBarChart>
                             </ResponsiveContainer>
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-2xl font-bold text-blue-300">{omanizationRate}%</span>
+                                <span className="text-2xl font-bold text-blue-300 print-text-black">{omanizationRate}%</span>
                             </div>
                         </div>
                   </CardContent>
@@ -489,18 +557,18 @@ const Dashboard = () => {
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
               <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-red-200/80">{t('dashboard.riskMap')}</CardTitle>
+                      <CardTitle className="text-sm font-medium text-red-200/80 print-text-black">{t('dashboard.riskMap')}</CardTitle>
                       <AlertTriangle className="h-4 w-4 text-red-300/70" />
                   </CardHeader>
                   <CardContent>
                       <div className="flex items-center gap-2">
                         <span className="relative flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 print:hidden"></span>
                             <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                         </span>
-                        <div className="text-4xl font-bold text-red-400">{risks.length}</div>
+                        <div className="text-4xl font-bold text-red-400 print-text-black">{risks.length}</div>
                       </div>
-                      <p className="text-xs text-red-200/60 mt-1">{t('dashboard.activeRisks')}</p>
+                      <p className="text-xs text-red-200/60 print-text-black mt-1">{t('dashboard.activeRisks')}</p>
                   </CardContent>
               </Card>
           </motion.div>
@@ -508,48 +576,48 @@ const Dashboard = () => {
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
             <Card className={cn(cardBaseClasses, "border-purple-500/30 hover:border-purple-500/70")}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-purple-200/80">{t('dashboard.financial.freeCashFlow')}</CardTitle>
+                    <CardTitle className="text-sm font-medium text-purple-200/80 print-text-black">{t('dashboard.financial.freeCashFlow')}</CardTitle>
                     <Wallet className="h-4 w-4 text-purple-300/70" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-4xl font-bold text-purple-400">{currencyFormatter(freeCashFlow)}</div>
-                    <p className="text-xs text-purple-200/60 mt-1">{t('financials.cashflow.fcf')}</p>
+                    <div className="text-4xl font-bold text-purple-400 print-text-black">{currencyFormatter(freeCashFlow)}</div>
+                    <p className="text-xs text-purple-200/60 print-text-black mt-1">{t('financials.cashflow.fcf')}</p>
                 </CardContent>
             </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
             <Card className={cn(cardBaseClasses, "border-sky-500/30 hover:border-sky-500/70")}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-sky-200/80">{t('dashboard.financial.equity')}</CardTitle>
+                    <CardTitle className="text-sm font-medium text-sky-200/80 print-text-black">{t('dashboard.financial.equity')}</CardTitle>
                     <Briefcase className="h-4 w-4 text-sky-300/70" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-4xl font-bold text-sky-400">{currencyFormatter(equity)}</div>
-                    <p className="text-xs text-sky-200/60 mt-1">{t('financials.position.equity')}</p>
+                    <div className="text-4xl font-bold text-sky-400 print-text-black">{currencyFormatter(equity)}</div>
+                    <p className="text-xs text-sky-200/60 print-text-black mt-1">{t('financials.position.equity')}</p>
                 </CardContent>
             </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
             <Card className={cn(cardBaseClasses, "border-teal-500/30 hover:border-teal-500/70")}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-teal-200/80">{t('dashboard.financial.netProfit')}</CardTitle>
+                    <CardTitle className="text-sm font-medium text-teal-200/80 print-text-black">{t('dashboard.financial.netProfit')}</CardTitle>
                     <BarChart2 className="h-4 w-4 text-teal-300/70" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-4xl font-bold text-teal-400">{currencyFormatter(netProfit)}</div>
-                    <p className="text-xs text-teal-200/60 mt-1">{t('financials.performance.netProfit')}</p>
+                    <div className="text-4xl font-bold text-teal-400 print-text-black">{currencyFormatter(netProfit)}</div>
+                    <p className="text-xs text-teal-200/60 print-text-black mt-1">{t('financials.performance.netProfit')}</p>
                 </CardContent>
             </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
             <Card className={cn(cardBaseClasses, "border-amber-500/30 hover:border-amber-500/70")}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-amber-200/80">{t('dashboard.financial.roi')}</CardTitle>
+                    <CardTitle className="text-sm font-medium text-amber-200/80 print-text-black">{t('dashboard.financial.roi')}</CardTitle>
                     <FileText className="h-4 w-4 text-amber-300/70" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-4xl font-bold text-amber-400">{lastROI.toFixed(1)}%</div>
-                    <p className="text-xs text-amber-200/60 mt-1">{t('financials.kpi.roi')}</p>
+                    <div className="text-4xl font-bold text-amber-400 print-text-black">{lastROI.toFixed(1)}%</div>
+                    <p className="text-xs text-amber-200/60 print-text-black mt-1">{t('financials.kpi.roi')}</p>
                 </CardContent>
             </Card>
           </motion.div>
@@ -560,7 +628,7 @@ const Dashboard = () => {
        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9} className="lg:col-span-3">
         <Card className={"glass h-full"}>
           <CardHeader>
-            <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
+            <CardTitle className="text-gold-400 print-text-black">{t('dashboard.strategicRadar')}</CardTitle>
           </CardHeader>
           <CardContent className="h-[450px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -589,7 +657,7 @@ const Dashboard = () => {
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
+                        <CardTitle className="text-gold-400 print-text-black">{t('dashboard.boardComposition.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={250}>
@@ -600,7 +668,7 @@ const Dashboard = () => {
                                     ))}
                                 </Pie>
                                 <Tooltip {...tooltipStyle}/>
-                                <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
+                                <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} className="print-text-black"/>
                             </PieChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -617,14 +685,14 @@ const Dashboard = () => {
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
+                        <CardTitle className="text-gold-400 print-text-black">{t('dashboard.icv.title')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-8 pt-6">
                         <ResponsiveContainer width="100%" height={250}>
                             <BarChart data={icvBarData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                                <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} />
-                                <YAxis tickFormatter={(value) => `${value / 1_000_000}M`} tick={{ fill: '#A0A0A0' }} />
+                                <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} className="print-text-black"/>
+                                <YAxis tickFormatter={(value) => `${value / 1_000_000}M`} tick={{ fill: '#A0A0A0' }} className="print-text-black"/>
                                 <Tooltip {...tooltipStyle} formatter={currencyFormatter} />
                                 <Bar dataKey="value" name={t('dashboard.icv.spending')} barSize={40} radius={[4, 4, 0, 0]}>
                                     {(icvBarData as any[]).map((entry, index) => {
@@ -640,7 +708,7 @@ const Dashboard = () => {
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
               <Card className={"glass h-full"}>
                   <CardHeader>
-                      <CardTitle className="text-gold-400">{t('dashboard.improvementStatus.title')}</CardTitle>
+                      <CardTitle className="text-gold-400 print-text-black">{t('dashboard.improvementStatus.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -661,11 +729,11 @@ const Dashboard = () => {
                                   ))}
                               </Pie>
                               <Tooltip {...tooltipStyle} />
-                              <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}}/>
-                               <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
+                              <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}} className="print-text-black"/>
+                               <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold print:fill-black">
                                     {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
                                 </text>
-                                <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
+                                <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm print:fill-gray-600">
                                   {t('reports.actions')}
                                 </text>
                           </PieChart>
@@ -680,7 +748,7 @@ const Dashboard = () => {
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-gold-400">
+                    <CardTitle className="flex items-center gap-2 text-gold-400 print-text-black">
                         <AlertTriangle />
                          {t('dashboard.riskMap')}
                     </CardTitle>
@@ -693,7 +761,7 @@ const Dashboard = () => {
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-gold-400">
+                    <CardTitle className="flex items-center gap-2 text-gold-400 print-text-black">
                         <PieChartIcon />
                         {t('dashboard.compliance')}
                     </CardTitle>
@@ -706,7 +774,7 @@ const Dashboard = () => {
                                     <Cell key="non-compliant" fill="#FF3B3B" />
                                 </Pie>
                                  <Tooltip {...tooltipStyle} />
-                                <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}}/>
+                                <Legend iconType="circle" wrapperStyle={{fontSize: '14px', color: 'white'}} className="print-text-black"/>
                                  <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold print:fill-black">
                                     {`${compliancePercentage}%`}
                                 </text>
@@ -721,7 +789,7 @@ const Dashboard = () => {
       <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={12}>
           <Card className={"glass h-full"}>
               <CardHeader>
-                  <CardTitle className="text-gold-400 flex items-center gap-2">
+                  <CardTitle className="text-gold-400 flex items-center gap-2 print-text-black">
                       <Target />
                       {t('dashboard.maturityPath')}
                   </CardTitle>
@@ -739,10 +807,10 @@ const Dashboard = () => {
                               </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                          <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
-                          <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
+                          <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} className="print-text-black"/>
+                          <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} className="print-text-black"/>
                           <Tooltip content={<CustomTooltip />} />
-                          <Legend wrapperStyle={{ color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
+                          <Legend wrapperStyle={{ color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" className="print-text-black"/>
                           <Line type="monotone" dataKey="companyScore" name={t('reports.companyScore')} stroke="#fbbf24" strokeWidth={3} dot={{r: 4}} />
                           <Line type="monotone" dataKey="sectorAverage" name={t('reports.sectorAverage')} stroke="#34d399" strokeWidth={2} dot={false} />
                           <Line type="monotone" dataKey="target" name={t('dashboard.maturityPath')} stroke="#818cf8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
