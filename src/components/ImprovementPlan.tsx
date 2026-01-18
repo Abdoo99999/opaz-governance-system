@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -71,7 +72,6 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
         const buttonClasses = "border-gray-600 text-gray-300 hover:bg-gold-500 hover:text-black hover:border-gold-500";
         return (
             <div className="flex justify-end items-center gap-2 w-full">
-                {/* --- FIX: ADDED TODO BUTTON FOR ADMIN --- */}
                 {task.status === 'todo' && (
                     <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
                         {t('improvement.start')} <ArrowRight className="ml-1 h-4 w-4" />
@@ -79,9 +79,14 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
                 )}
                 
                 {task.status === 'in-progress' && (
-                    <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'todo'); }}>
-                        <ArrowLeft className="mr-1 h-4 w-4" /> {t('improvement.return')}
-                    </Button>
+                    <>
+                        <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'todo'); }}>
+                            <ArrowLeft className="mr-1 h-4 w-4" /> {t('improvement.return')}
+                        </Button>
+                        <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'done'); }}>
+                            {t('improvement.finish')} <Check className="ml-1 h-4 w-4" />
+                        </Button>
+                    </>
                 )}
                 {task.status === 'done' && (
                     <Button variant="outline" size="sm" className={buttonClasses} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
@@ -576,3 +581,5 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
+
+    

@@ -35,10 +35,11 @@ import { INDICATORS, AXES } from '@/lib/data/indicators';
 import RiskLandscape from './dashboard/RiskLandscape';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
-import TopPerformers, { Performer } from './dashboard/TopPerformers';
+import TopPerformers from './dashboard/TopPerformers';
 import type { Task } from '@/components/ImprovementPlan';
 import { COMPANIES } from '@/data/companies';
 import { BOARD_MEMBERS } from '@/data/board-members';
+import { RadarCustomTick } from './Reports';
 
 
 const cardVariants = {
@@ -71,77 +72,6 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   );
 };
 
-
-const RadarCustomTick = (props: any) => {
-    const { payload, x, y, textAnchor, index } = props;
-    const value = payload.value;
-    const wordWrapThreshold = 12;
-
-    // Manual adjustments for position
-    let newX = x;
-    let newY = y;
-    const offset = 30; // 30px offset
-
-    const angle = (360 / AXES.length) * index;
-    
-    if (angle === 0) newY -= offset; // Top
-    else if (angle === 180) newY += offset; // Bottom
-    else if (angle > 0 && angle < 180) newX += offset; // Right side
-    else newX -= offset; // Left side
-    
-    // Fine-tune Y for corners
-    if (angle > 0 && angle < 90) newY += offset / 3;
-    if (angle > 90 && angle < 180) newY -= offset / 4;
-    if (angle > 180 && angle < 270) newY -= offset / 4;
-    if (angle > 270 && angle < 360) newY += offset / 3;
-    
-    if (value && value.length > wordWrapThreshold) {
-        const words = value.split(' ');
-        const lines = words.reduce((acc: string[], word: string) => {
-            if (acc.length === 0) {
-                acc.push(word);
-            } else {
-                const lastLine = acc[acc.length - 1];
-                if (lastLine.length + word.length + 1 > wordWrapThreshold) {
-                    acc.push(word);
-                } else {
-                    acc[acc.length - 1] = `${lastLine} ${word}`;
-                }
-            }
-            return acc;
-        }, []);
-
-        return (
-            <g transform={`translate(${newX}, ${newY})`}>
-                <text
-                    textAnchor={textAnchor}
-                    fill="#fff"
-                    fontSize="12px"
-                    className="print:fill-black"
-                >
-                    {lines.map((line, i) => (
-                        <tspan key={i} x={0} dy={i === 0 ? 0 : '1.2em'}>{line}</tspan>
-                    ))}
-                </text>
-            </g>
-        );
-    }
-
-    return (
-        <text
-            x={newX}
-            y={newY}
-            textAnchor={textAnchor}
-            fill="#fff"
-            fontSize="12px"
-            className="print:fill-black"
-        >
-            {value}
-        </text>
-    );
-};
-
-
 const Dashboard = () => {
   const { t, language } = useLanguage();
   const { getSelectedCompany, selectedCompanyId } = useCompany();
@@ -156,7 +86,7 @@ const Dashboard = () => {
   const [equity, setEquity] = useState(0);
   const [freeCashFlow, setFreeCashFlow] = useState(0);
   const [lastROI, setLastROI] = useState(0);
-  const [topPerformers, setTopPerformers] = useState<Performer[]>([]);
+  const [topPerformers, setTopPerformers] = useState<any[]>([]);
   const [improvementPlanData, setImprovementPlanData] = useState([]);
   const [boardIndependenceData, setBoardIndependenceData] = useState([]);
   const [radarData, setRadarData] = useState([]);
@@ -168,13 +98,22 @@ const Dashboard = () => {
   
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    let currentMaturityScore = 0;
+    
+    // --- Central Data Loading ---
     const allCompaniesStr = localStorage.getItem('oia_companies_registry');
     const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : COMPANIES;
+    
+    let maturityScoreVal = 0, totalAssetsVal = 0, omanizationRateVal = 0;
+    let netProfitVal = 0, equityVal = 0, freeCashFlowVal = 0, lastROIVal = 0;
+    let risksArr: any[] = [];
+    let allImprovementTasks: Task[] = [];
+    let boardMembersArr = [];
+    let icvData = { total: 0, local: 0, sme: 0 };
+    let complianceItemsArr: boolean[] = [];
+
+    // --- Sector Average Calculation (Always needed for Radar) ---
     let sectorScoresByAxis: { [key: number]: number[] } = {};
     AXES.forEach(a => sectorScoresByAxis[a.id] = []);
-
     allCompanies.forEach((comp: any) => {
          const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
          if (compAssessmentStr) {
@@ -184,7 +123,7 @@ const Dashboard = () => {
                 if(axisIndicators.length === 0) return;
                 const axisScores = axisIndicators.map(ind => compAssessmentData.scores?.[ind.id] || 0);
                 const axisSum = axisScores.reduce((a, b) => a + b, 0);
-                const axisAvg = axisSum / (axisIndicators.length * 5); // Score is out of 5
+                const axisAvg = axisSum / (axisIndicators.length * 5);
                 sectorScoresByAxis[axis.id].push(axisAvg);
              });
          }
@@ -192,14 +131,13 @@ const Dashboard = () => {
     const sectorAverageByAxis = AXES.map(axis => {
         const avgs = sectorScoresByAxis[axis.id] || [];
         const total = avgs.length > 0 ? avgs.reduce((a, b) => a + b, 0) / avgs.length : 0;
-        return total * 150; // Scale to 150 for radar
+        return total * 150;
     });
-
 
     if (selectedCompanyId && selectedCompanyId !== 'all') {
         const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
         if (!companyData) return;
-        
+
         const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {} };
 
@@ -207,70 +145,47 @@ const Dashboard = () => {
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
         
         const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
-        const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
+        allImprovementTasks = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
+        
+        boardMembersArr = BOARD_MEMBERS.filter(m => m.companyId === selectedCompanyId);
+        risksArr = complianceData.risks || [];
+        complianceItemsArr = Object.values(complianceData.compliance || {});
 
         const scores = Object.values(assessmentData.scores || {}) as number[];
-        const totalScore = scores.reduce((sum, score) => sum + score, 0);
-        currentMaturityScore = scores.length > 0 ? totalScore / INDICATORS.length : 0;
-        setMaturityScore(currentMaturityScore);
-
-        setTotalAssets(companyData.authorizedCapital || 0);
-        setOmanizationRate(companyData.totalEmployees > 0 ? Math.round((companyData.omaniEmployees / companyData.totalEmployees) * 100) : 0);
-        setRisks(complianceData?.risks || []);
-
-        setNetProfit((companyData.revenue || 0) - (companyData.expenses || 0));
-        setEquity((companyData.authorizedCapital || 0) - (companyData.liabilities || 0));
-        setFreeCashFlow((companyData.operatingCash || 0) - (companyData.capex || 0));
-        setLastROI(companyData.lastROI || 0);
-
-        const todo = improvementPlanTasks.filter(t => t.status === 'todo').length;
-        const inProgress = improvementPlanTasks.filter(t => t.status === 'in-progress').length;
-        const completed = improvementPlanTasks.filter(t => t.status === 'done').length;
-        setImprovementPlanData([
-            { name: t('reports.improvement.completed'), value: completed, color: '#00E096' },
-            { name: t('reports.improvement.inProgress'), value: inProgress, color: '#FFD700' },
-            { name: t('reports.improvement.notStarted'), value: todo, color: '#6b7280' },
-        ] as any);
-
-        const members = BOARD_MEMBERS.filter(m => m.companyId === selectedCompanyId);
-        const independentCount = members.filter(m => m.type === 'Independent').length;
-        setBoardIndependenceData([
-            { name: t('dashboard.boardComposition.independent'), value: independentCount, color: '#D4AF37' },
-            { name: t('dashboard.boardComposition.nonIndependent'), value: members.length - independentCount, color: '#3b82f6' },
-        ] as any);
+        maturityScoreVal = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / INDICATORS.length : 0;
         
+        totalAssetsVal = companyData.authorizedCapital || 0;
+        omanizationRateVal = companyData.totalEmployees > 0 ? Math.round((companyData.omaniEmployees / companyData.totalEmployees) * 100) : 0;
+        netProfitVal = (companyData.revenue || 0) - (companyData.expenses || 0);
+        equityVal = (companyData.authorizedCapital || 0) - (companyData.liabilities || 0);
+        freeCashFlowVal = (companyData.operatingCash || 0) - (companyData.capex || 0);
+        lastROIVal = companyData.lastROI || 0;
+        
+        icvData = {
+          total: companyData.totalSpending || 0,
+          local: companyData.localSpending || 0,
+          sme: companyData.smeSpending || 0
+        };
+
         const newRadarData = AXES.map((axis, index) => {
             const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
+            if (axisIndicators.length === 0) {
+                 return { subject: language === 'ar' ? axis.title_ar : axis.title_en, company: 0, sector: sectorAverageByAxis[index], fullMark: 150 };
+            }
             const companyAxisScores = axisIndicators.map(ind => assessmentData.scores?.[ind.id] || 0);
             const companyAxisSum = companyAxisScores.reduce((a, b) => a + b, 0);
-            const companyValue = axisIndicators.length > 0 ? (companyAxisSum / (axisIndicators.length * 5)) * 150 : 0;
+            const companyValue = (companyAxisSum / (axisIndicators.length * 5)) * 150;
             
             return { subject: language === 'ar' ? axis.title_ar : axis.title_en, company: companyValue, sector: sectorAverageByAxis[index], fullMark: 150 };
         });
         setRadarData(newRadarData as any);
-        
-        setIcvBarData([
-            { name: t('dashboard.icv.totalTenders'), value: companyData.totalSpending || 0 },
-            { name: t('dashboard.icv.localSpending'), value: companyData.localSpending || 0 },
-            { name: t('dashboard.icv.smeSpending'), value: companyData.smeSpending || 0 },
-        ] as any);
 
-        const complianceItems = Object.values(complianceData.compliance || {});
-        setCompliancePieData([
-          { name: t('dashboard.compliant'), value: complianceItems.filter(v => v === true).length },
-          { name: t('dashboard.nonCompliant'), value: complianceItems.filter(v => v === false).length },
-        ] as any);
-
-    } else { // "All Companies" selected
-        let totalMaturity = 0, totalOmanization = 0, totalCompliant = 0;
-        let totalAssetsAgg = 0, totalNetProfitAgg = 0, totalEquityAgg = 0, totalFreeCashFlowAgg = 0, totalROIAgg = 0;
+    } else { // "All Companies" Aggregate Logic
+        let totalMaturityAgg = 0, totalOmanizationAgg = 0, totalAssetsAgg = 0, totalNetProfitAgg = 0, totalEquityAgg = 0, totalFreeCashFlowAgg = 0, totalROIAgg = 0;
         let allRisksAgg: any[] = [];
-        let allImprovementTasksAgg: Task[] = [];
-        let allMembersCount = 0, allIndependentCount = 0;
-        let totalSpendingAgg = 0, totalLocalSpendingAgg = 0, totalSmeSpendingAgg = 0;
-        let allCompanyScores: Performer[] = [];
-        let totalComplianceItemsCount = 0;
-
+        let allCompanyScores: any[] = [];
+        let totalSpendingAgg = 0, localSpendingAgg = 0, smeSpendingAgg = 0;
+        
         allCompanies.forEach((comp: any) => {
             const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
             if (assessmentStr) {
@@ -279,98 +194,107 @@ const Dashboard = () => {
                 if(scores.length > 0) {
                   const totalScore = scores.reduce((sum, score) => sum + score, 0);
                   const companyMaturity = totalScore / INDICATORS.length;
-                  totalMaturity += companyMaturity;
+                  totalMaturityAgg += companyMaturity;
                   allCompanyScores.push({ name_ar: comp.name_ar, name_en: comp.name_en, score: companyMaturity });
                 }
             }
             const complianceStr = localStorage.getItem(`oia_compliance_${comp.id}`);
             if (complianceStr) {
                 const complianceData = JSON.parse(complianceStr);
-                const complianceItems = Object.values(complianceData.compliance || {});
-                totalCompliant += complianceItems.filter(v => v === true).length;
-                totalComplianceItemsCount += complianceItems.length;
+                complianceItemsArr.push(...Object.values(complianceData.compliance || {}));
                 allRisksAgg.push(...(complianceData.risks || []));
             }
             const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}`);
             if (improvementPlanStr) {
-                allImprovementTasksAgg.push(...(JSON.parse(improvementPlanStr)));
+                allImprovementTasks.push(...(JSON.parse(improvementPlanStr)));
             }
+            
             totalAssetsAgg += comp.authorizedCapital || 0;
             totalNetProfitAgg += (comp.revenue || 0) - (comp.expenses || 0);
             totalEquityAgg += (comp.authorizedCapital || 0) - (comp.liabilities || 0);
             totalFreeCashFlowAgg += (comp.operatingCash || 0) - (comp.capex || 0);
             totalROIAgg += comp.lastROI || 0;
-            totalOmanization += comp.totalEmployees > 0 ? Math.round((comp.omaniEmployees / comp.totalEmployees) * 100) : 0;
+            totalOmanizationAgg += comp.totalEmployees > 0 ? Math.round((comp.omaniEmployees / comp.totalEmployees) * 100) : 0;
             totalSpendingAgg += comp.totalSpending || 0;
-            totalLocalSpendingAgg += comp.localSpending || 0;
-            totalSmeSpendingAgg += comp.smeSpending || 0;
+            localSpendingAgg += comp.localSpending || 0;
+            smeSpendingAgg += comp.smeSpending || 0;
         });
 
         const numCompanies = allCompanies.length || 1;
-        currentMaturityScore = totalMaturity / allCompanyScores.length;
-        setMaturityScore(currentMaturityScore);
-        setTotalAssets(totalAssetsAgg);
-        setOmanizationRate(Math.round(totalOmanization / numCompanies));
-        setRisks(allRisksAgg);
-        setNetProfit(totalNetProfitAgg);
-        setEquity(totalEquityAgg);
-        setFreeCashFlow(totalFreeCashFlowAgg);
-        setLastROI(totalROIAgg / numCompanies);
+        const numScoredCompanies = allCompanyScores.length || 1;
+        
+        maturityScoreVal = totalMaturityAgg / numScoredCompanies;
+        omanizationRateVal = Math.round(totalOmanizationAgg / numCompanies);
+        totalAssetsVal = totalAssetsAgg;
+        netProfitVal = totalNetProfitAgg;
+        equityVal = totalEquityAgg;
+        freeCashFlowVal = totalFreeCashFlowAgg;
+        lastROIVal = totalROIAgg / numCompanies;
+        risksArr = allRisksAgg;
+        boardMembersArr = BOARD_MEMBERS;
         
         setTopPerformers(allCompanyScores.sort((a,b) => b.score - a.score).slice(0, 5));
-
-        const todo = allImprovementTasksAgg.filter(t => t.status === 'todo').length;
-        const inProgress = allImprovementTasksAgg.filter(t => t.status === 'in-progress').length;
-        const completed = allImprovementTasksAgg.filter(t => t.status === 'done').length;
-        setImprovementPlanData([
-            { name: t('reports.improvement.completed'), value: completed, color: '#00E096' },
-            { name: t('reports.improvement.inProgress'), value: inProgress, color: '#FFD700' },
-            { name: t('reports.improvement.notStarted'), value: todo, color: '#6b7280' },
-        ] as any);
-
-        allIndependentCount = BOARD_MEMBERS.filter(m => m.type === 'Independent').length;
-        allMembersCount = BOARD_MEMBERS.length;
-        setBoardIndependenceData([
-            { name: t('dashboard.boardComposition.independent'), value: allIndependentCount, color: '#D4AF37' },
-            { name: t('dashboard.boardComposition.nonIndependent'), value: allMembersCount - allIndependentCount, color: '#3b82f6' },
-        ] as any);
-
-        const allCompaniesRadarData = AXES.map((axis, index) => {
-            const companyValue = index === 0 ? currentMaturityScore * 30 : Math.random() * 100 + 40;
-            return {
-                subject: language === 'ar' ? axis.title_ar : axis.title_en,
-                company: companyValue,
-                sector: sectorAverageByAxis[index],
-                fullMark: 150
-            };
-        });
-        setRadarData(allCompaniesRadarData);
         
-        setIcvBarData([
-            { name: t('dashboard.icv.totalTenders'), value: totalSpendingAgg },
-            { name: t('dashboard.icv.localSpending'), value: totalLocalSpendingAgg },
-            { name: t('dashboard.icv.smeSpending'), value: totalSmeSpendingAgg },
-        ] as any);
-
-         setCompliancePieData([
-          { name: t('dashboard.compliant'), value: totalCompliant },
-          { name: t('dashboard.nonCompliant'), value: totalComplianceItemsCount - totalCompliant },
-        ] as any);
+        const allCompaniesRadarData = AXES.map((axis, index) => ({
+            subject: language === 'ar' ? axis.title_ar : axis.title_en,
+            company: sectorAverageByAxis[index],
+            sector: sectorAverageByAxis[index],
+            fullMark: 150
+        }));
+        setRadarData(allCompaniesRadarData as any);
+        
+        icvData = { total: totalSpendingAgg, local: localSpendingAgg, sme: smeSpendingAgg };
     }
+
+    // --- Set State Variables ---
+    setMaturityScore(maturityScoreVal);
+    setTotalAssets(totalAssetsVal);
+    setOmanizationRate(omanizationRateVal);
+    setNetProfit(netProfitVal);
+    setEquity(equityVal);
+    setFreeCashFlow(freeCashFlowVal);
+    setLastROI(lastROIVal);
+    setRisks(risksArr);
+
+    const todo = allImprovementTasks.filter(t => t.status === 'todo').length;
+    const inProgress = allImprovementTasks.filter(t => t.status === 'in-progress').length;
+    const completed = allImprovementTasks.filter(t => t.status === 'done').length;
+    setImprovementPlanData([
+        { name: t('reports.improvement.completed'), value: completed, color: '#00E096' },
+        { name: t('reports.improvement.inProgress'), value: inProgress, color: '#FFD700' },
+        { name: t('reports.improvement.notStarted'), value: todo, color: '#6b7280' },
+    ] as any);
+
+    const independentCount = boardMembersArr.filter((m: any) => m.type === 'Independent').length;
+    setBoardIndependenceData([
+        { name: t('dashboard.boardComposition.independent'), value: independentCount, color: '#D4AF37' },
+        { name: t('dashboard.boardComposition.nonIndependent'), value: boardMembersArr.length - independentCount, color: '#3b82f6' },
+    ] as any);
     
+    setIcvBarData([
+        { name: t('dashboard.icv.totalTenders'), value: icvData.total },
+        { name: t('dashboard.icv.localSpending'), value: icvData.local },
+        { name: t('dashboard.icv.smeSpending'), value: icvData.sme },
+    ] as any);
+    
+    setCompliancePieData([
+      { name: t('dashboard.compliant'), value: complianceItemsArr.filter(v => v === true).length },
+      { name: t('dashboard.nonCompliant'), value: complianceItemsArr.filter(v => v === false).length },
+    ] as any);
+
     const path = Array.from({ length: 7 }, (_, i) => {
         const year = 2024 + i;
-        const baseScore = currentMaturityScore || 3.0;
+        const baseScore = maturityScoreVal || 3.0;
         const companyScore = year >= selectedYear 
             ? baseScore + (year - selectedYear) * 0.2 + (Math.random() - 0.5) * 0.1
             : baseScore - (selectedYear - year) * 0.15 + (Math.random() - 0.5) * 0.1;
-        const sectorAverage = baseScore * 0.9 + (year - selectedYear) * 0.15 + (Math.random() - 0.5) * 0.15;
+        const sectorAvg = baseScore * 0.9 + (year - selectedYear) * 0.15 + (Math.random() - 0.5) * 0.15;
         const target = 3.5 + i * 0.25;
 
         return {
             year: year.toString(),
             companyScore: Math.max(1, Math.min(5, parseFloat(companyScore.toFixed(1)))),
-            sectorAverage: Math.max(1, Math.min(5, parseFloat(sectorAverage.toFixed(1)))),
+            sectorAverage: Math.max(1, Math.min(5, parseFloat(sectorAvg.toFixed(1)))),
             target: Math.min(5, parseFloat(target.toFixed(1))),
         };
     });
@@ -575,10 +499,10 @@ const Dashboard = () => {
 
        {/* Row 3: Highlights & Action */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
               <TopPerformers data={topPerformers} />
-          </motion.div>
-          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+            </motion.div>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
                         <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
@@ -601,14 +525,14 @@ const Dashboard = () => {
       </div>
       
       {/* Row 4: Strategic Radar */}
-      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+       <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9} className="lg:col-span-3">
         <Card className={"glass h-full"}>
           <CardHeader>
             <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+          <CardContent className="h-[450px]">
+            <ResponsiveContainer width="100%" height="100%">
+               <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                 <defs>
                   <radialGradient id="radarFillGold">
                     <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
@@ -620,8 +544,8 @@ const Dashboard = () => {
                 <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                 <Tooltip {...tooltipStyle} formatter={(value: number) => value.toFixed(1)} />
                 <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 4, strokeWidth: 2 }} />
-                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeWidth={2} fill="transparent" strokeDasharray="5 5" dot={{ r: 4, strokeWidth: 2 }} />
+                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={3} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 5, fill: '#D4AF37', stroke: '#001220', strokeWidth: 2 }} />
+                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeDasharray="8 8" strokeWidth={3} fill="transparent" dot={{ r: 5, fill: '#8b5cf6', stroke: '#001220', strokeWidth: 2 }}/>
               </RadarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -772,3 +696,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    

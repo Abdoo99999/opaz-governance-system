@@ -45,6 +45,7 @@ import { INDICATORS, AXES } from '@/lib/data/indicators';
 import type { Task } from '@/components/ImprovementPlan';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
+import { COMPANIES } from '@/data/companies';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -58,7 +59,7 @@ const cardVariants = {
 const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-[1.03] hover:shadow-2xl print:shadow-none print:border-gray-200 print:bg-white";
 
 
-const RadarCustomTick = (props: any) => {
+export const RadarCustomTick = (props: any) => {
     const { payload, x, y, textAnchor, index } = props;
     const value = payload.value;
     const wordWrapThreshold = 12;
@@ -173,8 +174,8 @@ const Reports: React.FC = () => {
         const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
 
         const companiesStr = localStorage.getItem('oia_companies_registry');
-        const companiesData = companiesStr ? JSON.parse(companiesStr) : [];
-        const companyData = companiesData.find((c: any) => c.id === selectedCompanyId);
+        const allCompaniesData = companiesStr ? JSON.parse(companiesStr) : COMPANIES;
+        const companyData = allCompaniesData.find((c: any) => c.id === selectedCompanyId);
 
         // --- Process Data ---
 
@@ -190,12 +191,12 @@ const Reports: React.FC = () => {
         
         const riskCounts = (risks || []).reduce((acc: any, risk: any) => {
             const score = risk.impact * risk.probability;
-            if (score >= 20) acc.Extreme++;
-            else if (score >= 15) acc.High++;
+            if (score >= 15) acc.Critical++;
+            else if (score >= 10) acc.High++;
             else if (score >= 5) acc.Medium++;
             else acc.Low++;
             return acc;
-        }, { Extreme: 0, High: 0, Medium: 0, Low: 0 });
+        }, { Critical: 0, High: 0, Medium: 0, Low: 0 });
 
         const totalActions = improvementPlanTasks.length; 
         const completedActions = improvementPlanTasks.filter(t => t.status === 'done').length;
@@ -203,21 +204,47 @@ const Reports: React.FC = () => {
         setSummaryData({
             maturity: parseFloat(maturity.toFixed(1)),
             compliance: Math.round(complianceRate),
-            risks: { high: riskCounts.High, medium: riskCounts.Medium, critical: riskCounts.Extreme },
+            risks: { high: riskCounts.High, medium: riskCounts.Medium, critical: riskCounts.Critical },
             actions: totalActions - completedActions
         });
 
         // 2. Radar Chart
-        const newRadarData = AXES.map(axis => {
+        let sectorScoresByAxis: { [key: number]: number[] } = {};
+        AXES.forEach(a => sectorScoresByAxis[a.id] = []);
+
+        allCompaniesData.forEach((comp: any) => {
+            const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+            if (compAssessmentStr) {
+                const compAssessmentData = JSON.parse(compAssessmentStr);
+                AXES.forEach(axis => {
+                    const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
+                    if(axisIndicators.length === 0) return;
+                    const axisScores = axisIndicators.map(ind => compAssessmentData.scores?.[ind.id] || 0);
+                    const axisSum = axisScores.reduce((a, b) => a + b, 0);
+                    const axisAvg = axisSum / (axisIndicators.length * 5);
+                    sectorScoresByAxis[axis.id].push(axisAvg);
+                });
+            }
+        });
+        const sectorAverageByAxis = AXES.map(axis => {
+            const avgs = sectorScoresByAxis[axis.id] || [];
+            const total = avgs.length > 0 ? avgs.reduce((a, b) => a + b, 0) / avgs.length : 0;
+            return total * 150;
+        });
+
+        const newRadarData = AXES.map((axis, index) => {
             const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
+            if (axisIndicators.length === 0) {
+                 return { subject: language === 'ar' ? axis.title_ar : axis.title_en, company: 0, sector: sectorAverageByAxis[index], fullMark: 150 };
+            }
             const axisScores = axisIndicators.map(ind => assessmentData.scores?.[ind.id] || 0);
             const axisSum = axisScores.reduce((a, b) => a + b, 0);
-            const companyValue = axisScores.length > 0 ? (axisSum / (axisScores.length * 5)) * 150 : 0; // Scale to 150
+            const companyValue = (axisSum / (axisIndicators.length * 5)) * 150;
             
             return {
                 subject: language === 'ar' ? axis.title_ar : axis.title_en,
                 company: companyValue,
-                sector: Math.random() * 110 + 20, // Mock sector average
+                sector: sectorAverageByAxis[index],
             };
         });
         setRadarData(newRadarData as any);
@@ -227,7 +254,7 @@ const Reports: React.FC = () => {
             { name: t('reports.riskLevels.low'), count: riskCounts.Low, color: '#00E096' },
             { name: t('reports.riskLevels.medium'), count: riskCounts.Medium, color: '#FFD700' },
             { name: t('reports.riskLevels.high'), count: riskCounts.High, color: '#FFA500' },
-            { name: t('reports.riskLevels.extreme'), count: riskCounts.Extreme, color: '#FF3B3B' },
+            { name: t('reports.riskLevels.critical'), count: riskCounts.Critical, color: '#FF3B3B' },
         ] as any);
 
         // 4. Improvement Plan
@@ -738,6 +765,5 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
-
 
     

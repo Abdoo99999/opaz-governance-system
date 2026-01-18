@@ -392,7 +392,7 @@ export const translations = {
           low: "منخفض",
           medium: "متوسط",
           high: "مرتفع",
-          extreme: "حرج"
+          critical: "حرج"
         },
         improvement: {
           completed: "تم الإنجاز",
@@ -937,7 +937,7 @@ export const translations = {
             low: "Low",
             medium: "Medium",
             high: "High",
-            extreme: "Extreme"
+            critical: "Critical"
         },
         improvement: {
           completed: "Completed",
