@@ -578,7 +578,59 @@ const Dashboard = () => {
            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
               <TopPerformers data={topPerformers} />
           </motion.div>
-          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+                <Card className={"glass h-full"}>
+                    <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={0} outerRadius={90} paddingAngle={5} labelLine={false} label={renderCustomizedLabel}>
+                                    {(boardIndependenceData as any[]).map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip {...tooltipStyle}/>
+                                <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
+      </div>
+      
+      {/* Row 4: Strategic Radar */}
+      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+        <Card className={"glass h-full"}>
+          <CardHeader>
+            <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                <defs>
+                  <radialGradient id="radarFillGold">
+                    <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
+                    <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
+                  </radialGradient>
+                </defs>
+                <PolarGrid stroke="rgba(255,255,255,0.2)" />
+                <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
+                <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                <Tooltip {...tooltipStyle} formatter={(value: number) => value.toFixed(1)} />
+                <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
+                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 4, strokeWidth: 2 }} />
+                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeWidth={2} fill="transparent" strokeDasharray="5 5" dot={{ r: 4, strokeWidth: 2 }} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Row 5: Operations & Governance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
               <Card className={"glass h-full"}>
                   <CardHeader>
                       <CardTitle className="text-gold-400">{t('dashboard.improvementStatus.title')}</CardTitle>
@@ -614,58 +666,6 @@ const Dashboard = () => {
                   </CardContent>
               </Card>
           </motion.div>
-      </div>
-      
-      {/* Row 4: Strategic Radar */}
-      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
-        <Card className={"glass h-full"}>
-          <CardHeader>
-            <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                <defs>
-                  <radialGradient id="radarFillGold">
-                    <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
-                    <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
-                  </radialGradient>
-                </defs>
-                <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
-                <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                <Tooltip {...tooltipStyle} />
-                <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 4, strokeWidth: 2 }} />
-                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeWidth={2} fill="transparent" strokeDasharray="5 5" dot={{ r: 4, strokeWidth: 2 }} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Row 5: Operations & Governance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-                <Card className={"glass h-full"}>
-                    <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={0} outerRadius={90} paddingAngle={5} labelLine={false} label={renderCustomizedLabel}>
-                                    {(boardIndependenceData as any[]).map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip {...tooltipStyle}/>
-                                <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
@@ -772,4 +772,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
