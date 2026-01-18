@@ -43,7 +43,7 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
     const [selectedCompanyForForm, setSelectedCompanyForForm] = useState<any>(null);
     const { t, language } = useLanguage();
     const { toast } = useToast();
-    const { selectedCompanyId } = useCompany();
+    const { selectedCompanyId, refreshData } = useCompany();
 
     const [companies, setCompanies] = useState(() => {
         if (typeof window === 'undefined') return initialCompaniesData;
@@ -112,6 +112,7 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
 
         setIsFormOpen(false);
         setSelectedCompanyForForm(null);
+        refreshData();
     };
 
     const handleCloseForm = () => {

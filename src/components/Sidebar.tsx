@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -38,7 +39,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLogout, userRole }) => {
   const { t } = useLanguage();
-  const { selectedCompanyId, getCompanySubmissionStatus } = useCompany();
+  const { selectedCompanyId, getCompanySubmissionStatus, dataVersion } = useCompany();
   const { selectedYear } = useYear();
 
   const [completion, setCompletion] = useState({
@@ -83,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
         };
         getCompletionStates();
     }
-  }, [selectedCompanyId, userRole, currentView, selectedYear]);
+  }, [selectedCompanyId, userRole, currentView, selectedYear, dataVersion]);
 
   const submissionStatus = userRole === 'company' && selectedCompanyId 
       ? getCompanySubmissionStatus(selectedCompanyId) 

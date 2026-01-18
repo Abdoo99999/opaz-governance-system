@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { COMPANIES, Company, SubmissionStatus } from '@/data/companies';
 
 interface CompanyContextType {
@@ -9,12 +9,19 @@ interface CompanyContextType {
   setSelectedCompanyId: (id: string) => void;
   getSelectedCompany: () => Company | null;
   getCompanySubmissionStatus: (id: string) => SubmissionStatus;
+  dataVersion: number;
+  refreshData: () => void;
 }
 
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
+  const [dataVersion, setDataVersion] = useState(0);
+
+  const refreshData = useCallback(() => {
+    setDataVersion(v => v + 1);
+  }, []);
 
   const getSelectedCompany = (): Company | null => {
     if (selectedCompanyId === 'all' || typeof window === 'undefined') return null;
@@ -38,7 +45,9 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
       selectedCompanyId,
       setSelectedCompanyId,
       getSelectedCompany,
-      getCompanySubmissionStatus
+      getCompanySubmissionStatus,
+      dataVersion,
+      refreshData
   };
 
   return (

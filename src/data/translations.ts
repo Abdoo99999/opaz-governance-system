@@ -9,7 +9,7 @@ export const translations = {
       company_profile: "بيانات الشركة",
       board_directory: "سجل المجلس",
       board_evaluation: "تقييم أداء المجلس",
-      assessment: "الأداء المؤسسي",
+      assessment: "تقييم الأداء المؤسسي",
       compliance: "الامتثال والمخاطر",
       improvement: "خطة التحسين",
       financials: "القوائم المالية",
@@ -502,7 +502,7 @@ export const translations = {
       subtitle: "يرجى التأكد من اكتمال جميع الأقسام قبل إرسال التقييم إلى جهاز الاستثمار العماني للمراجعة النهائية.",
       checklistTitle: "قائمة التحقق من الاكتمال",
       profile: "الملف التعريفي للشركة",
-      assessment: "تقييم نضج الحوكمة",
+      assessment: "تقييم الأداء المؤسسي",
       compliance: "الامتثال والمخاطر",
       status: {
         complete: "مكتمل",
@@ -555,7 +555,7 @@ export const translations = {
       company_profile: "Company Profile",
       board_directory: "Board Registry",
       board_evaluation: "Board Evaluation",
-      assessment: "Institutional Performance",
+      assessment: "Institutional Performance Assessment",
       compliance: "Compliance & Risk",
       improvement: "Improvement Plan",
       financials: "Financial Statements",
@@ -1048,7 +1048,7 @@ export const translations = {
       subtitle: "Please ensure all sections are complete before sending the assessment to OIA for final review.",
       checklistTitle: "Completion Checklist",
       profile: "Company Profile Data",
-      assessment: "Governance Maturity Assessment",
+      assessment: "Institutional Performance Assessment",
       compliance: "Compliance & Risk Registry",
       status: {
         complete: "Complete",
@@ -1093,5 +1093,3 @@ export const translations = {
     }
   }
 };
-
-    
