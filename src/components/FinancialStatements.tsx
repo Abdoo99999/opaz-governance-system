@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -40,7 +41,7 @@ const cardVariants = {
 const FinancialStatements: React.FC = () => {
   const { t, dir, language } = useLanguage();
   const { toast } = useToast();
-  const { selectedCompanyId, getSelectedCompany } = useCompany();
+  const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
   const selectedCompany = getSelectedCompany();
   
   const getStorageKey = () => `oia_companies_registry`;
@@ -139,6 +140,7 @@ const FinancialStatements: React.FC = () => {
       title: t('common.saveSuccessTitle'),
       description: `${t('financials.saveSuccessDesc')} ${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en): ''}.`,
     });
+    refreshData();
   };
 
   const handleNumericInput = (setter: React.Dispatch<React.SetStateAction<number | ''>>) => (e: React.ChangeEvent<HTMLInputElement>) => {

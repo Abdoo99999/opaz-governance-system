@@ -71,7 +71,7 @@ const initialComplianceState: ComplianceState = {
 
 const ComplianceMonitor: React.FC = () => {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
     
@@ -145,6 +145,7 @@ const ComplianceMonitor: React.FC = () => {
             title: "تم الحفظ بنجاح",
             description: `تم حفظ بيانات الامتثال والمخاطر لشركة ${selectedCompany?.name_ar}`,
         });
+        refreshData();
     };
 
     const handleComplianceChange = (id: keyof ComplianceState, value: boolean) => {
@@ -152,9 +153,20 @@ const ComplianceMonitor: React.FC = () => {
     };
 
     const onSubmitRisk = (data: RiskFormValues) => {
-        setRisks(prev => [...prev, data]);
+        const newRisks = [...risks, data];
+        setRisks(newRisks);
+        
+        const dataToSave = {
+            compliance: complianceState,
+            risks: newRisks,
+        };
+        if(selectedCompanyId && selectedCompanyId !== 'all') {
+            localStorage.setItem(getStorageKey(selectedCompanyId), JSON.stringify(dataToSave));
+        }
+
         setIsModalOpen(false);
         reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
+        refreshData();
     };
 
     const handleRiskCellClick = (impact: number, probability: number) => {
@@ -363,7 +375,3 @@ const ComplianceMonitor: React.FC = () => {
 };
 
 export default ComplianceMonitor;
-
-    
-
-    

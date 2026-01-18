@@ -48,7 +48,7 @@ interface AssessmentProps {
 
 const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
     const contentAreaRef = useRef<HTMLDivElement>(null);
@@ -135,6 +135,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
             title: t('common.saveSuccessTitle'),
             description: `${t('assessment.saveSuccessDesc')} ${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en): ''}`,
         });
+        refreshData();
     };
     
     const handleSubmit = () => {
@@ -150,6 +151,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                 title: t('assessment.successTitle'),
                 description: t('assessment.successDesc'),
             });
+            refreshData();
         }
     };
 
@@ -472,8 +474,3 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
-
-
-    
-
-    

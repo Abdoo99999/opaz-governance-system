@@ -61,10 +61,6 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
         return companies;
     }, [companies, userRole, selectedCompanyId]);
 
-    useEffect(() => {
-        localStorage.setItem('oia_companies_registry', JSON.stringify(companies));
-    }, [companies]);
-
     const handleAddCompany = () => {
         setSelectedCompanyForForm(null);
         setIsFormOpen(true);
@@ -76,34 +72,33 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
     };
 
     const handleSaveCompany = (formData: any) => {
-        setCompanies(prevCompanies => {
-            const isNew = !selectedCompanyForForm;
-            const companyDataFromList = COMPANIES.find(c => c.name_en === formData.companyName)
-            if (isNew) {
-                const newCompany = {
-                    id: companyDataFromList?.id || formData.companyName.toLowerCase().replace(/ /g, '_'),
-                    name_en: formData.companyName,
-                    name_ar: companyDataFromList?.name_ar || formData.companyName, // Assuming name is same for simplicity
+        const isNew = !selectedCompanyForForm;
+        const companyDataFromList = COMPANIES.find(c => c.name_en === formData.companyName)
+
+        const updatedCompanies = isNew ? 
+            [...companies, {
+                id: companyDataFromList?.id || formData.companyName.toLowerCase().replace(/ /g, '_'),
+                name_en: formData.companyName,
+                name_ar: companyDataFromList?.name_ar || formData.companyName,
+                ...formData,
+                omanization: formData.totalEmployees > 0 ? formData.omaniEmployees / formData.totalEmployees * 100 : 0,
+                risk: 'Medium',
+                submissionStatus: 'draft'
+            }] :
+            companies.map(c => 
+                c.id === selectedCompanyForForm.id 
+                ? { 
+                    ...c, 
                     ...formData,
-                    omanization: formData.omaniEmployees / formData.totalEmployees * 100,
-                    risk: 'Medium', // Default risk
-                    submissionStatus: 'draft'
-                };
-                return [...prevCompanies, newCompany];
-            } else {
-                return prevCompanies.map(c => 
-                    c.id === selectedCompanyForForm.id 
-                    ? { 
-                        ...c, 
-                        ...formData,
-                        name_en: formData.companyName,
-                        name_ar: companyDataFromList?.name_ar || formData.companyName, // Assuming name is same for simplicity
-                        omanization: formData.omaniEmployees / formData.totalEmployees * 100,
-                      } 
-                    : c
-                );
-            }
-        });
+                    name_en: formData.companyName,
+                    name_ar: companyDataFromList?.name_ar || formData.companyName,
+                    omanization: formData.totalEmployees > 0 ? formData.omaniEmployees / formData.totalEmployees * 100 : 0,
+                  } 
+                : c
+            );
+
+        localStorage.setItem('oia_companies_registry', JSON.stringify(updatedCompanies));
+        setCompanies(updatedCompanies);
         
         toast({
             title: t('common.saveSuccessTitle'),
@@ -123,11 +118,14 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
     const handleDeleteCompany = (companyId: string) => {
         // Add confirmation dialog before deleting
         if (window.confirm(t('common.deleteConfirm'))) {
-            setCompanies(prev => prev.filter(c => c.id !== companyId));
+            const updatedCompanies = companies.filter(c => c.id !== companyId);
+            localStorage.setItem('oia_companies_registry', JSON.stringify(updatedCompanies));
+            setCompanies(updatedCompanies);
             toast({
                 title: t('common.deleteSuccessTitle'),
                 variant: 'destructive',
             });
+            refreshData();
         }
     };
 
@@ -158,7 +156,7 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
                         transition={{ duration: 0.3 }}
                     >
                         <header className="flex items-center justify-between mb-8">
-                            <h1 className="text-3xl font-bold">{t('registry.title')}</h1>
+                            <h1 className="text-3xl font-bold">{userRole === 'company' ? t('menu.company_profile') : t('registry.title')}</h1>
                             {userRole === 'admin' && (
                                 <div className="flex items-center gap-4">
                                      <Button onClick={() => onNavigate('board-directory')} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">

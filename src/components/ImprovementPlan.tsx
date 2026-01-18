@@ -338,7 +338,7 @@ const CompleteTaskModal = ({ isOpen, onClose, onComplete, task }: { isOpen: bool
 
 export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
     
@@ -436,6 +436,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
             title: t('common.saveSuccessTitle'),
             description: `${t('improvement.saveSuccessDesc')} ${selectedCompany?.name_ar}`,
         });
+        refreshData();
     };
 
     const handleMoveTask = (taskId: number, newStatus: Status) => {
@@ -452,17 +453,20 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
     };
 
     const handleCompleteTask = (taskId: number, notes: string, file: File) => {
-        setTasks(prevTasks =>
-            prevTasks.map(task =>
-                task.id === taskId ? { 
-                    ...task, 
-                    status: 'done',
-                    completionNotes: notes,
-                    evidenceFile: { name: file.name, size: file.size }
-                } : task
-            )
+        const newTasks = tasks.map(task =>
+            task.id === taskId ? { 
+                ...task, 
+                status: 'done',
+                completionNotes: notes,
+                evidenceFile: { name: file.name, size: file.size }
+            } : task
         );
+        setTasks(newTasks);
+        if (selectedCompanyId && selectedCompanyId !== 'all') {
+            localStorage.setItem(getStorageKey(selectedCompanyId), JSON.stringify(newTasks));
+        }
         toast({ title: t('improvement.taskCompleted') });
+        refreshData();
     };
 
     const handleOpenDetails = (task: Task) => {
@@ -581,5 +585,3 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
-
-    

@@ -89,7 +89,7 @@ interface MeetingMinute {
 const BoardDirectory: React.FC = () => {
     const { t, language } = useLanguage();
     const { toast } = useToast();
-    const { selectedCompanyId } = useCompanyContext();
+    const { selectedCompanyId, refreshData } = useCompanyContext();
     
     const [boardMembers, setBoardMembers] = useState<BoardMember[]>(() => {
         if (typeof window === 'undefined') return BOARD_MEMBERS;
@@ -133,11 +133,12 @@ const BoardDirectory: React.FC = () => {
         };
         const updatedMinutes = [...minutes, newMinute];
         setMinutes(updatedMinutes);
-        if (selectedCompanyId) {
+        if (selectedCompanyId && selectedCompanyId !== 'all') {
           localStorage.setItem(`board_minutes_${selectedCompanyId}`, JSON.stringify(updatedMinutes));
         }
         toast({ title: t('common.saveSuccessTitle'), description: t('board_directory.minutes.minuteAdded') });
         setIsMinuteModalOpen(false);
+        refreshData();
     };
 
 
@@ -223,41 +224,38 @@ const BoardDirectory: React.FC = () => {
     };
 
     const handleSaveMember = (data: MemberFormData) => {
+        let newBoardMembers;
         if (editingMember) {
-            setBoardMembers(prev => prev.map(m => m.id === editingMember.id ? { 
+            newBoardMembers = boardMembers.map(m => m.id === editingMember.id ? { 
                 ...m, 
                 ...data, 
                 appointmentDate: format(data.appointmentDate, 'yyyy-MM-dd'),
                 expiryDate: format(data.expiryDate, 'yyyy-MM-dd'),
                 committees: data.committees || [] 
-            } : m));
+            } : m);
             toast({ title: t('common.saveSuccessTitle'), description: `Updated member: ${data.name_en}` });
         } else {
             if (selectedCompanyId === 'all') {
                 toast({ title: t('common.errorTitle'), description: t('common.selectCompanyToStart'), variant: 'destructive' });
                 return;
             }
-            const newMember: BoardMember = {
-                id: Math.max(0, ...boardMembers.map(m => m.id)) + 1,
-                avatar: `https://picsum.photos/seed/${Date.now()}/100/100`,
+            const newId = boardMembers.length > 0 ? Math.max(...boardMembers.map(m => m.id)) + 1 : 1;
+            newBoardMembers = [...boardMembers, {
+                id: newId,
+                avatar: `https://picsum.photos/seed/${newId}/100/100`,
                 ...data,
                 companyId: selectedCompanyId,
                 appointmentDate: format(data.appointmentDate, 'yyyy-MM-dd'),
                 expiryDate: format(data.expiryDate, 'yyyy-MM-dd'),
                 committees: data.committees as any || [],
-            };
-            setBoardMembers(prev => [...prev, newMember]);
+            }];
             toast({ title: t('common.saveSuccessTitle'), description: `Added new member: ${data.name_en}` });
         }
+        
+        localStorage.setItem('oia_board_members', JSON.stringify(newBoardMembers));
+        setBoardMembers(newBoardMembers);
         setIsFormOpen(false);
-    };
-
-    const handleSaveAll = () => {
-        localStorage.setItem('oia_board_members', JSON.stringify(boardMembers));
-        toast({
-            title: t('common.saveSuccessTitle'),
-            description: t('board_directory.saveSuccessDesc'),
-        });
+        refreshData();
     };
 
 
@@ -289,7 +287,6 @@ const BoardDirectory: React.FC = () => {
                         filteredMembers={filteredMembers}
                         handleOpenForm={handleOpenForm}
                         setIsCycleSettingsOpen={setIsCycleSettingsOpen}
-                        onSaveAll={handleSaveAll}
                         t={t}
                         language={language}
                     />
@@ -336,15 +333,11 @@ const BoardDirectory: React.FC = () => {
 
 
 // Members Tab Content Component
-const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMembers, handleOpenForm, setIsCycleSettingsOpen, onSaveAll, t, language }: any) => {
+const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMembers, handleOpenForm, setIsCycleSettingsOpen, t, language }: any) => {
 
     return (
         <>
             <div className="flex items-center justify-end gap-4 mb-8">
-                 <Button onClick={onSaveAll} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Save className="ml-2 h-5 w-5" />
-                    {t('common.save')}
-                </Button>
                 <Button onClick={() => setIsCycleSettingsOpen(true)} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">
                     <Calendar className="ml-2 h-5 w-5" />
                     {t('board_directory.form.cycleSettings')}
@@ -934,7 +927,3 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
 
 export default BoardDirectory;
-
-    
-
-    

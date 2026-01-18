@@ -31,7 +31,7 @@ type Evaluation = {
 
 const BoardEvaluation: React.FC = () => {
     const { t } = useLanguage();
-    const { selectedCompanyId } = useCompany();
+    const { selectedCompanyId, refreshData } = useCompany();
     const { selectedYear } = useYear();
     const { toast } = useToast();
 
@@ -125,10 +125,13 @@ const BoardEvaluation: React.FC = () => {
 
     const handleSaveNotes = () => {
         if (selectedMemberForNotes) {
-            handleEvaluationChange(selectedMemberForNotes.memberId, 'notes', notes);
+            const newEvals = evaluations.map(e => e.memberId === selectedMemberForNotes.memberId ? {...e, notes: notes} : e);
+            setEvaluations(newEvals);
+            localStorage.setItem(getStorageKey(), JSON.stringify(newEvals));
             toast({ title: t('board_evaluation.notes.saved') });
             setSelectedMemberForNotes(null);
             setNotes('');
+            refreshData();
         }
     };
     
@@ -149,6 +152,7 @@ const BoardEvaluation: React.FC = () => {
             title: t('common.saveSuccessTitle'),
             description: t('board_evaluation.saveSuccessDesc'),
         });
+        refreshData();
     };
 
 
