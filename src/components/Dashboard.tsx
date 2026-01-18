@@ -37,7 +37,7 @@ import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
 import TopPerformers from './dashboard/TopPerformers';
 import type { Task } from '@/components/ImprovementPlan';
-import { COMPANIES } from '@/data/companies';
+import { COMPANIES, type Company } from '@/data/companies';
 import { BOARD_MEMBERS as staticBoardMembers, BoardMember } from '@/data/board-members';
 import { RadarCustomTick } from './Reports';
 
@@ -88,10 +88,10 @@ const Dashboard = () => {
   const [lastROI, setLastROI] = useState(0);
   const [topPerformers, setTopPerformers] = useState<any[]>([]);
   const [improvementPlanData, setImprovementPlanData] = useState([]);
-  const [boardIndependenceData, setBoardIndependenceData] = useState([]);
+  const [boardIndependenceData, setBoardIndependenceData] = useState<any[]>([]);
   const [radarData, setRadarData] = useState([]);
   const [icvBarData, setIcvBarData] = useState([]);
-  const [compliancePieData, setCompliancePieData] = useState([]);
+  const [compliancePieData, setCompliancePieData] = useState<any[]>([]);
   const [maturityPathData, setMaturityPathData] = useState([]);
   
   const selectedCompany = getSelectedCompany();
@@ -101,7 +101,7 @@ const Dashboard = () => {
     
     // --- Central Data Loading ---
     const allCompaniesStr = localStorage.getItem('oia_companies_registry');
-    const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : COMPANIES;
+    const allCompanies: Company[] = allCompaniesStr ? JSON.parse(allCompaniesStr) : COMPANIES;
     const allBoardMembersStr = localStorage.getItem('oia_board_members');
     const allBoardMembers : BoardMember[] = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : staticBoardMembers;
     
@@ -118,7 +118,11 @@ const Dashboard = () => {
     let sectorScoresByAxis: { [key: number]: number[] } = {};
     AXES.forEach(a => sectorScoresByAxis[a.id] = []);
     allCompanies.forEach((comp: any) => {
-         const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
+         let compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
+         if (!compAssessmentStr) {
+            compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+         }
+
          if (compAssessmentStr) {
              const compAssessmentData = JSON.parse(compAssessmentStr);
              AXES.forEach(axis => {
@@ -141,16 +145,28 @@ const Dashboard = () => {
         const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
         if (!companyData) return;
 
-        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
+        let assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
+        if (!assessmentStr) {
+            assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        }
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {} };
 
-        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
+        let complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
+        if (!complianceStr) {
+            complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+        }
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
         
-        const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}_${selectedYear}`);
+        let improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}_${selectedYear}`);
+        if (!improvementPlanStr) {
+            improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
+        }
         allImprovementTasks = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
         
-        const financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+        let financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+        if (!financialsStr) {
+            financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}`);
+        }
         const financialsData = financialsStr ? JSON.parse(financialsStr) : companyData;
         
         boardMembersArr = allBoardMembers.filter(m => m.companyId === selectedCompanyId);
@@ -158,7 +174,7 @@ const Dashboard = () => {
         
         const complianceItems = Object.values(complianceData.compliance || {});
         totalCompliantItems = complianceItems.filter(v => v === true).length;
-        totalComplianceQuestions = 10; // Fixed number of questions
+        totalComplianceQuestions = 10; 
 
 
         const scores = Object.values(assessmentData.scores || {}) as number[];
@@ -199,7 +215,10 @@ const Dashboard = () => {
         let totalSpendingAgg = 0, localSpendingAgg = 0, smeSpendingAgg = 0;
         
         allCompanies.forEach((comp: any) => {
-            const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
+            let assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
+            if (!assessmentStr) {
+                assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+            }
             if (assessmentStr) {
                 const assessmentData = JSON.parse(assessmentStr);
                 const scores = Object.values(assessmentData.scores || {}) as number[];
@@ -210,7 +229,10 @@ const Dashboard = () => {
                   allCompanyScores.push({ name_ar: comp.name_ar, name_en: comp.name_en, score: companyMaturity });
                 }
             }
-            const complianceStr = localStorage.getItem(`oia_compliance_${comp.id}_${selectedYear}`);
+            let complianceStr = localStorage.getItem(`oia_compliance_${comp.id}_${selectedYear}`);
+            if (!complianceStr) {
+                complianceStr = localStorage.getItem(`oia_compliance_${comp.id}`);
+            }
             if (complianceStr) {
                 const complianceData = JSON.parse(complianceStr);
                 const complianceItems = Object.values(complianceData.compliance || {});
@@ -220,12 +242,18 @@ const Dashboard = () => {
             } else {
                  totalComplianceQuestions += 10; // still counts as 10 questions to be answered
             }
-            const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}_${selectedYear}`);
+            let improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}_${selectedYear}`);
+             if (!improvementPlanStr) {
+                improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}`);
+            }
             if (improvementPlanStr) {
                 allImprovementTasks.push(...(JSON.parse(improvementPlanStr)));
             }
             
-            const financialsStr = localStorage.getItem(`oia_financials_${comp.id}_${selectedYear}`);
+            let financialsStr = localStorage.getItem(`oia_financials_${comp.id}_${selectedYear}`);
+            if (!financialsStr) {
+                financialsStr = localStorage.getItem(`oia_financials_${comp.id}`);
+            }
             const financialsData = financialsStr ? JSON.parse(financialsStr) : comp;
 
             totalAssetsAgg += financialsData.authorizedCapital || 0;
@@ -287,10 +315,14 @@ const Dashboard = () => {
 
     const independentCount = boardMembersArr.filter((m: any) => m.type === 'Independent').length;
     const nonIndependentCount = boardMembersArr.length - independentCount;
-    setBoardIndependenceData([
-        { name: t('dashboard.boardComposition.independent'), value: independentCount, color: '#D4AF37' },
-        { name: t('dashboard.boardComposition.nonIndependent'), value: nonIndependentCount, color: '#3b82f6' },
-    ] as any);
+    if (boardMembersArr.length > 0) {
+        setBoardIndependenceData([
+            { name: t('dashboard.boardComposition.independent'), value: independentCount, color: '#D4AF37' },
+            { name: t('dashboard.boardComposition.nonIndependent'), value: nonIndependentCount, color: '#3b82f6' },
+        ]);
+    } else {
+        setBoardIndependenceData([]);
+    }
     
     setIcvBarData([
         { name: t('dashboard.icv.totalTenders'), value: icvData.total },
@@ -298,10 +330,15 @@ const Dashboard = () => {
         { name: t('dashboard.icv.smeSpending'), value: icvData.sme },
     ] as any);
     
-    setCompliancePieData([
-      { name: t('dashboard.compliant'), value: totalCompliantItems },
-      { name: t('dashboard.nonCompliant'), value: totalComplianceQuestions - totalCompliantItems },
-    ] as any);
+    if (totalComplianceQuestions > 0) {
+        setCompliancePieData([
+          { name: t('dashboard.compliant'), value: totalCompliantItems },
+          { name: t('dashboard.nonCompliant'), value: totalComplianceQuestions - totalCompliantItems },
+        ]);
+    } else {
+        setCompliancePieData([]);
+    }
+
 
     const path = Array.from({ length: 7 }, (_, i) => {
         const year = 2024 + i;
@@ -539,7 +576,7 @@ const Dashboard = () => {
                 <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                 <Tooltip {...tooltipStyle} formatter={(value: number) => Math.round(value)} />
                 <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={3} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 5, fill: '#D4AF37', stroke: '#001220', strokeWidth: 2 }} />
+                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#fbbf24" strokeWidth={3} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 5, fill: '#fbbf24', stroke: '#001220', strokeWidth: 2 }} />
                 <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeDasharray="8 8" strokeWidth={3} fill="transparent" dot={{ r: 5, fill: '#8b5cf6', stroke: '#001220', strokeWidth: 2 }}/>
               </RadarChart>
             </ResponsiveContainer>
@@ -719,3 +756,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    

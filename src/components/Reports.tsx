@@ -45,7 +45,7 @@ import { INDICATORS, AXES } from '@/lib/data/indicators';
 import type { Task } from '@/components/ImprovementPlan';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
-import { COMPANIES } from '@/data/companies';
+import { COMPANIES, type Company } from '@/data/companies';
 import { BOARD_MEMBERS as staticBoardMembers, BoardMember } from '@/data/board-members';
 
 const cardVariants = {
@@ -146,7 +146,7 @@ const Reports: React.FC = () => {
     const [topGapsData, setTopGapsData] = useState([]);
     const [criticalRisksData, setCriticalRisksData] = useState([]);
     const [financialPerformanceData, setFinancialPerformanceData] = useState([]);
-    const [boardIndependenceData, setBoardIndependenceData] = useState([]);
+    const [boardIndependenceData, setBoardIndependenceData] = useState<any[]>([]);
     const [icvBarData, setIcvBarData] = useState([]);
 
 
@@ -165,20 +165,32 @@ const Reports: React.FC = () => {
         }
 
         // --- Load Data from localStorage ---
-        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
+        let assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
+        if (!assessmentStr) {
+            assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        }
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {}, isComplete: false };
-
-        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
+        
+        let complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
+        if(!complianceStr){
+            complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+        }
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
 
-        const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}_${selectedYear}`);
+        let improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}_${selectedYear}`);
+        if(!improvementPlanStr){
+            improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
+        }
         const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
 
         const companiesStr = localStorage.getItem('oia_companies_registry');
-        const allCompaniesData = companiesStr ? JSON.parse(companiesStr) : COMPANIES;
+        const allCompaniesData: Company[] = companiesStr ? JSON.parse(companiesStr) : COMPANIES;
         const companyData = allCompaniesData.find((c: any) => c.id === selectedCompanyId);
         
-        const financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+        let financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+        if(!financialsStr){
+            financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}`);
+        }
         const financialsData = financialsStr ? JSON.parse(financialsStr) : companyData;
         
         const allBoardMembersStr = localStorage.getItem('oia_board_members');
@@ -196,7 +208,8 @@ const Reports: React.FC = () => {
         const totalComplianceQuestions = 10;
         const complianceItems = Object.values(complianceData.compliance || {});
         const compliantCount = complianceItems.filter((v: any) => v === true).length;
-        const complianceRate = (compliantCount / totalComplianceQuestions) * 100;
+        const complianceRate = totalComplianceQuestions > 0 ? (compliantCount / totalComplianceQuestions) * 100 : 0;
+
 
         const risks = complianceData.risks || [];
         
@@ -224,7 +237,10 @@ const Reports: React.FC = () => {
         AXES.forEach(a => sectorScoresByAxis[a.id] = []);
 
         allCompaniesData.forEach((comp: any) => {
-            const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
+            let compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
+            if(!compAssessmentStr){
+                compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+            }
             if (compAssessmentStr) {
                 const compAssessmentData = JSON.parse(compAssessmentStr);
                 AXES.forEach(axis => {
@@ -310,10 +326,14 @@ const Reports: React.FC = () => {
         // 7. Board Composition Chart
         const independentCount = companyBoardMembers.filter(m => m.type === 'Independent').length;
         const nonIndependentCount = companyBoardMembers.length - independentCount;
-        setBoardIndependenceData([
-            { name: t('dashboard.boardComposition.independent'), value: independentCount, color: '#D4AF37' },
-            { name: t('dashboard.boardComposition.nonIndependent'), value: nonIndependentCount, color: '#3b82f6' },
-        ] as any);
+         if (companyBoardMembers.length > 0) {
+            setBoardIndependenceData([
+                { name: t('dashboard.boardComposition.independent'), value: independentCount, color: '#D4AF37' },
+                { name: t('dashboard.boardComposition.nonIndependent'), value: nonIndependentCount, color: '#3b82f6' },
+            ]);
+        } else {
+            setBoardIndependenceData([]);
+        }
 
 
         // 8. ICV Bar Chart
@@ -562,7 +582,7 @@ const Reports: React.FC = () => {
                                         <PolarGrid className="stroke-white/20 print:stroke-gray-300" />
                                         <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                                         <PolarRadiusAxis angle={30} domain={[0, 150]} className="hidden" />
-                                        <Tooltip {...tooltipStyle} />
+                                        <Tooltip {...tooltipStyle} formatter={(value: number) => Math.round(value)} />
                                         <Legend content={renderCustomLegend} />
                                         <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
                                         <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
@@ -779,3 +799,5 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+    
