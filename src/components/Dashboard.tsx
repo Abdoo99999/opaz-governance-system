@@ -357,7 +357,7 @@ const Dashboard = () => {
     const currencyFormatter = (value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'OMR', notation: 'compact' }).format(value);
 
     const totalComplianceItems = (compliancePieData as any[]).reduce((acc, item) => acc + item.value, 0);
-    const compliantItems = (compliancePieData as any[])[0]?.value || 0;
+    const compliantItems = (compliancePieData.find(item => (item as any).name === t('dashboard.compliant')) as any)?.value || 0;
     const compliancePercentage = totalComplianceItems > 0
         ? Math.round((compliantItems / totalComplianceItems) * 100)
         : 0;
@@ -464,7 +464,7 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="text-4xl font-bold text-purple-400">{currencyFormatter(freeCashFlow)}</div>
-                    <p className="text-xs text-purple-200/60 mt-1">{t('dashboard.financial.fcf')}</p>
+                    <p className="text-xs text-purple-200/60 mt-1">{t('financials.cashflow.fcf')}</p>
                 </CardContent>
             </Card>
           </motion.div>
@@ -508,7 +508,10 @@ const Dashboard = () => {
 
        {/* Row 3: Highlights & Action */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+              <TopPerformers data={topPerformers} />
+          </motion.div>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
               <Card className={"glass h-full"}>
                   <CardHeader>
                       <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
@@ -539,33 +542,30 @@ const Dashboard = () => {
                   </CardContent>
               </Card>
           </motion.div>
-          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
-              <TopPerformers data={topPerformers} />
-          </motion.div>
       </div>
       
       {/* Row 4: Strategic Radar */}
-      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
+      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
         <Card className={"glass h-full"}>
           <CardHeader>
             <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+              <RadarChart cx="50%" cy="50%" outerRadius="65%" data={radarData}>
                 <defs>
-                  <radialGradient id="radarFill">
-                    <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
-                    <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
+                  <radialGradient id="radarFillGold">
+                    <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.4}/>
+                    <stop offset="100%" stopColor="#fbbf24" stopOpacity={0.1}/>
                   </radialGradient>
                 </defs>
                 <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                <PolarAngleAxis dataKey="subject" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: 'white', fontSize: 12 }} tickMargin={15} />
                 <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                 <Tooltip {...tooltipStyle} />
                 <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
-                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
+                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#fbbf24" strokeWidth={3} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 4, strokeWidth: 2 }} />
+                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeWidth={3} fill="transparent" dot={{ r: 4, strokeWidth: 2 }} />
               </RadarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -625,7 +625,7 @@ const Dashboard = () => {
             </motion.div>
        </div>
 
-      {/* Row 6: Compliance and Risk */}
+      {/* Row 6: Risk and Compliance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
                 <Card className={"glass h-full"}>
@@ -707,4 +707,3 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-    
