@@ -36,6 +36,9 @@ export const translations = {
       maturityScore: "مستوى النضج",
       compliant: "ممتثل",
       nonCompliant: "غير ممتثل",
+      improvementStatus: {
+        title: "موقف خطة التحسين"
+      },
       boardComposition: {
         title: "تحليل تكوين المجلس",
         independence: "استقلالية المجلس",
@@ -577,6 +580,9 @@ export const translations = {
       maturityScore: "Maturity Score",
       compliant: "Compliant",
       nonCompliant: "Non-Compliant",
+      improvementStatus: {
+        title: "Improvement Plan Status"
+      },
       boardComposition: {
         title: "Board Composition Analysis",
         independence: "Board Independence",

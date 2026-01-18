@@ -40,6 +40,7 @@ import FinancialHub from './dashboard/FinancialHub';
 import { useYear } from '@/context/YearContext';
 import { Progress } from '@/components/ui/progress';
 import TopPerformers from './dashboard/TopPerformers';
+import type { Task } from '@/components/ImprovementPlan';
 
 
 const cardVariants = {
@@ -169,6 +170,7 @@ const Dashboard = () => {
   const [radarData, setRadarData] = useState([]);
   const [maturityPathData, setMaturityPathData] = useState([]);
   const [icvBarData, setIcvBarData] = useState([]);
+  const [improvementPlanData, setImprovementPlanData] = useState([]);
 
   const selectedCompany = getSelectedCompany();
   
@@ -187,6 +189,18 @@ const Dashboard = () => {
 
         const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
+        
+        const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
+        const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
+        const todo = improvementPlanTasks.filter(t => t.status === 'todo').length;
+        const inProgress = improvementPlanTasks.filter(t => t.status === 'in-progress').length;
+        const completed = improvementPlanTasks.filter(t => t.status === 'done').length;
+
+        setImprovementPlanData([
+            { name: t('reports.improvement.completed'), value: completed, color: '#00E096' },
+            { name: t('reports.improvement.inProgress'), value: inProgress, color: '#FFD700' },
+            { name: t('reports.improvement.notStarted'), value: todo, color: '#6b7280' },
+        ] as any);
 
         const scores = Object.values(assessmentData.scores || {}) as number[];
         const totalScore = scores.reduce((sum, score) => sum + score, 0);
@@ -252,10 +266,13 @@ const Dashboard = () => {
         let totalSpending = 0;
         let allRisks: any[] = [];
         let totalLocalSpending = 0;
+        let allImprovementTasks: Task[] = [];
 
         allCompanies.forEach((comp: any) => {
             const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
             const complianceStr = localStorage.getItem(`oia_compliance_${comp.id}`);
+            const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}`);
+
             if (assessmentStr) {
                 const assessmentData = JSON.parse(assessmentStr);
                 const scores = Object.values(assessmentData.scores || {}) as number[];
@@ -271,6 +288,9 @@ const Dashboard = () => {
                 totalItems += complianceItems.length;
                 allRisks.push(...(complianceData.risks || []));
             }
+             if (improvementPlanStr) {
+                allImprovementTasks.push(...(JSON.parse(improvementPlanStr)));
+            }
             totalOmanization += comp.omanization || 0;
             totalAssets += comp.authorizedCapital || 0;
             totalROI += comp.lastROI || 0;
@@ -285,6 +305,15 @@ const Dashboard = () => {
         const avgOmanization = allCompanies.length > 0 ? totalOmanization / allCompanies.length : 0;
         const avgROI = allCompanies.length > 0 ? totalROI / allCompanies.length : 0;
         
+        const todo = allImprovementTasks.filter(t => t.status === 'todo').length;
+        const inProgress = allImprovementTasks.filter(t => t.status === 'in-progress').length;
+        const completed = allImprovementTasks.filter(t => t.status === 'done').length;
+        setImprovementPlanData([
+            { name: t('reports.improvement.completed'), value: completed, color: '#00E096' },
+            { name: t('reports.improvement.inProgress'), value: inProgress, color: '#FFD700' },
+            { name: t('reports.improvement.notStarted'), value: todo, color: '#6b7280' },
+        ] as any);
+
         setIcvBarData([
             { name: t('dashboard.icv.totalTenders'), value: totalSpending },
             { name: t('dashboard.icv.localSpending'), value: totalLocalSpending },
@@ -347,7 +376,7 @@ const Dashboard = () => {
   
   const compliancePieData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
-      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
   
    const boardIndependenceData = useMemo(() => [
@@ -418,7 +447,7 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold">{dashboardTitle}</h1>
       </header>
 
-      {/* KPIs Row */}
+      {/* Row 1: KPIs Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0}>
               <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
@@ -516,42 +545,71 @@ const Dashboard = () => {
               </Card>
           </motion.div>
       </div>
+
+       {/* Row 2: Highlights & Action */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+              <Card className={"glass h-full"}>
+                  <CardHeader>
+                      <CardTitle className="text-gold-400">{t('dashboard.improvementStatus.title')}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                          <PieChart>
+                              <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} labelLine={false}>
+                                  {(improvementPlanData as any[]).map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={entry.color} />
+                                  ))}
+                              </Pie>
+                              <Tooltip {...tooltipStyle}/>
+                              <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
+                              <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
+                                  {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
+                              </text>
+                              <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
+                                {t('reports.actions')}
+                              </text>
+                          </PieChart>
+                      </ResponsiveContainer>
+                  </CardContent>
+              </Card>
+          </motion.div>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+              <TopPerformers />
+          </motion.div>
+      </div>
       
-      {/* Financial Hub */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-            <FinancialHub
-                roi={dashboardData.lastROI}
-                netProfit={dashboardData.netProfit}
-                equity={dashboardData.totalAssets * 1_000_000}
-            />
-        </motion.div>
-        
-        {/* ICV & Governance Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-                <Card className={"glass h-full"}>
-                     <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-8 pt-6">
-                        <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={icvBarData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                                <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} />
-                                <YAxis tickFormatter={(value) => `${value / 1_000_000}M`} tick={{ fill: '#A0A0A0' }} />
-                                <Tooltip {...tooltipStyle} formatter={currencyFormatter} />
-                                <Bar dataKey="value" name={t('dashboard.icv.spending')} barSize={40} radius={[4, 4, 0, 0]}>
-                                    {(icvBarData as any[]).map((entry, index) => {
-                                        const colors = ['#6b7280', '#3b82f6', '#00E096'];
-                                        return <Cell key={`cell-${index}`} fill={colors[index]} />;
-                                    })}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+      {/* Row 3: Strategic Radar */}
+      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+        <Card className={"glass h-full"}>
+          <CardHeader>
+            <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
+                <defs>
+                  <radialGradient id="radarFill">
+                    <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
+                    <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
+                  </radialGradient>
+                </defs>
+                <PolarGrid stroke="rgba(255,255,255,0.2)" />
+                <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
+                <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                <Tooltip {...tooltipStyle} />
+                <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
+                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
+                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
+              </RadarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Row 4: Operations & Governance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
                         <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
@@ -582,42 +640,47 @@ const Dashboard = () => {
                     </CardContent>
                 </Card>
             </motion.div>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+                <Card className={"glass h-full"}>
+                    <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-8 pt-6">
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={icvBarData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                                <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} />
+                                <YAxis tickFormatter={(value) => `${value / 1_000_000}M`} tick={{ fill: '#A0A0A0' }} />
+                                <Tooltip {...tooltipStyle} formatter={currencyFormatter} />
+                                <Bar dataKey="value" name={t('dashboard.icv.spending')} barSize={40} radius={[4, 4, 0, 0]}>
+                                    {(icvBarData as any[]).map((entry, index) => {
+                                        const colors = ['#6b7280', '#3b82f6', '#00E096'];
+                                        return <Cell key={`cell-${index}`} fill={colors[index]} />;
+                                    })}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
        </div>
 
-      {/* Main Charts Row */}
-      <div className="grid grid-cols-1 gap-8">
-        
-        {/* Strategic Radar */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
-          <Card className={"glass h-full"}>
-            <CardHeader>
-              <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={400}>
-                <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-                  <defs>
-                    <radialGradient id="radarFill">
-                      <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
-                      <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
-                    </radialGradient>
-                  </defs>
-                  <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                  <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
-                  <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                  <Tooltip {...tooltipStyle} />
-                  <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                  <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFill)" fillOpacity={0.6} />
-                  <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8884d8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
-                </RadarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </motion.div>
-        
-        {/* Compliance and Risk */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+      {/* Row 5: Compliance and Risk */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+                <Card className={"glass h-full"}>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-gold-400">
+                            <AlertTriangle />
+                             {t('dashboard.riskMap')}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className='h-[300px]'>
+                        <RiskLandscape data={dashboardData.risks} />
+                    </CardContent>
+                </Card>
+            </motion.div>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-gold-400">
@@ -642,63 +705,42 @@ const Dashboard = () => {
                     </CardContent>
                 </Card>
             </motion.div>
-
-             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
-                <Card className={"glass h-full"}>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gold-400">
-                            <AlertTriangle />
-                             {t('dashboard.riskMap')}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className='h-[300px]'>
-                        <RiskLandscape data={dashboardData.risks} />
-                    </CardContent>
-                </Card>
-            </motion.div>
         </div>
-      </div>
       
-      {/* Strategic Path & Top Performers */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10} className="lg:col-span-8">
-              <Card className={"glass h-full"}>
-                  <CardHeader>
-                      <CardTitle className="text-gold-400 flex items-center gap-2">
-                          <Target />
-                          {t('dashboard.maturityPath')}
-                      </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                          <ComposedChart
-                              data={maturityPathData}
-                              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                          >
-                              <defs>
-                                  <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.8}/>
-                                      <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
-                                  </linearGradient>
-                              </defs>
-                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                              <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
-                              <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
-                              <Tooltip content={<CustomTooltip />} />
-                              <Legend wrapperStyle={{ color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                              <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                              <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#34d399" strokeWidth={2} dot={false} />
-                              <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#818cf8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                          </ComposedChart>
-                      </ResponsiveContainer>
-                  </CardContent>
-              </Card>
-          </motion.div>
-
-          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11} className="lg:col-span-4">
-              <TopPerformers />
-          </motion.div>
-      </div>
+      {/* Row 6: Strategic Path */}
+      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11}>
+          <Card className={"glass h-full"}>
+              <CardHeader>
+                  <CardTitle className="text-gold-400 flex items-center gap-2">
+                      <Target />
+                      {t('dashboard.maturityPath')}
+                  </CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                      <ComposedChart
+                          data={maturityPathData}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      >
+                          <defs>
+                              <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.8}/>
+                                  <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
+                              </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                          <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
+                          <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend wrapperStyle={{ color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
+                          <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                          <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#34d399" strokeWidth={2} dot={false} />
+                          <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#818cf8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                      </ComposedChart>
+                  </ResponsiveContainer>
+              </CardContent>
+          </Card>
+      </motion.div>
     </div>
   );
 };
