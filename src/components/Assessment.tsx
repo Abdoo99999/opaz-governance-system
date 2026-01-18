@@ -299,27 +299,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                 </header>
 
                 <div ref={contentAreaRef} className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-                {/* --- بداية زر التحديث المؤقت --- */}
-                <div className="p-4 mb-4 bg-red-900/20 border border-red-500/50 rounded-lg">
-                        <p className="text-red-400 mb-2 text-sm">زر صيانة مؤقت لتحديث المؤشرات:</p>
-                        <Button 
-                            variant="destructive" 
-                            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold"
-                            onClick={() => {
-                                localStorage.removeItem('oia_indicators_data');
-                                localStorage.removeItem('oia_assessment_all');
-                                Object.keys(localStorage).forEach(key => {
-                                    if (key.startsWith('oia_assessment_')) {
-                                        localStorage.removeItem(key);
-                                    }
-                                });
-                                window.location.reload();
-                            }}
-                        >
-                            ⚠️ اضغط هنا لتنظيف الذاكرة وتحديث الأسئلة
-                        </Button>
-                    </div>
-                    {/* --- نهاية زر التحديث المؤقت --- */}
                     {!selectedCompanyId || selectedCompanyId === 'all' ? (
                         <div className="flex items-center justify-center h-full">
                             <div className="text-center p-8 glass">
