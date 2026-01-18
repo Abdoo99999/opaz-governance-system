@@ -19,6 +19,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { useToast } from '@/hooks/use-toast';
 import RiskLandscape from './dashboard/RiskLandscape';
+import { useYear } from '@/context/YearContext';
 
 const complianceItems = [
     { id: 'auditor', question: 'compliance.questions.auditor' },
@@ -72,23 +73,14 @@ const initialComplianceState: ComplianceState = {
 const ComplianceMonitor: React.FC = () => {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
+    const { selectedYear } = useYear();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
     
-    const getStorageKey = (companyId: string) => `oia_compliance_${companyId}`;
+    const getStorageKey = (companyId: string, year: number) => `oia_compliance_${companyId}_${year}`;
 
-    const [complianceState, setComplianceState] = useState<ComplianceState>(() => {
-        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return initialComplianceState;
-        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
-        return saved ? JSON.parse(saved).compliance : initialComplianceState;
-    });
-
-    const [risks, setRisks] = useState<RiskFormValues[]>(() => {
-        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return [];
-        const saved = localStorage.getItem(getStorageKey(selectedCompanyId));
-        return saved ? JSON.parse(saved).risks : [];
-    });
-    
+    const [complianceState, setComplianceState] = useState<ComplianceState>(initialComplianceState);
+    const [risks, setRisks] = useState<RiskFormValues[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const { register, handleSubmit, control, reset, formState: { errors } } = useForm<RiskFormValues>({
@@ -107,7 +99,7 @@ const ComplianceMonitor: React.FC = () => {
     }, [risks]);
 
 
-    // RELOAD data when company changes
+    // RELOAD data when company or year changes
     useEffect(() => {
         if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
             setComplianceState(initialComplianceState);
@@ -115,21 +107,25 @@ const ComplianceMonitor: React.FC = () => {
             return;
         }
 
-        const storageKey = getStorageKey(selectedCompanyId);
-        const savedData = localStorage.getItem(storageKey);
+        const oldKey = `oia_compliance_${selectedCompanyId}`;
+        const newKey = getStorageKey(selectedCompanyId, selectedYear);
         
-        if (savedData) {
-            const { compliance, risks: savedRisks } = JSON.parse(savedData);
+        let savedDataStr = localStorage.getItem(newKey);
+        // Fallback to old key for migration
+        if (!savedDataStr) {
+            savedDataStr = localStorage.getItem(oldKey);
+        }
+        
+        if (savedDataStr) {
+            const { compliance, risks: savedRisks } = JSON.parse(savedDataStr);
             setComplianceState(compliance || initialComplianceState);
             setRisks(savedRisks || []);
         } else {
-            // CRITICAL: If no data exists, RESET the form
             setComplianceState(initialComplianceState);
             setRisks([]);
         }
-        // Also reset the form when company changes
         reset({ impact: 1, probability: 1, description: '', category: '', mitigation: '' });
-    }, [selectedCompanyId, reset]);
+    }, [selectedCompanyId, selectedYear, reset]);
 
     const handleSave = () => {
         if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
@@ -138,7 +134,7 @@ const ComplianceMonitor: React.FC = () => {
             compliance: complianceState,
             risks: risks,
         };
-        const storageKey = getStorageKey(selectedCompanyId);
+        const storageKey = getStorageKey(selectedCompanyId, selectedYear);
         localStorage.setItem(storageKey, JSON.stringify(dataToSave));
 
         toast({
@@ -161,7 +157,7 @@ const ComplianceMonitor: React.FC = () => {
             risks: newRisks,
         };
         if(selectedCompanyId && selectedCompanyId !== 'all') {
-            localStorage.setItem(getStorageKey(selectedCompanyId), JSON.stringify(dataToSave));
+            localStorage.setItem(getStorageKey(selectedCompanyId, selectedYear), JSON.stringify(dataToSave));
         }
 
         setIsModalOpen(false);

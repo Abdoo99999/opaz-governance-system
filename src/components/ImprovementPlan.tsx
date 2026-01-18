@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/app/page';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
+import { useYear } from '@/context/YearContext';
 
 type Status = 'todo' | 'in-progress' | 'done';
 type Priority = 'Critical' | 'High' | 'Medium' | 'Low';
@@ -339,10 +340,11 @@ const CompleteTaskModal = ({ isOpen, onClose, onComplete, task }: { isOpen: bool
 export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
+    const { selectedYear } = useYear();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
     
-    const getStorageKey = (companyId: string) => `oia_improvement_plan_${companyId}`;
+    const getStorageKey = (companyId: string, year: number) => `oia_improvement_plan_${companyId}_${year}`;
     
     const [tasks, setTasks] = useState<Task[]>([]);
     
@@ -352,21 +354,29 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
     const [draggedTask, setDraggedTask] = useState<Task | null>(null);
 
 
-    // RELOAD data when company changes
+    // RELOAD data when company or year changes
     useEffect(() => {
         if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
             setTasks([]);
             return;
         }
 
-        const storageKey = getStorageKey(selectedCompanyId);
-        const savedData = localStorage.getItem(storageKey);
-        let existingTasks: Task[] = savedData ? JSON.parse(savedData) : [];
+        const oldKey = `oia_improvement_plan_${selectedCompanyId}`;
+        const newKey = getStorageKey(selectedCompanyId, selectedYear);
+        
+        let savedDataStr = localStorage.getItem(newKey);
+        // Fallback to old key for migration
+        if (!savedDataStr) {
+            savedDataStr = localStorage.getItem(oldKey);
+        }
+        
+        let existingTasks: Task[] = savedDataStr ? JSON.parse(savedDataStr) : [];
         const generatedTasks: Task[] = [];
         let nextId = existingTasks.length > 0 ? Math.max(...existingTasks.map(t => t.id)) + 1 : 1;
 
         // 1. Generate tasks from Assessment Gaps
-        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        const assessmentKey = `oia_assessment_${selectedCompanyId}_${selectedYear}`;
+        const assessmentStr = localStorage.getItem(assessmentKey);
         if (assessmentStr) {
             const assessmentData = JSON.parse(assessmentStr);
             const scores = assessmentData.scores || {};
@@ -394,7 +404,8 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         }
         
         // 2. Generate tasks from Compliance Gaps
-        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+        const complianceKey = `oia_compliance_${selectedCompanyId}_${selectedYear}`;
+        const complianceStr = localStorage.getItem(complianceKey);
         if (complianceStr) {
             const complianceData = JSON.parse(complianceStr);
             const complianceState = complianceData.compliance || {};
@@ -424,12 +435,12 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         const allTasks = [...existingTasks, ...generatedTasks];
         setTasks(allTasks);
 
-    }, [selectedCompanyId]);
+    }, [selectedCompanyId, selectedYear]);
 
     const handleSave = () => {
         if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
         
-        const storageKey = getStorageKey(selectedCompanyId);
+        const storageKey = getStorageKey(selectedCompanyId, selectedYear);
         localStorage.setItem(storageKey, JSON.stringify(tasks));
         
         toast({
@@ -463,7 +474,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         );
         setTasks(newTasks);
         if (selectedCompanyId && selectedCompanyId !== 'all') {
-            localStorage.setItem(getStorageKey(selectedCompanyId), JSON.stringify(newTasks));
+            localStorage.setItem(getStorageKey(selectedCompanyId, selectedYear), JSON.stringify(newTasks));
         }
         toast({ title: t('improvement.taskCompleted') });
         refreshData();

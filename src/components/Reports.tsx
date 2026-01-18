@@ -165,18 +165,21 @@ const Reports: React.FC = () => {
         }
 
         // --- Load Data from localStorage ---
-        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {}, isComplete: false };
 
-        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
 
-        const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
+        const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}_${selectedYear}`);
         const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
 
         const companiesStr = localStorage.getItem('oia_companies_registry');
         const allCompaniesData = companiesStr ? JSON.parse(companiesStr) : COMPANIES;
         const companyData = allCompaniesData.find((c: any) => c.id === selectedCompanyId);
+        
+        const financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+        const financialsData = financialsStr ? JSON.parse(financialsStr) : companyData;
         
         const allBoardMembersStr = localStorage.getItem('oia_board_members');
         const allBoardMembers: BoardMember[] = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : staticBoardMembers;
@@ -221,7 +224,7 @@ const Reports: React.FC = () => {
         AXES.forEach(a => sectorScoresByAxis[a.id] = []);
 
         allCompaniesData.forEach((comp: any) => {
-            const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+            const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
             if (compAssessmentStr) {
                 const compAssessmentData = JSON.parse(compAssessmentStr);
                 AXES.forEach(axis => {
@@ -295,9 +298,9 @@ const Reports: React.FC = () => {
         setCriticalRisksData(risks.filter((r: any) => r.impact * r.probability >= 15).sort((a:any, b:any) => (b.impact * b.probability) - (a.impact * a.probability)) as any);
 
         // 6. Financial Performance Chart
-        if (companyData) {
-            const revenue = companyData.revenue || 0;
-            const expenses = companyData.expenses || 0;
+        if (financialsData) {
+            const revenue = financialsData.revenue || 0;
+            const expenses = financialsData.expenses || 0;
             const netProfit = revenue - expenses;
             setFinancialPerformanceData([
                 { name: t('reports.financial.performance'), revenue, expenses, netProfit }
@@ -776,5 +779,3 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
-
-    

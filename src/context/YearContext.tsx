@@ -14,7 +14,7 @@ const availableYears = Array.from({ length: 7 }, (_, i) => 2024 + i); // 2024 to
 const YearContext = createContext<YearContextType | undefined>(undefined);
 
 export const YearProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState<number>(2026);
 
   const value = {
     selectedYear,
@@ -36,3 +36,4 @@ export const useYear = (): YearContextType => {
   }
   return context;
 };
+

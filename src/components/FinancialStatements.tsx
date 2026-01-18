@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useCompany } from '@/context/CompanyContext';
 import { Badge } from './ui/badge';
+import { useYear } from '@/context/YearContext';
 
 
 const cardVariants = {
@@ -42,9 +43,10 @@ const FinancialStatements: React.FC = () => {
   const { t, dir, language } = useLanguage();
   const { toast } = useToast();
   const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
+  const { selectedYear } = useYear();
   const selectedCompany = getSelectedCompany();
   
-  const getStorageKey = () => `oia_companies_registry`;
+  const getStorageKey = (companyId: string, year: number) => `oia_financials_${companyId}_${year}`;
 
   const [assets, setAssets] = useState<number | ''>('');
   const [liabilities, setLiabilities] = useState<number | ''>('');
@@ -56,34 +58,62 @@ const FinancialStatements: React.FC = () => {
   const [isDeclared, setIsDeclared] = useState(false);
   const [auditorName, setAuditorName] = useState('');
 
-  // Load data when company changes
+  // Load data when company or year changes
   useEffect(() => {
-    if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
-        // Reset fields if no company is selected
+    const resetState = () => {
         setAssets(''); setLiabilities(''); setRevenue(''); setExpenses('');
         setOperatingCash(''); setCapex(''); setDividends(0); setIsDeclared(false);
         setAuditorName('');
+    };
+
+    if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
+        resetState();
         return;
     }
 
-    const storageKey = getStorageKey();
-    const allCompaniesStr = localStorage.getItem(storageKey);
-    if (allCompaniesStr) {
-        const allCompanies = JSON.parse(allCompaniesStr);
-        const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
-        if(companyData) {
-            setAssets(companyData.authorizedCapital || '');
-            setLiabilities(companyData.liabilities || ''); // Assuming liabilities is a field
-            setRevenue(companyData.revenue || ''); // Assuming revenue is a field
-            setExpenses(companyData.expenses || ''); // Assuming expenses is a field
-            setOperatingCash(companyData.operatingCash || '');
-            setCapex(companyData.capex || '');
-            setDividends(companyData.dividends || 0);
-            setAuditorName(companyData.auditorName || '');
-            // We don't load 'isDeclared' state
+    const loadData = () => {
+        // Try loading year-specific data first
+        const yearStorageKey = getStorageKey(selectedCompanyId, selectedYear);
+        const yearFinancialsStr = localStorage.getItem(yearStorageKey);
+        
+        if (yearFinancialsStr) {
+            const data = JSON.parse(yearFinancialsStr);
+            setAssets(data.authorizedCapital || '');
+            setLiabilities(data.liabilities || '');
+            setRevenue(data.revenue || '');
+            setExpenses(data.expenses || '');
+            setOperatingCash(data.operatingCash || '');
+            setCapex(data.capex || '');
+            setDividends(data.dividends || 0);
+            setAuditorName(data.auditorName || '');
+            return;
         }
-    }
-  }, [selectedCompanyId]);
+
+        // Fallback to reading from the main company registry
+        const allCompaniesStr = localStorage.getItem('oia_companies_registry');
+        if (allCompaniesStr) {
+            const allCompanies = JSON.parse(allCompaniesStr);
+            const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
+            if (companyData) {
+                setAssets(companyData.authorizedCapital || '');
+                setLiabilities(companyData.liabilities || '');
+                setRevenue(companyData.revenue || '');
+                setExpenses(companyData.expenses || '');
+                setOperatingCash(companyData.operatingCash || '');
+                setCapex(companyData.capex || '');
+                setDividends(companyData.dividends || 0);
+                setAuditorName(companyData.auditorName || '');
+            } else {
+                 resetState();
+            }
+        } else {
+             resetState();
+        }
+    };
+    
+    loadData();
+
+  }, [selectedCompanyId, selectedYear]);
 
 
   const equity = useMemo(() => (Number(assets) || 0) - (Number(liabilities) || 0), [assets, liabilities]);
@@ -107,34 +137,20 @@ const FinancialStatements: React.FC = () => {
         return;
     }
     
-    const storageKey = getStorageKey();
-    const allCompaniesStr = localStorage.getItem(storageKey);
-    let allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
-    
-    const companyIndex = allCompanies.findIndex((c: any) => c.id === selectedCompanyId);
+    const storageKey = getStorageKey(selectedCompanyId, selectedYear);
+    const financialData = {
+        authorizedCapital: Number(assets) || 0,
+        liabilities: Number(liabilities) || 0,
+        revenue: Number(revenue) || 0,
+        expenses: Number(expenses) || 0,
+        operatingCash: Number(operatingCash) || 0,
+        capex: Number(capex) || 0,
+        dividends: Number(dividends) || 0,
+        lastROI: roi,
+        auditorName,
+    };
 
-    if (companyIndex > -1) {
-        const companyData = allCompanies[companyIndex];
-        const updatedCompany = {
-            ...companyData,
-            authorizedCapital: Number(assets) || 0,
-            liabilities: Number(liabilities) || 0,
-            revenue: Number(revenue) || 0,
-            expenses: Number(expenses) || 0,
-            operatingCash: Number(operatingCash) || 0,
-            capex: Number(capex) || 0,
-            dividends: Number(dividends) || 0,
-            lastROI: roi,
-            auditorName,
-        };
-        allCompanies[companyIndex] = updatedCompany;
-    } else {
-        // This case should ideally not happen if form is only shown for existing companies
-        toast({ title: t('common.errorTitle'), description: "Could not find company to update.", variant: 'destructive'});
-        return;
-    }
-
-    localStorage.setItem(storageKey, JSON.stringify(allCompanies));
+    localStorage.setItem(storageKey, JSON.stringify(financialData));
 
     toast({
       title: t('common.saveSuccessTitle'),

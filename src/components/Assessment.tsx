@@ -37,6 +37,7 @@ import { useCompany } from '@/context/CompanyContext';
 import { Badge } from './ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/app/page';
+import { useYear } from '@/context/YearContext';
 
 type Scores = { [key: number]: number };
 type Files = { [key: number]: File | { name: string; size: number } | null };
@@ -49,6 +50,7 @@ interface AssessmentProps {
 const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
+    const { selectedYear } = useYear();
     const { toast } = useToast();
     const selectedCompany = getSelectedCompany();
     const contentAreaRef = useRef<HTMLDivElement>(null);
@@ -61,28 +63,18 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
 
     const activeAxis = AXES[0].id;
 
-    const getAssessmentStorageKey = (companyId: string) => `oia_assessment_${companyId}`;
+    const getAssessmentStorageKey = (companyId: string, year: number) => `oia_assessment_${companyId}_${year}`;
 
-    const [scores, setScores] = useState<Scores>(() => {
-        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return {};
-        const saved = localStorage.getItem(getAssessmentStorageKey(selectedCompanyId));
-        return saved ? JSON.parse(saved).scores : {};
-    });
-    
+    const [scores, setScores] = useState<Scores>({});
     const [files, setFiles] = useState<Files>({});
-    
-    const [isAssessmentComplete, setIsAssessmentComplete] = useState<boolean>(() => {
-        if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') return false;
-        const saved = localStorage.getItem(getAssessmentStorageKey(selectedCompanyId));
-        return saved ? JSON.parse(saved).isComplete : false;
-    });
+    const [isAssessmentComplete, setIsAssessmentComplete] = useState<boolean>(false);
 
     const [showValidationModal, setShowValidationModal] = useState(false);
     const [indicatorToEdit, setIndicatorToEdit] = useState<Indicator | null>(null);
     const [isIndicatorModalOpen, setIsIndicatorModalOpen] = useState(false);
     const [currentActiveAxis, setCurrentActiveAxis] = useState(activeAxis);
 
-    // RELOAD data when company changes
+    // RELOAD data when company or year changes
     useEffect(() => {
         if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
             setScores({});
@@ -91,20 +83,26 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
             return;
         }
 
-        const storageKey = getAssessmentStorageKey(selectedCompanyId);
-        const savedData = localStorage.getItem(storageKey);
+        const oldKey = `oia_assessment_${selectedCompanyId}`;
+        const newKey = getAssessmentStorageKey(selectedCompanyId, selectedYear);
         
-        if (savedData) {
-            const { scores: savedScores, isComplete: savedIsComplete } = JSON.parse(savedData);
+        let savedDataStr = localStorage.getItem(newKey);
+        // Fallback to old key for migration
+        if (!savedDataStr) {
+            savedDataStr = localStorage.getItem(oldKey);
+        }
+
+        if (savedDataStr) {
+            const { scores: savedScores, isComplete: savedIsComplete } = JSON.parse(savedDataStr);
             setScores(savedScores || {});
             setIsAssessmentComplete(savedIsComplete || false);
-            setFiles({}); // Files are not persisted in localStorage
         } else {
             setScores({});
-            setFiles({});
             setIsAssessmentComplete(false);
         }
-    }, [selectedCompanyId]);
+        setFiles({}); // Files are not persisted in localStorage
+
+    }, [selectedCompanyId, selectedYear]);
     
     // Save indicators whenever they change
     useEffect(() => {
@@ -128,7 +126,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
             scores: scores,
             isComplete: isAssessmentComplete,
         };
-        const storageKey = getAssessmentStorageKey(selectedCompanyId);
+        const storageKey = getAssessmentStorageKey(selectedCompanyId, selectedYear);
         localStorage.setItem(storageKey, JSON.stringify(dataToSave));
         
         toast({
@@ -139,14 +137,14 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     };
     
     const handleSubmit = () => {
-        if (!selectedCompanyId) return;
+        if (!selectedCompanyId || selectedCompanyId === 'all') return;
         const missing = getMissingIndicators();
         if (missing.length > 0) {
             setShowValidationModal(true);
         } else {
             setIsAssessmentComplete(true);
             const dataToSave = { scores: scores, isComplete: true };
-            localStorage.setItem(getAssessmentStorageKey(selectedCompanyId), JSON.stringify(dataToSave));
+            localStorage.setItem(getAssessmentStorageKey(selectedCompanyId, selectedYear), JSON.stringify(dataToSave));
             toast({
                 title: t('assessment.successTitle'),
                 description: t('assessment.successDesc'),

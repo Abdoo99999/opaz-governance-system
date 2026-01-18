@@ -118,7 +118,7 @@ const Dashboard = () => {
     let sectorScoresByAxis: { [key: number]: number[] } = {};
     AXES.forEach(a => sectorScoresByAxis[a.id] = []);
     allCompanies.forEach((comp: any) => {
-         const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+         const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
          if (compAssessmentStr) {
              const compAssessmentData = JSON.parse(compAssessmentStr);
              AXES.forEach(axis => {
@@ -141,14 +141,17 @@ const Dashboard = () => {
         const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
         if (!companyData) return;
 
-        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {} };
 
-        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
         
-        const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
+        const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}_${selectedYear}`);
         allImprovementTasks = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
+        
+        const financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+        const financialsData = financialsStr ? JSON.parse(financialsStr) : companyData;
         
         boardMembersArr = allBoardMembers.filter(m => m.companyId === selectedCompanyId);
         risksArr = complianceData.risks || [];
@@ -161,12 +164,14 @@ const Dashboard = () => {
         const scores = Object.values(assessmentData.scores || {}) as number[];
         maturityScoreVal = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / INDICATORS.length : 0;
         
-        totalAssetsVal = companyData.authorizedCapital || 0;
         omanizationRateVal = companyData.totalEmployees > 0 ? Math.round((companyData.omaniEmployees / companyData.totalEmployees) * 100) : 0;
-        netProfitVal = (companyData.revenue || 0) - (companyData.expenses || 0);
-        equityVal = (companyData.authorizedCapital || 0) - (companyData.liabilities || 0);
-        freeCashFlowVal = (companyData.operatingCash || 0) - (companyData.capex || 0);
-        lastROIVal = companyData.lastROI || 0;
+        
+        // Use financial data
+        totalAssetsVal = financialsData.authorizedCapital || 0;
+        netProfitVal = (financialsData.revenue || 0) - (financialsData.expenses || 0);
+        equityVal = (financialsData.authorizedCapital || 0) - (financialsData.liabilities || 0);
+        freeCashFlowVal = (financialsData.operatingCash || 0) - (financialsData.capex || 0);
+        lastROIVal = financialsData.lastROI || 0;
         
         icvData = {
           total: companyData.totalSpending || 0,
@@ -194,7 +199,7 @@ const Dashboard = () => {
         let totalSpendingAgg = 0, localSpendingAgg = 0, smeSpendingAgg = 0;
         
         allCompanies.forEach((comp: any) => {
-            const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+            const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
             if (assessmentStr) {
                 const assessmentData = JSON.parse(assessmentStr);
                 const scores = Object.values(assessmentData.scores || {}) as number[];
@@ -205,7 +210,7 @@ const Dashboard = () => {
                   allCompanyScores.push({ name_ar: comp.name_ar, name_en: comp.name_en, score: companyMaturity });
                 }
             }
-            const complianceStr = localStorage.getItem(`oia_compliance_${comp.id}`);
+            const complianceStr = localStorage.getItem(`oia_compliance_${comp.id}_${selectedYear}`);
             if (complianceStr) {
                 const complianceData = JSON.parse(complianceStr);
                 const complianceItems = Object.values(complianceData.compliance || {});
@@ -215,16 +220,20 @@ const Dashboard = () => {
             } else {
                  totalComplianceQuestions += 10; // still counts as 10 questions to be answered
             }
-            const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}`);
+            const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}_${selectedYear}`);
             if (improvementPlanStr) {
                 allImprovementTasks.push(...(JSON.parse(improvementPlanStr)));
             }
             
-            totalAssetsAgg += comp.authorizedCapital || 0;
-            totalNetProfitAgg += (comp.revenue || 0) - (comp.expenses || 0);
-            totalEquityAgg += (comp.authorizedCapital || 0) - (comp.liabilities || 0);
-            totalFreeCashFlowAgg += (comp.operatingCash || 0) - (comp.capex || 0);
-            totalROIAgg += comp.lastROI || 0;
+            const financialsStr = localStorage.getItem(`oia_financials_${comp.id}_${selectedYear}`);
+            const financialsData = financialsStr ? JSON.parse(financialsStr) : comp;
+
+            totalAssetsAgg += financialsData.authorizedCapital || 0;
+            totalNetProfitAgg += (financialsData.revenue || 0) - (financialsData.expenses || 0);
+            totalEquityAgg += (financialsData.authorizedCapital || 0) - (financialsData.liabilities || 0);
+            totalFreeCashFlowAgg += (financialsData.operatingCash || 0) - (financialsData.capex || 0);
+            totalROIAgg += financialsData.lastROI || 0;
+
             totalOmanizationAgg += comp.totalEmployees > 0 ? Math.round((comp.omaniEmployees / comp.totalEmployees) * 100) : 0;
             totalSpendingAgg += comp.totalSpending || 0;
             localSpendingAgg += comp.localSpending || 0;
@@ -509,34 +518,8 @@ const Dashboard = () => {
           </motion.div>
       </div>
 
-       {/* Row 3: Highlights & Action */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-                <Card className={"glass h-full"}>
-                    <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={0} outerRadius={90} paddingAngle={5} labelLine={false} label={renderCustomizedLabel}>
-                                    {(boardIndependenceData as any[]).map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip {...tooltipStyle}/>
-                                <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
-             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
-              <TopPerformers data={topPerformers} />
-            </motion.div>
-      </div>
       
-      {/* Row 4: Strategic Radar */}
+      {/* Row 3: Highlights & Action -> NOW RADAR */}
        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9} className="lg:col-span-3">
         <Card className={"glass h-full"}>
           <CardHeader>
@@ -564,8 +547,59 @@ const Dashboard = () => {
         </Card>
       </motion.div>
 
+       {/* Row 4: Board & Top Performers */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+                <Card className={"glass h-full"}>
+                    <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={0} outerRadius={90} paddingAngle={5} labelLine={false} label={renderCustomizedLabel}>
+                                    {(boardIndependenceData as any[]).map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip {...tooltipStyle}/>
+                                <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
+             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+              <TopPerformers data={topPerformers} />
+            </motion.div>
+      </div>
+      
+
       {/* Row 5: Operations & Governance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+                <Card className={"glass h-full"}>
+                    <CardHeader>
+                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-8 pt-6">
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={icvBarData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                                <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} />
+                                <YAxis tickFormatter={(value) => `${value / 1_000_000}M`} tick={{ fill: '#A0A0A0' }} />
+                                <Tooltip {...tooltipStyle} formatter={currencyFormatter} />
+                                <Bar dataKey="value" name={t('dashboard.icv.spending')} barSize={40} radius={[4, 4, 0, 0]}>
+                                    {(icvBarData as any[]).map((entry, index) => {
+                                        const colors = ['#6b7280', '#3b82f6', '#00E096'];
+                                        return <Cell key={`cell-${index}`} fill={colors[index]} />;
+                                    })}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+            </motion.div>
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
               <Card className={"glass h-full"}>
                   <CardHeader>
@@ -602,29 +636,6 @@ const Dashboard = () => {
                   </CardContent>
               </Card>
           </motion.div>
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
-                <Card className={"glass h-full"}>
-                    <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-8 pt-6">
-                        <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={icvBarData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                                <XAxis dataKey="name" tick={{ fill: '#A0A0A0', fontSize: 12 }} />
-                                <YAxis tickFormatter={(value) => `${value / 1_000_000}M`} tick={{ fill: '#A0A0A0' }} />
-                                <Tooltip {...tooltipStyle} formatter={currencyFormatter} />
-                                <Bar dataKey="value" name={t('dashboard.icv.spending')} barSize={40} radius={[4, 4, 0, 0]}>
-                                    {(icvBarData as any[]).map((entry, index) => {
-                                        const colors = ['#6b7280', '#3b82f6', '#00E096'];
-                                        return <Cell key={`cell-${index}`} fill={colors[index]} />;
-                                    })}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
        </div>
 
       {/* Row 6: Risk and Compliance */}
@@ -708,5 +719,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
