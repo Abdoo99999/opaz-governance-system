@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -225,7 +226,8 @@ const Dashboard = () => {
                 allRisksAgg.push(...(complianceData.risks || []));
             }
             // Improvement
-             if (improvementPlanStr) {
+            const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}`);
+            if (improvementPlanStr) {
                 allImprovementTasksAgg.push(...(JSON.parse(improvementPlanStr)));
             }
             // Financials from company object
@@ -704,3 +706,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    
