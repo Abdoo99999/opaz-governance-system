@@ -27,7 +27,7 @@ export const translations = {
       omanization: "نسبة التعمين",
       compliance: "حالة الامتثال",
       urgentAlerts: "تنبيهات عاجلة",
-      totalAssets: "إجمالي الأصول",
+      totalAssets: "إجمالي الأصول (ر.ع)",
       nationalWorkforce: "من إجمالي القوى العاملة",
       activeRisks: "مخاطر نشطة مسجلة",
       overallScore: "متوسط نتيجة التقييم",
@@ -571,7 +571,7 @@ export const translations = {
       omanization: "Omanization Rate",
       compliance: "Compliance Status",
       urgentAlerts: "Urgent Alerts",
-      totalAssets: "Total Assets",
+      totalAssets: "Total Assets (OMR)",
       nationalWorkforce: "of total workforce",
       activeRisks: "Active risks logged",
       overallScore: "Overall assessment score",
@@ -592,7 +592,7 @@ export const translations = {
       },
       icv: {
           title: "Tenders & Local Spending",
-          totalTenders: "Total",
+          totalTenders: "Total Tenders",
           omanizationRate: "Omanization Rate",
           smeSpending: "SMEs",
           localSpending: "Local Companies",
@@ -601,7 +601,7 @@ export const translations = {
           target: "Target"
       },
       financial: {
-        hubTitle: "Financial Position Hub",
+        hubTitle: "Financial Performance Hub",
         netProfit: "Net Profit",
         equity: "Equity",
         freeCashFlow: "Free Cash Flow",

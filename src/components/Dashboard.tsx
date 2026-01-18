@@ -67,6 +67,8 @@ const initialDashboardData = {
   risks: [],
   lastROI: 0,
   netProfit: 0,
+  equity: 0,
+  freeCashFlow: 0,
   smeSpending: 0,
   boardOmanization: 0,
 };
@@ -230,6 +232,8 @@ const Dashboard = () => {
         const compliantItemsCount = complianceItems.filter(v => v === true).length;
         
         const netProfit = (companyData?.revenue || 0) - (companyData?.expenses || 0);
+        const equity = (companyData?.authorizedCapital || 0) - (companyData?.liabilities || 0);
+        const freeCashFlow = (companyData?.operatingCash || 0) - (companyData?.capex || 0);
         
         const totalSpending = companyData?.totalSpending || 0;
         const localSpending = companyData?.localSpending || 0;
@@ -243,13 +247,15 @@ const Dashboard = () => {
 
         setDashboardData({
             maturityScore: parseFloat(currentMaturityScore.toFixed(1)),
-            totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital / 1_000_000 : 0,
+            totalAssets: companyData?.authorizedCapital ? companyData.authorizedCapital : 0,
             omanizationRate: omanizationRate || 0,
             compliantItems: compliantItemsCount,
             totalComplianceItems: complianceItems.length || 10,
             risks: complianceData?.risks || [],
             lastROI: companyData?.lastROI || 0,
             netProfit: netProfit,
+            equity: equity,
+            freeCashFlow: freeCashFlow,
             smeSpending: (smeSpending / totalSpending * 100) || 0,
             boardOmanization: 85, // Dummy data
         });
@@ -262,6 +268,8 @@ const Dashboard = () => {
         let totalAssets = 0;
         let totalROI = 0;
         let totalNetProfit = 0;
+        let totalEquity = 0;
+        let totalFreeCashFlow = 0;
         let totalSmeSpending = 0;
         let totalSpending = 0;
         let allRisks: any[] = [];
@@ -294,7 +302,10 @@ const Dashboard = () => {
             totalOmanization += comp.omanization || 0;
             totalAssets += comp.authorizedCapital || 0;
             totalROI += comp.lastROI || 0;
-            totalNetProfit += (comp.revenue || 0) - (comp.expenses || 0);
+            const netProfit = (comp.revenue || 0) - (comp.expenses || 0);
+            totalNetProfit += netProfit;
+            totalEquity += (comp.authorizedCapital || 0) - (comp.liabilities || 0);
+            totalFreeCashFlow += (comp.operatingCash || 0) - (comp.capex || 0);
             totalSmeSpending += comp.smeSpending || 0;
             totalLocalSpending += comp.localSpending || 0;
             totalSpending += comp.totalSpending || 0;
@@ -334,13 +345,15 @@ const Dashboard = () => {
 
         setDashboardData({
             maturityScore: parseFloat(avgMaturity.toFixed(1)),
-            totalAssets: totalAssets / 1_000_000,
+            totalAssets: totalAssets,
             omanizationRate: Math.round(avgOmanization),
             compliantItems: totalCompliant,
             totalComplianceItems: totalItems || 10,
             risks: allRisks,
             lastROI: avgROI,
             netProfit: totalNetProfit,
+            equity: totalEquity,
+            freeCashFlow: totalFreeCashFlow,
             smeSpending: (totalSmeSpending / totalSpending) * 100 || 0,
             boardOmanization: 85, // Dummy data
         });
@@ -468,8 +481,8 @@ const Dashboard = () => {
                       <CheckCircle className="h-4 w-4 text-green-300/70" />
                   </CardHeader>
                   <CardContent className="z-10">
-                      <div className="text-4xl font-bold text-green-400">{dashboardData.totalAssets.toFixed(2)}M</div>
-                      <p className="text-xs text-green-200/60 mt-1">{t('dashboard.totalAssets')} (OMR)</p>
+                      <div className="text-4xl font-bold text-green-400">{currencyFormatter(dashboardData.totalAssets)}</div>
+                      <p className="text-xs text-green-200/60 mt-1">{t('dashboard.totalAssets')}</p>
                   </CardContent>
                   <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-20">
                     <ResponsiveContainer width="100%" height="100%">
@@ -546,9 +559,20 @@ const Dashboard = () => {
           </motion.div>
       </div>
 
-       {/* Row 2: Highlights & Action */}
+      {/* Row 2: Financial Hub */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+            <FinancialHub 
+                roi={dashboardData.lastROI} 
+                netProfit={dashboardData.netProfit}
+                equity={dashboardData.equity}
+                freeCashFlow={dashboardData.freeCashFlow}
+            />
+        </motion.div>
+
+
+       {/* Row 3: Highlights & Action */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
               <Card className={"glass h-full"}>
                   <CardHeader>
                       <CardTitle className="text-gold-400">{t('dashboard.improvementStatus.title')}</CardTitle>
@@ -574,13 +598,13 @@ const Dashboard = () => {
                   </CardContent>
               </Card>
           </motion.div>
-          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
               <TopPerformers />
           </motion.div>
       </div>
       
-      {/* Row 3: Strategic Radar */}
-      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+      {/* Row 4: Strategic Radar */}
+      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
         <Card className={"glass h-full"}>
           <CardHeader>
             <CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle>
@@ -607,9 +631,9 @@ const Dashboard = () => {
         </Card>
       </motion.div>
 
-      {/* Row 4: Operations & Governance */}
+      {/* Row 5: Operations & Governance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
                         <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
@@ -640,7 +664,7 @@ const Dashboard = () => {
                     </CardContent>
                 </Card>
             </motion.div>
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
                         <CardTitle className="text-gold-400">{t('dashboard.icv.title')}</CardTitle>
@@ -665,22 +689,22 @@ const Dashboard = () => {
             </motion.div>
        </div>
 
-      {/* Row 5: Compliance and Risk */}
+      {/* Row 6: Compliance and Risk */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-gold-400">
-                            <AlertTriangle />
-                             {t('dashboard.riskMap')}
-                        </CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-gold-400">
+                        <AlertTriangle />
+                         {t('dashboard.riskMap')}
+                    </CardTitle>
                     </CardHeader>
                     <CardContent className='h-[300px]'>
                         <RiskLandscape data={dashboardData.risks} />
                     </CardContent>
                 </Card>
             </motion.div>
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-gold-400">
@@ -707,8 +731,8 @@ const Dashboard = () => {
             </motion.div>
         </div>
       
-      {/* Row 6: Strategic Path */}
-      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11}>
+      {/* Row 7: Strategic Path */}
+      <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={12}>
           <Card className={"glass h-full"}>
               <CardHeader>
                   <CardTitle className="text-gold-400 flex items-center gap-2">
@@ -733,7 +757,7 @@ const Dashboard = () => {
                           <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
                           <Tooltip content={<CustomTooltip />} />
                           <Legend wrapperStyle={{ color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                          <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#fbbf24" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                          <Line type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#fbbf24" strokeWidth={3} />
                           <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#34d399" strokeWidth={2} dot={false} />
                           <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#818cf8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
                       </ComposedChart>
