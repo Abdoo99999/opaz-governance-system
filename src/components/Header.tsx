@@ -83,7 +83,26 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
                </div>
             </div>
           ) : (
-            userRole === 'company' && selectedCompany && <div className="text-xl font-bold">{language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}</div>
+            userRole === 'company' && selectedCompany && (
+                <div className="flex items-center gap-3">
+                    <div className="text-xl font-bold">{language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}</div>
+                    <div className="flex items-center gap-2 bg-royal-900/60 border border-white/10 rounded-lg h-12 px-3">
+                        <Calendar className="w-5 h-5 text-gold-400"/>
+                        <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
+                        <SelectTrigger className="w-[120px] bg-transparent border-0 text-white h-auto p-0">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-royal-900 text-white border-white/20">
+                            {availableYears.map((year) => (
+                            <SelectItem key={year} value={String(year)}>
+                                {t('reports.year')} {year}
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            )
           )}
         </div>
         <div className="flex items-center gap-4">
