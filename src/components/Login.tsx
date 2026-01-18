@@ -66,7 +66,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <form onSubmit={role === 'company' ? handleCompanyLogin : (e) => { e.preventDefault(); onLogin(role); }} className="space-y-6 pt-6">
             {role === 'company' && (
                 <div className="space-y-2">
-                    <label htmlFor="companySelect">{t('companyForm.identity.companyName')}</label>
+                    <label htmlFor="companySelect" className="block text-right px-1">{t('companyForm.identity.companyName')}</label>
                     <Select onValueChange={setSelectedCompany}>
                         <SelectTrigger id="companySelect" className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white">
                             <SelectValue placeholder={t('common.selectPlaceholder')} />
@@ -82,12 +82,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 </div>
             )}
             <div className="space-y-2">
-                <label htmlFor="username">{t('common.username')}</label>
-                <Input id="username" type="text" placeholder={t('common.usernamePlaceholder')} defaultValue={role === 'admin' ? 'admin' : 'company_user'} className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white" />
+                <label htmlFor="username" className="block text-right px-1">{t('common.username')}</label>
+                <Input id="username" type="text" placeholder={t('common.usernamePlaceholder')} defaultValue={role === 'admin' ? 'admin' : 'company_user'} className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white text-right" />
             </div>
             <div className="space-y-2">
-                <label htmlFor="password">{t('common.password')}</label>
-                <Input id="password" type="password" placeholder={t('common.passwordPlaceholder')} defaultValue="password" className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white" />
+                <label htmlFor="password" className="block text-right px-1">{t('common.password')}</label>
+                <Input id="password" type="password" placeholder={t('common.passwordPlaceholder')} defaultValue="password" className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white text-right" />
             </div>
             <Button type="submit" className="w-full h-12 bg-gold-500 text-royal-900 hover:bg-gold-400 text-lg font-bold">
                 {t('common.login')}
