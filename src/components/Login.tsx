@@ -21,8 +21,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div 
-        className="relative h-screen w-screen items-center justify-center bg-login-background bg-cover bg-center text-white" 
+        className="relative h-screen w-screen items-center justify-center bg-cover bg-center text-white" 
         dir={dir}
+        style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1620908480153-c5980a3734e5?q=80&w=2574&auto=format&fit=crop')",
+            backgroundColor: '#0f172a'
+        }}
     >
         <div className="absolute inset-0 bg-black/60" />
         <div className="relative z-10 flex h-full w-full items-center justify-center">
