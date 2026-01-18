@@ -6,9 +6,10 @@ export const translations = {
     menu: {
       dashboard: "لوحة القيادة",
       registry: "سجل الشركات",
-      board_directory: "سجل المجالس",
+      company_profile: "بيانات الشركة",
+      board_directory: "سجل المجلس",
       board_evaluation: "تقييم أداء المجلس",
-      assessment: "تقييم النضج",
+      assessment: "مؤشر التميز المؤسسي",
       compliance: "الامتثال والمخاطر",
       improvement: "خطة التحسين",
       financials: "القوائم المالية",
@@ -551,9 +552,10 @@ export const translations = {
     menu: {
       dashboard: "Dashboard",
       registry: "Company Registry",
-      board_directory: "Board Directory",
+      company_profile: "Company Profile",
+      board_directory: "Board Registry",
       board_evaluation: "Board Evaluation",
-      assessment: "Maturity Assessment",
+      assessment: "Institutional Excellence Index",
       compliance: "Compliance & Risk",
       improvement: "Improvement Plan",
       financials: "Financial Statements",
@@ -934,10 +936,10 @@ export const translations = {
             recommendation: "Recommended Action"
         },
         riskLevels: {
-            low: "Low",
-            medium: "Medium",
-            high: "High",
-            critical: "Critical"
+          low: "Low",
+          medium: "Medium",
+          high: "High",
+          critical: "Critical"
         },
         improvement: {
           completed: "Completed",

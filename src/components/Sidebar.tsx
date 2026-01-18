@@ -1,9 +1,8 @@
-
 "use client";
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Building2, ClipboardCheck, ShieldAlert, LineChart, Kanban, Settings, LogOut, FileText, Send, GitPullRequest, Lock, Users, ClipboardEdit } from 'lucide-react';
+import { LayoutDashboard, Building2, ShieldAlert, LineChart, Kanban, Settings, LogOut, FileText, Send, GitPullRequest, Lock, Users, ClipboardEdit, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { useLanguage } from '@/context/LanguageContext';
@@ -16,15 +15,15 @@ import type { SubmissionStatus } from '@/data/companies';
 const allMenuItems = [
   { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard', roles: ['admin'], requiredStatus: 'none' },
   { name: 'registry', icon: Building2, view: 'companies', roles: ['admin', 'company'], requiredStatus: 'profile' },
-  { name: 'board_directory', icon: Users, view: 'board-directory', roles: ['admin'], requiredStatus: 'none' },
-  { name: 'board_evaluation', icon: ClipboardEdit, view: 'board-evaluation', roles: ['admin'], requiredStatus: 'none' },
-  { name: 'assessment', icon: ClipboardCheck, view: 'maturity-assessment', roles: ['admin', 'company'], requiredStatus: 'assessment' },
+  { name: 'board_directory', icon: Users, view: 'board-directory', roles: ['admin', 'company'], requiredStatus: 'none' },
+  { name: 'board_evaluation', icon: ClipboardEdit, view: 'board-evaluation', roles: ['admin', 'company'], requiredStatus: 'none' },
+  { name: 'assessment', icon: Star, view: 'maturity-assessment', roles: ['admin', 'company'], requiredStatus: 'assessment' },
   { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor', roles: ['admin', 'company'], requiredStatus: 'compliance' },
   { name: 'financials', icon: FileText, view: 'financial-statements', roles: ['admin', 'company'], requiredStatus: 'financials' },
   { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'], requiredStatus: 'improvement' },
   { name: 'review', icon: Send, view: 'review-submit', roles: ['company'], requiredStatus: 'review' },
   { name: 'approvals', icon: GitPullRequest, view: 'approval-requests', roles: ['admin'], requiredStatus: 'none' },
-  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin'], requiredStatus: 'none' },
+  { name: 'reports', icon: LineChart, view: 'reports', roles: ['admin', 'company'], requiredStatus: 'none' },
   { name: 'settings', icon: Settings, view: 'settings', roles: ['admin'], requiredStatus: 'none' },
 ];
 
@@ -40,46 +39,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
   const { t } = useLanguage();
   const { selectedCompanyId, getCompanySubmissionStatus } = useCompany();
 
-  const getCompletionStatus = (companyId: string) => {
-    if (typeof window === 'undefined') return { 
-        profileComplete: false, 
-        assessmentComplete: false, 
-        complianceComplete: false, 
-        financialsComplete: false, 
-        improvementComplete: false,
-        submissionStatus: 'draft' as SubmissionStatus,
-    };
-
-    const companiesStr = localStorage.getItem('oia_companies_registry');
-    const companies = companiesStr ? JSON.parse(companiesStr) : [];
-    const companyData = companies.find((c: any) => c.id === companyId);
-    
-    const profileComplete = !!companyData?.legalForm;
-
-    const assessmentStr = localStorage.getItem(`oia_assessment_${companyId}`);
-    const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
-    const assessmentComplete = assessmentData.isComplete;
-
-    const complianceStr = localStorage.getItem(`oia_compliance_${companyId}`);
-    const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {} };
-    const complianceComplete = Object.keys(complianceData.compliance || {}).length > 0;
-    
-    const financialsComplete = !!companyData?.revenue;
-
-    const improvementStr = localStorage.getItem(`oia_improvement_plan_${companyId}`);
-    const improvementTasks = improvementStr ? JSON.parse(improvementStr) : [];
-    const improvementComplete = improvementTasks.length > 0;
-    
-    const submissionStatus = getCompanySubmissionStatus(companyId);
-
-    return { profileComplete, assessmentComplete, complianceComplete, financialsComplete, improvementComplete, submissionStatus };
-  };
-  
-  const completionStatus = userRole === 'company' && selectedCompanyId ? getCompletionStatus(selectedCompanyId) : null;
+  const completionStatus = userRole === 'company' && selectedCompanyId ? { submissionStatus: getCompanySubmissionStatus(selectedCompanyId) } : null;
 
   const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
   
-  // MOCK: Get pending count for admin
   const pendingApprovals = 3; 
 
   const isMenuItemDisabled = (item: (typeof menuItems)[0]) => {
@@ -96,37 +59,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
           return !allowedViews.includes(item.view);
       }
 
-      // Logic for draft/returned state (progressive enabling)
-      switch (item.requiredStatus) {
-          case 'profile':
-              return false; // Always enabled
-          case 'assessment':
-              return !completionStatus.profileComplete;
-          case 'compliance':
-              return !completionStatus.assessmentComplete;
-          case 'financials':
-              return !completionStatus.complianceComplete;
-          case 'improvement':
-              return !completionStatus.financialsComplete;
-          case 'review':
-              return !completionStatus.improvementComplete;
-          default:
-              return false;
-      }
+      // If status is 'draft' or 'returned', nothing is disabled.
+      return false;
   };
   
   const getDisabledTooltip = (item: (typeof menuItems)[0]): string => {
        if (isMenuItemDisabled(item)) {
            if (completionStatus?.submissionStatus === 'submitted' || completionStatus?.submissionStatus === 'approved') {
                return "البيانات قيد المراجعة، هذه الصفحة مقفلة حالياً.";
-           }
-           switch(item.requiredStatus) {
-               case 'assessment': return "يرجى إكمال بيانات الشركة أولاً";
-               case 'compliance': return "يرجى إكمال واعتماد تقييم النضج أولاً";
-               case 'financials': return "يرجى حفظ بيانات الامتثال والمخاطر أولاً";
-               case 'improvement': return "يرجى إنشاء وحفظ خطة التحسين أولاً";
-               case 'review': return "يرجى إنشاء وحفظ خطة التحسين أولاً";
-               default: return "أكمل الخطوة السابقة أولاً";
            }
        }
        return '';
@@ -155,6 +95,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
               {menuItems.map((item) => {
                 const isDisabled = isMenuItemDisabled(item);
                 const tooltipContent = getDisabledTooltip(item);
+                const label = (userRole === 'company' && item.name === 'registry') ? t('menu.company_profile') : t(`menu.${item.name}`);
+
 
                 const menuItemContent = (
                     <button
@@ -170,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                     >
                       {isDisabled && !isOpen ? <Lock className="w-6 h-6 ml-4" /> : <item.icon className="w-6 h-6 ml-4" />}
                       <span className={cn("font-medium mr-4 transition-opacity duration-300 flex-1 text-right", !isOpen && 'opacity-0')}>
-                        {t(`menu.${item.name}`)}
+                        {label}
                       </span>
                        {isDisabled && isOpen && <Lock size={16} />}
                       {item.name === 'approvals' && pendingApprovals > 0 && isOpen && (
