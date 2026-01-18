@@ -46,6 +46,7 @@ import type { Task } from '@/components/ImprovementPlan';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
 import { COMPANIES } from '@/data/companies';
+import { BOARD_MEMBERS as staticBoardMembers, BoardMember } from '@/data/board-members';
 
 const cardVariants = {
   hidden: { y: 20, opacity: 0 },
@@ -176,6 +177,11 @@ const Reports: React.FC = () => {
         const companiesStr = localStorage.getItem('oia_companies_registry');
         const allCompaniesData = companiesStr ? JSON.parse(companiesStr) : COMPANIES;
         const companyData = allCompaniesData.find((c: any) => c.id === selectedCompanyId);
+        
+        const allBoardMembersStr = localStorage.getItem('oia_board_members');
+        const allBoardMembers: BoardMember[] = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : staticBoardMembers;
+        const companyBoardMembers = allBoardMembers.filter(m => m.companyId === selectedCompanyId);
+
 
         // --- Process Data ---
 
@@ -184,8 +190,10 @@ const Reports: React.FC = () => {
         const totalScore = scores.reduce((sum, score) => sum + score, 0);
         const maturity = scores.length > 0 ? totalScore / INDICATORS.length : 0;
         
+        const totalComplianceQuestions = 10;
         const complianceItems = Object.values(complianceData.compliance || {});
-        const complianceRate = complianceItems.length > 0 ? (complianceItems.filter((v: any) => v).length / complianceItems.length) * 100 : 0;
+        const compliantCount = complianceItems.filter((v: any) => v === true).length;
+        const complianceRate = (compliantCount / totalComplianceQuestions) * 100;
 
         const risks = complianceData.risks || [];
         
@@ -297,10 +305,13 @@ const Reports: React.FC = () => {
         }
 
         // 7. Board Composition Chart
+        const independentCount = companyBoardMembers.filter(m => m.type === 'Independent').length;
+        const nonIndependentCount = companyBoardMembers.length - independentCount;
         setBoardIndependenceData([
-            { name: t('dashboard.boardComposition.independent'), value: 60, color: '#D4AF37' },
-            { name: t('dashboard.boardComposition.nonIndependent'), value: 40, color: '#3b82f6' },
+            { name: t('dashboard.boardComposition.independent'), value: independentCount, color: '#D4AF37' },
+            { name: t('dashboard.boardComposition.nonIndependent'), value: nonIndependentCount, color: '#3b82f6' },
         ] as any);
+
 
         // 8. ICV Bar Chart
         if (companyData) {

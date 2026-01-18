@@ -38,7 +38,7 @@ import { useYear } from '@/context/YearContext';
 import TopPerformers from './dashboard/TopPerformers';
 import type { Task } from '@/components/ImprovementPlan';
 import { COMPANIES } from '@/data/companies';
-import { BOARD_MEMBERS } from '@/data/board-members';
+import { BOARD_MEMBERS as staticBoardMembers, BoardMember } from '@/data/board-members';
 import { RadarCustomTick } from './Reports';
 
 
@@ -102,14 +102,17 @@ const Dashboard = () => {
     // --- Central Data Loading ---
     const allCompaniesStr = localStorage.getItem('oia_companies_registry');
     const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : COMPANIES;
+    const allBoardMembersStr = localStorage.getItem('oia_board_members');
+    const allBoardMembers : BoardMember[] = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : staticBoardMembers;
     
     let maturityScoreVal = 0, totalAssetsVal = 0, omanizationRateVal = 0;
     let netProfitVal = 0, equityVal = 0, freeCashFlowVal = 0, lastROIVal = 0;
     let risksArr: any[] = [];
     let allImprovementTasks: Task[] = [];
-    let boardMembersArr = [];
+    let boardMembersArr: BoardMember[] = [];
     let icvData = { total: 0, local: 0, sme: 0 };
-    let complianceItemsArr: boolean[] = [];
+    let totalCompliantItems = 0;
+    let totalComplianceQuestions = 0;
 
     // --- Sector Average Calculation (Always needed for Radar) ---
     let sectorScoresByAxis: { [key: number]: number[] } = {};
@@ -147,9 +150,13 @@ const Dashboard = () => {
         const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
         allImprovementTasks = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
         
-        boardMembersArr = BOARD_MEMBERS.filter(m => m.companyId === selectedCompanyId);
+        boardMembersArr = allBoardMembers.filter(m => m.companyId === selectedCompanyId);
         risksArr = complianceData.risks || [];
-        complianceItemsArr = Object.values(complianceData.compliance || {});
+        
+        const complianceItems = Object.values(complianceData.compliance || {});
+        totalCompliantItems = complianceItems.filter(v => v === true).length;
+        totalComplianceQuestions = 10; // Fixed number of questions
+
 
         const scores = Object.values(assessmentData.scores || {}) as number[];
         maturityScoreVal = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / INDICATORS.length : 0;
@@ -201,8 +208,12 @@ const Dashboard = () => {
             const complianceStr = localStorage.getItem(`oia_compliance_${comp.id}`);
             if (complianceStr) {
                 const complianceData = JSON.parse(complianceStr);
-                complianceItemsArr.push(...Object.values(complianceData.compliance || {}));
+                const complianceItems = Object.values(complianceData.compliance || {});
+                totalCompliantItems += complianceItems.filter(v => v === true).length;
+                totalComplianceQuestions += 10;
                 allRisksAgg.push(...(complianceData.risks || []));
+            } else {
+                 totalComplianceQuestions += 10; // still counts as 10 questions to be answered
             }
             const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}`);
             if (improvementPlanStr) {
@@ -231,7 +242,7 @@ const Dashboard = () => {
         freeCashFlowVal = totalFreeCashFlowAgg;
         lastROIVal = totalROIAgg / numCompanies;
         risksArr = allRisksAgg;
-        boardMembersArr = BOARD_MEMBERS;
+        boardMembersArr = allBoardMembers;
         
         setTopPerformers(allCompanyScores.sort((a,b) => b.score - a.score).slice(0, 5));
         
@@ -266,9 +277,10 @@ const Dashboard = () => {
     ] as any);
 
     const independentCount = boardMembersArr.filter((m: any) => m.type === 'Independent').length;
+    const nonIndependentCount = boardMembersArr.length - independentCount;
     setBoardIndependenceData([
         { name: t('dashboard.boardComposition.independent'), value: independentCount, color: '#D4AF37' },
-        { name: t('dashboard.boardComposition.nonIndependent'), value: boardMembersArr.length - independentCount, color: '#3b82f6' },
+        { name: t('dashboard.boardComposition.nonIndependent'), value: nonIndependentCount, color: '#3b82f6' },
     ] as any);
     
     setIcvBarData([
@@ -278,8 +290,8 @@ const Dashboard = () => {
     ] as any);
     
     setCompliancePieData([
-      { name: t('dashboard.compliant'), value: complianceItemsArr.filter(v => v === true).length },
-      { name: t('dashboard.nonCompliant'), value: complianceItemsArr.filter(v => v === false).length },
+      { name: t('dashboard.compliant'), value: totalCompliantItems },
+      { name: t('dashboard.nonCompliant'), value: totalComplianceQuestions - totalCompliantItems },
     ] as any);
 
     const path = Array.from({ length: 7 }, (_, i) => {
@@ -499,9 +511,6 @@ const Dashboard = () => {
 
        {/* Row 3: Highlights & Action */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
-              <TopPerformers data={topPerformers} />
-            </motion.div>
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
@@ -521,6 +530,9 @@ const Dashboard = () => {
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
+            </motion.div>
+             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
+              <TopPerformers data={topPerformers} />
             </motion.div>
       </div>
       
@@ -542,7 +554,7 @@ const Dashboard = () => {
                 <PolarGrid stroke="rgba(255,255,255,0.2)" />
                 <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                 <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                <Tooltip {...tooltipStyle} formatter={(value: number) => value.toFixed(1)} />
+                <Tooltip {...tooltipStyle} formatter={(value: number) => Math.round(value)} />
                 <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
                 <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={3} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 5, fill: '#D4AF37', stroke: '#001220', strokeWidth: 2 }} />
                 <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeDasharray="8 8" strokeWidth={3} fill="transparent" dot={{ r: 5, fill: '#8b5cf6', stroke: '#001220', strokeWidth: 2 }}/>

@@ -17,7 +17,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { useYear } from '@/context/YearContext';
 import { useToast } from '@/hooks/use-toast';
-import { BOARD_MEMBERS, BoardMember } from '@/data/board-members';
+import { BOARD_MEMBERS as staticBoardMembers, BoardMember } from '@/data/board-members';
 import { cn } from '@/lib/utils';
 
 type Evaluation = {
@@ -36,6 +36,7 @@ const BoardEvaluation: React.FC = () => {
     const { toast } = useToast();
 
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+    const [boardMembers, setBoardMembers] = useState<BoardMember[]>([]);
     const [selectedMemberForNotes, setSelectedMemberForNotes] = useState<Evaluation | null>(null);
     const [notes, setNotes] = useState('');
     
@@ -56,15 +57,23 @@ const BoardEvaluation: React.FC = () => {
     };
 
     useEffect(() => {
-        if (!selectedCompanyId || selectedCompanyId === 'all') {
+        if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
             setEvaluations([]);
+            setBoardMembers([]);
             return;
         }
+
+        // Load members from Local Storage
+        const savedMembersStr = localStorage.getItem('oia_board_members');
+        const allMembers: BoardMember[] = savedMembersStr ? JSON.parse(savedMembersStr) : staticBoardMembers;
+        const companyMembers = allMembers.filter(m => m.companyId === selectedCompanyId);
+        setBoardMembers(companyMembers);
+        
+        // Load or initialize evaluations for these members
         const savedData = localStorage.getItem(getStorageKey());
         if (savedData) {
             setEvaluations(JSON.parse(savedData));
         } else {
-            const companyMembers = BOARD_MEMBERS.filter(m => m.companyId === selectedCompanyId);
             const initialEvals = companyMembers.map(member => ({
                 memberId: member.id,
                 meetingsHeld: 12,
@@ -77,13 +86,8 @@ const BoardEvaluation: React.FC = () => {
         }
     }, [selectedCompanyId, selectedYear]);
 
-    const filteredMembers = useMemo(() => {
-        if (selectedCompanyId === 'all') return [];
-        return BOARD_MEMBERS.filter(m => m.companyId === selectedCompanyId);
-    }, [selectedCompanyId]);
-
     const summaryData = useMemo(() => {
-        const scores = filteredMembers.map(member => {
+        const scores = boardMembers.map(member => {
             const evaluation = evaluations.find(e => e.memberId === member.id);
             return calculateTotalScore(evaluation);
         });
@@ -96,14 +100,14 @@ const BoardEvaluation: React.FC = () => {
             const maxScore = Math.max(...validScores);
             const topPerformerIndex = scores.indexOf(maxScore);
             if (topPerformerIndex !== -1) {
-                topPerformer = filteredMembers[topPerformerIndex];
+                topPerformer = boardMembers[topPerformerIndex];
             }
         }
         
         const reviewRequiredCount = scores.filter(s => s < 70).length;
 
         return { averageScore, topPerformer, reviewRequiredCount };
-    }, [evaluations, filteredMembers, calculateTotalScore]);
+    }, [evaluations, boardMembers]);
 
 
     const handleEvaluationChange = (memberId: number, field: keyof Evaluation, value: number | string) => {
@@ -221,7 +225,7 @@ const BoardEvaluation: React.FC = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {filteredMembers.map(member => {
+                                {boardMembers.map(member => {
                                     const evaluation = evaluations.find(e => e.memberId === member.id);
                                     const totalScore = calculateTotalScore(evaluation);
                                     const recommendation = getRecommendation(totalScore);
