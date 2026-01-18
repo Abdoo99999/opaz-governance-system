@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -40,6 +39,7 @@ import { cn } from '@/lib/utils';
 import FinancialHub from './dashboard/FinancialHub';
 import { useYear } from '@/context/YearContext';
 import { Progress } from '@/components/ui/progress';
+import TopPerformers from './dashboard/TopPerformers';
 
 
 const cardVariants = {
@@ -347,7 +347,7 @@ const Dashboard = () => {
   
   const compliancePieData = useMemo(() => [
       { name: t('dashboard.compliant'), value: dashboardData.compliantItems },
-      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.compliantItems },
+      { name: t('dashboard.nonCompliant'), value: dashboardData.totalComplianceItems - dashboardData.totalComplianceItems },
   ], [dashboardData.compliantItems, dashboardData.totalComplianceItems, t]);
   
    const boardIndependenceData = useMemo(() => [
@@ -657,41 +657,47 @@ const Dashboard = () => {
                 </Card>
             </motion.div>
         </div>
+      </div>
+      
+      {/* Strategic Path & Top Performers */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10} className="lg:col-span-8">
+              <Card className={"glass h-full"}>
+                  <CardHeader>
+                      <CardTitle className="text-gold-400 flex items-center gap-2">
+                          <Target />
+                          {t('dashboard.maturityPath')}
+                      </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                          <ComposedChart
+                              data={maturityPathData}
+                              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                          >
+                              <defs>
+                                  <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor="#E5C565" stopOpacity={0.8}/>
+                                      <stop offset="95%" stopColor="#E5C565" stopOpacity={0}/>
+                                  </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                              <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
+                              <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
+                              <Tooltip content={<CustomTooltip />} />
+                              <Legend wrapperStyle={{ color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
+                              <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                              <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#8884d8" strokeWidth={2} dot={false} />
+                              <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                          </ComposedChart>
+                      </ResponsiveContainer>
+                  </CardContent>
+              </Card>
+          </motion.div>
 
-        {/* Strategic Path Chart */}
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
-            <Card className={"glass h-full"}>
-                <CardHeader>
-                    <CardTitle className="text-gold-400 flex items-center gap-2">
-                        <Target />
-                        {t('dashboard.maturityPath')}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <ComposedChart
-                            data={maturityPathData}
-                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                        >
-                            <defs>
-                                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#E5C565" stopOpacity={0.8}/>
-                                    <stop offset="95%" stopColor="#E5C565" stopOpacity={0}/>
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                            <XAxis dataKey="year" tick={{ fill: '#A0A0A0' }} />
-                            <YAxis domain={[1, 5]} tick={{ fill: '#A0A0A0' }} />
-                            <Tooltip content={<CustomTooltip />} />
-                            <Legend wrapperStyle={{ color: '#FFFFFF' }} iconType="circle" />
-                            <Area type="monotone" dataKey="companyScore" name={language === 'ar' ? "أداء المؤسسة الحالية" : "Company Score"} stroke="#E5C565" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                             <Line type="monotone" dataKey="sectorAverage" name={language === 'ar' ? "المتوسط العام للقطاع" : "Sector Average"} stroke="#00E096" strokeWidth={2} dot={false} />
-                            <Line type="monotone" dataKey="target" name={language === 'ar' ? "المسار المستهدف" : "Target Path"} stroke="#8884d8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
-                        </ComposedChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
-        </motion.div>
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11} className="lg:col-span-4">
+              <TopPerformers />
+          </motion.div>
       </div>
     </div>
   );

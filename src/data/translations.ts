@@ -75,6 +75,9 @@ export const translations = {
             likely: 'محتمل',
             certain: 'مؤكد'
           }
+      },
+      top5: {
+        title: "أفضل 5 شركات أداءً"
       }
     },
     registry: {
@@ -613,6 +616,9 @@ export const translations = {
             likely: 'Likely',
             certain: 'Certain'
           }
+      },
+      top5: {
+        title: "Top 5 Performing Companies"
       }
     },
     registry: {
@@ -1077,5 +1083,3 @@ export const translations = {
     }
   }
 };
-
-    
