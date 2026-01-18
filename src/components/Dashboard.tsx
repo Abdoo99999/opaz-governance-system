@@ -72,6 +72,76 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 };
 
 
+const RadarCustomTick = (props: any) => {
+    const { payload, x, y, textAnchor, index } = props;
+    const value = payload.value;
+    const wordWrapThreshold = 12;
+
+    // Manual adjustments for position
+    let newX = x;
+    let newY = y;
+    const offset = 30; // 30px offset
+
+    const angle = (360 / AXES.length) * index;
+    
+    if (angle === 0) newY -= offset; // Top
+    else if (angle === 180) newY += offset; // Bottom
+    else if (angle > 0 && angle < 180) newX += offset; // Right side
+    else newX -= offset; // Left side
+    
+    // Fine-tune Y for corners
+    if (angle > 0 && angle < 90) newY += offset / 3;
+    if (angle > 90 && angle < 180) newY -= offset / 4;
+    if (angle > 180 && angle < 270) newY -= offset / 4;
+    if (angle > 270 && angle < 360) newY += offset / 3;
+    
+    if (value && value.length > wordWrapThreshold) {
+        const words = value.split(' ');
+        const lines = words.reduce((acc: string[], word: string) => {
+            if (acc.length === 0) {
+                acc.push(word);
+            } else {
+                const lastLine = acc[acc.length - 1];
+                if (lastLine.length + word.length + 1 > wordWrapThreshold) {
+                    acc.push(word);
+                } else {
+                    acc[acc.length - 1] = `${lastLine} ${word}`;
+                }
+            }
+            return acc;
+        }, []);
+
+        return (
+            <g transform={`translate(${newX}, ${newY})`}>
+                <text
+                    textAnchor={textAnchor}
+                    fill="#fff"
+                    fontSize="12px"
+                    className="print:fill-black"
+                >
+                    {lines.map((line, i) => (
+                        <tspan key={i} x={0} dy={i === 0 ? 0 : '1.2em'}>{line}</tspan>
+                    ))}
+                </text>
+            </g>
+        );
+    }
+
+    return (
+        <text
+            x={newX}
+            y={newY}
+            textAnchor={textAnchor}
+            fill="#fff"
+            fontSize="12px"
+            className="print:fill-black"
+        >
+            {value}
+        </text>
+    );
+};
+
+
 const Dashboard = () => {
   const { t, language } = useLanguage();
   const { getSelectedCompany, selectedCompanyId } = useCompany();
@@ -102,12 +172,34 @@ const Dashboard = () => {
     let currentMaturityScore = 0;
     const allCompaniesStr = localStorage.getItem('oia_companies_registry');
     const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : COMPANIES;
+    let sectorScoresByAxis: { [key: number]: number[] } = {};
+    AXES.forEach(a => sectorScoresByAxis[a.id] = []);
+
+    allCompanies.forEach((comp: any) => {
+         const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
+         if (compAssessmentStr) {
+             const compAssessmentData = JSON.parse(compAssessmentStr);
+             AXES.forEach(axis => {
+                const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
+                if(axisIndicators.length === 0) return;
+                const axisScores = axisIndicators.map(ind => compAssessmentData.scores?.[ind.id] || 0);
+                const axisSum = axisScores.reduce((a, b) => a + b, 0);
+                const axisAvg = axisSum / (axisIndicators.length * 5); // Score is out of 5
+                sectorScoresByAxis[axis.id].push(axisAvg);
+             });
+         }
+    });
+    const sectorAverageByAxis = AXES.map(axis => {
+        const avgs = sectorScoresByAxis[axis.id] || [];
+        const total = avgs.length > 0 ? avgs.reduce((a, b) => a + b, 0) / avgs.length : 0;
+        return total * 150; // Scale to 150 for radar
+    });
+
 
     if (selectedCompanyId && selectedCompanyId !== 'all') {
         const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
         if (!companyData) return;
         
-        // --- DATA FETCH FOR SINGLE COMPANY ---
         const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {} };
 
@@ -117,7 +209,6 @@ const Dashboard = () => {
         const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
         const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
 
-        // --- CALCULATIONS FOR SINGLE COMPANY ---
         const scores = Object.values(assessmentData.scores || {}) as number[];
         const totalScore = scores.reduce((sum, score) => sum + score, 0);
         currentMaturityScore = scores.length > 0 ? totalScore / INDICATORS.length : 0;
@@ -148,36 +239,13 @@ const Dashboard = () => {
             { name: t('dashboard.boardComposition.nonIndependent'), value: members.length - independentCount, color: '#3b82f6' },
         ] as any);
         
-        // Sector average for Radar
-        let sectorScoresByAxis: { [key: number]: number[] } = {};
-        AXES.forEach(a => sectorScoresByAxis[a.id] = []);
-
-        allCompanies.forEach((comp: any) => {
-             const compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
-             if (compAssessmentStr) {
-                 const compAssessmentData = JSON.parse(compAssessmentStr);
-                 AXES.forEach(axis => {
-                    const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
-                    if(axisIndicators.length === 0) return;
-                    const axisScores = axisIndicators.map(ind => compAssessmentData.scores?.[ind.id] || 0);
-                    const axisSum = axisScores.reduce((a, b) => a + b, 0);
-                    const axisAvg = axisSum / (axisIndicators.length * 5);
-                    sectorScoresByAxis[axis.id].push(axisAvg);
-                 });
-             }
-        });
-
-        const newRadarData = AXES.map(axis => {
+        const newRadarData = AXES.map((axis, index) => {
             const axisIndicators = INDICATORS.filter(ind => ind.axisId === axis.id);
             const companyAxisScores = axisIndicators.map(ind => assessmentData.scores?.[ind.id] || 0);
             const companyAxisSum = companyAxisScores.reduce((a, b) => a + b, 0);
             const companyValue = axisIndicators.length > 0 ? (companyAxisSum / (axisIndicators.length * 5)) * 150 : 0;
             
-            const sectorAvgs = sectorScoresByAxis[axis.id] || [];
-            const totalSectorAvg = sectorAvgs.length > 0 ? sectorAvgs.reduce((a, b) => a + b, 0) / sectorAvgs.length : 0;
-            const sectorValue = totalSectorAvg * 150;
-
-            return { subject: language === 'ar' ? axis.title_ar : axis.title_en, company: companyValue, sector: sectorValue, fullMark: 150 };
+            return { subject: language === 'ar' ? axis.title_ar : axis.title_en, company: companyValue, sector: sectorAverageByAxis[index], fullMark: 150 };
         });
         setRadarData(newRadarData as any);
         
@@ -204,7 +272,6 @@ const Dashboard = () => {
         let totalComplianceItemsCount = 0;
 
         allCompanies.forEach((comp: any) => {
-            // Assessment & Maturity
             const assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
             if (assessmentStr) {
                 const assessmentData = JSON.parse(assessmentStr);
@@ -216,7 +283,6 @@ const Dashboard = () => {
                   allCompanyScores.push({ name_ar: comp.name_ar, name_en: comp.name_en, score: companyMaturity });
                 }
             }
-            // Compliance
             const complianceStr = localStorage.getItem(`oia_compliance_${comp.id}`);
             if (complianceStr) {
                 const complianceData = JSON.parse(complianceStr);
@@ -225,12 +291,10 @@ const Dashboard = () => {
                 totalComplianceItemsCount += complianceItems.length;
                 allRisksAgg.push(...(complianceData.risks || []));
             }
-            // Improvement
             const improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}`);
             if (improvementPlanStr) {
                 allImprovementTasksAgg.push(...(JSON.parse(improvementPlanStr)));
             }
-            // Financials from company object
             totalAssetsAgg += comp.authorizedCapital || 0;
             totalNetProfitAgg += (comp.revenue || 0) - (comp.expenses || 0);
             totalEquityAgg += (comp.authorizedCapital || 0) - (comp.liabilities || 0);
@@ -243,7 +307,7 @@ const Dashboard = () => {
         });
 
         const numCompanies = allCompanies.length || 1;
-        currentMaturityScore = totalMaturity / numCompanies;
+        currentMaturityScore = totalMaturity / allCompanyScores.length;
         setMaturityScore(currentMaturityScore);
         setTotalAssets(totalAssetsAgg);
         setOmanizationRate(Math.round(totalOmanization / numCompanies));
@@ -271,12 +335,15 @@ const Dashboard = () => {
             { name: t('dashboard.boardComposition.nonIndependent'), value: allMembersCount - allIndependentCount, color: '#3b82f6' },
         ] as any);
 
-        const allCompaniesRadarData = AXES.map(axis => ({
-            subject: language === 'ar' ? axis.title_ar : axis.title_en,
-            company: Math.random() * 100 + 40,
-            sector: Math.random() * 110 + 20,
-            fullMark: 150
-        }));
+        const allCompaniesRadarData = AXES.map((axis, index) => {
+            const companyValue = index === 0 ? currentMaturityScore * 30 : Math.random() * 100 + 40;
+            return {
+                subject: language === 'ar' ? axis.title_ar : axis.title_en,
+                company: companyValue,
+                sector: sectorAverageByAxis[index],
+                fullMark: 150
+            };
+        });
         setRadarData(allCompaniesRadarData);
         
         setIcvBarData([
@@ -514,29 +581,34 @@ const Dashboard = () => {
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
               <Card className={"glass h-full"}>
                   <CardHeader>
-                      <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
+                      <CardTitle className="text-gold-400">{t('dashboard.improvementStatus.title')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
                           <PieChart>
                               <Pie 
-                                data={boardIndependenceData} 
+                                data={improvementPlanData} 
                                 dataKey="value" 
                                 nameKey="name" 
                                 cx="50%" 
                                 cy="50%" 
-                                innerRadius={0} 
-                                outerRadius={90} 
+                                innerRadius={70} 
+                                outerRadius={100} 
                                 paddingAngle={5} 
                                 labelLine={false}
-                                label={renderCustomizedLabel}
                               >
-                                  {boardIndependenceData.map((entry, index) => (
-                                      <Cell key={`cell-${index}`} fill={(entry as any).color} />
+                                  {(improvementPlanData as any[]).map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={entry.color} />
                                   ))}
                               </Pie>
                               <Tooltip {...tooltipStyle} />
                               <Legend iconType="circle" verticalAlign="bottom" wrapperStyle={{fontSize: '14px', color: 'white', paddingTop: '20px'}}/>
+                               <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
+                                    {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
+                                </text>
+                                <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
+                                  {t('reports.actions')}
+                                </text>
                           </PieChart>
                       </ResponsiveContainer>
                   </CardContent>
@@ -552,20 +624,20 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={400}>
-              <RadarChart cx="50%" cy="50%" outerRadius="65%" data={radarData}>
+               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
                 <defs>
                   <radialGradient id="radarFillGold">
-                    <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.4}/>
-                    <stop offset="100%" stopColor="#fbbf24" stopOpacity={0.1}/>
+                    <stop offset="0%" stopColor="#D4AF37" stopOpacity={0.4}/>
+                    <stop offset="100%" stopColor="#D4AF37" stopOpacity={0.1}/>
                   </radialGradient>
                 </defs>
                 <PolarGrid stroke="rgba(255,255,255,0.2)" />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: 'white', fontSize: 12 }} tickMargin={15} />
+                <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                 <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
                 <Tooltip {...tooltipStyle} />
                 <Legend layout="vertical" align="right" verticalAlign="middle" wrapperStyle={{ paddingRight: '20px', color: '#FFFFFF', lineHeight: '2.5rem' }} iconType="circle" />
-                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#fbbf24" strokeWidth={3} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 4, strokeWidth: 2 }} />
-                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeWidth={3} fill="transparent" dot={{ r: 4, strokeWidth: 2 }} />
+                <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={2} fill="url(#radarFillGold)" fillOpacity={0.6} dot={{ r: 4, strokeWidth: 2 }} />
+                <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeWidth={2} fill="transparent" strokeDasharray="5 5" dot={{ r: 4, strokeWidth: 2 }} />
               </RadarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -577,24 +649,18 @@ const Dashboard = () => {
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
                 <Card className={"glass h-full"}>
                     <CardHeader>
-                        <CardTitle className="text-gold-400">{t('dashboard.improvementStatus.title')}</CardTitle>
+                        <CardTitle className="text-gold-400">{t('dashboard.boardComposition.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
-                                <Pie data={improvementPlanData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={70} outerRadius={100} paddingAngle={5} labelLine={false}>
-                                    {(improvementPlanData as any[]).map((entry, index) => (
+                                <Pie data={boardIndependenceData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={0} outerRadius={90} paddingAngle={5} labelLine={false} label={renderCustomizedLabel}>
+                                    {(boardIndependenceData as any[]).map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.color} />
                                     ))}
                                 </Pie>
                                 <Tooltip {...tooltipStyle}/>
                                 <Legend iconType="circle" wrapperStyle={{ color: '#FFFFFF' }} />
-                                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-3xl font-bold">
-                                    {(improvementPlanData as any[]).reduce((acc, item) => acc + item.value, 0)}
-                                </text>
-                                <text x="50%" y="58%" textAnchor="middle" dominantBaseline="middle" className="fill-gray-400 text-sm">
-                                  {t('reports.actions')}
-                                </text>
                             </PieChart>
                         </ResponsiveContainer>
                     </CardContent>
