@@ -242,7 +242,7 @@ const BoardDirectory: React.FC = () => {
             const newId = boardMembers.length > 0 ? Math.max(...boardMembers.map(m => m.id)) + 1 : 1;
             newBoardMembers = [...boardMembers, {
                 id: newId,
-                avatar: `https://picsum.photos/seed/${newId}/100/100`,
+                avatar: "https://placehold.co/100x100/FFFFFF/FFFFFF.png",
                 ...data,
                 companyId: selectedCompanyId,
                 appointmentDate: format(data.appointmentDate, 'yyyy-MM-dd'),
@@ -442,7 +442,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                             </div>
                             <CardHeader className="flex flex-row items-center gap-4 p-4">
                                 <Avatar className="h-16 w-16 border-2 border-gold-500/30">
-                                    <AvatarImage src={member.avatar} alt={member.name_en} data-ai-hint="person portrait" />
+                                    <AvatarImage src={member.avatar} alt={member.name_en} />
                                     <AvatarFallback>{member.name_en.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
@@ -928,4 +928,5 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
 export default BoardDirectory;
 
+    
     
