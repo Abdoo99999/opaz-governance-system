@@ -242,7 +242,7 @@ const BoardDirectory: React.FC = () => {
             const newId = boardMembers.length > 0 ? Math.max(...boardMembers.map(m => m.id)) + 1 : 1;
             newBoardMembers = [...boardMembers, {
                 id: newId,
-                avatar: "https://placehold.co/100x100/FFFFFF/FFFFFF.png",
+                avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/epv2AAAAABJRU5ErkJggg==',
                 ...data,
                 companyId: selectedCompanyId,
                 appointmentDate: format(data.appointmentDate, 'yyyy-MM-dd'),
@@ -927,6 +927,3 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
 
 export default BoardDirectory;
-
-    
-    
