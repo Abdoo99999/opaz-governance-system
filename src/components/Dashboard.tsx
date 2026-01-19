@@ -91,6 +91,7 @@ const Dashboard = () => {
   const [netProfit, setNetProfit] = useState(0);
   const [equity, setEquity] = useState(0);
   const [freeCashFlow, setFreeCashFlow] = useState(0);
+  const [operatingCash, setOperatingCash] = useState(0);
   const [lastROI, setLastROI] = useState(0);
   const [topPerformers, setTopPerformers] = useState<any[]>([]);
   const [improvementPlanData, setImprovementPlanData] = useState([]);
@@ -112,7 +113,7 @@ const Dashboard = () => {
     const allBoardMembers : BoardMember[] = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : staticBoardMembers;
     
     let maturityScoreVal = 0, totalAssetsVal = 0, omanizationRateVal = 0;
-    let netProfitVal = 0, equityVal = 0, freeCashFlowVal = 0, lastROIVal = 0;
+    let netProfitVal = 0, equityVal = 0, freeCashFlowVal = 0, operatingCashVal = 0, lastROIVal = 0;
     let risksArr: any[] = [];
     let allImprovementTasks: Task[] = [];
     let boardMembersArr: BoardMember[] = [];
@@ -193,6 +194,7 @@ const Dashboard = () => {
         netProfitVal = (financialsData.revenue || 0) - (financialsData.expenses || 0);
         equityVal = (financialsData.authorizedCapital || 0) - (financialsData.liabilities || 0);
         freeCashFlowVal = (financialsData.operatingCash || 0) - (financialsData.capex || 0);
+        operatingCashVal = financialsData.operatingCash || 0;
         lastROIVal = financialsData.lastROI || 0;
         
         icvData = {
@@ -215,7 +217,7 @@ const Dashboard = () => {
         setRadarData(newRadarData as any);
 
     } else { // "All Companies" Aggregate Logic
-        let totalMaturityAgg = 0, totalOmanizationAgg = 0, totalAssetsAgg = 0, totalNetProfitAgg = 0, totalEquityAgg = 0, totalFreeCashFlowAgg = 0, totalROIAgg = 0;
+        let totalMaturityAgg = 0, totalOmanizationAgg = 0, totalAssetsAgg = 0, totalNetProfitAgg = 0, totalEquityAgg = 0, totalFreeCashFlowAgg = 0, totalOperatingCashAgg = 0, totalROIAgg = 0;
         let allRisksAgg: any[] = [];
         let allCompanyScores: any[] = [];
         let totalSpendingAgg = 0, localSpendingAgg = 0, smeSpendingAgg = 0;
@@ -266,6 +268,7 @@ const Dashboard = () => {
             totalNetProfitAgg += (financialsData.revenue || 0) - (financialsData.expenses || 0);
             totalEquityAgg += (financialsData.authorizedCapital || 0) - (financialsData.liabilities || 0);
             totalFreeCashFlowAgg += (financialsData.operatingCash || 0) - (financialsData.capex || 0);
+            totalOperatingCashAgg += financialsData.operatingCash || 0;
             totalROIAgg += financialsData.lastROI || 0;
 
             totalOmanizationAgg += comp.totalEmployees > 0 ? Math.round((comp.omaniEmployees / comp.totalEmployees) * 100) : 0;
@@ -283,6 +286,7 @@ const Dashboard = () => {
         netProfitVal = totalNetProfitAgg;
         equityVal = totalEquityAgg;
         freeCashFlowVal = totalFreeCashFlowAgg;
+        operatingCashVal = totalOperatingCashAgg;
         lastROIVal = totalROIAgg / numCompanies;
         risksArr = allRisksAgg;
         boardMembersArr = allBoardMembers;
@@ -307,6 +311,7 @@ const Dashboard = () => {
     setNetProfit(netProfitVal);
     setEquity(equityVal);
     setFreeCashFlow(freeCashFlowVal);
+    setOperatingCash(operatingCashVal);
     setLastROI(lastROIVal);
     setRisks(risksArr);
 
@@ -475,6 +480,10 @@ const Dashboard = () => {
     const compliancePercentage = totalComplianceItems > 0
         ? Math.round((compliantItems / totalComplianceItems) * 100)
         : 0;
+    
+    const freeCashFlowPercentage = operatingCash > 0 ? Math.min(100, (freeCashFlow / operatingCash) * 100) : 0;
+    const equityPercentage = totalAssets > 0 ? Math.min(100, (equity / totalAssets) * 100) : 0;
+
 
   return (
     <div className="p-4 md:p-6 lg:p-8 text-white space-y-8" ref={dashboardRef}>
@@ -585,25 +594,63 @@ const Dashboard = () => {
           
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
             <Card className={cn(cardBaseClasses, "border-purple-500/30 hover:border-purple-500/70")}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-purple-200/80 print-text-black">{t('dashboard.financial.freeCashFlow')}</CardTitle>
-                    <Wallet className="h-4 w-4 text-purple-300/70" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-4xl font-bold text-purple-400 print-text-black">{currencyFormatter(freeCashFlow)}</div>
-                    <p className="text-xs text-purple-200/60 print-text-black mt-1">{t('financials.cashflow.fcf')}</p>
+                <CardContent className="flex flex-col justify-end h-full p-4 text-center">
+                    <div className="flex-grow">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RadialBarChart
+                                innerRadius="70%"
+                                outerRadius="100%"
+                                data={[{ value: freeCashFlowPercentage }]}
+                                startAngle={90}
+                                endAngle={-270}
+                                barSize={12}
+                            >
+                                <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+                                <RadialBar
+                                    background={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                                    dataKey="value"
+                                    cornerRadius={6}
+                                >
+                                    <Cell fill="#8b5cf6" />
+                                </RadialBar>
+                            </RadialBarChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="mt-2">
+                        <p className="text-sm font-medium text-purple-200/80 print-text-black">{t('dashboard.financial.freeCashFlow')}</p>
+                        <p className="text-2xl font-bold text-purple-400 print-text-black">{currencyFormatter(freeCashFlow)}</p>
+                    </div>
                 </CardContent>
             </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
             <Card className={cn(cardBaseClasses, "border-sky-500/30 hover:border-sky-500/70")}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-sky-200/80 print-text-black">{t('dashboard.financial.equity')}</CardTitle>
-                    <Briefcase className="h-4 w-4 text-sky-300/70" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-4xl font-bold text-sky-400 print-text-black">{currencyFormatter(equity)}</div>
-                    <p className="text-xs text-sky-200/60 print-text-black mt-1">{t('financials.position.equity')}</p>
+                <CardContent className="flex flex-col justify-end h-full p-4 text-center">
+                    <div className="flex-grow">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RadialBarChart
+                                innerRadius="70%"
+                                outerRadius="100%"
+                                data={[{ value: equityPercentage }]}
+                                startAngle={90}
+                                endAngle={-270}
+                                barSize={12}
+                            >
+                                <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+                                <RadialBar
+                                    background={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                                    dataKey="value"
+                                    cornerRadius={6}
+                                >
+                                    <Cell fill="#3b82f6" />
+                                </RadialBar>
+                            </RadialBarChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="mt-2">
+                        <p className="text-sm font-medium text-sky-200/80 print-text-black">{t('dashboard.financial.equity')}</p>
+                        <p className="text-2xl font-bold text-sky-400 print-text-black">{currencyFormatter(equity)}</p>
+                    </div>
                 </CardContent>
             </Card>
           </motion.div>
@@ -635,14 +682,14 @@ const Dashboard = () => {
                                 data={[{ value: lastROI > 100 ? 100 : lastROI }]}
                                 startAngle={180}
                                 endAngle={0}
-                                barSize={12}
+                                barSize={16}
                                 cy="80%"
                             >
+                                <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
                                 <RadialBar
-                                    minAngle={15}
                                     background={{ fill: 'rgba(255, 255, 255, 0.1)' }}
                                     dataKey="value"
-                                    cornerRadius={6}
+                                    cornerRadius={8}
                                 >
                                     <Cell fill="#D4AF37" />
                                 </RadialBar>
@@ -859,4 +906,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
