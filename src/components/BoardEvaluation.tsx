@@ -297,7 +297,7 @@ const BoardEvaluation: React.FC = () => {
 
             <div className="mt-8 flex justify-end gap-4 print:hidden">
                 <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Save className="mr-2 h-5 w-5"/>
+                    <Save />
                     {t('board_evaluation.save')}
                 </Button>
                 <Button onClick={() => window.print()} variant="outline" className="text-white border-white/20 hover:bg-white/10">
@@ -320,7 +320,7 @@ const BoardEvaluation: React.FC = () => {
                     />
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setSelectedMemberForNotes(null)}>{t('common.cancel')}</Button>
-                        <Button onClick={handleSaveNotes} className="bg-gold-500 text-royal-900">{t('common.save')}</Button>
+                        <Button onClick={handleSaveNotes} className="bg-gold-500 text-royal-900"><Save /> {t('common.save')}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -329,3 +329,5 @@ const BoardEvaluation: React.FC = () => {
 };
 
 export default BoardEvaluation;
+
+    

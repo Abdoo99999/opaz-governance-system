@@ -171,7 +171,7 @@ const ApprovalRequests: React.FC<ApprovalRequestsProps> = ({ onNavigate }) => {
                                                             </div>
                                                             <DialogFooter>
                                                                 <Button variant="outline" onClick={() => setIsReturnModalOpen(false)}>{t('common.cancel')}</Button>
-                                                                <Button onClick={handleReturn} className="bg-gold-500 text-royal-900">{t('approvals.sendFeedback')}</Button>
+                                                                <Button onClick={handleReturn} className="bg-gold-500 text-royal-900"><Send /> {t('approvals.sendFeedback')}</Button>
                                                             </DialogFooter>
                                                         </DialogContent>
                                                     </Dialog>
@@ -215,3 +215,5 @@ const ApprovalRequests: React.FC<ApprovalRequestsProps> = ({ onNavigate }) => {
 };
 
 export default ApprovalRequests;
+
+    

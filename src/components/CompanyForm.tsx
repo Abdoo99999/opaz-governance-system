@@ -123,8 +123,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
                     {company ? `${t('common.edit')} ${language === 'ar' ? company.name_ar : company.name_en}` : t('registry.addNew')}
                 </h1>
                 <Button onClick={handleSubmit(onSave)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Save className="ml-2 h-4 w-4"/>
-                    {t('common.save')}
+                    <Save/> {t('common.save')}
                 </Button>
             </header>
 
@@ -296,6 +295,8 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
 };
 
 export default CompanyForm;
+
+    
 
     
 

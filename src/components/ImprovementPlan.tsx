@@ -534,9 +534,8 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
                             {t('improvement.addTask')}
                         </Button>
                     )}
-                     <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={!selectedCompanyId || selectedCompanyId === 'all'}>
-                        <Save className="ml-2 h-4 w-4"/>
-                        {t('common.save')}
+                     <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={!selectedCompanyId || selectedCompanyId === 'all'}>
+                        <Save/>{t('common.save')}
                      </Button>
                 </div>
             </header>
@@ -596,3 +595,5 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
+
+    

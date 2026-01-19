@@ -748,7 +748,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                 <Button type="button" variant="outline" className="text-white border-white/20">{t('common.cancel')}</Button>
               </DialogClose>
               <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                <Save className="mr-2 h-4 w-4"/>
+                <Save />
                 {t('common.save')}
               </Button>
           </DialogFooter>
@@ -822,7 +822,7 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
                         <Button type="button" variant="outline" className="text-white border-white/20">{t('common.cancel')}</Button>
                     </DialogClose>
                     <Button onClick={handleSave} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                        <Save className="mr-2 h-4 w-4"/>
+                        <Save />
                         {t('common.save')}
                     </Button>
                 </DialogFooter>
@@ -917,7 +917,7 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
                 <DialogFooter className="pt-4">
                     <Button type="button" variant="outline" onClick={onClose}>{t('common.cancel')}</Button>
-                    <Button type="submit" className="bg-gold-500 text-royal-900">{t('common.save')}</Button>
+                    <Button type="submit" className="bg-gold-500 text-royal-900"><Save /> {t('common.save')}</Button>
                 </DialogFooter>
             </form>
         </DialogContent>
@@ -927,3 +927,5 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
 
 export default BoardDirectory;
+
+    

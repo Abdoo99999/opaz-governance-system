@@ -208,7 +208,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
                         onClick={handleSendToOIA}
                         disabled={!isAllComplete}
                     >
-                        <Send className="ml-3"/>
+                        <Send />
                         {t('review.submitButton')}
                     </Button>
                     {!isAllComplete && <p className="text-yellow-400 text-sm mt-4">{t('review.subtitle')}</p>}
@@ -219,3 +219,5 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
 };
 
 export default ReviewSubmit;
+
+    

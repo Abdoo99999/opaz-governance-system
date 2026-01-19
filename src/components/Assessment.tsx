@@ -7,7 +7,7 @@ import { AXES, INDICATORS as initialIndicators, Indicator } from '@/lib/data/ind
 import IndicatorCard from './IndicatorCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle, ArrowRight, Save, Plus, Pencil, Trash2 } from 'lucide-react';
+import { CheckCircle, AlertTriangle, ArrowRight, Save, Plus, Pencil, Trash2, Send } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -293,7 +293,9 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                                  <Save className="ml-2 h-4 w-4"/>
                                  {t('assessment.saveDraft')}
                              </Button>
-                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>{t('assessment.submitFinal')}</Button>
+                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
+                                <Send /> {t('assessment.submitFinal')}
+                            </Button>
                         </div>
                     </div>
                 </header>
@@ -462,7 +464,7 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
                         <DialogClose asChild>
                            <Button type="button" variant="outline" className="text-white border-white/20">{t('common.cancel')}</Button>
                         </DialogClose>
-                        <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400">{t('common.save')}</Button>
+                        <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400"><Save /> {t('common.save')}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -472,3 +474,5 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
+
+    

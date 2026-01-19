@@ -414,7 +414,7 @@ const FinancialStatements: React.FC = () => {
                 disabled={!isDeclared}
                 onClick={handleSave}
               >
-                <Save className="ml-3" />
+                <Save />
                 {t('financials.declaration.saveButton')}
               </Button>
             </div>
@@ -426,3 +426,5 @@ const FinancialStatements: React.FC = () => {
 };
 
 export default FinancialStatements;
+
+    
