@@ -21,20 +21,32 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div 
-        className="relative h-screen w-screen items-center justify-center bg-cover bg-center text-white" 
-        dir={dir}
-        style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1620908480153-c5980a3734e5?q=80&w=2574&auto=format&fit=crop')",
-            backgroundColor: '#0f172a'
-        }}
+      className="min-h-screen w-full flex items-center justify-center relative overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, #0A1930 0%, #0f172a 100%)',
+        borderTop: '6px solid #C5A065',
+        backgroundColor: '#0A1930'
+      }}
+      dir={dir}
     >
-        <div className="absolute inset-0 bg-black/60" />
-        <div className="relative z-10 flex h-full w-full items-center justify-center">
+        <div style={{
+           position: 'absolute',
+           top: '-100px',
+           left: '-100px',
+           width: '300px',
+           height: '300px',
+           background: '#C5A065',
+           filter: 'blur(150px)',
+           opacity: '0.15',
+           zIndex: 0
+        }}></div>
+
+        <div className="relative z-10 w-full max-w-md">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="w-full max-w-lg"
+                className="w-full"
             >
                 <Card className="glass">
                     <CardHeader className="text-center pb-6 pt-8">
