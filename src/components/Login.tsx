@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,68 +17,6 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const { t, dir, language } = useLanguage();
   const [selectedCompany, setSelectedCompany] = useState<string | undefined>(undefined);
-
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden"
-     style={{
-       // Make the background distinct Navy (Not Black)
-       background: 'linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%)',
-     }}
-     dir={dir}
->
-    {/* 1. THE GOLD CEILING BAR (Physical Element - Cannot be hidden) */}
-    <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '12px', // Thick visible bar
-        backgroundColor: '#C5A065', // OIA Copper Gold
-        zIndex: 50, // Force on top
-        boxShadow: '0 0 15px rgba(197, 160, 101, 0.5)' // Gold Glow
-    }}></div>
-
-    {/* 2. THE AMBIENT GLOW (Behind the Form) */}
-    <div style={{
-        position: 'absolute',
-        width: '600px',
-        height: '600px',
-        background: 'radial-gradient(circle, rgba(30, 58, 138, 0.4) 0%, transparent 70%)',
-        zIndex: 0
-    }}></div>
-
-    {/* 3. THE LOGIN FORM */}
-    <div className="relative z-10 w-full max-w-md mt-10"> 
-       <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="w-full"
-        >
-            <Card className="glass">
-                <CardHeader className="text-center pb-6 pt-8">
-                    <CardTitle className="text-4xl font-bold text-gold-400">{t('appTitle')}</CardTitle>
-                    <p className="text-gray-300 text-md pt-2">{t('appSubtitle')}</p>
-                </CardHeader>
-                <CardContent>
-                    <Tabs defaultValue="admin" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 bg-royal-900/50">
-                            <TabsTrigger value="admin">{t('common.admin')}</TabsTrigger>
-                            <TabsTrigger value="company">{t('common.company')}</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="admin">
-                            {renderLoginForm('admin')}
-                        </TabsContent>
-                        <TabsContent value="company">
-                            {renderLoginForm('company')}
-                        </TabsContent>
-                    </Tabs>
-                </CardContent>
-            </Card>
-        </motion.div>
-    </div>
-</div>
-  );
 
   function renderLoginForm(role: UserRole) {
     const handleCompanyLogin = (e: React.FormEvent) => {
@@ -124,6 +61,56 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         </form>
     );
   }
+
+  return (
+    <div 
+      className="min-h-screen w-full flex items-center justify-center relative overflow-hidden"
+      style={{
+        // 1. Darker Sovereign Gradient (Almost Black/Navy)
+        background: 'linear-gradient(180deg, #0f172a 0%, #020617 100%)',
+      }}
+      dir={dir}
+    >
+        {/* The Gold Ceiling Bar (Keep it visible) */}
+        <div style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0,
+            height: '12px',
+            backgroundColor: '#C5A065',
+            zIndex: 50,
+            boxShadow: '0 0 20px rgba(197, 160, 101, 0.4)'
+        }}></div>
+
+        {/* The Login Form Container - SCALED UP */}
+        <div className="relative z-10 w-full max-w-lg transform scale-105"> 
+           <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-10 rounded-2xl shadow-2xl">
+              <CardHeader className="text-center pb-6 pt-0 px-0">
+                  <CardTitle className="text-4xl font-bold text-gold-400">{t('appTitle')}</CardTitle>
+                  <p className="text-gray-300 text-md pt-2">{t('appSubtitle')}</p>
+              </CardHeader>
+              <CardContent className="p-0">
+                  <Tabs defaultValue="admin" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 bg-royal-900/50">
+                          <TabsTrigger value="admin">{t('common.admin')}</TabsTrigger>
+                          <TabsTrigger value="company">{t('common.company')}</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="admin">
+                          {renderLoginForm('admin')}
+                      </TabsContent>
+                      <TabsContent value="company">
+                          {renderLoginForm('company')}
+                      </TabsContent>
+                  </Tabs>
+              </CardContent>
+           </div>
+        </div>
+        
+        {/* Ambient Background Glow (Subtle) */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+            background: 'radial-gradient(circle at 50% 50%, rgba(30, 58, 138, 0.15) 0%, transparent 60%)'
+        }}></div>
+    </div>
+  );
 };
 
 export default Login;
