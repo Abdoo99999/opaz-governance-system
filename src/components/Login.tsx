@@ -9,6 +9,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { UserRole } from '@/app/page';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { COMPANIES } from '@/data/companies';
+import { Send } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (role: UserRole, companyId?: string) => void;
@@ -56,6 +57,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 <Input id="password" type="password" placeholder={t('common.passwordPlaceholder')} defaultValue="password" className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white text-right" />
             </div>
             <Button type="submit" className="w-full h-12 bg-gold-500 text-royal-900 hover:bg-gold-400 text-lg font-bold">
+                <Send />
                 {t('common.login')}
             </Button>
         </form>
@@ -66,8 +68,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div 
       className="min-h-screen w-full flex items-center justify-center relative overflow-hidden"
       style={{
-        // 1. Darker Sovereign Gradient (Almost Black/Navy)
-        background: 'linear-gradient(180deg, #0f172a 0%, #020617 100%)',
+       // The "Middle Ground" Gradient: Rich deep navy fading to dark slate. 
+       // Not too bright blue, not too black.
+       background: 'linear-gradient(180deg, #172554 0%, #0b1121 100%)',
       }}
       dir={dir}
     >
