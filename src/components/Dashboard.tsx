@@ -380,12 +380,10 @@ const Dashboard = () => {
   
   const netProfitChartData = useMemo(() => {
     const base = netProfit > 0 ? netProfit : 1000000;
-    return [
-      { v: base * (Math.random() * 0.3 + 0.4) },
-      { v: base * (Math.random() * 0.4 + 0.6) },
-      { v: base * (Math.random() * 0.2 + 0.3) },
-      { v: base * (Math.random() * 0.5 + 0.5) },
-    ];
+    return Array.from({ length: 4 }, (_, i) => ({
+      name: `Q${i + 1}`,
+      v: base * (Math.random() * (0.4 - i * 0.05) + (0.6 - i * 0.1))
+    }));
   }, [netProfit]);
 
   const dashboardTitle = useMemo(() => {
@@ -595,7 +593,7 @@ const Dashboard = () => {
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
             <Card className={cn(cardBaseClasses, "border-purple-500/30 hover:border-purple-500/70")}>
                 <CardContent className="flex flex-col justify-end h-full p-4 text-center">
-                    <div className="flex-grow">
+                    <div className="flex-grow h-24">
                         <ResponsiveContainer width="100%" height="100%">
                             <RadialBarChart
                                 innerRadius="70%"
@@ -605,14 +603,19 @@ const Dashboard = () => {
                                 endAngle={-270}
                                 barSize={12}
                             >
+                                <defs>
+                                    <linearGradient id="fcfGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#a855f7" />
+                                        <stop offset="100%" stopColor="#8b5cf6" />
+                                    </linearGradient>
+                                </defs>
                                 <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
                                 <RadialBar
-                                    background={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                                    background={{ fill: 'rgba(139, 92, 246, 0.15)' }}
                                     dataKey="value"
                                     cornerRadius={6}
-                                >
-                                    <Cell fill="#8b5cf6" />
-                                </RadialBar>
+                                    fill="url(#fcfGradient)"
+                                />
                             </RadialBarChart>
                         </ResponsiveContainer>
                     </div>
@@ -626,7 +629,7 @@ const Dashboard = () => {
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
             <Card className={cn(cardBaseClasses, "border-sky-500/30 hover:border-sky-500/70")}>
                 <CardContent className="flex flex-col justify-end h-full p-4 text-center">
-                    <div className="flex-grow">
+                    <div className="flex-grow h-24">
                         <ResponsiveContainer width="100%" height="100%">
                             <RadialBarChart
                                 innerRadius="70%"
@@ -636,14 +639,19 @@ const Dashboard = () => {
                                 endAngle={-270}
                                 barSize={12}
                             >
+                                <defs>
+                                     <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#38bdf8" />
+                                        <stop offset="100%" stopColor="#3b82f6" />
+                                    </linearGradient>
+                                </defs>
                                 <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
                                 <RadialBar
-                                    background={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                                    background={{ fill: 'rgba(59, 130, 246, 0.15)' }}
                                     dataKey="value"
                                     cornerRadius={6}
-                                >
-                                    <Cell fill="#3b82f6" />
-                                </RadialBar>
+                                    fill="url(#equityGradient)"
+                                />
                             </RadialBarChart>
                         </ResponsiveContainer>
                     </div>
@@ -657,10 +665,16 @@ const Dashboard = () => {
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
             <Card className={cn(cardBaseClasses, "border-teal-500/30 hover:border-teal-500/70")}>
                 <CardContent className="flex flex-col justify-end h-full p-4 text-center">
-                    <div className="flex-grow">
+                    <div className="flex-grow h-24">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={netProfitChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                                <Bar dataKey="v" fill="#00E096" radius={[4, 4, 0, 0]}/>
+                                 <defs>
+                                     <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#2dd4bf" />
+                                        <stop offset="100%" stopColor="#14b8a6" />
+                                    </linearGradient>
+                                </defs>
+                                <Bar dataKey="v" fill="url(#profitGradient)" radius={[4, 4, 0, 0]}/>
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
@@ -673,26 +687,31 @@ const Dashboard = () => {
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
             <Card className={cn(cardBaseClasses, "border-amber-500/30 hover:border-amber-500/70")}>
-                <CardContent className="flex flex-col justify-end h-full p-4 text-center">
-                     <div className="flex-grow">
+                <CardContent className="flex flex-col justify-between h-full p-4 text-center">
+                     <div className="flex-grow h-24">
                          <ResponsiveContainer width="100%" height="100%">
                             <RadialBarChart
-                                innerRadius="70%"
-                                outerRadius="100%"
+                                innerRadius="80%"
+                                outerRadius="120%"
                                 data={[{ value: lastROI > 100 ? 100 : lastROI }]}
                                 startAngle={180}
                                 endAngle={0}
-                                barSize={16}
-                                cy="80%"
+                                barSize={20}
+                                cy="90%"
                             >
+                                <defs>
+                                    <radialGradient id="roiGradient" cx="50%" cy="50%" r="50%">
+                                        <stop offset="0%" stopColor="#FDE047" />
+                                        <stop offset="100%" stopColor="#D4AF37" />
+                                    </radialGradient>
+                                </defs>
                                 <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
                                 <RadialBar
-                                    background={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                                    background={{ fill: 'rgba(212, 175, 55, 0.15)' }}
                                     dataKey="value"
-                                    cornerRadius={8}
-                                >
-                                    <Cell fill="#D4AF37" />
-                                </RadialBar>
+                                    cornerRadius={10}
+                                    fill="url(#roiGradient)"
+                                />
                             </RadialBarChart>
                         </ResponsiveContainer>
                     </div>
