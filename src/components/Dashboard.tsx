@@ -31,7 +31,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon, Wallet, BarChart2, Briefcase, FileText, FileDown, Loader2 } from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon, Wallet, Briefcase, FileDown, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
@@ -372,6 +372,16 @@ const Dashboard = () => {
       uv: totalAssets * (Math.random() * 0.4 + 0.8)
     })), 
   [totalAssets]);
+  
+  const netProfitChartData = useMemo(() => {
+    const base = netProfit > 0 ? netProfit : 1000000;
+    return [
+      { v: base * (Math.random() * 0.3 + 0.4) },
+      { v: base * (Math.random() * 0.4 + 0.6) },
+      { v: base * (Math.random() * 0.2 + 0.3) },
+      { v: base * (Math.random() * 0.5 + 0.5) },
+    ];
+  }, [netProfit]);
 
   const dashboardTitle = useMemo(() => {
     if (selectedCompany) {
@@ -599,25 +609,50 @@ const Dashboard = () => {
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
             <Card className={cn(cardBaseClasses, "border-teal-500/30 hover:border-teal-500/70")}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-teal-200/80 print-text-black">{t('dashboard.financial.netProfit')}</CardTitle>
-                    <BarChart2 className="h-4 w-4 text-teal-300/70" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-4xl font-bold text-teal-400 print-text-black">{currencyFormatter(netProfit)}</div>
-                    <p className="text-xs text-teal-200/60 print-text-black mt-1">{t('financials.performance.netProfit')}</p>
+                <CardContent className="flex flex-col justify-end h-full p-4 text-center">
+                    <div className="flex-grow">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={netProfitChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                                <Bar dataKey="v" fill="#00E096" radius={[4, 4, 0, 0]}/>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="mt-2">
+                        <p className="text-sm font-medium text-teal-200/80 print-text-black">{t('dashboard.financial.netProfit')}</p>
+                        <p className="text-2xl font-bold text-teal-400 print-text-black">{currencyFormatter(netProfit)}</p>
+                    </div>
                 </CardContent>
             </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
             <Card className={cn(cardBaseClasses, "border-amber-500/30 hover:border-amber-500/70")}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-amber-200/80 print-text-black">{t('dashboard.financial.roi')}</CardTitle>
-                    <FileText className="h-4 w-4 text-amber-300/70" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-4xl font-bold text-amber-400 print-text-black">{lastROI.toFixed(1)}%</div>
-                    <p className="text-xs text-amber-200/60 print-text-black mt-1">{t('financials.kpi.roi')}</p>
+                <CardContent className="flex flex-col justify-end h-full p-4 text-center">
+                     <div className="flex-grow">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <RadialBarChart
+                                innerRadius="70%"
+                                outerRadius="100%"
+                                data={[{ value: lastROI > 100 ? 100 : lastROI }]}
+                                startAngle={180}
+                                endAngle={0}
+                                barSize={12}
+                                cy="80%"
+                            >
+                                <RadialBar
+                                    minAngle={15}
+                                    background={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+                                    dataKey="value"
+                                    cornerRadius={6}
+                                >
+                                    <Cell fill="#D4AF37" />
+                                </RadialBar>
+                            </RadialBarChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="mt-2">
+                         <p className="text-sm font-medium text-amber-200/80 print-text-black">{t('financials.kpi.roi')}</p>
+                         <p className="text-2xl font-bold text-amber-400 print-text-black">{lastROI.toFixed(1)}%</p>
+                    </div>
                 </CardContent>
             </Card>
           </motion.div>
@@ -825,4 +860,3 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-    
