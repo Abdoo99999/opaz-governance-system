@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useYear } from '@/context/YearContext';
 
 type ChecklistItem = {
     id: string;
@@ -36,7 +37,8 @@ interface ReviewSubmitProps {
 
 const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { selectedCompanyId, getSelectedCompany, dataVersion } = useCompany();
+    const { selectedYear } = useYear();
     const { toast } = useToast();
     
     const [companyData, setCompanyData] = useState<any>(null);
@@ -50,23 +52,57 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
                 setCompanyData(currentCompany);
             }
         }
-    }, [selectedCompanyId]);
+    }, [selectedCompanyId, dataVersion]);
 
     const checklist = useMemo((): ChecklistItem[] => {
         if (!selectedCompanyId || typeof window === 'undefined') return [];
+
+        // Storage keys
+        const assessmentKey = `oia_assessment_${selectedCompanyId}_${selectedYear}`;
+        const complianceKey = `oia_compliance_${selectedCompanyId}_${selectedYear}`;
+        const financialsKey = `oia_financials_${selectedCompanyId}_${selectedYear}`;
+        const evaluationKey = `board_evaluation_${selectedCompanyId}_${selectedYear}`;
+        const boardMembersKey = 'oia_board_members';
+        const companiesKey = 'oia_companies_registry';
+
+        // Get data from localStorage
+        const allCompaniesStr = localStorage.getItem(companiesKey);
+        const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
+        const companyDataForCheck = allCompanies.find((c: any) => c.id === selectedCompanyId);
         
-        const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+        const allBoardMembersStr = localStorage.getItem(boardMembersKey);
+        const allBoardMembers = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : [];
+        const companyMembers = allBoardMembers.filter((m: any) => m.companyId === selectedCompanyId);
+
+        const evaluationStr = localStorage.getItem(evaluationKey);
+        const evaluationData = evaluationStr ? JSON.parse(evaluationStr) : [];
+
+        const assessmentStr = localStorage.getItem(assessmentKey);
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
         
-        const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
-        const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
+        const complianceStr = localStorage.getItem(complianceKey);
+        const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {} };
 
+        const financialsStr = localStorage.getItem(financialsKey);
+        const financialsData = financialsStr ? JSON.parse(financialsStr) : {};
+
+        // Completion Logic
+        const profileComplete = !!companyDataForCheck?.legalForm;
+        const boardComplete = companyMembers.length > 0;
+        const evaluationComplete = evaluationData.length > 0;
+        const assessmentComplete = assessmentData.isComplete === true;
+        const complianceComplete = Object.keys(complianceData.compliance || {}).length === 10;
+        const financialsComplete = !!financialsData.auditorName;
+        
         return [
-            { id: 'profile', title: t('review.profile'), isComplete: true, view: 'companies' }, // Assuming always complete
-            { id: 'assessment', title: t('review.assessment'), isComplete: assessmentData.isComplete, view: 'maturity-assessment' },
-            { id: 'compliance', title: t('review.compliance'), isComplete: Object.keys(complianceData.compliance).length > 0, view: 'compliance-monitor' },
+            { id: 'profile', title: t('review.profile'), isComplete: profileComplete, view: 'companies' },
+            { id: 'board', title: t('menu.board_directory'), isComplete: boardComplete, view: 'board-directory' },
+            { id: 'evaluation', title: t('menu.board_evaluation'), isComplete: evaluationComplete, view: 'board-evaluation' },
+            { id: 'assessment', title: t('review.assessment'), isComplete: assessmentComplete, view: 'maturity-assessment' },
+            { id: 'compliance', title: t('review.compliance'), isComplete: complianceComplete, view: 'compliance-monitor' },
+            { id: 'financials', title: t('menu.financials'), isComplete: financialsComplete, view: 'financial-statements' },
         ];
-    }, [selectedCompanyId, t]);
+    }, [selectedCompanyId, t, selectedYear, dataVersion]);
 
     const isAllComplete = checklist.every(item => item.isComplete);
     const submissionStatus: SubmissionStatus = companyData?.submissionStatus || 'draft';
