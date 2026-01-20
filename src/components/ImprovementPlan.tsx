@@ -337,7 +337,7 @@ const CompleteTaskModal = ({ isOpen, onClose, onComplete, task }: { isOpen: bool
 };
 
 
-export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
+export default function ImprovementPlan({ userRole, onNavigate }: { userRole: UserRole, onNavigate: (view: string) => void; }) {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
     const { selectedYear } = useYear();
@@ -448,6 +448,7 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
             description: `${t('improvement.saveSuccessDesc')} ${selectedCompany?.name_ar}`,
         });
         refreshData();
+        onNavigate('review-submit');
     };
 
     const handleMoveTask = (taskId: number, newStatus: Status) => {
@@ -595,5 +596,3 @@ export default function ImprovementPlan({ userRole }: { userRole: UserRole }) {
         </div>
     );
 }
-
-    

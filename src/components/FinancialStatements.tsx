@@ -39,7 +39,11 @@ const cardVariants = {
   }),
 };
 
-const FinancialStatements: React.FC = () => {
+interface FinancialStatementsProps {
+    onNavigate: (view: string) => void;
+}
+
+const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate }) => {
   const { t, dir, language } = useLanguage();
   const { toast } = useToast();
   const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
@@ -157,6 +161,7 @@ const FinancialStatements: React.FC = () => {
       description: `${t('financials.saveSuccessDesc')} ${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en): ''}.`,
     });
     refreshData();
+    onNavigate('improvement-plan');
   };
 
   const handleNumericInput = (setter: React.Dispatch<React.SetStateAction<number | ''>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -426,5 +431,3 @@ const FinancialStatements: React.FC = () => {
 };
 
 export default FinancialStatements;
-
-    

@@ -150,6 +150,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                 description: t('assessment.successDesc'),
             });
             refreshData();
+            onNavigate('compliance-monitor');
         }
     };
 
@@ -336,15 +337,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                         </AnimatePresence>
                     )}
                 </div>
-
-                {isAssessmentComplete && selectedCompanyId && selectedCompanyId !== 'all' && (
-                     <div className="sticky bottom-0 z-10 p-4 bg-royal-900/80 backdrop-blur-sm border-t border-white/10 flex items-center justify-between">
-                        <span className="font-bold text-success">{t('assessment.locked')}</span>
-                        <Button onClick={() => onNavigate('compliance-monitor')} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                             {t('assessment.nextCompliance')} <ArrowRight className="mr-2 h-4 w-4" />
-                        </Button>
-                    </div>
-                )}
             </main>
             
             {/* Validation Modal */}
@@ -474,5 +466,3 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
-
-    

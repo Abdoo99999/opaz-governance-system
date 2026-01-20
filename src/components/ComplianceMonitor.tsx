@@ -42,6 +42,10 @@ const riskSchema = z.object({
     mitigation: z.string().min(1, 'خطة المعالجة مطلوبة'),
 });
 
+interface ComplianceMonitorProps {
+    onNavigate: (view: string) => void;
+}
+
 type RiskFormValues = z.infer<typeof riskSchema>;
 
 type ComplianceState = {
@@ -70,7 +74,7 @@ const initialComplianceState: ComplianceState = {
     minutesArchiving: false,
 };
 
-const ComplianceMonitor: React.FC = () => {
+const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => {
     const { t, language } = useLanguage();
     const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
     const { selectedYear } = useYear();
@@ -142,6 +146,7 @@ const ComplianceMonitor: React.FC = () => {
             description: `تم حفظ بيانات الامتثال والمخاطر لشركة ${selectedCompany?.name_ar}`,
         });
         refreshData();
+        onNavigate('financial-statements');
     };
 
     const handleComplianceChange = (id: keyof ComplianceState, value: boolean) => {
@@ -370,5 +375,3 @@ const ComplianceMonitor: React.FC = () => {
 };
 
 export default ComplianceMonitor;
-
-    

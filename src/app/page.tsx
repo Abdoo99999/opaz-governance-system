@@ -96,11 +96,11 @@ const AppContent = () => {
       case 'maturity-assessment':
         return <Assessment onNavigate={handleNavigate} userRole={userRole} />;
       case 'compliance-monitor':
-        return <ComplianceMonitor />;
+        return <ComplianceMonitor onNavigate={handleNavigate} />;
       case 'improvement-plan':
-        return <ImprovementPlan userRole={userRole}/>;
+        return <ImprovementPlan userRole={userRole} onNavigate={handleNavigate}/>;
       case 'financial-statements':
-        return <FinancialStatements />;
+        return <FinancialStatements onNavigate={handleNavigate}/>;
       case 'review-submit':
         return <ReviewSubmit onNavigate={handleNavigate} />;
       case 'approval-requests':
