@@ -63,15 +63,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
             const evaluationData = evaluationStr ? JSON.parse(evaluationStr) : [];
             const evaluationComplete = evaluationData.length > 0;
 
-            const assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+            let assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
+            if (!assessmentStr) {
+                assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+            }
             const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
             const assessmentComplete = assessmentData.isComplete === true;
             
-            const complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+            let complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
+             if (!complianceStr) {
+                 complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+            }
             const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {} };
-            const complianceComplete = Object.keys(complianceData.compliance || {}).length > 0;
+            const complianceComplete = Object.keys(complianceData.compliance || {}).length === 10;
 
-            const financialsComplete = !!companyData?.auditorName;
+            let financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+            if (!financialsStr) {
+                financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}`);
+            }
+            const financialsData = financialsStr ? JSON.parse(financialsStr) : {};
+            const financialsComplete = !!financialsData.auditorName;
 
             setCompletion({
                 profile: profileComplete,
