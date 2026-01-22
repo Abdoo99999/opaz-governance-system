@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -17,7 +18,7 @@ import ReviewSubmit from '@/components/ReviewSubmit';
 import ApprovalRequests from '@/components/ApprovalRequests';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageProvider } from '@/context/LanguageContext';
-import { CompanyProvider, useCompany } from '@/context/CompanyContext';
+import { ZoneProvider, useCompany } from '@/context/CompanyContext';
 import { YearProvider } from '@/context/YearContext';
 
 export type UserRole = 'admin' | 'company';
@@ -28,26 +29,26 @@ const AppContent = () => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [userRole, setUserRole] = useState<UserRole>('admin');
   const { toast } = useToast();
-  const { setSelectedCompanyId, getSelectedCompany, getCompanySubmissionStatus } = useCompany();
+  const { setSelectedZoneId, getSelectedZone, getZoneSubmissionStatus } = useCompany();
 
-  const handleLogin = (role: UserRole, companyId?: string) => {
+  const handleLogin = (role: UserRole, zoneId?: string) => {
     setIsLoggedIn(true);
     setUserRole(role);
-    if (role === 'company' && companyId) {
-        setSelectedCompanyId(companyId);
-        const status = getCompanySubmissionStatus(companyId);
+    if (role === 'company' && zoneId) {
+        setSelectedZoneId(zoneId);
+        const status = getZoneSubmissionStatus(zoneId);
         if (status === 'submitted' || status === 'approved') {
             setCurrentView('review-submit');
         } else {
             setCurrentView('companies'); // Redirect company user to registry
         }
     } else {
-        setSelectedCompanyId('all'); // Admin defaults to all
+        setSelectedZoneId('all'); // Admin defaults to all
         setCurrentView('dashboard');
     }
     toast({
         title: "تم تسجيل الدخول بنجاح",
-        description: "أهلاً بك في نظام حوكمة جهاز الاستثمار العماني.",
+        description: "أهلاً بك في نظام حوكمة أوباز.",
     });
   };
 
@@ -55,16 +56,16 @@ const AppContent = () => {
     setIsLoggedIn(false);
     setUserRole('admin'); // Reset role on logout
     setCurrentView('dashboard'); // Reset to default view on logout
-    setSelectedCompanyId('all');
+    setSelectedZoneId('all');
     toast({
         title: "تم تسجيل الخروج بنجاح",
     });
   };
 
   const handleNavigate = (view: string) => {
-    const companyId = getSelectedCompany()?.id;
-    if (userRole === 'company' && companyId) {
-        const status = getCompanySubmissionStatus(companyId);
+    const zoneId = getSelectedZone()?.id;
+    if (userRole === 'company' && zoneId) {
+        const status = getZoneSubmissionStatus(zoneId);
         // Define allowed views for submitted/approved status
         const allowedViews = ['improvement-plan', 'review-submit'];
         if (status === 'approved') {
@@ -133,10 +134,12 @@ export default function Home() {
   return (
     <LanguageProvider>
       <YearProvider>
-        <CompanyProvider>
+        <ZoneProvider>
           <AppContent />
-        </CompanyProvider>
+        </ZoneProvider>
       </YearProvider>
     </LanguageProvider>
   );
 }
+
+    

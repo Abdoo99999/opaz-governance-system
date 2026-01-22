@@ -19,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Users, Plus, Calendar, AlertTriangle, Edit, Save, ShieldCheck, Layers, Upload, Download } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import { COMPANIES, Company } from '@/data/companies';
+import { ZONES, Zone } from '@/data/companies';
 import { BOARD_MEMBERS, BoardMember, NATIONALITIES } from '@/data/board-members';
 import { differenceInMonths, format, parse, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -31,7 +31,7 @@ import * as z from 'zod';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Checkbox } from './ui/checkbox';
-import { useCompany as useCompanyContext } from '@/context/CompanyContext';
+import { useCompany as useZoneContext } from '@/context/CompanyContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -89,7 +89,7 @@ interface MeetingMinute {
 const BoardDirectory: React.FC = () => {
     const { t, language } = useLanguage();
     const { toast } = useToast();
-    const { selectedCompanyId, refreshData } = useCompanyContext();
+    const { selectedZoneId, refreshData } = useZoneContext();
     
     const [boardMembers, setBoardMembers] = useState<BoardMember[]>(() => {
         if (typeof window === 'undefined') return BOARD_MEMBERS;
@@ -110,17 +110,17 @@ const BoardDirectory: React.FC = () => {
     
     // Load/Save Minutes from localStorage
     useEffect(() => {
-        if (selectedCompanyId && selectedCompanyId !== 'all' && typeof window !== 'undefined') {
-            const savedMinutes = localStorage.getItem(`board_minutes_${selectedCompanyId}`);
+        if (selectedZoneId && selectedZoneId !== 'all' && typeof window !== 'undefined') {
+            const savedMinutes = localStorage.getItem(`board_minutes_${selectedZoneId}`);
             if (savedMinutes) {
                 setMinutes(JSON.parse(savedMinutes));
             } else {
-                setMinutes([]); // Reset if no data for this company
+                setMinutes([]); // Reset if no data for this zone
             }
         } else {
-            setMinutes([]); // Reset if 'All Companies' is selected
+            setMinutes([]); // Reset if 'All Zones' is selected
         }
-    }, [selectedCompanyId]);
+    }, [selectedZoneId]);
 
     const handleSaveMinute = (data: { date: Date; type: any; title: string; attendees: number; file: File }) => {
         const newMinute: MeetingMinute = {
@@ -133,8 +133,8 @@ const BoardDirectory: React.FC = () => {
         };
         const updatedMinutes = [...minutes, newMinute];
         setMinutes(updatedMinutes);
-        if (selectedCompanyId && selectedCompanyId !== 'all') {
-          localStorage.setItem(`board_minutes_${selectedCompanyId}`, JSON.stringify(updatedMinutes));
+        if (selectedZoneId && selectedZoneId !== 'all') {
+          localStorage.setItem(`board_minutes_${selectedZoneId}`, JSON.stringify(updatedMinutes));
         }
         toast({ title: t('common.saveSuccessTitle'), description: t('board_directory.minutes.minuteAdded') });
         setIsMinuteModalOpen(false);
@@ -143,9 +143,9 @@ const BoardDirectory: React.FC = () => {
 
 
     const filteredMembers = useMemo(() => {
-        if (selectedCompanyId === 'all') return boardMembers;
-        return boardMembers.filter(m => m.companyId === selectedCompanyId);
-    }, [selectedCompanyId, boardMembers]);
+        if (selectedZoneId === 'all') return boardMembers;
+        return boardMembers.filter(m => m.zoneId === selectedZoneId);
+    }, [selectedZoneId, boardMembers]);
 
     // Effect to set initial board cycle from member dates
     useEffect(() => {
@@ -235,7 +235,7 @@ const BoardDirectory: React.FC = () => {
             } : m);
             toast({ title: t('common.saveSuccessTitle'), description: `Updated member: ${data.name_en}` });
         } else {
-            if (selectedCompanyId === 'all') {
+            if (selectedZoneId === 'all') {
                 toast({ title: t('common.errorTitle'), description: t('common.selectCompanyToStart'), variant: 'destructive' });
                 return;
             }
@@ -244,7 +244,7 @@ const BoardDirectory: React.FC = () => {
                 id: newId,
                 avatar: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAwAB/epv2AAAAABJRU5ErkJggg==',
                 ...data,
-                companyId: selectedCompanyId,
+                zoneId: selectedZoneId,
                 appointmentDate: format(data.appointmentDate, 'yyyy-MM-dd'),
                 expiryDate: format(data.expiryDate, 'yyyy-MM-dd'),
                 committees: data.committees as any || [],
@@ -927,3 +927,5 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
 
 export default BoardDirectory;
+
+    

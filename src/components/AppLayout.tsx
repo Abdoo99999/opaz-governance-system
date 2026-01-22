@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -19,7 +20,7 @@ interface AppLayoutProps {
 export default function AppLayout({ children, currentView, onNavigate, onLogout, userRole }: AppLayoutProps) {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const { dir } = useLanguage();
-  const { selectedCompanyId } = useCompany();
+  const { selectedZoneId } = useCompany();
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -43,9 +44,11 @@ export default function AppLayout({ children, currentView, onNavigate, onLogout,
           isSidebarVisible={true}
         />
         <main className={cn("flex-1 overflow-x-hidden overflow-y-auto print:overflow-visible print:h-auto")}>
-          {React.cloneElement(children as React.ReactElement, { userRole: userRole, key: selectedCompanyId })}
+          {React.cloneElement(children as React.ReactElement, { userRole: userRole, key: selectedZoneId })}
         </main>
       </div>
     </div>
   );
 }
+
+    

@@ -2,33 +2,33 @@
 export const translations = {
   ar: {
     appTitle: "منظومة إتقان",
-    appSubtitle: "لحوكمة شركات جهاز الاستثمار العماني",
+    appSubtitle: "لإدارة المناطق الاقتصادية الخاصة والمناطق الحرة",
     menu: {
       dashboard: "لوحة القيادة",
-      registry: "سجل الشركات",
-      company_profile: "بيانات الشركة",
-      board_directory: "سجل المجلس",
-      board_evaluation: "تقييم أداء المجلس",
+      registry: "سجل المناطق والمدن",
+      company_profile: "بيانات المنطقة",
+      board_directory: "سجل القيادات التنفيذية",
+      board_evaluation: "مؤشرات القيادة",
       assessment: "تقييم الأداء المؤسسي",
       compliance: "الامتثال والمخاطر",
       improvement: "خطة التحسين",
-      financials: "القوائم المالية",
+      financials: "المؤشرات الاقتصادية",
       reports: "التقارير",
       settings: "الإعدادات",
       logout: "تسجيل الخروج",
       review: "المراجعة والإرسال",
-      approvals: "طلبات الاعتماد"
+      approvals: "طلبات الموافقة"
     },
     dashboard: {
       strategicRadar: "رادار الأداء الاستراتيجي",
-      portfolioHealth: "صحة المحفظة",
+      portfolioHealth: "إجمالي حجم الاستثمار",
       maturityGauge: "مقياس النضج العام",
       riskMap: "خارطة المخاطر",
       sectorPerf: "أداء القطاعات",
       omanization: "نسبة التعمين",
       compliance: "حالة الامتثال",
       urgentAlerts: "تنبيهات عاجلة",
-      totalAssets: "إجمالي الأصول (ر.ع)",
+      totalAssets: "إجمالي الاستثمارات (مليون ر.ع)",
       nationalWorkforce: "من إجمالي القوى العاملة",
       activeRisks: "مخاطر نشطة مسجلة",
       overallScore: "متوسط نتيجة التقييم",
@@ -41,11 +41,11 @@ export const translations = {
         title: "موقف خطة التحسين"
       },
       boardComposition: {
-        title: "تحليل تكوين المجلس",
-        independence: "استقلالية المجلس",
+        title: "تحليل القيادات التنفيذية",
+        independence: "استقلالية القيادة",
         independent: "أعضاء مستقلون",
         nonIndependent: "أعضاء غير مستقلين",
-        omanization: "التعمين في المجالس"
+        omanization: "التعمين في المناصب"
       },
       icv: {
           title: "المناقصات والإنفاق المحلي",
@@ -59,10 +59,10 @@ export const translations = {
       },
       financial: {
         hubTitle: "محور الأداء المالي",
-        netProfit: "صافي الأرباح",
-        equity: "حقوق الملكية",
-        freeCashFlow: "التدفق النقدي الحر",
-        roi: "العائد على الاستثمار"
+        netProfit: "عدد الاتفاقيات الموقعة",
+        equity: "المساحة المشغولة (كم²)",
+        freeCashFlow: "المساحة المشغولة (كم²)",
+        roi: "نسبة التعمين"
       },
       riskLabels: {
           impact: {
@@ -81,13 +81,13 @@ export const translations = {
           }
       },
       top5: {
-        title: "أفضل 5 شركات أداءً"
+        title: "أفضل 5 مناطق أداءً"
       }
     },
     registry: {
-      title: "سجل الشركات",
-      addNew: "إضافة شركة جديدة",
-      searchPlaceholder: "بحث باسم الشركة أو الكود...",
+      title: "سجل المناطق والمدن",
+      addNew: "إضافة منطقة جديدة",
+      searchPlaceholder: "بحث باسم المنطقة أو الكود...",
       riskLevel: "مستوى الخطورة",
       risks: {
         low: "منخفض",
@@ -97,30 +97,30 @@ export const translations = {
       }
     },
     board_directory: {
-      title: "سجل تشكيل المجالس واللجان",
-      subtitle: "عرض وتحليل تشكيلات مجالس الإدارة واللجان التابعة لها",
-      addMember: "إضافة عضو جديد",
-      saveSuccessDesc: "تم حفظ بيانات سجل المجلس بنجاح.",
+      title: "سجل القيادات التنفيذية",
+      subtitle: "عرض بيانات القيادات التنفيذية ومؤشرات الأداء",
+      addMember: "إضافة مسؤول جديد",
+      saveSuccessDesc: "تم حفظ بيانات سجل القيادات بنجاح.",
       skillsMatrix: "مصفوفة المهارات والخبرات",
-      boardTenure: "الدورة الحالية للمجلس",
+      boardTenure: "الدورة الحالية للقيادة",
       currentTerm: "الدورة الحالية",
       noData: "لا توجد بيانات لعرضها",
-      membersCount: "عدد الأعضاء",
+      membersCount: "عدد المسؤولين",
       memberType: "نوع العضوية",
       expertise_label: "الخبرة الأساسية",
       committees: "عضوية اللجان",
       noCommittees: "لا يوجد",
       expiresSoon: "تنتهي العضوية قريباً",
       summary: {
-        total_members: "إجمالي الأعضاء",
+        total_members: "إجمالي القيادات",
         independent_members: "الأعضاء المستقلون",
-        of_board: "من المجلس",
+        of_board: "من القيادة",
         expiring_soon: "عضويات تنتهي قريباً",
         within_3_months: "خلال 3 أشهر",
         total_committees: "لجنة عاملة"
       },
       tabs: {
-        members: "الأعضاء والمهارات",
+        members: "القيادات والمهارات",
         minutes: "الاجتماعات والمحاضر"
       },
       minutes: {
@@ -131,7 +131,7 @@ export const translations = {
         type: "نوع الاجتماع",
         attendees: "عدد الحاضرين",
         actions: "إجراءات",
-        noMinutes: "لا توجد محاضر محفوظة لهذه الشركة.",
+        noMinutes: "لا توجد محاضر محفوظة لهذه المنطقة.",
         minuteAdded: "تمت إضافة المحضر بنجاح.",
         types: {
             quarterly: "دوري",
@@ -140,8 +140,8 @@ export const translations = {
         }
       },
       roles: {
-        chairman: "رئيس المجلس",
-        member: "عضو مجلس"
+        chairman: "الرئيس التنفيذي",
+        member: "مسؤول تنفيذي"
       },
       types: {
         independent: "مستقل",
@@ -164,8 +164,8 @@ export const translations = {
         nomination: "الترشيحات والمكافآت"
       },
       form: {
-        title_add: 'إضافة عضو جديد',
-        title_edit: 'تعديل بيانات العضو',
+        title_add: 'إضافة مسؤول جديد',
+        title_edit: 'تعديل بيانات المسؤول',
         name_ar: 'الاسم بالعربية',
         name_en: 'الاسم بالإنجليزية',
         nationality: 'الجنسية',
@@ -184,9 +184,9 @@ export const translations = {
       }
     },
     board_evaluation: {
-        title: "تقييم أداء أعضاء المجلس",
+        title: "مؤشرات أداء القيادات",
         cycle: "دورة التقييم",
-        memberInfo: "العضو",
+        memberInfo: "المسؤول التنفيذي",
         attendance: "الالتزام بالحضور",
         strategic: "المساهمة الاستراتيجية",
         technical: "القيمة الفنية",
@@ -197,11 +197,11 @@ export const translations = {
         goodStanding: "وضع جيد",
         save: "حفظ التقييم",
         export: "تصدير التقرير",
-        saveSuccessDesc: "تم حفظ بيانات تقييم المجلس بنجاح.",
+        saveSuccessDesc: "تم حفظ بيانات مؤشرات القيادة بنجاح.",
         summary: {
-            avgScore: "متوسط أداء المجلس",
-            topPerformer: "العضو الأعلى أداءً",
-            reviewRequired: "أعضاء للمراجعة"
+            avgScore: "متوسط أداء القيادة",
+            topPerformer: "المسؤول الأعلى أداءً",
+            reviewRequired: "مسؤولون للمراجعة"
         },
         notes: {
             title: "ملاحظات التقييم",
@@ -228,7 +228,7 @@ export const translations = {
         gotIt: "حسناً، فهمت",
         successTitle: "تم الاعتماد بنجاح!",
         successDesc: "تم حفظ واعتماد التقييم بنجاح.",
-        saveSuccessDesc: "تم حفظ بيانات تقييم شركة",
+        saveSuccessDesc: "تم حفظ بيانات تقييم منطقة",
         viewResults: "عرض النتائج",
         stayHere: "البقاء هنا",
         locked: "التقييم معتمد ومغلق",
@@ -260,7 +260,7 @@ export const translations = {
             dividends: "هل تم تحويل أرباح جهاز الاستثمار في الموعد المحدد؟",
             agmApproval: "هل تم اعتماد القوائم المالية من الجمعية العامة السنوية؟",
             reporting: "هل تم نشر التقرير السنوي المدقق للجمهور؟",
-            legalIssues: "هل تخلو الشركة من قضايا قانونية جوهرية غير مفصح عنها؟",
+            legalIssues: "هل تخلو المنطقة من قضايا قانونية جوهرية غير مفصح عنها؟",
             minutesArchiving: "هل جميع محاضر اجتماعات المجلس واللجان موقعة ومؤرشفة؟"
         },
         riskForm: {
@@ -309,7 +309,7 @@ export const translations = {
         relatedAxis: "المحور المرتبط",
         comments: "التعليقات",
         commentsPlaceholder: "مكان مخصص لتعليقات ومناقشات الفريق...",
-        saveSuccessDesc: "تم حفظ بيانات خطة التحسين لشركة",
+        saveSuccessDesc: "تم حفظ بيانات خطة التحسين لمنطقة",
         completeTaskTitle: "إنهاء المهمة وتقديم الدليل",
         completeTaskDesc: "يرجى تقديم ملاحظات حول كيفية إنجاز المهمة وإرفاق دليل الإنجاز.",
         completionNotes: "ملاحظات الإنجاز",
@@ -321,23 +321,23 @@ export const translations = {
         attachedEvidence: "الدليل المرفق"
     },
     financials: {
-      title: "القوائم المالية والحوكمة",
+      title: "المؤشرات الاقتصادية",
       auditorPlaceholder: "اسم مكتب التدقيق الخارجي...",
-      saveSuccessDesc: "تم حفظ البيانات المالية لشركة",
+      saveSuccessDesc: "تم حفظ المؤشرات الاقتصادية لمنطقة",
       position: {
-        title: "المركز المالي",
-        assets: "إجمالي الأصول",
+        title: "حجم الاستثمار",
+        assets: "إجمالي الأصول والاستثمارات",
         liabilities: "إجمالي الالتزامات",
-        equity: "حقوق الملكية"
+        equity: "صافي قيمة الأصول"
       },
       performance: {
-        title: "الأداء المالي",
-        revenue: "الإيرادات",
-        expenses: "المصروفات",
-        netProfit: "صافي الربح/الخسارة"
+        title: "الأداء التشغيلي",
+        revenue: "الإيرادات التشغيلية",
+        expenses: "المصروفات التشغيلية",
+        netProfit: "صافي الدخل"
       },
       cashflow: {
-        title: "السيولة والتدفق النقدي الحر",
+        title: "السيولة والتدفق النقدي",
         operating: "النقد التشغيلي",
         capex: "الإنفاق الرأسمالي (CAPEX)",
         fcf: "التدفق النقدي الحر (FCF)",
@@ -353,16 +353,16 @@ export const translations = {
         title: "المرفقات والإقرار",
         uploadDesc: "قم بسحب وإفلات تقرير المدقق المالي (PDF) هنا، أو اضغط للاختيار",
         uploadHint: "حجم الملف الأقصى: 10MB",
-        checkbox: "أقر بصحة البيانات المالية المقدمة",
-        saveButton: "حفظ البيانات المالية"
+        checkbox: "أقر بصحة البيانات المقدمة",
+        saveButton: "حفظ المؤشرات الاقتصادية"
       }
     },
     reports: {
         title: "التقرير الاستراتيجي الشامل",
-        selectCompanyToView: "يرجى اختيار شركة لعرض تقريرها التفصيلي.",
+        selectCompanyToView: "يرجى اختيار منطقة لعرض تقريرها التفصيلي.",
         year: "عام",
         export: "تصدير PDF",
-        boardAndIcvAnalysis: "تحليل المجلس والقيمة المحلية",
+        boardAndIcvAnalysis: "تحليل القيادة والقيمة المحلية",
         summary: {
             maturity: "النضج العام",
             maturitySub: "+0.2 عن العام الماضي",
@@ -374,8 +374,8 @@ export const translations = {
             pending: "معلقة",
             actionsSub: "8 مكتملة هذا العام"
         },
-        maturityAnalysis: "تحليل نضج الحوكمة (الشركة مقابل القطاع)",
-        companyScore: "نتيجة الشركة",
+        maturityAnalysis: "تحليل نضج الحوكمة (المنطقة مقابل المتوسط)",
+        companyScore: "نتيجة المنطقة",
         sectorAverage: "متوسط القطاع",
         riskAnalysis: "تحليل المخاطر حسب الشدة",
         improvementStatus: "حالة خطة التحسين",
@@ -401,11 +401,11 @@ export const translations = {
           notStarted: "قيد الانتظار"
         },
         financial: {
-            title: "ملخص الأداء المالي",
+            title: "ملخص الأداء الاقتصادي",
             performance: "الأداء",
             revenue: "الإيرادات",
             expenses: "المصروفات",
-            netProfit: "صافي الربح"
+            netProfit: "صافي الدخل"
         }
     },
     settings: {
@@ -425,13 +425,13 @@ export const translations = {
       },
       info: {
           title: "معلومات النظام",
-          version: "OIA GRC v2.0 (Elite Edition)",
-          license: "مرخص حصرياً لجهاز الاستثمار العماني",
+          version: "OPAZ GRC v1.0 (Foundation)",
+          license: "مرخص حصرياً للهيئة العامة للمناطق الاقتصادية الخاصة والمناطق الحرة",
           credits: "صمم وهندس بواسطة د. عبدالرحمن النوفلي"
       },
       data: {
           title: "إدارة البيانات",
-          description: "سيؤدي هذا الإجراء إلى حذف جميع البيانات المدخلة في التطبيق بشكل نهائي، بما في ذلك بيانات الشركات والتقييمات والمخاطر وخطط التحسين. استخدم هذا الخيار بحذر شديد.",
+          description: "سيؤدي هذا الإجراء إلى حذف جميع البيانات المدخلة في التطبيق بشكل نهائي، بما في ذلك بيانات المناطق والتقييمات والمخاطر وخطط التحسين. استخدم هذا الخيار بحذر شديد.",
           resetButton: "إعادة ضبط بيانات التطبيق",
           confirmTitle: "هل أنت متأكد؟",
           confirmDesc: "سيتم حذف جميع البيانات بشكل نهائي ولا يمكن التراجع عن هذا الإجراء. هل ترغب في المتابعة؟",
@@ -443,7 +443,7 @@ export const translations = {
     companyForm: {
         identity: {
             title: "البيانات الأساسية",
-            companyName: "اسم الشركة",
+            companyName: "اسم المنطقة/المدينة",
             code: "الرمز",
             sector: "القطاع",
             legalForm: "الشكل القانوني",
@@ -456,10 +456,10 @@ export const translations = {
             uso: "التزامات الخدمة الشاملة",
         },
         board: {
-            title: "حوكمة المجلس",
-            appointmentDate: "تاريخ تعيين المجلس",
+            title: "حوكمة القيادة",
+            appointmentDate: "تاريخ تعيين القيادة",
             expiryDate: "تاريخ انتهاء الصلاحية",
-            members: "عدد الأعضاء",
+            members: "عدد المسؤولين",
             independent: "الأعضاء المستقلون",
         },
         icv: {
@@ -476,16 +476,16 @@ export const translations = {
         }
     },
     approvals: {
-      title: "طلبات الاعتماد",
-      companyName: "اسم الشركة",
+      title: "طلبات الموافقة",
+      companyName: "اسم المنطقة",
       submissionDate: "تاريخ الإرسال",
       maturityScore: "نتيجة النضج",
       actions: "الإجراءات",
       view: "معاينة",
       return: "إعادة للتعديل",
-      approve: "اعتماد نهائي",
+      approve: "موافقة نهائية",
       returnModalTitle: "إعادة التقييم للمراجعة",
-      returnModalDesc: "يرجى كتابة الملاحظات المطلوبة من الشركة قبل إعادة الإرسال.",
+      returnModalDesc: "يرجى كتابة الملاحظات المطلوبة من المنطقة قبل إعادة الإرسال.",
       notesPlaceholder: "مثال: يرجى استكمال بيانات التدقيق الداخلي...",
       sendFeedback: "إرسال الملاحظات",
       approveConfirmTitle: "هل أنت متأكد؟",
@@ -499,9 +499,9 @@ export const translations = {
     },
     review: {
       title: "المراجعة النهائية والإرسال",
-      subtitle: "يرجى التأكد من اكتمال جميع الأقسام قبل إرسال التقييم إلى جهاز الاستثمار العماني للمراجعة النهائية.",
+      subtitle: "يرجى التأكد من اكتمال جميع الأقسام قبل إرسال التقييم إلى الهيئة للمراجعة النهائية.",
       checklistTitle: "قائمة التحقق من الاكتمال",
-      profile: "الملف التعريفي للشركة",
+      profile: "الملف التعريفي للمنطقة",
       assessment: "تقييم الأداء المؤسسي",
       compliance: "الامتثال والمخاطر",
       status: {
@@ -509,16 +509,16 @@ export const translations = {
         incomplete: "غير مكتمل"
       },
       view: "مراجعة",
-      submitButton: "إرسال إلى جهاز الاستثمار",
+      submitButton: "إرسال إلى الهيئة",
       submittedTitle: "تم الإرسال بنجاح",
-      submittedDesc: "تم إرسال تقييم شركتكم بنجاح. سيتم إشعاركم عند اكتمال المراجعة من قبل فريق الحوكمة في جهاز الاستثمار العماني.",
-      underReview: "التقييم قيد المراجعة حالياً من قبل جهاز الاستثمار. لا يمكن إجراء تعديلات في هذه المرحلة.",
-      returned: "تمت إعادة التقييم من قبل جهاز الاستثمار مع الملاحظات التالية:",
+      submittedDesc: "تم إرسال تقييم منطقتكم بنجاح. سيتم إشعاركم عند اكتمال المراجعة من قبل فريق الحوكمة في الهيئة.",
+      underReview: "التقييم قيد المراجعة حالياً من قبل الهيئة. لا يمكن إجراء تعديلات في هذه المرحلة.",
+      returned: "تمت إعادة التقييم من قبل الهيئة مع الملاحظات التالية:",
       viewNotes: "عرض الملاحظات"
     },
     common: {
       admin: "مدير النظام",
-      company: "بوابة الشركة",
+      company: "بوابة المنطقة",
       switchLang: "English",
       username: "اسم المستخدم",
       password: "كلمة المرور",
@@ -534,12 +534,12 @@ export const translations = {
       delete: "حذف",
       view: "عرض",
       editingFor: "جاري التعديل لـ",
-      selectAllCompanies: "عرض كل الشركات",
-      selectCompanyToStart: "اختر شركة للبدء",
-      selectCompanyToStartDesc: "يرجى اختيار شركة من القائمة أعلاه لعرض أو تعديل بياناتها.",
+      selectAllCompanies: "عرض كل المناطق",
+      selectCompanyToStart: "اختر منطقة للبدء",
+      selectCompanyToStartDesc: "يرجى اختيار منطقة من القائمة أعلاه لعرض أو تعديل بياناتها.",
       saveSuccessTitle: "تم الحفظ بنجاح",
-      saveSuccessDesc: "تم حفظ بيانات الشركة:",
-      deleteConfirm: "هل أنت متأكد من رغبتك في حذف هذه الشركة؟ لا يمكن التراجع عن هذا الإجراء.",
+      saveSuccessDesc: "تم حفظ بيانات المنطقة:",
+      deleteConfirm: "هل أنت متأكد من رغبتك في حذف هذه المنطقة؟ لا يمكن التراجع عن هذا الإجراء.",
       deleteSuccessTitle: "تم الحذف بنجاح",
       errorTitle: "خطأ",
       fillAllFields: "يرجى تعبئة جميع الحقول المطلوبة.",
@@ -548,17 +548,17 @@ export const translations = {
   },
   en: {
     appTitle: "ITQAN Platform",
-    appSubtitle: "For OIA Company Governance",
+    appSubtitle: "For OPAZ Governance Management",
     menu: {
       dashboard: "Dashboard",
-      registry: "Company Registry",
-      company_profile: "Company Profile",
-      board_directory: "Board Registry",
-      board_evaluation: "Board Evaluation",
-      assessment: "Institutional Performance Assessment",
+      registry: "Zones Registry",
+      company_profile: "Zone Profile",
+      board_directory: "Executive Leadership",
+      board_evaluation: "Leadership KPIs",
+      assessment: "Institutional Performance",
       compliance: "Compliance & Risk",
       improvement: "Improvement Plan",
-      financials: "Financial Statements",
+      financials: "Economic Indicators",
       reports: "Reports",
       settings: "Settings",
       logout: "Logout",
@@ -567,14 +567,14 @@ export const translations = {
     },
     dashboard: {
       strategicRadar: "Strategic Performance Radar",
-      portfolioHealth: "Portfolio Health",
+      portfolioHealth: "Total Investment Volume",
       maturityGauge: "Overall Maturity Gauge",
       riskMap: "Risk Map",
       sectorPerf: "Sector Performance",
       omanization: "Omanization Rate",
       compliance: "Compliance Status",
       urgentAlerts: "Urgent Alerts",
-      totalAssets: "Total Assets (OMR)",
+      totalAssets: "Total Investments (OMR M)",
       nationalWorkforce: "of total workforce",
       activeRisks: "Active risks logged",
       overallScore: "Overall assessment score",
@@ -587,11 +587,11 @@ export const translations = {
         title: "Improvement Plan Status"
       },
       boardComposition: {
-        title: "Board Composition Analysis",
-        independence: "Board Independence",
+        title: "Executive Leadership Analysis",
+        independence: "Leadership Independence",
         independent: "Independent Members",
         nonIndependent: "Non-Independent",
-        omanization: "Omanization in Boards"
+        omanization: "Omanization in Leadership"
       },
       icv: {
           title: "Tenders & Local Spending",
@@ -605,10 +605,10 @@ export const translations = {
       },
       financial: {
         hubTitle: "Financial Performance Hub",
-        netProfit: "Net Profit",
-        equity: "Equity",
-        freeCashFlow: "Free Cash Flow",
-        roi: "Return on Investment"
+        netProfit: "Signed Agreements",
+        equity: "Occupied Area (km²)",
+        freeCashFlow: "Occupied Area (km²)",
+        roi: "Omanization Rate"
       },
       riskLabels: {
           impact: {
@@ -627,13 +627,13 @@ export const translations = {
           }
       },
       top5: {
-        title: "Top 5 Performing Companies"
+        title: "Top 5 Performing Zones"
       }
     },
     registry: {
-        title: "Company Registry",
-        addNew: "Add New Company",
-        searchPlaceholder: "Search by company name or code...",
+        title: "Zones Registry",
+        addNew: "Add New Zone",
+        searchPlaceholder: "Search by zone name or code...",
         riskLevel: "Risk Level",
         risks: {
             low: "Low",
@@ -643,30 +643,30 @@ export const translations = {
         }
     },
      board_directory: {
-      title: "Board & Committees Directory",
-      subtitle: "View and analyze board and committee compositions",
-      addMember: "Add New Member",
-      saveSuccessDesc: "Board directory data has been saved successfully.",
+      title: "Executive Leadership Registry",
+      subtitle: "View and analyze executive leadership data and performance",
+      addMember: "Add New Official",
+      saveSuccessDesc: "Leadership registry data has been saved successfully.",
       skillsMatrix: "Skills & Expertise Matrix",
-      boardTenure: "Current Board Tenure",
+      boardTenure: "Current Leadership Tenure",
       currentTerm: "Current Term",
       noData: "No data to display",
-      membersCount: "Members",
+      membersCount: "Officials",
       memberType: "Membership Type",
       expertise_label: "Primary Expertise",
       committees: "Committee Memberships",
       noCommittees: "None",
       expiresSoon: "Tenure expires soon",
       summary: {
-        total_members: "Total Members",
+        total_members: "Total Officials",
         independent_members: "Independent Members",
-        of_board: "of the board",
+        of_board: "of the leadership team",
         expiring_soon: "Tenures Expiring Soon",
         within_3_months: "within 3 months",
         total_committees: "Active Committees"
       },
       tabs: {
-        members: "Members & Skills",
+        members: "Officials & Skills",
         minutes: "Meetings & Minutes"
       },
       minutes: {
@@ -677,7 +677,7 @@ export const translations = {
         type: "Meeting Type",
         attendees: "Attendees",
         actions: "Actions",
-        noMinutes: "No minutes have been saved for this company.",
+        noMinutes: "No minutes have been saved for this zone.",
         minuteAdded: "Minute added successfully.",
         types: {
             quarterly: "Quarterly",
@@ -686,8 +686,8 @@ export const translations = {
         }
       },
       roles: {
-        chairman: "Chairman",
-        member: "Board Member"
+        chairman: "CEO",
+        member: "Executive Official"
       },
       types: {
         independent: "Independent",
@@ -710,8 +710,8 @@ export const translations = {
         nomination: "Nomination"
       },
       form: {
-        title_add: 'Add New Member',
-        title_edit: 'Edit Member Details',
+        title_add: 'Add New Official',
+        title_edit: 'Edit Official Details',
         name_ar: 'Name (Arabic)',
         name_en: 'Name (English)',
         nationality: 'Nationality',
@@ -730,24 +730,24 @@ export const translations = {
       }
     },
     board_evaluation: {
-        title: "Board Performance Evaluation",
+        title: "Leadership Performance KPIs",
         cycle: "Evaluation Cycle",
-        memberInfo: "Member",
+        memberInfo: "Executive Official",
         attendance: "Attendance",
         strategic: "Strategic Contribution",
         technical: "Technical Value",
         totalScore: "Final Score",
         recommendation: "Recommendation",
-        renew: "Renew Membership",
+        renew: "Renew Term",
         review: "Review / Replace",
         goodStanding: "Good Standing",
         save: "Save Evaluation",
         export: "Export Report",
-        saveSuccessDesc: "Board evaluation data has been saved successfully.",
+        saveSuccessDesc: "Leadership evaluation data has been saved successfully.",
         summary: {
-            avgScore: "Avg. Board Score",
+            avgScore: "Avg. Leadership Score",
             topPerformer: "Top Performer",
-            reviewRequired: "Members to Review"
+            reviewRequired: "Officials to Review"
         },
         notes: {
             title: "Evaluation Notes",
@@ -806,7 +806,7 @@ export const translations = {
             dividends: "Were OIA dividends transferred on schedule?",
             agmApproval: "Were financial statements approved by the AGM?",
             reporting: "Was the audited Annual Report published to the public?",
-            legalIssues: "Is the company free from undisclosed material legal cases?",
+            legalIssues: "Is the zone free from undisclosed material legal cases?",
             minutesArchiving: "Are all Board & Committee minutes signed and archived?"
         },
         riskForm: {
@@ -867,23 +867,23 @@ export const translations = {
         attachedEvidence: "Attached Evidence"
     },
     financials: {
-      title: "Financial Statements & Governance",
+      title: "Economic Indicators",
       auditorPlaceholder: "External Auditor's Office Name...",
-      saveSuccessDesc: "Financial data has been saved for",
+      saveSuccessDesc: "Economic indicators have been saved for",
       position: {
-        title: "Financial Position",
-        assets: "Total Assets",
+        title: "Investment Volume",
+        assets: "Total Assets & Investments",
         liabilities: "Total Liabilities",
-        equity: "Equity"
+        equity: "Net Asset Value"
       },
       performance: {
-        title: "Financial Performance",
-        revenue: "Revenue",
-        expenses: "Expenses",
-        netProfit: "Net Profit/Loss"
+        title: "Operational Performance",
+        revenue: "Operating Revenue",
+        expenses: "Operating Expenses",
+        netProfit: "Net Income"
       },
       cashflow: {
-        title: "Liquidity & Free Cash Flow",
+        title: "Liquidity & Cash Flow",
         operating: "Operating Cash",
         capex: "Capital Expenditure (CAPEX)",
         fcf: "Free Cash Flow (FCF)",
@@ -899,16 +899,16 @@ export const translations = {
         title: "Attachments & Declaration",
         uploadDesc: "Drag and drop the financial auditor's report (PDF) here, or click to select",
         uploadHint: "Maximum file size: 10MB",
-        checkbox: "I hereby declare the provided financial data is accurate",
-        saveButton: "Save Financial Data"
+        checkbox: "I hereby declare the provided data is accurate",
+        saveButton: "Save Economic Indicators"
       }
     },
     reports: {
         title: "Comprehensive Strategic Report",
-        selectCompanyToView: "Please select a company to view its detailed report.",
+        selectCompanyToView: "Please select a zone to view its detailed report.",
         year: "Year",
         export: "Export PDF",
-        boardAndIcvAnalysis: "Board & National Value Analysis",
+        boardAndIcvAnalysis: "Leadership & National Value Analysis",
         summary: {
             maturity: "Overall Maturity",
             maturitySub: "+0.2 from last year",
@@ -920,8 +920,8 @@ export const translations = {
             pending: "Pending",
             actionsSub: "8 Completed this year"
         },
-        maturityAnalysis: "Governance Maturity Analysis (Company vs. Sector)",
-        companyScore: "Company Score",
+        maturityAnalysis: "Governance Maturity Analysis (Zone vs. Average)",
+        companyScore: "Zone Score",
         sectorAverage: "Sector Average",
         riskAnalysis: "Risk Analysis by Severity",
         improvementStatus: "Improvement Plan Status",
@@ -947,11 +947,11 @@ export const translations = {
           notStarted: "Not Started"
         },
         financial: {
-            title: "Financial Performance Snapshot",
+            title: "Economic Performance Snapshot",
             performance: "Performance",
             revenue: "Revenue",
             expenses: "Expenses",
-            netProfit: "Net Profit"
+            netProfit: "Net Income"
         }
     },
     settings: {
@@ -971,13 +971,13 @@ export const translations = {
       },
       info: {
           title: "System Information",
-          version: "OIA GRC v2.0 (Elite Edition)",
-          license: "Exclusively licensed for Oman Investment Authority",
+          version: "OPAZ GRC v1.0 (Foundation)",
+          license: "Exclusively licensed for OPAZ",
           credits: "Designed & Architected by Dr. Abdulrahman Al-Nofali"
       },
       data: {
           title: "Data Management",
-          description: "This action will permanently delete all data entered into the application, including company data, assessments, risks, and improvement plans. Use this option with extreme caution.",
+          description: "This action will permanently delete all data entered into the application, including zone data, assessments, risks, and improvement plans. Use this option with extreme caution.",
           resetButton: "Reset Application Data",
           confirmTitle: "Are you sure?",
           confirmDesc: "All data will be permanently deleted. This action cannot be undone. Do you wish to proceed?",
@@ -989,7 +989,7 @@ export const translations = {
     companyForm: {
         identity: {
             title: "Basic Identity",
-            companyName: "Company Name",
+            companyName: "Zone/City Name",
             code: "Code",
             sector: "Sector",
             legalForm: "Legal Form",
@@ -1002,10 +1002,10 @@ export const translations = {
             uso: "USO Obligations",
         },
         board: {
-            title: "Board Governance",
-            appointmentDate: "Board Appointment Date",
+            title: "Leadership Governance",
+            appointmentDate: "Leadership Appointment Date",
             expiryDate: "Expiry Date",
-            members: "No. of Members",
+            members: "No. of Officials",
             independent: "Independent Members",
         },
         icv: {
@@ -1023,7 +1023,7 @@ export const translations = {
     },
     approvals: {
       title: "Approval Requests",
-      companyName: "Company Name",
+      companyName: "Zone Name",
       submissionDate: "Submission Date",
       maturityScore: "Maturity Score",
       actions: "Actions",
@@ -1031,7 +1031,7 @@ export const translations = {
       return: "Return for Edits",
       approve: "Final Approve",
       returnModalTitle: "Return Assessment for Review",
-      returnModalDesc: "Please provide the required feedback for the company before they resubmit.",
+      returnModalDesc: "Please provide the required feedback for the zone before they resubmit.",
       notesPlaceholder: "e.g., Please complete the internal audit section...",
       sendFeedback: "Send Feedback",
       approveConfirmTitle: "Are you sure?",
@@ -1045,9 +1045,9 @@ export const translations = {
     },
     review: {
       title: "Final Review and Submission",
-      subtitle: "Please ensure all sections are complete before sending the assessment to OIA for final review.",
+      subtitle: "Please ensure all sections are complete before sending the assessment to the Authority for final review.",
       checklistTitle: "Completion Checklist",
-      profile: "Company Profile Data",
+      profile: "Zone Profile Data",
       assessment: "Institutional Performance Assessment",
       compliance: "Compliance & Risk Registry",
       status: {
@@ -1055,16 +1055,16 @@ export const translations = {
         incomplete: "Incomplete"
       },
       view: "Review",
-      submitButton: "Send to OIA",
+      submitButton: "Send to Authority",
       submittedTitle: "Successfully Submitted",
-      submittedDesc: "Your company's assessment has been sent successfully. You will be notified once the review by OIA's governance team is complete.",
-      underReview: "The assessment is currently under review by OIA. No edits can be made at this stage.",
-      returned: "The assessment has been returned by OIA with the following feedback:",
+      submittedDesc: "Your zone's assessment has been sent successfully. You will be notified once the review by the Authority's governance team is complete.",
+      underReview: "The assessment is currently under review by the Authority. No edits can be made at this stage.",
+      returned: "The assessment has been returned by the Authority with the following feedback:",
       viewNotes: "View Notes"
     },
     common: {
-      admin: "Admin Access",
-      company: "Company Portal",
+      admin: "System Admin",
+      company: "Zone Portal",
       switchLang: "عربي",
       username: "Username",
       password: "Password",
@@ -1080,12 +1080,12 @@ export const translations = {
       delete: "Delete",
       view: "View",
       editingFor: "Editing for",
-      selectAllCompanies: "All Companies View",
-      selectCompanyToStart: "Select a Company to Begin",
-      selectCompanyToStartDesc: "Please select a company from the dropdown above to view or edit its data.",
+      selectAllCompanies: "All Zones View",
+      selectCompanyToStart: "Select a Zone to Begin",
+      selectCompanyToStartDesc: "Please select a zone from the dropdown above to view or edit its data.",
       saveSuccessTitle: "Saved Successfully",
-      saveSuccessDesc: "Company data has been saved for:",
-      deleteConfirm: "Are you sure you want to delete this company? This action cannot be undone.",
+      saveSuccessDesc: "Zone data has been saved for:",
+      deleteConfirm: "Are you sure you want to delete this zone? This action cannot be undone.",
       deleteSuccessTitle: "Deleted Successfully",
       errorTitle: "Error",
       fillAllFields: "Please fill all required fields.",
@@ -1093,3 +1093,5 @@ export const translations = {
     }
   }
 };
+
+    

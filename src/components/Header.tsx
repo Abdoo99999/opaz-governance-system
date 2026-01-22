@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -13,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
-import { COMPANIES } from '@/data/companies';
+import { ZONES } from '@/data/companies';
 import { UserRole } from '@/app/page';
 import { useYear } from '@/context/YearContext';
 
@@ -27,9 +28,9 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigate, userRole, isSidebarVisible }) => {
   const { language, setLanguage, t } = useLanguage();
-  const { selectedCompanyId, setSelectedCompanyId, getSelectedCompany } = useCompany();
+  const { selectedZoneId, setSelectedZoneId, getSelectedZone } = useCompany();
   const { selectedYear, setSelectedYear, availableYears } = useYear();
-  const selectedCompany = getSelectedCompany();
+  const selectedZone = getSelectedZone();
 
   const handleLanguageChange = () => {
     setLanguage(language === 'ar' ? 'en' : 'ar');
@@ -53,15 +54,15 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
           )}
           {userRole === 'admin' && showFilters ? (
             <div className="flex items-center gap-3">
-              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+              <Select value={selectedZoneId} onValueChange={setSelectedZoneId}>
                 <SelectTrigger className="w-[280px] bg-royal-900/60 border-white/10 text-white rounded-lg h-12">
-                  <SelectValue placeholder="Select Company" />
+                  <SelectValue placeholder="Select Zone" />
                 </SelectTrigger>
                 <SelectContent className="bg-royal-900 text-white border-white/20">
-                  <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'All Companies'}</SelectItem>
-                  {COMPANIES.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {language === 'ar' ? company.name_ar : company.name_en}
+                  <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'All Zones'}</SelectItem>
+                  {ZONES.map((zone) => (
+                    <SelectItem key={zone.id} value={zone.id}>
+                      {language === 'ar' ? zone.name_ar : zone.name_en}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -83,9 +84,9 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
                </div>
             </div>
           ) : (
-            userRole === 'company' && selectedCompany && (
+            userRole === 'company' && selectedZone && (
                 <div className="flex items-center gap-3">
-                    <div className="text-xl font-bold">{language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}</div>
+                    <div className="text-xl font-bold">{language === 'ar' ? selectedZone.name_ar : selectedZone.name_en}</div>
                     <div className="flex items-center gap-2 bg-royal-900/60 border border-white/10 rounded-lg h-12 px-3">
                         <Calendar className="w-5 h-5 text-gold-400"/>
                         <Select value={String(selectedYear)} onValueChange={(val) => setSelectedYear(Number(val))}>
@@ -113,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9 border-2 border-gold-500/50">
               <AvatarImage src={userRole === 'admin' ? "https://picsum.photos/seed/admin/100/100" : "https://picsum.photos/seed/company/100/100" } alt="User" data-ai-hint="person portrait" />
-              <AvatarFallback>{userRole === 'admin' ? 'A' : 'C'}</AvatarFallback>
+              <AvatarFallback>{userRole === 'admin' ? 'A' : 'Z'}</AvatarFallback>
             </Avatar>
             <span className="text-sm font-medium hidden md:block">{userRole === 'admin' ? t('common.admin') : t('common.company')}</span>
           </div>
@@ -124,3 +125,5 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
 };
 
 export default Header;
+
+    

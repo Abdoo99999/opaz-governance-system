@@ -31,7 +31,7 @@ type Evaluation = {
 
 const BoardEvaluation: React.FC = () => {
     const { t } = useLanguage();
-    const { selectedCompanyId, refreshData } = useCompany();
+    const { selectedZoneId, refreshData } = useCompany();
     const { selectedYear } = useYear();
     const { toast } = useToast();
 
@@ -40,7 +40,7 @@ const BoardEvaluation: React.FC = () => {
     const [selectedMemberForNotes, setSelectedMemberForNotes] = useState<Evaluation | null>(null);
     const [notes, setNotes] = useState('');
     
-    const getStorageKey = () => `board_evaluation_${selectedCompanyId}_${selectedYear}`;
+    const getStorageKey = () => `board_evaluation_${selectedZoneId}_${selectedYear}`;
 
     const calculateAttendance = (held: number, attended: number) => {
         if (!held || held === 0) return 0;
@@ -57,7 +57,7 @@ const BoardEvaluation: React.FC = () => {
     };
 
     useEffect(() => {
-        if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
+        if (!selectedZoneId || selectedZoneId === 'all' || typeof window === 'undefined') {
             setEvaluations([]);
             setBoardMembers([]);
             return;
@@ -66,15 +66,15 @@ const BoardEvaluation: React.FC = () => {
         // Load members from Local Storage
         const savedMembersStr = localStorage.getItem('oia_board_members');
         const allMembers: BoardMember[] = savedMembersStr ? JSON.parse(savedMembersStr) : staticBoardMembers;
-        const companyMembers = allMembers.filter(m => m.companyId === selectedCompanyId);
-        setBoardMembers(companyMembers);
+        const zoneMembers = allMembers.filter(m => m.zoneId === selectedZoneId);
+        setBoardMembers(zoneMembers);
         
         // Load or initialize evaluations for these members
         const savedData = localStorage.getItem(getStorageKey());
         if (savedData) {
             setEvaluations(JSON.parse(savedData));
         } else {
-            const initialEvals = companyMembers.map(member => ({
+            const initialEvals = zoneMembers.map(member => ({
                 memberId: member.id,
                 meetingsHeld: 12,
                 meetingsAttended: 10 + Math.floor(Math.random() * 3),
@@ -84,7 +84,7 @@ const BoardEvaluation: React.FC = () => {
             }));
             setEvaluations(initialEvals);
         }
-    }, [selectedCompanyId, selectedYear]);
+    }, [selectedZoneId, selectedYear]);
 
     const summaryData = useMemo(() => {
         const scores = boardMembers.map(member => {
@@ -156,7 +156,7 @@ const BoardEvaluation: React.FC = () => {
     };
 
 
-    if (selectedCompanyId === 'all') {
+    if (selectedZoneId === 'all') {
          return (
             <div className="flex items-center justify-center h-full p-8 text-white">
                 <div className="text-center p-8 glass">

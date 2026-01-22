@@ -45,7 +45,7 @@ import { INDICATORS, AXES } from '@/lib/data/indicators';
 import type { Task } from '@/components/ImprovementPlan';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
-import { COMPANIES, type Company } from '@/data/companies';
+import { ZONES, type Zone } from '@/data/companies';
 import { BOARD_MEMBERS as staticBoardMembers, BoardMember } from '@/data/board-members';
 
 const cardVariants = {
@@ -183,9 +183,9 @@ const Reports: React.FC = () => {
         }
         const improvementPlanTasks: Task[] = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
 
-        const companiesStr = localStorage.getItem('oia_companies_registry');
-        const allCompaniesData: Company[] = companiesStr ? JSON.parse(companiesStr) : COMPANIES;
-        const companyData = allCompaniesData.find((c: any) => c.id === selectedCompanyId);
+        const companiesStr = localStorage.getItem('opaz_zones_registry');
+        const allZonesData: Zone[] = companiesStr ? JSON.parse(companiesStr) : ZONES;
+        const companyData = allZonesData.find((c: any) => c.id === selectedCompanyId);
         
         let financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
         if(!financialsStr){
@@ -195,7 +195,7 @@ const Reports: React.FC = () => {
         
         const allBoardMembersStr = localStorage.getItem('oia_board_members');
         const allBoardMembers: BoardMember[] = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : staticBoardMembers;
-        const companyBoardMembers = allBoardMembers.filter(m => m.companyId === selectedCompanyId);
+        const companyBoardMembers = allBoardMembers.filter(m => m.zoneId === selectedCompanyId);
 
 
         // --- Process Data ---
@@ -236,7 +236,7 @@ const Reports: React.FC = () => {
         let sectorScoresByAxis: { [key: number]: number[] } = {};
         AXES.forEach(a => sectorScoresByAxis[a.id] = []);
 
-        allCompaniesData.forEach((comp: any) => {
+        allZonesData.forEach((comp: any) => {
             let compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
             if(!compAssessmentStr){
                 compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
@@ -338,9 +338,9 @@ const Reports: React.FC = () => {
 
         // 8. ICV Bar Chart
         if (companyData) {
-            const totalSpending = companyData.totalSpending || 0;
-            const localSpending = companyData.localSpending || 0;
-            const smeSpending = companyData.smeSpending || 0;
+            const totalSpending = (companyData as any).totalSpending || 0;
+            const localSpending = (companyData as any).localSpending || 0;
+            const smeSpending = (companyData as any).smeSpending || 0;
             setIcvBarData([
                 { name: t('dashboard.icv.totalTenders'), value: totalSpending },
                 { name: t('dashboard.icv.localSpending'), value: localSpending },
@@ -430,7 +430,7 @@ const Reports: React.FC = () => {
 
       return (
         <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="font-bold drop-shadow-md print:fill-black">
-          {`${(percent * 100).toFixed(0)}%`}
+          {`%${(percent * 100).toFixed(0)}`}
         </text>
       );
     };
@@ -799,5 +799,3 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
-
-    

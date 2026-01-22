@@ -16,14 +16,14 @@ import { Building, Wallet, Landmark, Users, ArrowLeft, Save } from 'lucide-react
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
-import { COMPANIES } from '@/data/companies';
+import { ZONES } from '@/data/companies';
 import { Badge } from './ui/badge';
 
-const sectors = [...new Set(COMPANIES.map(c => c.sector))];
-const legalForms = ['Holding', 'SAOC', 'SAOG'];
+const sectors = [...new Set(ZONES.map(c => c.sector))];
+const legalForms = ['Holding', 'SAOC', 'SAOG', 'Free Zone', 'SEZ'];
 
 const formSchema = z.object({
-    companyName: z.string().min(1, 'Company name is required'),
+    companyName: z.string().min(1, 'Zone name is required'),
     code: z.string(),
     sector: z.string().min(1, 'Sector is required'),
     legalForm: z.string().min(1, 'Legal form is required'),
@@ -95,14 +95,14 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
     const watchLocalSpending = watch('localSpending');
     const watchSmeSpending = watch('smeSpending');
 
-    const companyOptions = COMPANIES.map(c => ({ value: c.name_en, label: language === 'ar' ? c.name_ar : c.name_en }));
+    const zoneOptions = ZONES.map(c => ({ value: c.name_en, label: language === 'ar' ? c.name_ar : c.name_en }));
 
     useEffect(() => {
         if (watchCompanyName) {
-            const selectedCompanyData = COMPANIES.find(c => c.name_en === watchCompanyName);
-            if(selectedCompanyData) {
-                setValue('code', `OIA-${selectedCompanyData.id.toUpperCase()}`);
-                setValue('sector', selectedCompanyData.sector);
+            const selectedZoneData = ZONES.find(c => c.name_en === watchCompanyName);
+            if(selectedZoneData) {
+                setValue('code', `OPZ-${selectedZoneData.id.toUpperCase()}`);
+                setValue('sector', selectedZoneData.sector);
             }
         }
     }, [watchCompanyName, setValue]);
@@ -145,7 +145,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <SelectTrigger className={inputStyles}><SelectValue placeholder={t('common.selectPlaceholder')} /></SelectTrigger>
                                             <SelectContent className="bg-royal-900 text-white border-white/20">
-                                                {companyOptions.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                                                {zoneOptions.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     )}
@@ -295,9 +295,5 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
 };
 
 export default CompanyForm;
-
-    
-
-    
 
     

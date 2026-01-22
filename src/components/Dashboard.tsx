@@ -41,7 +41,7 @@ import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
 import TopPerformers from './dashboard/TopPerformers';
 import type { Task } from '@/components/ImprovementPlan';
-import { COMPANIES, type Company } from '@/data/companies';
+import { ZONES, type Zone } from '@/data/companies';
 import { BOARD_MEMBERS as staticBoardMembers, BoardMember } from '@/data/board-members';
 import { RadarCustomTick } from './Reports';
 
@@ -78,7 +78,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 
 const Dashboard = () => {
   const { t, language } = useLanguage();
-  const { getSelectedCompany, selectedCompanyId } = useCompany();
+  const { getSelectedZone, selectedZoneId } = useCompany();
   const { selectedYear } = useYear();
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -101,14 +101,14 @@ const Dashboard = () => {
   const [compliancePieData, setCompliancePieData] = useState<any[]>([]);
   const [maturityPathData, setMaturityPathData] = useState([]);
   
-  const selectedCompany = getSelectedCompany();
+  const selectedZone = getSelectedZone();
   
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
     // --- Central Data Loading ---
-    const allCompaniesStr = localStorage.getItem('oia_companies_registry');
-    const allCompanies: Company[] = allCompaniesStr ? JSON.parse(allCompaniesStr) : COMPANIES;
+    const allZonesStr = localStorage.getItem('opaz_zones_registry');
+    const allZones: Zone[] = allZonesStr ? JSON.parse(allZonesStr) : ZONES;
     const allBoardMembersStr = localStorage.getItem('oia_board_members');
     const allBoardMembers : BoardMember[] = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : staticBoardMembers;
     
@@ -124,7 +124,7 @@ const Dashboard = () => {
     // --- Sector Average Calculation (Always needed for Radar) ---
     let sectorScoresByAxis: { [key: number]: number[] } = {};
     AXES.forEach(a => sectorScoresByAxis[a.id] = []);
-    allCompanies.forEach((comp: any) => {
+    allZones.forEach((comp: any) => {
          let compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
          if (!compAssessmentStr) {
             compAssessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
@@ -148,35 +148,35 @@ const Dashboard = () => {
         return total * 150;
     });
 
-    if (selectedCompanyId && selectedCompanyId !== 'all') {
-        const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
-        if (!companyData) return;
+    if (selectedZoneId && selectedZoneId !== 'all') {
+        const zoneData = allZones.find((c: any) => c.id === selectedZoneId);
+        if (!zoneData) return;
 
-        let assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
+        let assessmentStr = localStorage.getItem(`oia_assessment_${selectedZoneId}_${selectedYear}`);
         if (!assessmentStr) {
-            assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+            assessmentStr = localStorage.getItem(`oia_assessment_${selectedZoneId}`);
         }
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {} };
 
-        let complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
+        let complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}_${selectedYear}`);
         if (!complianceStr) {
-            complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+            complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}`);
         }
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
         
-        let improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}_${selectedYear}`);
+        let improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedZoneId}_${selectedYear}`);
         if (!improvementPlanStr) {
-            improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
+            improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedZoneId}`);
         }
         allImprovementTasks = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
         
-        let financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+        let financialsStr = localStorage.getItem(`oia_financials_${selectedZoneId}_${selectedYear}`);
         if (!financialsStr) {
-            financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}`);
+            financialsStr = localStorage.getItem(`oia_financials_${selectedZoneId}`);
         }
-        const financialsData = financialsStr ? JSON.parse(financialsStr) : companyData;
+        const financialsData = financialsStr ? JSON.parse(financialsStr) : zoneData;
         
-        boardMembersArr = allBoardMembers.filter(m => m.companyId === selectedCompanyId);
+        boardMembersArr = allBoardMembers.filter(m => m.zoneId === selectedZoneId);
         risksArr = complianceData.risks || [];
         
         const complianceItems = Object.values(complianceData.compliance || {});
@@ -187,7 +187,7 @@ const Dashboard = () => {
         const scores = Object.values(assessmentData.scores || {}) as number[];
         maturityScoreVal = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / INDICATORS.length : 0;
         
-        omanizationRateVal = companyData.totalEmployees > 0 ? Math.round((companyData.omaniEmployees / companyData.totalEmployees) * 100) : 0;
+        omanizationRateVal = (zoneData as any).totalEmployees > 0 ? Math.round(((zoneData as any).omaniEmployees / (zoneData as any).totalEmployees) * 100) : 0;
         
         // Use financial data
         totalAssetsVal = financialsData.authorizedCapital || 0;
@@ -198,9 +198,9 @@ const Dashboard = () => {
         lastROIVal = financialsData.lastROI || 0;
         
         icvData = {
-          total: companyData.totalSpending || 0,
-          local: companyData.localSpending || 0,
-          sme: companyData.smeSpending || 0
+          total: (zoneData as any).totalSpending || 0,
+          local: (zoneData as any).localSpending || 0,
+          sme: (zoneData as any).smeSpending || 0
         };
 
         const newRadarData = AXES.map((axis, index) => {
@@ -216,13 +216,13 @@ const Dashboard = () => {
         });
         setRadarData(newRadarData as any);
 
-    } else { // "All Companies" Aggregate Logic
+    } else { // "All Zones" Aggregate Logic
         let totalMaturityAgg = 0, totalOmanizationAgg = 0, totalAssetsAgg = 0, totalNetProfitAgg = 0, totalEquityAgg = 0, totalFreeCashFlowAgg = 0, totalOperatingCashAgg = 0, totalROIAgg = 0;
         let allRisksAgg: any[] = [];
-        let allCompanyScores: any[] = [];
+        let allZoneScores: any[] = [];
         let totalSpendingAgg = 0, localSpendingAgg = 0, smeSpendingAgg = 0;
         
-        allCompanies.forEach((comp: any) => {
+        allZones.forEach((comp: any) => {
             let assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}_${selectedYear}`);
             if (!assessmentStr) {
                 assessmentStr = localStorage.getItem(`oia_assessment_${comp.id}`);
@@ -234,7 +234,7 @@ const Dashboard = () => {
                   const totalScore = scores.reduce((sum, score) => sum + score, 0);
                   const companyMaturity = totalScore / INDICATORS.length;
                   totalMaturityAgg += companyMaturity;
-                  allCompanyScores.push({ name_ar: comp.name_ar, name_en: comp.name_en, score: companyMaturity });
+                  allZoneScores.push({ name_ar: comp.name_ar, name_en: comp.name_en, score: companyMaturity });
                 }
             }
             let complianceStr = localStorage.getItem(`oia_compliance_${comp.id}_${selectedYear}`);
@@ -277,29 +277,29 @@ const Dashboard = () => {
             smeSpendingAgg += comp.smeSpending || 0;
         });
 
-        const numCompanies = allCompanies.length || 1;
-        const numScoredCompanies = allCompanyScores.length || 1;
+        const numZones = allZones.length || 1;
+        const numScoredZones = allZoneScores.length || 1;
         
-        maturityScoreVal = totalMaturityAgg / numScoredCompanies;
-        omanizationRateVal = Math.round(totalOmanizationAgg / numCompanies);
+        maturityScoreVal = totalMaturityAgg / numScoredZones;
+        omanizationRateVal = Math.round(totalOmanizationAgg / numZones);
         totalAssetsVal = totalAssetsAgg;
         netProfitVal = totalNetProfitAgg;
         equityVal = totalEquityAgg;
         freeCashFlowVal = totalFreeCashFlowAgg;
         operatingCashVal = totalOperatingCashAgg;
-        lastROIVal = totalROIAgg / numCompanies;
+        lastROIVal = totalROIAgg / numZones;
         risksArr = allRisksAgg;
         boardMembersArr = allBoardMembers;
         
-        setTopPerformers(allCompanyScores.sort((a,b) => b.score - a.score).slice(0, 5));
+        setTopPerformers(allZoneScores.sort((a,b) => b.score - a.score).slice(0, 5));
         
-        const allCompaniesRadarData = AXES.map((axis, index) => ({
+        const allZonesRadarData = AXES.map((axis, index) => ({
             subject: language === 'ar' ? axis.title_ar : axis.title_en,
             company: sectorAverageByAxis[index],
             sector: sectorAverageByAxis[index],
             fullMark: 150
         }));
-        setRadarData(allCompaniesRadarData as any);
+        setRadarData(allZonesRadarData as any);
         
         icvData = { total: totalSpendingAgg, local: localSpendingAgg, sme: smeSpendingAgg };
     }
@@ -369,7 +369,7 @@ const Dashboard = () => {
     });
     setMaturityPathData(path as any);
 
-  }, [selectedCompanyId, language, selectedYear, t]);
+  }, [selectedZoneId, language, selectedYear, t]);
 
 
   const sparklineData = useMemo(() => 
@@ -379,7 +379,7 @@ const Dashboard = () => {
   [totalAssets]);
   
   const netProfitChartData = useMemo(() => {
-    const base = netProfit > 0 ? netProfit : 1000000;
+    const base = netProfit > 0 ? netProfit : 1000;
     return Array.from({ length: 4 }, (_, i) => ({
       name: `Q${i + 1}`,
       v: base * (Math.random() * (0.4 - i * 0.05) + (0.6 - i * 0.1))
@@ -387,11 +387,11 @@ const Dashboard = () => {
   }, [netProfit]);
 
   const dashboardTitle = useMemo(() => {
-    if (selectedCompany) {
-      return language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en;
+    if (selectedZone) {
+      return language === 'ar' ? selectedZone.name_ar : selectedZone.name_en;
     }
     return t('menu.dashboard');
-  }, [selectedCompany, language, t]);
+  }, [selectedZone, language, t]);
   
     const handleExport = async () => {
         if (!dashboardRef.current) return;
@@ -431,7 +431,7 @@ const Dashboard = () => {
 
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
             
-            const filename = `OIA-Executive-Dashboard-${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : 'Overall'}-${selectedYear}.pdf`;
+            const filename = `OPAZ-Executive-Dashboard-${selectedZone ? (language === 'ar' ? selectedZone.name_ar : selectedZone.name_en) : 'Overall'}-${selectedYear}.pdf`;
             pdf.save(filename);
             
         } catch (error) {
@@ -479,7 +479,6 @@ const Dashboard = () => {
         ? Math.round((compliantItems / totalComplianceItems) * 100)
         : 0;
     
-    const freeCashFlowPercentage = operatingCash > 0 ? Math.min(100, (freeCashFlow / operatingCash) * 100) : 0;
     const equityPercentage = totalAssets > 0 ? Math.min(100, (equity / totalAssets) * 100) : 0;
 
 
@@ -598,7 +597,7 @@ const Dashboard = () => {
                             <RadialBarChart
                                 innerRadius="70%"
                                 outerRadius="100%"
-                                data={[{ value: freeCashFlowPercentage }]}
+                                data={[{ value: equityPercentage }]}
                                 startAngle={90}
                                 endAngle={-270}
                                 barSize={12}
@@ -620,8 +619,8 @@ const Dashboard = () => {
                         </ResponsiveContainer>
                     </div>
                     <div className="mt-2">
-                        <p className="text-sm font-medium text-purple-200/80 print-text-black">{t('dashboard.financial.freeCashFlow')}</p>
-                        <p className="text-2xl font-bold text-purple-400 print-text-black">{currencyFormatter(freeCashFlow)}</p>
+                        <p className="text-sm font-medium text-purple-200/80 print-text-black">{t('dashboard.financial.equity')}</p>
+                        <p className="text-2xl font-bold text-purple-400 print-text-black">{equity.toFixed(0)} km²</p>
                     </div>
                 </CardContent>
             </Card>
@@ -680,7 +679,7 @@ const Dashboard = () => {
                     </div>
                     <div className="mt-2">
                         <p className="text-sm font-medium text-teal-200/80 print-text-black">{t('dashboard.financial.netProfit')}</p>
-                        <p className="text-2xl font-bold text-teal-400 print-text-black">{currencyFormatter(netProfit)}</p>
+                        <p className="text-2xl font-bold text-teal-400 print-text-black">{Math.round(netProfit)}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -716,7 +715,7 @@ const Dashboard = () => {
                         </ResponsiveContainer>
                     </div>
                     <div className="mt-2">
-                         <p className="text-sm font-medium text-amber-200/80 print-text-black">{t('financials.kpi.roi')}</p>
+                         <p className="text-sm font-medium text-amber-200/80 print-text-black">{t('dashboard.financial.roi')}</p>
                          <p className="text-2xl font-bold text-amber-400 print-text-black">{lastROI.toFixed(1)}%</p>
                     </div>
                 </CardContent>
@@ -925,3 +924,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -19,7 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-import { COMPANIES } from '@/data/companies';
+import { ZONES } from '@/data/companies';
 import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Badge } from './ui/badge';
@@ -41,20 +42,28 @@ const Settings: React.FC = () => {
         if (typeof window === 'undefined') return;
 
         // Keys to remove
-        const baseKeys = ['oia_companies_registry', 'oia_indicators_data'];
-        const companySpecificKeys = [
+        const baseKeys = ['opaz_zones_registry', 'oia_indicators_data', 'oia_board_members'];
+        const zoneSpecificKeys = [
             'oia_assessment_',
             'oia_compliance_',
-            'oia_improvement_plan_'
+            'oia_improvement_plan_',
+            'oia_financials_',
+            'board_evaluation_',
+            'board_minutes_',
         ];
 
         // Remove base keys
         baseKeys.forEach(key => localStorage.removeItem(key));
 
-        // Remove company-specific keys
-        COMPANIES.forEach(company => {
-            companySpecificKeys.forEach(prefix => {
-                localStorage.removeItem(`${prefix}${company.id}`);
+        // Remove zone-specific keys
+        ZONES.forEach(zone => {
+            zoneSpecificKeys.forEach(prefix => {
+                // To be safe, also check for old keys if any exist
+                localStorage.removeItem(`${prefix}${zone.id}`);
+                localStorage.removeItem(`${prefix}${zone.id}_2024`);
+                localStorage.removeItem(`${prefix}${zone.id}_2025`);
+                localStorage.removeItem(`${prefix}${zone.id}_2026`);
+                // Add more years if needed
             });
         });
         
@@ -200,3 +209,5 @@ const Settings: React.FC = () => {
 };
 
 export default Settings;
+
+    

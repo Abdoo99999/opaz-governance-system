@@ -39,7 +39,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLogout, userRole }) => {
   const { t } = useLanguage();
-  const { selectedCompanyId, getCompanySubmissionStatus, dataVersion } = useCompany();
+  const { selectedZoneId, getZoneSubmissionStatus, dataVersion } = useCompany();
   const { selectedYear } = useYear();
 
   const [completion, setCompletion] = useState({
@@ -47,39 +47,39 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
   });
 
   useEffect(() => {
-    if (userRole === 'company' && selectedCompanyId && typeof window !== 'undefined') {
+    if (userRole === 'company' && selectedZoneId && typeof window !== 'undefined') {
         const getCompletionStates = () => {
-            const allCompaniesStr = localStorage.getItem('oia_companies_registry');
-            const allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
-            const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);
-            const profileComplete = !!companyData?.legalForm;
+            const allZonesStr = localStorage.getItem('opaz_zones_registry');
+            const allZones = allZonesStr ? JSON.parse(allZonesStr) : [];
+            const zoneData = allZones.find((c: any) => c.id === selectedZoneId);
+            const profileComplete = !!zoneData?.legalForm;
 
             const boardMembersStr = localStorage.getItem('oia_board_members');
             const allBoardMembers = boardMembersStr ? JSON.parse(boardMembersStr) : [];
-            const companyMembers = allBoardMembers.filter((m: any) => m.companyId === selectedCompanyId);
-            const boardComplete = companyMembers.length > 0;
+            const zoneMembers = allBoardMembers.filter((m: any) => m.zoneId === selectedZoneId);
+            const boardComplete = zoneMembers.length > 0;
 
-            const evaluationStr = localStorage.getItem(`board_evaluation_${selectedCompanyId}_${selectedYear}`);
+            const evaluationStr = localStorage.getItem(`board_evaluation_${selectedZoneId}_${selectedYear}`);
             const evaluationData = evaluationStr ? JSON.parse(evaluationStr) : [];
             const evaluationComplete = evaluationData.length > 0;
 
-            let assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
+            let assessmentStr = localStorage.getItem(`oia_assessment_${selectedZoneId}_${selectedYear}`);
             if (!assessmentStr) {
-                assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
+                assessmentStr = localStorage.getItem(`oia_assessment_${selectedZoneId}`);
             }
             const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
             const assessmentComplete = assessmentData.isComplete === true;
             
-            let complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
+            let complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}_${selectedYear}`);
              if (!complianceStr) {
-                 complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+                 complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}`);
             }
             const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {} };
             const complianceComplete = Object.keys(complianceData.compliance || {}).length === 10;
 
-            let financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}_${selectedYear}`);
+            let financialsStr = localStorage.getItem(`oia_financials_${selectedZoneId}_${selectedYear}`);
             if (!financialsStr) {
-                financialsStr = localStorage.getItem(`oia_financials_${selectedCompanyId}`);
+                financialsStr = localStorage.getItem(`oia_financials_${selectedZoneId}`);
             }
             const financialsData = financialsStr ? JSON.parse(financialsStr) : {};
             const financialsComplete = !!financialsData.auditorName;
@@ -95,10 +95,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
         };
         getCompletionStates();
     }
-  }, [selectedCompanyId, userRole, currentView, selectedYear, dataVersion]);
+  }, [selectedZoneId, userRole, currentView, selectedYear, dataVersion]);
 
-  const submissionStatus = userRole === 'company' && selectedCompanyId 
-      ? getCompanySubmissionStatus(selectedCompanyId) 
+  const submissionStatus = userRole === 'company' && selectedZoneId 
+      ? getZoneSubmissionStatus(selectedZoneId) 
       : 'draft';
 
   const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
@@ -112,8 +112,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
       if (submissionStatus === 'submitted' || submissionStatus === 'approved') {
           const allowedViews = ['review-submit', 'improvement-plan'];
            if (submissionStatus === 'approved') {
-              allowedViews.push('reports'); // This won't be in sidebar, but logic is sound for navigation
-          }
+              allowedViews.push('reports');
+           }
           return !allowedViews.includes(item.view);
       }
 
@@ -248,3 +248,5 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
 };
 
 export default Sidebar;
+
+    

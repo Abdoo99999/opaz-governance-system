@@ -12,13 +12,13 @@ import { Badge } from '@/components/ui/badge';
 import CompanyForm from './CompanyForm';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
-import { COMPANIES } from '@/data/companies';
-import type { Company } from '@/data/companies';
+import { ZONES } from '@/data/companies';
+import type { Zone } from '@/data/companies';
 import { useCompany } from '@/context/CompanyContext';
 import { UserRole } from '@/app/page';
 
 
-const initialCompaniesData = COMPANIES.map(c => ({
+const initialZonesData = ZONES.map(c => ({
     ...c,
     omanization: 70 + Math.floor(Math.random() * 25), // 70-95%
     risk: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
@@ -40,65 +40,65 @@ interface CompanyRegistryProps {
 
 const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate }) => {
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [selectedCompanyForForm, setSelectedCompanyForForm] = useState<any>(null);
+    const [selectedZoneForForm, setSelectedZoneForForm] = useState<any>(null);
     const { t, language } = useLanguage();
     const { toast } = useToast();
-    const { selectedCompanyId, refreshData } = useCompany();
+    const { selectedZoneId, refreshData } = useCompany();
 
-    const [companies, setCompanies] = useState(() => {
-        if (typeof window === 'undefined') return initialCompaniesData;
-        const savedCompanies = localStorage.getItem('oia_companies_registry');
-        return savedCompanies ? JSON.parse(savedCompanies) : initialCompaniesData;
+    const [zones, setZones] = useState(() => {
+        if (typeof window === 'undefined') return initialZonesData;
+        const savedZones = localStorage.getItem('opaz_zones_registry');
+        return savedZones ? JSON.parse(savedZones) : initialZonesData;
     });
     
-    const companiesToDisplay = useMemo(() => {
+    const zonesToDisplay = useMemo(() => {
         if (userRole === 'company') {
-            return companies.filter(c => c.id === selectedCompanyId);
+            return zones.filter(c => c.id === selectedZoneId);
         }
-        if (userRole === 'admin' && selectedCompanyId !== 'all') {
-            return companies.filter(c => c.id === selectedCompanyId);
+        if (userRole === 'admin' && selectedZoneId !== 'all') {
+            return zones.filter(c => c.id === selectedZoneId);
         }
-        return companies;
-    }, [companies, userRole, selectedCompanyId]);
+        return zones;
+    }, [zones, userRole, selectedZoneId]);
 
-    const handleAddCompany = () => {
-        setSelectedCompanyForForm(null);
+    const handleAddZone = () => {
+        setSelectedZoneForForm(null);
         setIsFormOpen(true);
     };
 
-    const handleEditCompany = (company: any) => {
-        setSelectedCompanyForForm(company);
+    const handleEditZone = (zone: any) => {
+        setSelectedZoneForForm(zone);
         setIsFormOpen(true);
     };
 
-    const handleSaveCompany = (formData: any) => {
-        const isNew = !selectedCompanyForForm;
-        const companyDataFromList = COMPANIES.find(c => c.name_en === formData.companyName)
+    const handleSaveZone = (formData: any) => {
+        const isNew = !selectedZoneForForm;
+        const zoneDataFromList = ZONES.find(c => c.name_en === formData.companyName)
 
-        const updatedCompanies = isNew ? 
-            [...companies, {
-                id: companyDataFromList?.id || formData.companyName.toLowerCase().replace(/ /g, '_'),
+        const updatedZones = isNew ? 
+            [...zones, {
+                id: zoneDataFromList?.id || formData.companyName.toLowerCase().replace(/ /g, '_'),
                 name_en: formData.companyName,
-                name_ar: companyDataFromList?.name_ar || formData.companyName,
+                name_ar: zoneDataFromList?.name_ar || formData.companyName,
                 ...formData,
                 omanization: formData.totalEmployees > 0 ? formData.omaniEmployees / formData.totalEmployees * 100 : 0,
                 risk: 'Medium',
                 submissionStatus: 'draft'
             }] :
-            companies.map(c => 
-                c.id === selectedCompanyForForm.id 
+            zones.map(c => 
+                c.id === selectedZoneForForm.id 
                 ? { 
                     ...c, 
                     ...formData,
                     name_en: formData.companyName,
-                    name_ar: companyDataFromList?.name_ar || formData.companyName,
+                    name_ar: zoneDataFromList?.name_ar || formData.companyName,
                     omanization: formData.totalEmployees > 0 ? formData.omaniEmployees / formData.totalEmployees * 100 : 0,
                   } 
                 : c
             );
 
-        localStorage.setItem('oia_companies_registry', JSON.stringify(updatedCompanies));
-        setCompanies(updatedCompanies);
+        localStorage.setItem('opaz_zones_registry', JSON.stringify(updatedZones));
+        setZones(updatedZones);
         
         toast({
             title: t('common.saveSuccessTitle'),
@@ -106,21 +106,21 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
         });
 
         setIsFormOpen(false);
-        setSelectedCompanyForForm(null);
+        setSelectedZoneForForm(null);
         refreshData();
     };
 
     const handleCloseForm = () => {
         setIsFormOpen(false);
-        setSelectedCompanyForForm(null);
+        setSelectedZoneForForm(null);
     };
     
-    const handleDeleteCompany = (companyId: string) => {
+    const handleDeleteZone = (zoneId: string) => {
         // Add confirmation dialog before deleting
         if (window.confirm(t('common.deleteConfirm'))) {
-            const updatedCompanies = companies.filter(c => c.id !== companyId);
-            localStorage.setItem('oia_companies_registry', JSON.stringify(updatedCompanies));
-            setCompanies(updatedCompanies);
+            const updatedZones = zones.filter(c => c.id !== zoneId);
+            localStorage.setItem('opaz_zones_registry', JSON.stringify(updatedZones));
+            setZones(updatedZones);
             toast({
                 title: t('common.deleteSuccessTitle'),
                 variant: 'destructive',
@@ -143,9 +143,9 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
                         className="absolute inset-0 z-50 bg-royal-900"
                     >
                         <CompanyForm 
-                            company={selectedCompanyForForm} 
+                            company={selectedZoneForForm} 
                             onClose={handleCloseForm}
-                            onSave={handleSaveCompany} 
+                            onSave={handleSaveZone} 
                         />
                     </motion.div>
                 ) : (
@@ -163,7 +163,7 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
                                         <Users className="ml-2 h-5 w-5" />
                                         {t('menu.board_directory')}
                                     </Button>
-                                    <Button onClick={handleAddCompany} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                                    <Button onClick={handleAddZone} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                                         <Plus className="ml-2 h-5 w-5" />
                                         {t('registry.addNew')}
                                     </Button>
@@ -183,33 +183,33 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {companiesToDisplay.map((company) => (
-                                <Card key={company.id} className="bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+                            {zonesToDisplay.map((zone) => (
+                                <Card key={zone.id} className="bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between mb-4">
-                                            <h2 className="text-xl font-bold">{language === 'ar' ? company.name_ar : company.name_en}</h2>
+                                            <h2 className="text-xl font-bold">{language === 'ar' ? zone.name_ar : zone.name_en}</h2>
                                             <div className="flex items-center gap-2">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white" onClick={() => handleEditCompany(company)}>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white" onClick={() => handleEditZone(zone)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
                                                 {userRole === 'admin' && (
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500" onClick={() => handleDeleteCompany(company.id)}>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500" onClick={() => handleDeleteZone(zone.id)}>
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="text-sm text-gray-400 mb-4">{company.sector}</div>
+                                        <div className="text-sm text-gray-400 mb-4">{zone.sector}</div>
                                         <div className="mb-2">
                                             <div className="flex justify-between items-center text-xs text-gray-300 mb-1">
                                                 <span>{t('dashboard.omanization')}</span>
-                                                <span>{company.omanization.toFixed(0)}%</span>
+                                                <span>{(zone as any).omanization.toFixed(0)}%</span>
                                             </div>
-                                            <Progress value={company.omanization} className="h-2" />
+                                            <Progress value={(zone as any).omanization} className="h-2" />
                                         </div>
                                         <div>
                                             <span className="text-xs text-gray-300 mr-2">{t('registry.riskLevel')}:</span>
-                                            <Badge variant={riskVariant[company.risk]}>{t(`registry.risks.${company.risk.toLowerCase()}`)}</Badge>
+                                            <Badge variant={riskVariant[(zone as any).risk]}>{t(`registry.risks.${(zone as any).risk.toLowerCase()}`)}</Badge>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -223,3 +223,5 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
 };
 
 export default CompanyRegistry;
+
+    
