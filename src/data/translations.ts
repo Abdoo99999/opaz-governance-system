@@ -106,7 +106,7 @@ export const translations = {
       currentTerm: "الدورة الحالية",
       noData: "لا توجد بيانات لعرضها",
       membersCount: "عدد المسؤولين",
-      memberType: "نوع العضوية",
+      memberType: "الدور التنفيذي",
       expertise_label: "الخبرة الأساسية",
       committees: "عضوية اللجان",
       noCommittees: "لا يوجد",
@@ -140,22 +140,21 @@ export const translations = {
         }
       },
       roles: {
-        chairman: "الرئيس التنفيذي",
-        member: "مسؤول تنفيذي"
+        ceo: "الرئيس التنفيذي",
+        'deputy ceo': "نائب الرئيس",
+        'director general': "مدير عام"
       },
-      types: {
+      types: { 
         independent: "مستقل",
         government: "ممثل حكومي",
         executive: "تنفيذي"
       },
       expertise: {
-        legal: "قانونية",
-        finance: "مالية",
-        engineering: "هندسية",
-        hr: "موارد بشرية",
-        strategy: "استراتيجية",
-        technology: "تقنية",
-        marketing: "تسويق"
+        'smart city development': "تطوير المدن الذكية",
+        'logistics': "اللوجستيات",
+        'fdi attraction': "جذب الاستثمار الأجنبي",
+        'industrial management': "الإدارة الصناعية",
+        'urban planning': "التخطيط العمراني"
       },
       committee_names: {
         audit: "التدقيق",
@@ -169,7 +168,7 @@ export const translations = {
         name_ar: 'الاسم بالعربية',
         name_en: 'الاسم بالإنجليزية',
         nationality: 'الجنسية',
-        role: 'المنصب',
+        role: 'الدور التنفيذي',
         appointmentDate: 'تاريخ التعيين',
         expiryDate: 'تاريخ انتهاء الصلاحية',
         cycleSettings: 'إعدادات الدورة',
@@ -445,15 +444,20 @@ export const translations = {
             title: "البيانات الأساسية",
             companyName: "اسم المنطقة/المدينة",
             code: "الرمز",
-            sector: "القطاع",
-            legalForm: "الشكل القانوني",
+            sector: "القطاع", // Fallback
+            legalForm: "الشكل القانوني", // Fallback, to be replaced
+            zoneType: "نوع المنطقة"
         },
         financial: {
-            title: "الموقف المالي",
-            capital: "رأس المال المصرح به (ر.ع.)",
-            yearEnd: "نهاية السنة المالية",
+            title: "المؤشرات الرئيسية",
+            capital: "رأس المال المصرح به (ر.ع.)", // Fallback
+            yearEnd: "نهاية السنة المالية", // Fallback
             roi: "آخر عائد على الاستثمار (%)",
             uso: "التزامات الخدمة الشاملة",
+            totalArea: "المساحة الإجمالية (كم²)",
+            developedArea: "المساحة المطورة (كم²)",
+            cumulativeInvestment: "حجم الاستثمار التراكمي (مليون ر.ع)",
+            directJobs: "عدد الوظائف المباشرة"
         },
         board: {
             title: "حوكمة القيادة",
@@ -480,7 +484,7 @@ export const translations = {
       companyName: "اسم المنطقة",
       submissionDate: "تاريخ الإرسال",
       maturityScore: "نتيجة النضج",
-      actions: "الإجراءات",
+      actions: "إجراءات",
       view: "معاينة",
       return: "إعادة للتعديل",
       approve: "موافقة نهائية",
@@ -652,7 +656,7 @@ export const translations = {
       currentTerm: "Current Term",
       noData: "No data to display",
       membersCount: "Officials",
-      memberType: "Membership Type",
+      memberType: "Executive Role",
       expertise_label: "Primary Expertise",
       committees: "Committee Memberships",
       noCommittees: "None",
@@ -686,22 +690,21 @@ export const translations = {
         }
       },
       roles: {
-        chairman: "CEO",
-        member: "Executive Official"
+        ceo: "CEO",
+        'deputy ceo': "Deputy CEO",
+        'director general': "Director General"
       },
-      types: {
+      types: { 
         independent: "Independent",
         government: "Government Rep.",
         executive: "Executive"
       },
       expertise: {
-        legal: "Legal",
-        finance: "Finance",
-        engineering: "Engineering",
-        hr: "Human Resources",
-        strategy: "Strategy",
-        technology: "Technology",
-        marketing: "Marketing"
+        'smart city development': "Smart City Development",
+        'logistics': "Logistics",
+        'fdi attraction': "FDI Attraction",
+        'industrial management': "Industrial Management",
+        'urban planning': "Urban Planning"
       },
       committee_names: {
         audit: "Audit",
@@ -715,7 +718,7 @@ export const translations = {
         name_ar: 'Name (Arabic)',
         name_en: 'Name (English)',
         nationality: 'Nationality',
-        role: 'Role',
+        role: 'Executive Role',
         appointmentDate: 'Appointment Date',
         expiryDate: 'Expiry Date',
         cycleSettings: 'Cycle Settings',
@@ -991,15 +994,20 @@ export const translations = {
             title: "Basic Identity",
             companyName: "Zone/City Name",
             code: "Code",
-            sector: "Sector",
-            legalForm: "Legal Form",
+            sector: "Sector", // Fallback
+            legalForm: "Legal Form", // Fallback, to be replaced
+            zoneType: "Zone Type"
         },
         financial: {
-            title: "Financial Position",
-            capital: "Authorized Capital (OMR)",
-            yearEnd: "Financial Year End",
+            title: "Key Indicators",
+            capital: "Authorized Capital (OMR)", // Fallback
+            yearEnd: "Financial Year End", // Fallback
             roi: "Last ROI (%)",
             uso: "USO Obligations",
+            totalArea: "Total Area (km²)",
+            developedArea: "Developed Area (km²)",
+            cumulativeInvestment: "Cumulative Investment (OMR M)",
+            directJobs: "Direct Jobs Created"
         },
         board: {
             title: "Leadership Governance",
@@ -1093,5 +1101,3 @@ export const translations = {
     }
   }
 };
-
-    

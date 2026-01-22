@@ -3,11 +3,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Search, Edit, Trash2, Users } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Users, Briefcase, Map, Waypoints } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import CompanyForm from './CompanyForm';
 import { useLanguage } from '@/context/LanguageContext';
@@ -18,19 +17,11 @@ import { useCompany } from '@/context/CompanyContext';
 import { UserRole } from '@/app/page';
 
 
-const initialZonesData = ZONES.map(c => ({
+const initialZonesData: Zone[] = ZONES.map(c => ({
     ...c,
-    omanization: 70 + Math.floor(Math.random() * 25), // 70-95%
-    risk: ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)],
     submissionStatus: 'draft' as 'draft' | 'submitted' | 'returned' | 'approved',
 }));
 
-
-const riskVariant: { [key: string]: "default" | "secondary" | "destructive" | "outline" } = {
-    'Low': 'default',
-    'Medium': 'secondary',
-    'High': 'destructive'
-}
 
 interface CompanyRegistryProps {
     userRole: UserRole;
@@ -45,7 +36,7 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
     const { toast } = useToast();
     const { selectedZoneId, refreshData } = useCompany();
 
-    const [zones, setZones] = useState(() => {
+    const [zones, setZones] = useState<Zone[]>(() => {
         if (typeof window === 'undefined') return initialZonesData;
         const savedZones = localStorage.getItem('opaz_zones_registry');
         return savedZones ? JSON.parse(savedZones) : initialZonesData;
@@ -81,8 +72,6 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
                 name_en: formData.companyName,
                 name_ar: zoneDataFromList?.name_ar || formData.companyName,
                 ...formData,
-                omanization: formData.totalEmployees > 0 ? formData.omaniEmployees / formData.totalEmployees * 100 : 0,
-                risk: 'Medium',
                 submissionStatus: 'draft'
             }] :
             zones.map(c => 
@@ -92,7 +81,6 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
                     ...formData,
                     name_en: formData.companyName,
                     name_ar: zoneDataFromList?.name_ar || formData.companyName,
-                    omanization: formData.totalEmployees > 0 ? formData.omaniEmployees / formData.totalEmployees * 100 : 0,
                   } 
                 : c
             );
@@ -116,7 +104,6 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
     };
     
     const handleDeleteZone = (zoneId: string) => {
-        // Add confirmation dialog before deleting
         if (window.confirm(t('common.deleteConfirm'))) {
             const updatedZones = zones.filter(c => c.id !== zoneId);
             localStorage.setItem('opaz_zones_registry', JSON.stringify(updatedZones));
@@ -199,17 +186,21 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="text-sm text-gray-400 mb-4">{zone.sector}</div>
-                                        <div className="mb-2">
-                                            <div className="flex justify-between items-center text-xs text-gray-300 mb-1">
-                                                <span>{t('dashboard.omanization')}</span>
-                                                <span>{(zone as any).omanization.toFixed(0)}%</span>
+                                        <div className="text-sm text-gray-400 mb-4">{zone.type}</div>
+                                        
+                                        <div className="space-y-3 text-sm">
+                                            <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
+                                                <span className="text-gray-400 flex items-center gap-2"><Map size={14}/> {t('companyForm.financial.totalArea')}</span>
+                                                <Badge variant="outline" className="border-purple-400/30 text-purple-300">{zone.totalArea} كم²</Badge>
                                             </div>
-                                            <Progress value={(zone as any).omanization} className="h-2" />
-                                        </div>
-                                        <div>
-                                            <span className="text-xs text-gray-300 mr-2">{t('registry.riskLevel')}:</span>
-                                            <Badge variant={riskVariant[(zone as any).risk]}>{t(`registry.risks.${(zone as any).risk.toLowerCase()}`)}</Badge>
+                                            <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
+                                                <span className="text-gray-400 flex items-center gap-2"><Briefcase size={14}/> {t('companyForm.financial.cumulativeInvestment')}</span>
+                                                <Badge variant="outline" className="border-blue-400/30 text-blue-300">{zone.cumulativeInvestment} مليون</Badge>
+                                            </div>
+                                            <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
+                                                <span className="text-gray-400 flex items-center gap-2"><Users size={14}/> {t('companyForm.financial.directJobs')}</span>
+                                                <Badge variant="outline" className="border-green-400/30 text-green-300">{zone.directJobs}</Badge>
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -223,5 +214,3 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
 };
 
 export default CompanyRegistry;
-
-    

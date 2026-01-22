@@ -38,13 +38,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 
 
 const expertiseColors: { [key: string]: string } = {
-  'Legal': '#3b82f6',
-  'Finance': '#10b981',
-  'Engineering': '#f97316',
-  'HR': '#8b5cf6',
-  'Strategy': '#d946ef',
-  'Technology': '#14b8a6',
-  'Marketing': '#ec4899',
+  'Smart City Development': '#3b82f6',
+  'Logistics': '#10b981',
+  'FDI Attraction': '#f97316',
+  'Industrial Management': '#8b5cf6',
+  'Urban Planning': '#d946ef',
 };
 
 const cardVariants = {
@@ -56,20 +54,18 @@ const cardVariants = {
   }),
 };
 
-const expertiseOptions = ['Legal', 'Finance', 'Engineering', 'HR', 'Strategy', 'Technology', 'Marketing'];
+const expertiseOptions = ['Smart City Development', 'Logistics', 'FDI Attraction', 'Industrial Management', 'Urban Planning'];
 const committeeOptions = ['Audit', 'Risk', 'HR', 'Nomination'];
-const roleOptions = ['Chairman', 'Member'];
-const typeOptions = ['Independent', 'Government', 'Executive'];
+const roleOptions = ['CEO', 'Deputy CEO', 'Director General'];
 const qualificationOptions = ['Bachelor', 'Master', 'PhD'] as const;
 
 const memberSchema = z.object({
   name_ar: z.string().min(1, 'الاسم بالعربية مطلوب'),
   name_en: z.string().min(1, 'الاسم بالانجليزية مطلوب'),
   nationality: z.string().min(1, 'الجنسية مطلوبة'),
-  role: z.enum(['Chairman', 'Member']),
-  type: z.enum(['Independent', 'Government', 'Executive']),
+  role: z.enum(roleOptions),
   qualification: z.enum(qualificationOptions),
-  expertise: z.enum(['Legal', 'Finance', 'Engineering', 'HR', 'Strategy', 'Technology', 'Marketing']),
+  expertise: z.enum(expertiseOptions),
   appointmentDate: z.date(),
   expiryDate: z.date(),
   committees: z.array(z.string()).optional(),
@@ -101,24 +97,22 @@ const BoardDirectory: React.FC = () => {
     const [editingMember, setEditingMember] = useState<BoardMember | null>(null);
     const [isCycleSettingsOpen, setIsCycleSettingsOpen] = useState(false);
     
-    // Board Cycle State - now expects string 'YYYY-MM-DD' for native date input
     const [boardCycleStart, setBoardCycleStart] = useState<string | null>(null);
     const [boardCycleEnd, setBoardCycleEnd] = useState<string | null>(null);
     
     const [minutes, setMinutes] = useState<MeetingMinute[]>([]);
     const [isMinuteModalOpen, setIsMinuteModalOpen] = useState(false);
     
-    // Load/Save Minutes from localStorage
     useEffect(() => {
         if (selectedZoneId && selectedZoneId !== 'all' && typeof window !== 'undefined') {
             const savedMinutes = localStorage.getItem(`board_minutes_${selectedZoneId}`);
             if (savedMinutes) {
                 setMinutes(JSON.parse(savedMinutes));
             } else {
-                setMinutes([]); // Reset if no data for this zone
+                setMinutes([]); 
             }
         } else {
-            setMinutes([]); // Reset if 'All Zones' is selected
+            setMinutes([]); 
         }
     }, [selectedZoneId]);
 
@@ -147,7 +141,6 @@ const BoardDirectory: React.FC = () => {
         return boardMembers.filter(m => m.zoneId === selectedZoneId);
     }, [selectedZoneId, boardMembers]);
 
-    // Effect to set initial board cycle from member dates
     useEffect(() => {
         if (filteredMembers.length > 0) {
             const appointmentDates = filteredMembers.map(m => parseISO(m.appointmentDate));
@@ -156,7 +149,6 @@ const BoardDirectory: React.FC = () => {
             const boardStart = new Date(Math.min(...appointmentDates.map(d => d.getTime())));
             const boardEnd = new Date(Math.max(...expiryDates.map(d => d.getTime())));
             
-            // Set as 'YYYY-MM-DD' string
             setBoardCycleStart(format(boardStart, 'yyyy-MM-dd'));
             setBoardCycleEnd(format(boardEnd, 'yyyy-MM-dd'));
         } else {
@@ -168,10 +160,8 @@ const BoardDirectory: React.FC = () => {
     const summaryData = useMemo(() => {
         const totalMembers = filteredMembers.length;
         if (totalMembers === 0) {
-            return { totalMembers: 0, independentMembersCount: 0, independentPercentage: 0, expiringSoon: 0, totalCommittees: 0 };
+            return { totalMembers: 0, expiringSoon: 0, totalCommittees: 0 };
         }
-        const independentMembersCount = filteredMembers.filter(m => m.type === 'Independent').length;
-        const independentPercentage = (independentMembersCount / totalMembers) * 100;
         const expiringSoon = filteredMembers.filter(m => {
             const diff = differenceInMonths(parseISO(m.expiryDate), new Date());
             return diff >= 0 && diff <= 3;
@@ -180,8 +170,6 @@ const BoardDirectory: React.FC = () => {
 
         return {
             totalMembers,
-            independentMembersCount,
-            independentPercentage,
             expiringSoon,
             totalCommittees,
         };
@@ -194,9 +182,9 @@ const BoardDirectory: React.FC = () => {
         }, {} as { [key: string]: number });
 
         return Object.keys(expertiseColors).map(expertise => ({
-            subject: t(`board_directory.expertise.${expertise.toLowerCase()}`),
+            subject: t(`board_directory.expertise.${expertise.toLowerCase().replace(/ /g, '_')}`),
             count: expertiseCounts[expertise] || 0,
-            fullMark: Math.max(5, ...Object.values(expertiseCounts)),
+            fullMark: Math.max(3, ...Object.values(expertiseCounts)),
         }));
     }, [filteredMembers, t]);
 
@@ -347,7 +335,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                     {t('board_directory.addMember')}
                 </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <Card className="glass">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.summary.total_members')}</CardTitle>
@@ -355,16 +343,6 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-gold-400">{summaryData.totalMembers}</div>
-                    </CardContent>
-                </Card>
-                <Card className="glass">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.summary.independent_members')}</CardTitle>
-                        <ShieldCheck className="h-5 w-5 text-gray-400" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold text-gold-400">{summaryData.independentMembersCount}</div>
-                        <p className="text-xs text-gray-400">{summaryData.independentPercentage.toFixed(0)}% {t('board_directory.summary.of_board')}</p>
                     </CardContent>
                 </Card>
                 <Card className="glass">
@@ -447,7 +425,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                                 </Avatar>
                                 <div>
                                     <h3 className="font-bold text-lg">{language === 'ar' ? member.name_ar : member.name_en}</h3>
-                                    <p className="text-sm text-gold-400">{t(`board_directory.roles.${member.role.toLowerCase()}`)}</p>
+                                    <p className="text-sm text-gold-400">{t(`board_directory.roles.${member.role.toLowerCase().replace(/ /g, '_')}`)}</p>
                                 </div>
                             </CardHeader>
                             <CardContent className="p-4 space-y-3 text-sm flex-grow">
@@ -457,7 +435,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                                 </div>
                                 <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
                                     <span className="text-gray-400">{t('board_directory.memberType')}</span>
-                                    <Badge variant="outline" className="border-blue-400/30 text-blue-300">{t(`board_directory.types.${member.type.toLowerCase()}`)}</Badge>
+                                     <Badge variant="outline" className="border-blue-400/30 text-blue-300">{t(`board_directory.roles.${member.role.toLowerCase().replace(/ /g, '_')}`)}</Badge>
                                 </div>
                                 {member.qualification && (
                                     <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
@@ -470,7 +448,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                                 <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
                                     <span className="text-gray-400">{t('board_directory.expertise_label')}</span>
                                     <Badge style={{ backgroundColor: `${expertiseColors[member.expertise]}30`, color: expertiseColors[member.expertise], borderColor: `${expertiseColors[member.expertise]}50` }}>
-                                        {t(`board_directory.expertise.${member.expertise.toLowerCase()}`)}
+                                        {t(`board_directory.expertise.${member.expertise.toLowerCase().replace(/ /g, '_')}`)}
                                     </Badge>
                                 </div>
                                 <div className="bg-black/20 p-2 rounded-md">
@@ -591,7 +569,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
         reset({
           name_ar: '', name_en: '',
           nationality: 'Omani',
-          role: 'Member', type: 'Independent', expertise: 'Finance',
+          role: 'Director General', expertise: 'Logistics',
           qualification: 'Bachelor',
           appointmentDate: new Date(), expiryDate: new Date(),
           committees: []
@@ -616,17 +594,6 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
               <Label htmlFor="name_ar">{t('board_directory.form.name_ar')}</Label>
               <Input id="name_ar" {...control.register('name_ar')} className="bg-royal-900/50 border-white/10" dir="rtl"/>
               {errors.name_ar && <p className="text-red-500 text-sm mt-1">{errors.name_ar.message}</p>}
-            </div>
-             <div>
-              <Label htmlFor="type">{t('board_directory.memberType')}</Label>
-              <Controller name="type" control={control} render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-royal-900 text-white border-white/20">
-                    {typeOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.types.${opt.toLowerCase()}`)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              )}/>
             </div>
             <div>
               <Label htmlFor="appointmentDate">{t('board_directory.form.appointmentDate')}</Label>
@@ -670,15 +637,6 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                 )}
               />
             </div>
-          </div>
-
-          {/* Column 2 */}
-          <div className="space-y-4">
-             <div>
-              <Label htmlFor="name_en">{t('board_directory.form.name_en')}</Label>
-              <Input id="name_en" {...control.register('name_en')} className="bg-royal-900/50 border-white/10" dir="ltr" />
-               {errors.name_en && <p className="text-red-500 text-sm mt-1">{errors.name_en.message}</p>}
-            </div>
              <div>
               <Label htmlFor="nationality">{t('board_directory.form.nationality')}</Label>
               <Controller name="nationality" control={control} render={({ field }) => (
@@ -690,35 +648,23 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                 </Select>
               )}/>
             </div>
+          </div>
+
+          {/* Column 2 */}
+          <div className="space-y-4">
+             <div>
+              <Label htmlFor="name_en">{t('board_directory.form.name_en')}</Label>
+              <Input id="name_en" {...control.register('name_en')} className="bg-royal-900/50 border-white/10" dir="ltr" />
+               {errors.name_en && <p className="text-red-500 text-sm mt-1">{errors.name_en.message}</p>}
+            </div>
+            
             <div>
               <Label htmlFor="role">{t('board_directory.form.role')}</Label>
               <Controller name="role" control={control} render={({ field }) => (
                 <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
                   <SelectContent className="bg-royal-900 text-white border-white/20">
-                    {roleOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.roles.${opt.toLowerCase()}`)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              )}/>
-            </div>
-            <div>
-                <Label htmlFor="qualification">{t('board_directory.form.qualification')}</Label>
-                <Controller name="qualification" control={control} render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-royal-900 text-white border-white/20">
-                        {qualificationOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.qualifications.${opt.toLowerCase()}`)}</SelectItem>)}
-                    </SelectContent>
-                    </Select>
-                )}/>
-            </div>
-             <div>
-              <Label htmlFor="expertise">{t('board_directory.expertise_label')}</Label>
-               <Controller name="expertise" control={control} render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
-                  <SelectContent className="bg-royal-900 text-white border-white/20">
-                    {expertiseOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.expertise.${opt.toLowerCase()}`)}</SelectItem>)}
+                    {roleOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.roles.${opt.toLowerCase().replace(/ /g, '_')}`)}</SelectItem>)}
                   </SelectContent>
                 </Select>
               )}/>
@@ -739,6 +685,28 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
                     />
                 )}
                 />
+            </div>
+            <div>
+                <Label htmlFor="qualification">{t('board_directory.form.qualification')}</Label>
+                <Controller name="qualification" control={control} render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-royal-900 text-white border-white/20">
+                        {qualificationOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.qualifications.${opt.toLowerCase()}`)}</SelectItem>)}
+                    </SelectContent>
+                    </Select>
+                )}/>
+            </div>
+             <div>
+              <Label htmlFor="expertise">{t('board_directory.expertise_label')}</Label>
+               <Controller name="expertise" control={control} render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="bg-royal-900/50 border-white/10"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-royal-900 text-white border-white/20">
+                    {expertiseOptions.map(opt => <SelectItem key={opt} value={opt}>{t(`board_directory.expertise.${opt.toLowerCase().replace(/ /g, '_')}`)}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              )}/>
             </div>
           </div>
           
@@ -772,7 +740,6 @@ const CycleSettingsDialog: React.FC<CycleSettingsDialogProps> = ({ isOpen, onClo
     const [start, setStart] = useState<string | undefined>(startDate || undefined);
     const [end, setEnd] = useState<string | undefined>(endDate || undefined);
     
-    // Use an effect to sync state with props when the dialog opens
     useEffect(() => {
         if (isOpen) {
             setStart(startDate || undefined);
@@ -927,5 +894,3 @@ const MinuteUploadDialog: React.FC<MinuteUploadDialogProps> = ({ isOpen, onClose
 
 
 export default BoardDirectory;
-
-    

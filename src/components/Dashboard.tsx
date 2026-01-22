@@ -31,7 +31,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon, Wallet, Briefcase, FileDown, Loader2 } from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon, Wallet, Briefcase, FileDown, Loader2, FileSignature, LandPlot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
@@ -85,13 +85,11 @@ const Dashboard = () => {
 
   // State for all dashboard data
   const [maturityScore, setMaturityScore] = useState(0);
-  const [totalAssets, setTotalAssets] = useState(0);
   const [omanizationRate, setOmanizationRate] = useState(0);
   const [risks, setRisks] = useState<any[]>([]);
-  const [netProfit, setNetProfit] = useState(0);
-  const [equity, setEquity] = useState(0);
-  const [freeCashFlow, setFreeCashFlow] = useState(0);
-  const [operatingCash, setOperatingCash] = useState(0);
+  const [agreementsSigned, setAgreementsSigned] = useState(0);
+  const [developedArea, setDevelopedArea] = useState(0);
+  const [totalInvestment, setTotalInvestment] = useState(0);
   const [lastROI, setLastROI] = useState(0);
   const [topPerformers, setTopPerformers] = useState<any[]>([]);
   const [improvementPlanData, setImprovementPlanData] = useState([]);
@@ -112,8 +110,8 @@ const Dashboard = () => {
     const allBoardMembersStr = localStorage.getItem('oia_board_members');
     const allBoardMembers : BoardMember[] = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : staticBoardMembers;
     
-    let maturityScoreVal = 0, totalAssetsVal = 0, omanizationRateVal = 0;
-    let netProfitVal = 0, equityVal = 0, freeCashFlowVal = 0, operatingCashVal = 0, lastROIVal = 0;
+    let maturityScoreVal = 0, omanizationRateVal = 0, totalInvestmentVal = 0;
+    let agreementsSignedVal = 0, developedAreaVal = 0, lastROIVal = 0;
     let risksArr: any[] = [];
     let allImprovementTasks: Task[] = [];
     let boardMembersArr: BoardMember[] = [];
@@ -170,11 +168,7 @@ const Dashboard = () => {
         }
         allImprovementTasks = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
         
-        let financialsStr = localStorage.getItem(`oia_financials_${selectedZoneId}_${selectedYear}`);
-        if (!financialsStr) {
-            financialsStr = localStorage.getItem(`oia_financials_${selectedZoneId}`);
-        }
-        const financialsData = financialsStr ? JSON.parse(financialsStr) : zoneData;
+        const financialsData = zoneData;
         
         boardMembersArr = allBoardMembers.filter(m => m.zoneId === selectedZoneId);
         risksArr = complianceData.risks || [];
@@ -183,24 +177,20 @@ const Dashboard = () => {
         totalCompliantItems = complianceItems.filter(v => v === true).length;
         totalComplianceQuestions = 10; 
 
-
         const scores = Object.values(assessmentData.scores || {}) as number[];
         maturityScoreVal = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / INDICATORS.length : 0;
         
-        omanizationRateVal = (zoneData as any).totalEmployees > 0 ? Math.round(((zoneData as any).omaniEmployees / (zoneData as any).totalEmployees) * 100) : 0;
+        omanizationRateVal = (financialsData as any).totalEmployees > 0 ? Math.round(((financialsData as any).omaniEmployees / (financialsData as any).totalEmployees) * 100) : 0;
         
-        // Use financial data
-        totalAssetsVal = financialsData.authorizedCapital || 0;
-        netProfitVal = (financialsData.revenue || 0) - (financialsData.expenses || 0);
-        equityVal = (financialsData.authorizedCapital || 0) - (financialsData.liabilities || 0);
-        freeCashFlowVal = (financialsData.operatingCash || 0) - (financialsData.capex || 0);
-        operatingCashVal = financialsData.operatingCash || 0;
+        totalInvestmentVal = financialsData.cumulativeInvestment || 0;
+        agreementsSignedVal = financialsData.agreementsSigned || 0;
+        developedAreaVal = financialsData.developedArea || 0;
         lastROIVal = financialsData.lastROI || 0;
         
         icvData = {
-          total: (zoneData as any).totalSpending || 0,
-          local: (zoneData as any).localSpending || 0,
-          sme: (zoneData as any).smeSpending || 0
+          total: (financialsData as any).totalSpending || 0,
+          local: (financialsData as any).localSpending || 0,
+          sme: (financialsData as any).smeSpending || 0
         };
 
         const newRadarData = AXES.map((axis, index) => {
@@ -216,8 +206,8 @@ const Dashboard = () => {
         });
         setRadarData(newRadarData as any);
 
-    } else { // "All Zones" Aggregate Logic
-        let totalMaturityAgg = 0, totalOmanizationAgg = 0, totalAssetsAgg = 0, totalNetProfitAgg = 0, totalEquityAgg = 0, totalFreeCashFlowAgg = 0, totalOperatingCashAgg = 0, totalROIAgg = 0;
+    } else { 
+        let totalMaturityAgg = 0, totalOmanizationAgg = 0, totalInvestmentAgg = 0, totalAgreementsAgg = 0, totalDevelopedAreaAgg = 0, totalROIAgg = 0;
         let allRisksAgg: any[] = [];
         let allZoneScores: any[] = [];
         let totalSpendingAgg = 0, localSpendingAgg = 0, smeSpendingAgg = 0;
@@ -248,7 +238,7 @@ const Dashboard = () => {
                 totalComplianceQuestions += 10;
                 allRisksAgg.push(...(complianceData.risks || []));
             } else {
-                 totalComplianceQuestions += 10; // still counts as 10 questions to be answered
+                 totalComplianceQuestions += 10;
             }
             let improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${comp.id}_${selectedYear}`);
              if (!improvementPlanStr) {
@@ -258,17 +248,11 @@ const Dashboard = () => {
                 allImprovementTasks.push(...(JSON.parse(improvementPlanStr)));
             }
             
-            let financialsStr = localStorage.getItem(`oia_financials_${comp.id}_${selectedYear}`);
-            if (!financialsStr) {
-                financialsStr = localStorage.getItem(`oia_financials_${comp.id}`);
-            }
-            const financialsData = financialsStr ? JSON.parse(financialsStr) : comp;
+            const financialsData = comp;
 
-            totalAssetsAgg += financialsData.authorizedCapital || 0;
-            totalNetProfitAgg += (financialsData.revenue || 0) - (financialsData.expenses || 0);
-            totalEquityAgg += (financialsData.authorizedCapital || 0) - (financialsData.liabilities || 0);
-            totalFreeCashFlowAgg += (financialsData.operatingCash || 0) - (financialsData.capex || 0);
-            totalOperatingCashAgg += financialsData.operatingCash || 0;
+            totalInvestmentAgg += financialsData.cumulativeInvestment || 0;
+            agreementsSignedVal += financialsData.agreementsSigned || 0;
+            developedAreaVal += financialsData.developedArea || 0;
             totalROIAgg += financialsData.lastROI || 0;
 
             totalOmanizationAgg += comp.totalEmployees > 0 ? Math.round((comp.omaniEmployees / comp.totalEmployees) * 100) : 0;
@@ -282,11 +266,9 @@ const Dashboard = () => {
         
         maturityScoreVal = totalMaturityAgg / numScoredZones;
         omanizationRateVal = Math.round(totalOmanizationAgg / numZones);
-        totalAssetsVal = totalAssetsAgg;
-        netProfitVal = totalNetProfitAgg;
-        equityVal = totalEquityAgg;
-        freeCashFlowVal = totalFreeCashFlowAgg;
-        operatingCashVal = totalOperatingCashAgg;
+        totalInvestmentVal = totalInvestmentAgg;
+        agreementsSignedVal = agreementsSignedVal;
+        developedAreaVal = developedAreaVal;
         lastROIVal = totalROIAgg / numZones;
         risksArr = allRisksAgg;
         boardMembersArr = allBoardMembers;
@@ -304,14 +286,11 @@ const Dashboard = () => {
         icvData = { total: totalSpendingAgg, local: localSpendingAgg, sme: smeSpendingAgg };
     }
 
-    // --- Set State Variables ---
     setMaturityScore(maturityScoreVal);
-    setTotalAssets(totalAssetsVal);
     setOmanizationRate(omanizationRateVal);
-    setNetProfit(netProfitVal);
-    setEquity(equityVal);
-    setFreeCashFlow(freeCashFlowVal);
-    setOperatingCash(operatingCashVal);
+    setTotalInvestment(totalInvestmentVal);
+    setAgreementsSigned(agreementsSignedVal);
+    setDevelopedArea(developedAreaVal);
     setLastROI(lastROIVal);
     setRisks(risksArr);
 
@@ -374,17 +353,17 @@ const Dashboard = () => {
 
   const sparklineData = useMemo(() => 
     Array.from({ length: 10 }, () => ({
-      uv: totalAssets * (Math.random() * 0.4 + 0.8)
+      uv: totalInvestment * (Math.random() * 0.4 + 0.8)
     })), 
-  [totalAssets]);
+  [totalInvestment]);
   
-  const netProfitChartData = useMemo(() => {
-    const base = netProfit > 0 ? netProfit : 1000;
+  const agreementsChartData = useMemo(() => {
+    const base = agreementsSigned > 0 ? agreementsSigned : 100;
     return Array.from({ length: 4 }, (_, i) => ({
       name: `Q${i + 1}`,
       v: base * (Math.random() * (0.4 - i * 0.05) + (0.6 - i * 0.1))
     }));
-  }, [netProfit]);
+  }, [agreementsSigned]);
 
   const dashboardTitle = useMemo(() => {
     if (selectedZone) {
@@ -479,7 +458,7 @@ const Dashboard = () => {
         ? Math.round((compliantItems / totalComplianceItems) * 100)
         : 0;
     
-    const equityPercentage = totalAssets > 0 ? Math.min(100, (equity / totalAssets) * 100) : 0;
+    const developedAreaPercentage = developedArea > 0 ? Math.min(100, developedArea) : 0;
 
 
   return (
@@ -519,10 +498,10 @@ const Dashboard = () => {
               <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70 relative overflow-hidden")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10">
                       <CardTitle className="text-sm font-medium text-green-200/80 print-text-black">{t('dashboard.portfolioHealth')}</CardTitle>
-                      <CheckCircle className="h-4 w-4 text-green-300/70" />
+                      <Wallet className="h-4 w-4 text-green-300/70" />
                   </CardHeader>
                   <CardContent className="z-10">
-                      <div className="text-4xl font-bold text-green-400 print-text-black">{currencyFormatter(totalAssets)}</div>
+                      <div className="text-4xl font-bold text-green-400 print-text-black">{currencyFormatter(totalInvestment)}</div>
                       <p className="text-xs text-green-200/60 print-text-black mt-1">{t('dashboard.totalAssets')}</p>
                   </CardContent>
                   <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-20 print:hidden">
@@ -597,7 +576,7 @@ const Dashboard = () => {
                             <RadialBarChart
                                 innerRadius="70%"
                                 outerRadius="100%"
-                                data={[{ value: equityPercentage }]}
+                                data={[{ value: developedAreaPercentage }]}
                                 startAngle={90}
                                 endAngle={-270}
                                 barSize={12}
@@ -620,7 +599,7 @@ const Dashboard = () => {
                     </div>
                     <div className="mt-2">
                         <p className="text-sm font-medium text-purple-200/80 print-text-black">{t('dashboard.financial.equity')}</p>
-                        <p className="text-2xl font-bold text-purple-400 print-text-black">{equity.toFixed(0)} km²</p>
+                        <p className="text-2xl font-bold text-purple-400 print-text-black">{developedArea.toFixed(0)} km²</p>
                     </div>
                 </CardContent>
             </Card>
@@ -633,7 +612,7 @@ const Dashboard = () => {
                             <RadialBarChart
                                 innerRadius="70%"
                                 outerRadius="100%"
-                                data={[{ value: equityPercentage }]}
+                                data={[{ value: developedAreaPercentage }]}
                                 startAngle={90}
                                 endAngle={-270}
                                 barSize={12}
@@ -655,8 +634,8 @@ const Dashboard = () => {
                         </ResponsiveContainer>
                     </div>
                     <div className="mt-2">
-                        <p className="text-sm font-medium text-sky-200/80 print-text-black">{t('dashboard.financial.equity')}</p>
-                        <p className="text-2xl font-bold text-sky-400 print-text-black">{currencyFormatter(equity)}</p>
+                        <p className="text-sm font-medium text-sky-200/80 print-text-black">{t('dashboard.financial.freeCashFlow')}</p>
+                        <p className="text-2xl font-bold text-sky-400 print-text-black">{developedArea.toFixed(0)} km²</p>
                     </div>
                 </CardContent>
             </Card>
@@ -666,7 +645,7 @@ const Dashboard = () => {
                 <CardContent className="flex flex-col justify-end h-full p-4 text-center">
                     <div className="flex-grow h-24">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={netProfitChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                            <BarChart data={agreementsChartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                                  <defs>
                                      <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="0%" stopColor="#2dd4bf" />
@@ -679,7 +658,7 @@ const Dashboard = () => {
                     </div>
                     <div className="mt-2">
                         <p className="text-sm font-medium text-teal-200/80 print-text-black">{t('dashboard.financial.netProfit')}</p>
-                        <p className="text-2xl font-bold text-teal-400 print-text-black">{Math.round(netProfit)}</p>
+                        <p className="text-2xl font-bold text-teal-400 print-text-black">{Math.round(agreementsSigned)}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -716,7 +695,7 @@ const Dashboard = () => {
                     </div>
                     <div className="mt-2">
                          <p className="text-sm font-medium text-amber-200/80 print-text-black">{t('dashboard.financial.roi')}</p>
-                         <p className="text-2xl font-bold text-amber-400 print-text-black">{lastROI.toFixed(1)}%</p>
+                         <p className="text-2xl font-bold text-amber-400 print-text-black">{omanizationRate.toFixed(1)}%</p>
                     </div>
                 </CardContent>
             </Card>
@@ -924,5 +903,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
