@@ -58,10 +58,10 @@ const priorityConfig: Record<Priority, { className: string, glowClassName: strin
 };
 
 const complianceQuestions: Record<string, {en: string, ar: string, axisId: number}> = {
-    auditor: { en: 'Appoint external auditor', ar: 'تعيين مدقق حسابات خارجي', axisId: 6 },
-    quorum: { en: 'Ensure board meeting quorum is met', ar: 'التأكد من اكتمال نصاب اجتماعات المجلس', axisId: 3 },
+    auditor: { en: 'Appoint external auditor', ar: 'تعيين مدقق حسابات خارجي', axisId: 2 },
+    quorum: { en: 'Ensure board meeting quorum is met', ar: 'التأكد من اكتمال نصاب اجتماعات المجلس', axisId: 1 },
     doa: { en: 'Develop and approve Delegation of Authority policy', ar: 'تطوير واعتماد لائحة صلاحيات', axisId: 1 },
-    conflict: { en: 'Establish a conflict of interest disclosure process', ar: 'تأسيس عملية للإفصاح عن تعارض المصالح', axisId: 7 },
+    conflict: { en: 'Establish a conflict of interest disclosure process', ar: 'تأسيس عملية للإفصاح عن تعارض المصالح', axisId: 2 },
 };
 
 
