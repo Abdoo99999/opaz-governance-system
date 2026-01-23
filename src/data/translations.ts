@@ -141,8 +141,9 @@ export const translations = {
       },
       roles: {
         ceo: "الرئيس التنفيذي",
-        'deputy ceo': "نائب الرئيس",
-        'director general': "مدير عام"
+        'vp_operations': "نائب الرئيس للعمليات",
+        'investment_dg': "مدير عام الاستثمار",
+        'planning_dg': "مدير عام التخطيط"
       },
       types: { 
         independent: "مستقل",
@@ -150,11 +151,11 @@ export const translations = {
         executive: "تنفيذي"
       },
       expertise: {
-        'smart city development': "تطوير المدن الذكية",
+        'smart_city_development': "تطوير المدن الذكية",
         'logistics': "اللوجستيات",
-        'fdi attraction': "جذب الاستثمار الأجنبي",
-        'industrial management': "الإدارة الصناعية",
-        'urban planning': "التخطيط العمراني"
+        'fdi_attraction': "جذب الاستثمار الأجنبي",
+        'industrial_management': "الإدارة الصناعية",
+        'urban_planning': "التخطيط العمراني"
       },
       committee_names: {
         audit: "التدقيق",
@@ -186,9 +187,9 @@ export const translations = {
         title: "مؤشرات أداء القيادات",
         cycle: "دورة التقييم",
         memberInfo: "المسؤول التنفيذي",
-        attendance: "الالتزام بالحضور",
-        strategic: "المساهمة الاستراتيجية",
-        technical: "القيمة الفنية",
+        projectsCompletion: "نسبة إنجاز المشاريع",
+        investmentTargets: "تحقيق مستهدفات الاستثمار",
+        operationalExcellence: "التميز التشغيلي",
         totalScore: "النتيجة النهائية",
         recommendation: "التوصية",
         renew: "تجديد العضوية",
@@ -693,8 +694,9 @@ export const translations = {
       },
       roles: {
         ceo: "CEO",
-        'deputy ceo': "Deputy CEO",
-        'director general': "Director General"
+        'vp_operations': "VP Operations",
+        'investment_dg': "Investment DG",
+        'planning_dg': "Planning DG"
       },
       types: { 
         independent: "Independent",
@@ -702,11 +704,11 @@ export const translations = {
         executive: "Executive"
       },
       expertise: {
-        'smart city development': "Smart City Development",
+        'smart_city_development': "Smart City Development",
         'logistics': "Logistics",
-        'fdi attraction': "FDI Attraction",
-        'industrial management': "Industrial Management",
-        'urban planning': "Urban Planning"
+        'fdi_attraction': "FDI Attraction",
+        'industrial_management': "Industrial Management",
+        'urban_planning': "Urban Planning"
       },
       committee_names: {
         audit: "Audit",
@@ -738,9 +740,9 @@ export const translations = {
         title: "Leadership Performance KPIs",
         cycle: "Evaluation Cycle",
         memberInfo: "Executive Official",
-        attendance: "Attendance",
-        strategic: "Strategic Contribution",
-        technical: "Technical Value",
+        projectsCompletion: "Projects Completion %",
+        investmentTargets: "Investment Targets",
+        operationalExcellence: "Operational Excellence",
         totalScore: "Final Score",
         recommendation: "Recommendation",
         renew: "Renew Term",

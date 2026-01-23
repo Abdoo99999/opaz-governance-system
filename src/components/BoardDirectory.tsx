@@ -56,16 +56,16 @@ const cardVariants = {
 
 const expertiseOptions = ['Smart City Development', 'Logistics', 'FDI Attraction', 'Industrial Management', 'Urban Planning'];
 const committeeOptions = ['Audit', 'Risk', 'HR', 'Nomination'];
-const roleOptions = ['CEO', 'Deputy CEO', 'Director General'];
+const roleOptions = ['CEO', 'VP Operations', 'Investment DG', 'Planning DG'];
 const qualificationOptions = ['Bachelor', 'Master', 'PhD'] as const;
 
 const memberSchema = z.object({
   name_ar: z.string().min(1, 'الاسم بالعربية مطلوب'),
   name_en: z.string().min(1, 'الاسم بالانجليزية مطلوب'),
   nationality: z.string().min(1, 'الجنسية مطلوبة'),
-  role: z.enum(roleOptions),
+  role: z.enum(roleOptions as [string, ...string[]]),
   qualification: z.enum(qualificationOptions),
-  expertise: z.enum(expertiseOptions),
+  expertise: z.enum(expertiseOptions as [string, ...string[]]),
   appointmentDate: z.date(),
   expiryDate: z.date(),
   committees: z.array(z.string()).optional(),
@@ -569,7 +569,7 @@ const BoardMemberFormDialog: React.FC<BoardMemberFormDialogProps> = ({ isOpen, o
         reset({
           name_ar: '', name_en: '',
           nationality: 'Omani',
-          role: 'Director General', expertise: 'Logistics',
+          role: 'CEO', expertise: 'Logistics',
           qualification: 'Bachelor',
           appointmentDate: new Date(), expiryDate: new Date(),
           committees: []

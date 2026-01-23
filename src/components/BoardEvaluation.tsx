@@ -22,10 +22,9 @@ import { cn } from '@/lib/utils';
 
 type Evaluation = {
     memberId: number;
-    meetingsHeld: number;
-    meetingsAttended: number;
-    strategic: number;
-    technical: number;
+    projectsCompletion: number;
+    investmentTargets: number;
+    operationalExcellence: number;
     notes?: string;
 };
 
@@ -41,18 +40,11 @@ const BoardEvaluation: React.FC = () => {
     const [notes, setNotes] = useState('');
     
     const getStorageKey = () => `board_evaluation_${selectedZoneId}_${selectedYear}`;
-
-    const calculateAttendance = (held: number, attended: number) => {
-        if (!held || held === 0) return 0;
-        return (attended / held) * 100;
-    };
     
     const calculateTotalScore = (evaluation: Evaluation | undefined) => {
         if (!evaluation) return 0;
-        const attendanceScore = calculateAttendance(evaluation.meetingsHeld, evaluation.meetingsAttended);
-        const strategicScore = (evaluation.strategic / 5) * 100;
-        const technicalScore = (evaluation.technical / 5) * 100;
-        const weightedScore = (attendanceScore * 0.4) + (strategicScore * 0.3) + (technicalScore * 0.3);
+        const { projectsCompletion, investmentTargets, operationalExcellence } = evaluation;
+        const weightedScore = (projectsCompletion * 0.4) + (investmentTargets * 0.3) + (operationalExcellence * 0.3);
         return Math.round(weightedScore);
     };
 
@@ -76,10 +68,9 @@ const BoardEvaluation: React.FC = () => {
         } else {
             const initialEvals = zoneMembers.map(member => ({
                 memberId: member.id,
-                meetingsHeld: 12,
-                meetingsAttended: 10 + Math.floor(Math.random() * 3),
-                strategic: 3 + Math.random() * 2,
-                technical: 3 + Math.random() * 2,
+                projectsCompletion: 80 + Math.floor(Math.random() * 20),
+                investmentTargets: 75 + Math.floor(Math.random() * 25),
+                operationalExcellence: 85 + Math.floor(Math.random() * 15),
                 notes: '',
             }));
             setEvaluations(initialEvals);
@@ -119,7 +110,13 @@ const BoardEvaluation: React.FC = () => {
                 return updatedEvals;
             }
              // This part should ideally not be hit if initialized correctly
-            return [...prev, { memberId, meetingsHeld: 12, meetingsAttended: 12, strategic: 4, technical: 4, [field]: value } as Evaluation];
+            return [...prev, { 
+                memberId, 
+                projectsCompletion: 90, 
+                investmentTargets: 90, 
+                operationalExcellence: 90, 
+                [field]: value 
+            } as Evaluation];
         });
     };
 
@@ -221,9 +218,9 @@ const BoardEvaluation: React.FC = () => {
                             <TableHeader>
                                 <TableRow className="border-b-white/10 hover:bg-transparent print:border-b-gray-300">
                                     <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.memberInfo')}</TableHead>
-                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.attendance')}</TableHead>
-                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.strategic')}</TableHead>
-                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.technical')}</TableHead>
+                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.projectsCompletion')}</TableHead>
+                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.investmentTargets')}</TableHead>
+                                    <TableHead className="text-white font-bold print:text-black">{t('board_evaluation.operationalExcellence')}</TableHead>
                                     <TableHead className="text-center text-white font-bold print:text-black">{t('board_evaluation.totalScore')}</TableHead>
                                     <TableHead className="text-center text-white font-bold print:text-black">{t('board_evaluation.recommendation')}</TableHead>
                                 </TableRow>
@@ -244,28 +241,26 @@ const BoardEvaluation: React.FC = () => {
                                                     </Avatar>
                                                     <div>
                                                         <p className="font-bold print:text-black">{t(member.name_ar, member.name_en)}</p>
-                                                        <p className="text-sm text-gray-400 print:text-gray-600">{t(`board_directory.roles.${member.role.toLowerCase()}`)}</p>
+                                                        <p className="text-sm text-gray-400 print:text-gray-600">{t(`board_directory.roles.${member.role.toLowerCase().replace(/ /g, '_')}`)}</p>
                                                     </div>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <div className="flex items-center gap-2 w-48">
-                                                    <Input type="number" className="w-16 h-8 glass print:border-gray-300 print:bg-gray-100" value={evaluation?.meetingsAttended || ''} onChange={e => handleEvaluationChange(member.id, 'meetingsAttended', parseInt(e.target.value) || 0)} />
-                                                    <span className="text-gray-400">/</span>
-                                                    <Input type="number" className="w-16 h-8 glass print:border-gray-300 print:bg-gray-100" value={evaluation?.meetingsHeld || ''} onChange={e => handleEvaluationChange(member.id, 'meetingsHeld', parseInt(e.target.value) || 0)} />
-                                                    <Badge variant="outline" className="text-xs print:border-gray-400 print:text-black">{calculateAttendance(evaluation?.meetingsHeld || 0, evaluation?.meetingsAttended || 0).toFixed(0)}%</Badge>
+                                                <div className="flex items-center gap-3 w-48">
+                                                    <Slider value={[evaluation?.projectsCompletion || 0]} onValueChange={([val]) => handleEvaluationChange(member.id, 'projectsCompletion', val)} max={100} step={1} className="w-32" />
+                                                    <span className="font-bold text-gold-400 w-8 text-center print:text-black">{(evaluation?.projectsCompletion || 0).toFixed(0)}%</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-3 w-48">
-                                                    <Slider value={[evaluation?.strategic || 0]} onValueChange={([val]) => handleEvaluationChange(member.id, 'strategic', val)} max={5} step={0.5} className="w-32" />
-                                                    <span className="font-bold text-gold-400 w-8 text-center print:text-black">{(evaluation?.strategic || 0).toFixed(1)}</span>
+                                                    <Slider value={[evaluation?.investmentTargets || 0]} onValueChange={([val]) => handleEvaluationChange(member.id, 'investmentTargets', val)} max={100} step={1} className="w-32" />
+                                                    <span className="font-bold text-gold-400 w-8 text-center print:text-black">{(evaluation?.investmentTargets || 0).toFixed(0)}%</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                  <div className="flex items-center gap-3 w-48">
-                                                     <Slider value={[evaluation?.technical || 0]} onValueChange={([val]) => handleEvaluationChange(member.id, 'technical', val)} max={5} step={0.5} className="w-32" />
-                                                    <span className="font-bold text-gold-400 w-8 text-center print:text-black">{(evaluation?.technical || 0).toFixed(1)}</span>
+                                                     <Slider value={[evaluation?.operationalExcellence || 0]} onValueChange={([val]) => handleEvaluationChange(member.id, 'operationalExcellence', val)} max={100} step={1} className="w-32" />
+                                                    <span className="font-bold text-gold-400 w-8 text-center print:text-black">{(evaluation?.operationalExcellence || 0).toFixed(0)}%</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center">
@@ -329,5 +324,3 @@ const BoardEvaluation: React.FC = () => {
 };
 
 export default BoardEvaluation;
-
-    
