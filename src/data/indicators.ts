@@ -14,7 +14,7 @@ export interface Indicator {
 
 export const AXES: Axis[] = [
     { id: 1, title_ar: "الحوكمة الاستراتيجية والقيادة", title_en: "Strategic Governance & Leadership" },
-    { id: 2, title_ar: "النزاهة والامتثال", title_en: "Integrity & Compliance" },
+    { id: 2, title_ar: "النزاهة والشفافية والامتثال", title_en: "Integrity & Compliance" },
     { id: 3, title_ar: "التميز التشغيلي وخدمات المستثمرين", title_en: "Operational Excellence & Investor Services" },
     { id: 4, title_ar: "إدارة المخاطر والاستدامة", title_en: "Risk Management & Sustainability" },
     { id: 5, title_ar: "القيمة المحلية والأثر الوطني", title_en: "ICV & National Impact" },
