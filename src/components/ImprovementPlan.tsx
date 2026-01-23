@@ -22,7 +22,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { AXES, INDICATORS } from '@/lib/data/indicators';
+import { AXES, INDICATORS } from '@/data/indicators';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { useToast } from '@/hooks/use-toast';
@@ -339,7 +339,8 @@ const CompleteTaskModal = ({ isOpen, onClose, onComplete, task }: { isOpen: bool
 
 export default function ImprovementPlan({ userRole, onNavigate }: { userRole: UserRole, onNavigate: (view: string) => void; }) {
     const { t, language } = useLanguage();
-    const { selectedZoneId: selectedCompanyId, getSelectedZone, refreshData } = useCompany();
+    const { getSelectedZone, refreshData } = useCompany();
+    const selectedCompanyId = getSelectedZone()?.id;
     const { selectedYear } = useYear();
     const { toast } = useToast();
     const selectedCompany = getSelectedZone();
@@ -596,3 +597,5 @@ export default function ImprovementPlan({ userRole, onNavigate }: { userRole: Us
         </div>
     );
 }
+
+    

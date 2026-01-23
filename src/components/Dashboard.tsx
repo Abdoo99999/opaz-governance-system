@@ -35,7 +35,7 @@ import { TrendingUp, AlertTriangle, CheckCircle, Users, Target, PieChartIcon, Wa
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
-import { INDICATORS, AXES } from '@/lib/data/indicators';
+import { INDICATORS, AXES } from '@/data/indicators';
 import RiskLandscape from './dashboard/RiskLandscape';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
@@ -78,7 +78,8 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 
 const Dashboard = () => {
   const { t, language } = useLanguage();
-  const { getSelectedZone, selectedZoneId } = useCompany();
+  const { getSelectedZone, dataVersion } = useCompany();
+  const selectedCompanyId = getSelectedZone()?.id
   const { selectedYear } = useYear();
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -146,31 +147,31 @@ const Dashboard = () => {
         return total * 150;
     });
 
-    if (selectedZoneId && selectedZoneId !== 'all') {
-        const zoneData = allZones.find((c: any) => c.id === selectedZoneId);
+    if (selectedCompanyId && selectedCompanyId !== 'all') {
+        const zoneData = allZones.find((c: any) => c.id === selectedCompanyId);
         if (!zoneData) return;
 
-        let assessmentStr = localStorage.getItem(`oia_assessment_${selectedZoneId}_${selectedYear}`);
+        let assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}_${selectedYear}`);
         if (!assessmentStr) {
-            assessmentStr = localStorage.getItem(`oia_assessment_${selectedZoneId}`);
+            assessmentStr = localStorage.getItem(`oia_assessment_${selectedCompanyId}`);
         }
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {} };
 
-        let complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}_${selectedYear}`);
+        let complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
         if (!complianceStr) {
-            complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}`);
+            complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
         }
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
         
-        let improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedZoneId}_${selectedYear}`);
+        let improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}_${selectedYear}`);
         if (!improvementPlanStr) {
-            improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedZoneId}`);
+            improvementPlanStr = localStorage.getItem(`oia_improvement_plan_${selectedCompanyId}`);
         }
         allImprovementTasks = improvementPlanStr ? JSON.parse(improvementPlanStr) : [];
         
         const financialsData = zoneData;
         
-        boardMembersArr = allBoardMembers.filter(m => m.zoneId === selectedZoneId);
+        boardMembersArr = allBoardMembers.filter(m => m.zoneId === selectedCompanyId);
         risksArr = complianceData.risks || [];
         
         const complianceItems = Object.values(complianceData.compliance || {});
@@ -348,7 +349,7 @@ const Dashboard = () => {
     });
     setMaturityPathData(path as any);
 
-  }, [selectedZoneId, language, selectedYear, t]);
+  }, [selectedCompanyId, language, selectedYear, t, dataVersion]);
 
 
   const sparklineData = useMemo(() => 
@@ -903,3 +904,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    

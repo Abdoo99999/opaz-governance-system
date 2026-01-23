@@ -41,7 +41,7 @@ import { TrendingUp, FileDown, AlertCircle, CheckCircle, Wallet, Loader2 } from 
 import { format } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
-import { INDICATORS, AXES } from '@/lib/data/indicators';
+import { INDICATORS, AXES } from '@/data/indicators';
 import type { Task } from '@/components/ImprovementPlan';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
@@ -132,7 +132,8 @@ export const RadarCustomTick = (props: any) => {
 
 const Reports: React.FC = () => {
     const { t, language } = useLanguage();
-    const { selectedZoneId: selectedCompanyId, getSelectedZone } = useCompany();
+    const { getSelectedZone, dataVersion } = useCompany();
+    const selectedCompanyId = getSelectedZone()?.id;
     const { selectedYear, setSelectedYear, availableYears } = useYear();
     const reportRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
@@ -349,7 +350,7 @@ const Reports: React.FC = () => {
         }
 
 
-    }, [selectedCompanyId, language, t, selectedYear]);
+    }, [selectedCompanyId, language, t, selectedYear, dataVersion]);
 
     // --- ARABIC FONT FIX FOR EXPORT ---
     const handleExport = async () => {
@@ -799,3 +800,5 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+    

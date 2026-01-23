@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AXES, INDICATORS as initialIndicators, Indicator } from '@/lib/data/indicators';
+import { AXES, INDICATORS as initialIndicators, Indicator } from '@/data/indicators';
 import IndicatorCard from './IndicatorCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -49,7 +49,8 @@ interface AssessmentProps {
 
 const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     const { t, language } = useLanguage();
-    const { selectedZoneId: selectedCompanyId, getSelectedZone, refreshData } = useCompany();
+    const { getSelectedZone, refreshData } = useCompany();
+    const selectedCompanyId = getSelectedZone()?.id;
     const { selectedYear } = useYear();
     const { toast } = useToast();
     const selectedCompany = getSelectedZone();
@@ -466,3 +467,5 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
+
+    
