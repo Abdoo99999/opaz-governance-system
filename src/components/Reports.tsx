@@ -132,12 +132,12 @@ export const RadarCustomTick = (props: any) => {
 
 const Reports: React.FC = () => {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany } = useCompany();
+    const { selectedZoneId: selectedCompanyId, getSelectedZone } = useCompany();
     const { selectedYear, setSelectedYear, availableYears } = useYear();
     const reportRef = useRef<HTMLDivElement>(null);
     const [isExporting, setIsExporting] = useState(false);
 
-    const selectedCompany = getSelectedCompany();
+    const selectedCompany = getSelectedZone();
     
     const [summaryData, setSummaryData] = useState({ maturity: 0, compliance: 0, risks: { high: 0, medium: 0, critical: 0 }, actions: 0 });
     const [radarData, setRadarData] = useState([]);

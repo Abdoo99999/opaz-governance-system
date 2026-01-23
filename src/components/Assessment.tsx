@@ -49,10 +49,10 @@ interface AssessmentProps {
 
 const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
+    const { selectedZoneId: selectedCompanyId, getSelectedZone, refreshData } = useCompany();
     const { selectedYear } = useYear();
     const { toast } = useToast();
-    const selectedCompany = getSelectedCompany();
+    const selectedCompany = getSelectedZone();
     const contentAreaRef = useRef<HTMLDivElement>(null);
     
     const [indicators, setIndicators] = useState<Indicator[]>(() => {

@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
 import { useToast } from '@/hooks/use-toast';
-import type { Company, SubmissionStatus } from '@/data/companies';
+import type { Zone, SubmissionStatus } from '@/data/companies';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,7 +37,7 @@ interface ReviewSubmitProps {
 
 const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany, dataVersion } = useCompany();
+    const { selectedZoneId: selectedCompanyId, dataVersion } = useCompany();
     const { selectedYear } = useYear();
     const { toast } = useToast();
     
@@ -255,5 +255,3 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
 };
 
 export default ReviewSubmit;
-
-    

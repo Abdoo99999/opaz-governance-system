@@ -339,10 +339,10 @@ const CompleteTaskModal = ({ isOpen, onClose, onComplete, task }: { isOpen: bool
 
 export default function ImprovementPlan({ userRole, onNavigate }: { userRole: UserRole, onNavigate: (view: string) => void; }) {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
+    const { selectedZoneId: selectedCompanyId, getSelectedZone, refreshData } = useCompany();
     const { selectedYear } = useYear();
     const { toast } = useToast();
-    const selectedCompany = getSelectedCompany();
+    const selectedCompany = getSelectedZone();
     
     const getStorageKey = (companyId: string, year: number) => `oia_improvement_plan_${companyId}_${year}`;
     

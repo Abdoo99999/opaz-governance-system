@@ -46,9 +46,9 @@ interface FinancialStatementsProps {
 const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate }) => {
   const { t, dir, language } = useLanguage();
   const { toast } = useToast();
-  const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
+  const { selectedZoneId: selectedCompanyId, getSelectedZone, refreshData } = useCompany();
   const { selectedYear } = useYear();
-  const selectedCompany = getSelectedCompany();
+  const selectedCompany = getSelectedZone();
   
   const getStorageKey = (companyId: string, year: number) => `oia_financials_${companyId}_${year}`;
 
@@ -94,7 +94,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
         }
 
         // Fallback to reading from the main company registry
-        const allCompaniesStr = localStorage.getItem('oia_companies_registry');
+        const allCompaniesStr = localStorage.getItem('opaz_zones_registry');
         if (allCompaniesStr) {
             const allCompanies = JSON.parse(allCompaniesStr);
             const companyData = allCompanies.find((c: any) => c.id === selectedCompanyId);

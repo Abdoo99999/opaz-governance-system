@@ -76,10 +76,10 @@ const initialComplianceState: ComplianceState = {
 
 const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => {
     const { t, language } = useLanguage();
-    const { selectedCompanyId, getSelectedCompany, refreshData } = useCompany();
+    const { selectedZoneId: selectedCompanyId, getSelectedZone, refreshData } = useCompany();
     const { selectedYear } = useYear();
     const { toast } = useToast();
-    const selectedCompany = getSelectedCompany();
+    const selectedCompany = getSelectedZone();
     
     const getStorageKey = (companyId: string, year: number) => `oia_compliance_${companyId}_${year}`;
 
