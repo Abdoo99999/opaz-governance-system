@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Save, Building, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Save, Building, TrendingUp, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { ZONES } from '@/data/companies';
@@ -25,9 +25,17 @@ const formSchema = z.object({
     developedArea: z.number().gte(0, 'Must be a non-negative number'),
     cumulativeInvestment: z.number().gte(0, 'Must be a non-negative number'),
     directJobs: z.number().int().gte(0, 'Must be a non-negative number'),
+    totalEmployees: z.number().int().gte(0, 'Must be a non-negative number'),
+    omaniEmployees: z.number().int().gte(0, 'Must be a non-negative number'),
+    totalSpending: z.number().gte(0, 'Must be a non-negative number'),
+    localSpending: z.number().gte(0, 'Must be a non-negative number'),
+    smeSpending: z.number().gte(0, 'Must be a non-negative number'),
 }).refine(data => data.developedArea <= data.totalArea, {
     message: "Developed area cannot exceed total area",
     path: ["developedArea"],
+}).refine(data => data.omaniEmployees <= data.totalEmployees, {
+    message: "Omani employees cannot exceed total employees",
+    path: ["omaniEmployees"],
 });
 
 
@@ -62,6 +70,11 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
             developedArea: company?.developedArea || 0,
             cumulativeInvestment: company?.cumulativeInvestment || 0,
             directJobs: company?.directJobs || 0,
+            totalEmployees: (company as any)?.totalEmployees || 0,
+            omaniEmployees: (company as any)?.omaniEmployees || 0,
+            totalSpending: (company as any)?.totalSpending || 0,
+            localSpending: (company as any)?.localSpending || 0,
+            smeSpending: (company as any)?.smeSpending || 0,
         },
     });
 
@@ -77,6 +90,27 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
             }
         }
     }, [watchCompanyName, setValue]);
+
+    const watchTotalEmployees = watch('totalEmployees');
+    const watchOmaniEmployees = watch('omaniEmployees');
+    const watchTotalSpending = watch('totalSpending');
+    const watchLocalSpending = watch('localSpending');
+    const watchSmeSpending = watch('smeSpending');
+
+    const omanizationRate = useMemo(() => {
+        if (!watchTotalEmployees || watchTotalEmployees === 0) return 0;
+        return Math.round((watchOmaniEmployees / watchTotalEmployees) * 100);
+    }, [watchTotalEmployees, watchOmaniEmployees]);
+
+    const icvPercentage = useMemo(() => {
+        if (!watchTotalSpending || watchTotalSpending === 0) return 0;
+        return Math.round((watchLocalSpending / watchTotalSpending) * 100);
+    }, [watchTotalSpending, watchLocalSpending]);
+    
+    const smePercentage = useMemo(() => {
+        if (!watchTotalSpending || watchTotalSpending === 0) return 0;
+        return Math.round((watchSmeSpending / watchTotalSpending) * 100);
+    }, [watchTotalSpending, watchSmeSpending]);
 
 
     return (
@@ -167,6 +201,63 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ company, onClose, onSave }) =
                              <div>
                                 <label>{t('companyForm.financial.directJobs')}</label>
                                 <Input type="number" {...register('directJobs', { valueAsNumber: true })} className={inputStyles} />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                 {/* Card 3: ICV */}
+                <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3} className="lg:col-span-2">
+                    <Card className="glass h-full">
+                        <CardHeader className="flex flex-row items-center gap-4">
+                            <Users className="w-6 h-6 text-gold-400" />
+                            <CardTitle>{t('companyForm.icv.title')}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Workforce Section */}
+                            <div className="space-y-4 p-4 bg-black/20 rounded-lg">
+                                <h4 className="text-lg font-semibold text-center text-gold-300">{t('companyForm.icv.workforceTitle')}</h4>
+                                <div>
+                                    <label>{t('companyForm.icv.totalEmployees')}</label>
+                                    <Input type="number" {...register('totalEmployees', { valueAsNumber: true })} className={inputStyles} />
+                                    {errors.totalEmployees && <p className="text-red-500 text-sm mt-1">{errors.totalEmployees.message}</p>}
+                                </div>
+                                <div>
+                                    <label>{t('companyForm.icv.omanis')}</label>
+                                    <Input type="number" {...register('omaniEmployees', { valueAsNumber: true })} className={inputStyles} />
+                                    {errors.omaniEmployees && <p className="text-red-500 text-sm mt-1">{errors.omaniEmployees.message}</p>}
+                                </div>
+                                <div className="p-3 bg-royal-800 rounded-lg text-center mt-2">
+                                    <p className="text-gray-400 text-sm">{t('companyForm.icv.omanizationRate')}</p>
+                                    <p className="text-2xl font-bold text-gold-400">{omanizationRate}%</p>
+                                </div>
+                            </div>
+
+                            {/* Spending Section */}
+                            <div className="space-y-4 p-4 bg-black/20 rounded-lg">
+                                <h4 className="text-lg font-semibold text-center text-gold-300">{t('companyForm.icv.spendingTitle')}</h4>
+                                <div>
+                                    <label>{t('companyForm.icv.totalSpending')}</label>
+                                    <Input type="number" {...register('totalSpending', { valueAsNumber: true })} className={inputStyles} />
+                                </div>
+                                <div>
+                                    <label>{t('companyForm.icv.localSpending')}</label>
+                                    <Input type="number" {...register('localSpending', { valueAsNumber: true })} className={inputStyles} />
+                                </div>
+                                <div>
+                                    <label>{t('companyForm.icv.smeSpending')}</label>
+                                    <Input type="number" {...register('smeSpending', { valueAsNumber: true })} className={inputStyles} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    <div className="p-2 bg-royal-800 rounded-lg text-center">
+                                        <p className="text-gray-400 text-xs">{t('companyForm.icv.icvPercentage')}</p>
+                                        <p className="font-bold text-gold-400">{icvPercentage}%</p>
+                                    </div>
+                                    <div className="p-2 bg-royal-800 rounded-lg text-center">
+                                        <p className="text-gray-400 text-xs">{t('companyForm.icv.smeShort')}</p>
+                                        <p className="font-bold text-gold-400">{smePercentage}%</p>
+                                    </div>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
