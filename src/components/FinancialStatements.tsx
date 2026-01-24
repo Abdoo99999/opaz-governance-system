@@ -210,7 +210,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
         
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-          <Card className="glass h-full">
+          <Card className="glass h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <Building2 className="w-7 h-7 text-gold-500" />
               <CardTitle className="text-2xl">{t('financials.card1.title')}</CardTitle>
@@ -233,7 +233,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
         </motion.div>
 
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-          <Card className="glass h-full">
+          <Card className="glass h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <TrendingUp className="w-7 h-7 text-gold-500" />
               <CardTitle className="text-2xl">{t('financials.card2.title')}</CardTitle>
@@ -256,7 +256,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
         </motion.div>
 
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-            <Card className="glass h-full">
+            <Card className="glass h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                 <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
                     <Coins className="w-7 h-7 text-gold-500" />
                     <CardTitle className="text-2xl">{t('financials.card3.title')}</CardTitle>
@@ -279,7 +279,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
         </motion.div>
 
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-          <Card className="glass h-full">
+          <Card className="glass h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <Target className="w-7 h-7 text-gold-500" />
               <CardTitle className="text-2xl">{t('financials.card4.title')}</CardTitle>
@@ -306,7 +306,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
       </div>
 
       <motion.div className="max-w-7xl mx-auto mt-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.5 }}>
-        <Card className="glass">
+        <Card className="glass transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
           <CardHeader>
             <CardTitle className="text-center text-xl text-gold-400">{t('financials.declaration')}</CardTitle>
           </CardHeader>
@@ -334,5 +334,3 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
 };
 
 export default FinancialStatements;
-
-    

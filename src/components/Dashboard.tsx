@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -51,7 +52,7 @@ const cardVariants = {
   }),
 };
 
-const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-xl print:shadow-none print:border-gray-200 print:bg-white border border-transparent hover:border-gold-500";
+const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-xl print:shadow-none print:border-gray-200 print:bg-white hover:border-gold-500";
 
 const Dashboard = () => {
   const { t, language, dir } = useLanguage();

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -47,7 +48,7 @@ const TopPerformers: React.FC<TopPerformersProps> = ({ data }) => {
     const { t, language } = useLanguage();
 
     return (
-        <Card className="glass h-full transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-xl border border-transparent hover:border-gold-500 print:shadow-none print:border-gray-200 print:bg-white">
+        <Card className="glass h-full transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-xl hover:border-gold-500 print:shadow-none print:border-gray-200 print:bg-white">
             <CardHeader>
                 <CardTitle className="text-gold-400">{t('dashboard.top5.title')}</CardTitle>
             </CardHeader>

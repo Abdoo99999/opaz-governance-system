@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -232,11 +233,11 @@ const KanbanLane = ({ title, tasks, status, onMove, onComplete, onOpenDetails, u
             }}
             onDragLeave={() => setIsHovered(false)}
             className={cn(
-                "glass flex flex-col h-full transition-all duration-300 rounded-xl overflow-hidden", 
+                "glass flex flex-col h-full transition-all duration-300 rounded-xl overflow-hidden hover:scale-[1.01] hover:shadow-xl hover:border-gold-500", 
                 config.borderClass, 
                 "border-t-4", 
                 config.bgClass,
-                isHovered && "bg-white/5 ring-2 ring-gold-500/30"
+                isHovered && "bg-white/10"
             )}
         >
             <div className="flex justify-between items-center p-4 border-b border-white/5 bg-black/20">

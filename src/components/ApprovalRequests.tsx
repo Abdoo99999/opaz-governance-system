@@ -101,7 +101,7 @@ const ApprovalRequests: React.FC<ApprovalRequestsProps> = ({ onNavigate }) => {
                 </header>
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <Card className="glass">
+                    <Card className="glass transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                         <CardContent className="p-0">
                              <Table>
                                 <TableHeader>

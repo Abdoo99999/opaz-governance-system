@@ -76,6 +76,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
 
         const evaluationStr = localStorage.getItem(evaluationKey);
         const evaluationData = evaluationStr ? JSON.parse(evaluationStr) : [];
+        const evaluationComplete = evaluationData.length > 0;
 
         const assessmentStr = localStorage.getItem(assessmentKey);
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
@@ -89,7 +90,6 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
         // Completion Logic
         const profileComplete = !!companyDataForCheck?.type;
         const boardComplete = companyMembers.length > 0;
-        const evaluationComplete = evaluationData.length > 0;
         const assessmentComplete = assessmentData.isComplete === true;
         const complianceComplete = Object.keys(complianceData.compliance || {}).length === 10;
         const financialsComplete = !!financialsData.auditorName;
@@ -141,10 +141,11 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
     }
 
     const renderStatusBanner = () => {
+        const baseClasses = "glass p-6 mb-8 flex items-center gap-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500";
         switch (submissionStatus) {
             case 'submitted':
                 return (
-                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="glass p-6 mb-8 flex items-center gap-4 border-blue-500/50">
+                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className={cn(baseClasses, "border-blue-500/50")}>
                         <Clock className="w-12 h-12 text-blue-400" />
                         <div>
                             <h3 className="text-xl font-bold text-blue-300">{t('approvals.status.submitted')}</h3>
@@ -154,7 +155,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
                 );
             case 'returned':
                 return (
-                     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="glass p-6 mb-8 flex items-center gap-4 border-yellow-500/50">
+                     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className={cn(baseClasses, "border-yellow-500/50")}>
                         <AlertTriangle className="w-12 h-12 text-yellow-400" />
                         <div>
                             <h3 className="text-xl font-bold text-yellow-300">{t('approvals.status.returned')}</h3>
@@ -181,7 +182,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
                 );
             case 'approved':
                  return (
-                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="glass p-6 mb-8 flex items-center gap-4 border-emerald-500/50">
+                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className={cn(baseClasses, "border-emerald-500/50")}>
                         <CheckCircle className="w-12 h-12 text-emerald-400" />
                         <div>
                             <h3 className="text-xl font-bold text-emerald-300">{t('approvals.status.approved')}</h3>
@@ -210,7 +211,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
             
             {(submissionStatus === 'draft' || submissionStatus === 'returned') && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                <Card className="glass">
+                <Card className="glass transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                     <CardHeader>
                         <CardTitle className="text-gold-400">{t('review.checklistTitle')}</CardTitle>
                     </CardHeader>
@@ -255,5 +256,3 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
 };
 
 export default ReviewSubmit;
-
-    

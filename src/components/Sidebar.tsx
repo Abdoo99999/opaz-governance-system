@@ -219,7 +219,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                 );
 
                 return (
-                  <li key={item.name} className="relative mb-2 transition-transform duration-200 ease-in-out hover:scale-105">
+                  <li key={item.name} className="relative mb-2 transition-all duration-200 ease-in-out hover:scale-105 rounded-md border border-transparent hover:border-gold-500/50">
                      <Tooltip>
                         <TooltipTrigger asChild>
                             {menuItemContent}

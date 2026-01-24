@@ -89,7 +89,7 @@ const Settings: React.FC = () => {
 
             {/* Profile Card */}
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-                <Card className="glass flex items-center p-6">
+                <Card className="glass flex items-center p-6 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl border border-transparent hover:border-gold-500">
                     <Avatar className="h-24 w-24 border-4 border-gold-500/50 bg-royal-800/50">
                         <div className="w-full h-full flex items-center justify-center">
                             <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -115,7 +115,7 @@ const Settings: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* System Preferences */}
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-                    <Card className="glass h-full">
+                    <Card className="glass h-full transition-all duration-300 hover:scale-[1.01] hover:shadow-xl border border-transparent hover:border-gold-500">
                         <CardHeader className="flex flex-row items-center gap-4">
                             <Sliders className="w-6 h-6 text-gold-400" />
                             <CardTitle>{t('settings.preferences.title')}</CardTitle>
@@ -156,7 +156,7 @@ const Settings: React.FC = () => {
 
                 {/* System Info */}
                 <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-                    <Card className="glass h-full">
+                    <Card className="glass h-full transition-all duration-300 hover:scale-[1.01] hover:shadow-xl border border-transparent hover:border-gold-500">
                          <CardHeader className="flex flex-row items-center gap-4">
                             <Info className="w-6 h-6 text-gold-400" />
                             <CardTitle>{t('settings.info.title')}</CardTitle>
@@ -172,7 +172,7 @@ const Settings: React.FC = () => {
 
             {/* Danger Zone */}
             <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-                 <Card className="glass border-danger/30">
+                 <Card className="glass border-danger/30 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-gold-500">
                      <CardHeader className="flex flex-row items-center gap-4">
                         <DatabaseZap className="w-6 h-6 text-danger" />
                         <CardTitle className="text-red-400">{t('settings.data.title')}</CardTitle>
@@ -209,5 +209,3 @@ const Settings: React.FC = () => {
 };
 
 export default Settings;
-
-    

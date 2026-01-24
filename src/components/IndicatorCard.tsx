@@ -59,7 +59,7 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
     return (
         <motion.div
             id={`indicator-${indicator.id}`}
-            className={cn("glass p-6 relative transition-all duration-300 hover:scale-105", isLocked && "opacity-70 pointer-events-none")}
+            className={cn("glass p-6 relative transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-gold-500", isLocked && "opacity-70 pointer-events-none")}
             variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
             transition={{ duration: 0.4 }}
         >
@@ -156,5 +156,3 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicator, score, file, o
 };
 
 export default IndicatorCard;
-
-    

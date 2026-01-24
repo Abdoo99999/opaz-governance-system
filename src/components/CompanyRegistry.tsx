@@ -171,7 +171,7 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {zonesToDisplay.map((zone) => (
-                                <Card key={zone.id} className="bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden">
+                                <Card key={zone.id} className="bg-royal-800/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                                     <CardContent className="p-6">
                                         <div className="flex items-center justify-between mb-4">
                                             <h2 className="text-xl font-bold">{language === 'ar' ? zone.name_ar : zone.name_en}</h2>

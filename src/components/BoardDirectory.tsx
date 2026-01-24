@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -345,13 +346,13 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                     <Calendar className="ml-2 h-5 w-5" />
                     {t('board_directory.form.cycleSettings')}
                 </Button>
-                <Button onClick={handleSaveData} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10 hover:text-gold-300">
+                <Button onClick={handleSaveData} variant="outline" className="bg-gold-500 text-royal-900 hover:bg-gold-400">
                     <Save className="ml-2 h-5 w-5" />
                     {t('common.save')}
                 </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <Card className="glass">
+                <Card className="glass transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border border-transparent hover:border-gold-500">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.summary.total_members')}</CardTitle>
                         <Users className="h-5 w-5 text-gray-400" />
@@ -360,7 +361,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                         <div className="text-3xl font-bold text-gold-400">{summaryData.totalMembers}</div>
                     </CardContent>
                 </Card>
-                <Card className="glass">
+                <Card className="glass transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border border-transparent hover:border-gold-500">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.summary.expiring_soon')}</CardTitle>
                         <AlertTriangle className="h-5 w-5 text-yellow-400" />
@@ -370,7 +371,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                         <p className="text-xs text-gray-400">{t('board_directory.summary.within_3_months')}</p>
                     </CardContent>
                 </Card>
-                <Card className="glass">
+                <Card className="glass transition-all duration-300 hover:scale-[1.02] hover:shadow-xl border border-transparent hover:border-gold-500">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-gray-300">{t('board_directory.committees')}</CardTitle>
                         <Layers className="h-5 w-5 text-gray-400" />
@@ -384,7 +385,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="lg:col-span-2">
-                    <Card className="glass h-full">
+                    <Card className="glass h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                         <CardHeader>
                             <CardTitle className="text-gold-400">{t('board_directory.skillsMatrix')}</CardTitle>
                         </CardHeader>
@@ -402,7 +403,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                     </Card>
                 </motion.div>
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                     <Card className="glass h-full">
+                     <Card className="glass h-full transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                         <CardHeader>
                             <CardTitle className="text-gold-400">{t('board_directory.boardTenure')}</CardTitle>
                         </CardHeader>
@@ -427,7 +428,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredMembers.map((member: BoardMember, index: number) => (
                     <motion.div key={member.id} variants={cardVariants} initial="hidden" animate="visible" custom={index}>
-                        <Card className="glass overflow-hidden h-full flex flex-col relative">
+                        <Card className="glass overflow-hidden h-full flex flex-col relative transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                             <div className="absolute top-2 left-2 flex gap-1 z-10">
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gold-400 bg-black/20 hover:bg-black/40" onClick={(e) => { e.stopPropagation(); handleOpenForm(member); }}>
                                     <Edit className="h-4 w-4" />

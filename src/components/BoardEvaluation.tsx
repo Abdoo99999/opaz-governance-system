@@ -172,7 +172,7 @@ const BoardEvaluation: React.FC = () => {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Card className="glass print:shadow-none print:border print:border-gray-200">
+                <Card className="glass print:shadow-none print:border print:border-gray-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('board_evaluation.summary.avgScore')}</CardTitle>
                         <TrendingUp className="h-5 w-5 text-gray-400 print:text-gray-500" />
@@ -181,7 +181,7 @@ const BoardEvaluation: React.FC = () => {
                         <div className="text-3xl font-bold text-gold-400 print:text-black">{summaryData.averageScore.toFixed(1)} / 100</div>
                     </CardContent>
                 </Card>
-                <Card className="glass print:shadow-none print:border print:border-gray-200">
+                <Card className="glass print:shadow-none print:border print:border-gray-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('board_evaluation.summary.topPerformer')}</CardTitle>
                         <Award className="h-5 w-5 text-gray-400 print:text-gray-500" />
@@ -202,7 +202,7 @@ const BoardEvaluation: React.FC = () => {
                         )}
                     </CardContent>
                 </Card>
-                 <Card className="glass print:shadow-none print:border print:border-gray-200">
+                 <Card className="glass print:shadow-none print:border print:border-gray-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-gray-300 print:text-gray-600">{t('board_evaluation.summary.reviewRequired')}</CardTitle>
                         <UserX className="h-5 w-5 text-yellow-400 print:text-yellow-500" />
@@ -214,7 +214,7 @@ const BoardEvaluation: React.FC = () => {
             </div>
             
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <Card className="glass print:shadow-none print:border print:border-gray-200">
+                <Card className="glass print:shadow-none print:border print:border-gray-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-gold-500">
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
