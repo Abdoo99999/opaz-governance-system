@@ -11,7 +11,7 @@ import { UserRole } from '@/app/page';
 import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useCompany } from '@/context/CompanyContext';
-import type { SubmissionStatus } from '@/data/companies';
+import type { SubmissionStatus, Zone } from '@/data/companies';
 import { useYear } from '@/context/YearContext';
 
 const allMenuItems = [
@@ -45,6 +45,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
   const [completion, setCompletion] = useState({
       profile: false, board: false, evaluation: false, assessment: false, compliance: false, financials: false
   });
+
+  const [pendingApprovals, setPendingApprovals] = useState(0);
+
+    useEffect(() => {
+        if (userRole === 'admin' && typeof window !== 'undefined') {
+            const allZonesStr = localStorage.getItem('opaz_zones_registry');
+            if (allZonesStr) {
+                const allZones: Zone[] = JSON.parse(allZonesStr);
+                const submittedCount = allZones.filter(zone => zone.submissionStatus === 'submitted').length;
+                setPendingApprovals(submittedCount);
+            } else {
+                setPendingApprovals(0);
+            }
+        }
+  }, [dataVersion, userRole]);
+
 
   useEffect(() => {
     if (userRole === 'company' && selectedZoneId && typeof window !== 'undefined') {
@@ -103,7 +119,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
 
   const menuItems = allMenuItems.filter(item => item.roles.includes(userRole));
   
-  const pendingApprovals = 3; 
 
   const isMenuItemDisabled = (item: (typeof menuItems)[0]) => {
       if (userRole !== 'company') return false;
@@ -248,5 +263,3 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
 };
 
 export default Sidebar;
-
-    
