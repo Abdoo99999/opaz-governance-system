@@ -106,13 +106,6 @@ const Dashboard = () => {
         };
     };
 
-    const allZonesStr = localStorage.getItem('opaz_zones_registry');
-    const allZonesData: Zone[] = allZonesStr ? JSON.parse(allZonesStr) : ZONES;
-    
-    const targetZones = (selectedZoneId && selectedZoneId !== 'all') 
-        ? [allZonesData.find(z => z.id === selectedZoneId)].filter(Boolean) 
-        : allZonesData;
-
     let accMaturity = 0, countMaturity = 0;
     let accInvestment = 0, accExports = 0, accRisks = 0;
     let accOmanization = 0, countOmanization = 0;
@@ -124,6 +117,13 @@ const Dashboard = () => {
     const radarAcc = AXES.map(axis => ({ id: axis.id, score: 0, count: 0 }));
     const zoneScores: any[] = [];
     
+    const allZonesStr = localStorage.getItem('opaz_zones_registry');
+    const allZonesData: Zone[] = allZonesStr ? JSON.parse(allZonesStr) : ZONES;
+    
+    const targetZones = (selectedZoneId && selectedZoneId !== 'all') 
+        ? [allZonesData.find(z => z.id === selectedZoneId)].filter(Boolean) 
+        : allZonesData;
+
     targetZones.forEach((zone: any) => {
         const data = getZoneData(zone.id);
 
@@ -447,39 +447,32 @@ const Dashboard = () => {
       </div>
 
       {/* --- ROW 4: COMPLIANCE & IMPROVEMENT --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
-                <Card className={"glass h-full"}>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-emerald-400">
-                            <CheckCircle size={18}/> حالة خطة التحسين
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="h-[250px] flex flex-col items-center justify-center">
-                         <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={improvementPlanData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={50}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    labelLine={false}
-                                    label={({ name, percent, value }) => `${(percent * 100).toFixed(0)}% (${value})`}
-                                >
-                                    {improvementPlanData.map((entry: any, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} stroke={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip {...tooltipStyle}/>
-                                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
+               <Card className={"glass h-full"}>
+                   <CardHeader><CardTitle className="flex items-center gap-2 text-emerald-400"><CheckCircle size={18}/> حالة الامتثال وخطة التحسين</CardTitle></CardHeader>
+                   <CardContent className="grid grid-cols-2 gap-4">
+                        <div className="h-[200px] flex flex-col items-center">
+                            <p className="text-xs mb-2 text-gray-400">الامتثال التشريعي</p>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={compliancePieData} dataKey="value" innerRadius={40} outerRadius={60} paddingAngle={5}><Cell fill="#00E096" /><Cell fill="#ef4444" /></Pie>
+                                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-lg font-bold">{complianceRate}%</text>
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="h-[200px] flex flex-col items-center">
+                            <p className="text-xs mb-2 text-gray-400">مهام خطة التحسين</p>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={improvementPlanData} dataKey="value" innerRadius={0} outerRadius={60}>{improvementPlanData.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={entry.color} />)}</Pie>
+                                    <Tooltip {...tooltipStyle}/>
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                   </CardContent>
+               </Card>
+           </motion.div>
            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11}>
              <Card className="glass h-full">
                 <CardHeader><CardTitle className="text-sm text-blue-200">تعمين القيادات التنفيذية</CardTitle></CardHeader>
@@ -532,38 +525,27 @@ const Dashboard = () => {
       </div>
 
       {/* --- ROW 6: MATURITY PATH --- */}
-        <div className="grid grid-cols-1 gap-8">
-            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={14}>
-                <Card className="glass h-full">
-                    <CardHeader>
-                        <CardTitle className="text-gold-400 text-sm">مسار النضج الاستراتيجي (التقدم الزمني)</CardTitle>
-                    </CardHeader>
-                    <CardContent className="h-[250px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={maturityPathData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="colorCompany" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.8}/>
-                                        <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
-                                    </linearGradient>
-                                     <linearGradient id="colorSector" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#818cf8" stopOpacity={0.6}/>
-                                        <stop offset="95%" stopColor="#818cf8" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" vertical={false} />
-                                <XAxis dataKey="year" tick={{fill: '#9ca3af'}} />
-                                <YAxis domain={[0, 5]} tick={{fill: '#9ca3af'}} />
-                                <Tooltip {...tooltipStyle} />
-                                <Legend verticalAlign="top" align="right" wrapperStyle={{color: '#9ca3af', paddingBottom: '10px'}}/>
-                                <Area type="monotone" dataKey="companyScore" name={t('reports.companyScore')} stroke="#fbbf24" fillOpacity={1} fill="url(#colorCompany)" />
-                                <Area type="monotone" dataKey="sectorAverage" name={t('reports.sectorAverage')} stroke="#818cf8" fillOpacity={1} fill="url(#colorSector)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-            </motion.div>
-        </div>
+      <div className="grid grid-cols-1 gap-8">
+          <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={14}>
+              <Card className="glass h-full">
+                  <CardHeader><CardTitle className="text-gold-400 text-sm">مسار النضج الاستراتيجي (التقدم الزمني)</CardTitle></CardHeader>
+                  <CardContent className="h-[250px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={maturityPathData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                              <defs><linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#fbbf24" stopOpacity={0.8}/><stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/></linearGradient></defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" vertical={false} />
+                              <XAxis dataKey="year" tick={{fill: '#9ca3af'}} />
+                              <YAxis domain={[0, 5]} tick={{fill: '#9ca3af'}} />
+                              <Tooltip {...tooltipStyle} />
+                              <Legend verticalAlign="top" align="right" wrapperStyle={{color: '#9ca3af', paddingBottom: '10px'}}/>
+                              <Area type="monotone" dataKey="companyScore" name={t('reports.companyScore')} stroke="#fbbf24" fillOpacity={1} fill="url(#colorScore)" />
+                              <Line type="monotone" dataKey="sectorAverage" name={t('reports.sectorAverage')} stroke="#818cf8" strokeDasharray="5 5" />
+                          </AreaChart>
+                      </ResponsiveContainer>
+                  </CardContent>
+              </Card>
+          </motion.div>
+      </div>
 
     </div>
   );

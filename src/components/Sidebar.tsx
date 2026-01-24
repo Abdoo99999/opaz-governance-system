@@ -52,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
             const allZonesStr = localStorage.getItem('opaz_zones_registry');
             const allZones = allZonesStr ? JSON.parse(allZonesStr) : [];
             const zoneData = allZones.find((c: any) => c.id === selectedZoneId);
-            const profileComplete = !!zoneData?.legalForm;
+            const profileComplete = !!zoneData?.type;
 
             const boardMembersStr = localStorage.getItem('oia_board_members');
             const allBoardMembers = boardMembersStr ? JSON.parse(boardMembersStr) : [];
@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
             const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
             const assessmentComplete = assessmentData.isComplete === true;
             
-            let complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}_${selectedYear}`);
+            let complianceStr = localStorage.getItem(`opaz_compliance_${selectedZoneId}_${selectedYear}`);
              if (!complianceStr) {
                  complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}`);
             }

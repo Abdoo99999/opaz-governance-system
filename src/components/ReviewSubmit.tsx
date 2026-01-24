@@ -45,7 +45,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
     
     useEffect(() => {
         if (typeof window !== 'undefined' && selectedCompanyId) {
-            const allCompaniesStr = localStorage.getItem('oia_companies_registry');
+            const allCompaniesStr = localStorage.getItem('opaz_zones_registry');
             if (allCompaniesStr) {
                 const allCompanies = JSON.parse(allCompaniesStr);
                 const currentCompany = allCompanies.find((c: any) => c.id === selectedCompanyId);
@@ -59,11 +59,11 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
 
         // Storage keys
         const assessmentKey = `oia_assessment_${selectedCompanyId}_${selectedYear}`;
-        const complianceKey = `oia_compliance_${selectedCompanyId}_${selectedYear}`;
+        const complianceKey = `opaz_compliance_${selectedCompanyId}_${selectedYear}`;
         const financialsKey = `oia_financials_${selectedCompanyId}_${selectedYear}`;
         const evaluationKey = `board_evaluation_${selectedCompanyId}_${selectedYear}`;
         const boardMembersKey = 'oia_board_members';
-        const companiesKey = 'oia_companies_registry';
+        const companiesKey = 'opaz_zones_registry';
 
         // Get data from localStorage
         const allCompaniesStr = localStorage.getItem(companiesKey);
@@ -72,7 +72,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
         
         const allBoardMembersStr = localStorage.getItem(boardMembersKey);
         const allBoardMembers = allBoardMembersStr ? JSON.parse(allBoardMembersStr) : [];
-        const companyMembers = allBoardMembers.filter((m: any) => m.companyId === selectedCompanyId);
+        const companyMembers = allBoardMembers.filter((m: any) => m.zoneId === selectedCompanyId);
 
         const evaluationStr = localStorage.getItem(evaluationKey);
         const evaluationData = evaluationStr ? JSON.parse(evaluationStr) : [];
@@ -87,7 +87,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
         const financialsData = financialsStr ? JSON.parse(financialsStr) : {};
 
         // Completion Logic
-        const profileComplete = !!companyDataForCheck?.legalForm;
+        const profileComplete = !!companyDataForCheck?.type;
         const boardComplete = companyMembers.length > 0;
         const evaluationComplete = evaluationData.length > 0;
         const assessmentComplete = assessmentData.isComplete === true;
@@ -118,12 +118,12 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
         }
 
         if (typeof window !== 'undefined' && selectedCompanyId) {
-            const allCompaniesStr = localStorage.getItem('oia_companies_registry');
+            const allCompaniesStr = localStorage.getItem('opaz_zones_registry');
             let allCompanies = allCompaniesStr ? JSON.parse(allCompaniesStr) : [];
             allCompanies = allCompanies.map((c: any) => 
                 c.id === selectedCompanyId ? { ...c, submissionStatus: 'submitted', submissionDate: new Date().toISOString() } : c
             );
-            localStorage.setItem('oia_companies_registry', JSON.stringify(allCompanies));
+            localStorage.setItem('opaz_zones_registry', JSON.stringify(allCompanies));
             setCompanyData((prev: any) => ({ ...prev, submissionStatus: 'submitted' }));
             toast({
                 title: t('review.submittedTitle'),
@@ -255,3 +255,5 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onNavigate }) => {
 };
 
 export default ReviewSubmit;
+
+    
