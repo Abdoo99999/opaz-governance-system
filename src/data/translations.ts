@@ -20,81 +20,51 @@ export const translations = {
       approvals: "طلبات الموافقة"
     },
     dashboard: {
-      strategicRadar: "رادار الأداء الاستراتيجي",
-      portfolioHealth: "إجمالي حجم الاستثمار",
+      central_dashboard: "لوحة القيادة المركزية",
+      title: "لوحة قيادة",
       maturityGauge: "مقياس النضج العام",
-      riskMap: "خارطة المخاطر",
-      sectorPerf: "أداء القطاعات",
-      omanization: "نسبة التعمين",
-      compliance: "حالة الامتثال",
-      urgentAlerts: "تنبيهات عاجلة",
-      totalAssets: "إجمالي الاستثمارات (مليون ر.ع)",
-      nationalWorkforce: "من إجمالي القوى العاملة",
-      activeRisks: "مخاطر نشطة مسجلة",
-      overallScore: "متوسط نتيجة التقييم",
-      complianceRisk: "الامتثال والمخاطر",
-      maturityPath: "مسار النضج الاستراتيجي",
-      maturityScore: "مستوى النضج",
+      totalInvestment: "إجمالي حجم الاستثمار",
+      investmentSubtitle: "القيمة التراكمية للأصول",
+      annualExports: "حجم الصادرات السنوي",
+      criticalRisks: "المخاطر الحرجة",
+      risksSubtitle: "مخاطر تتطلب معالجة فورية",
+      omanizationRate: "نسبة التعمين",
+      directJobs: "الوظائف المباشرة",
+      jobsSubtitle: "وظيفة مسجلة",
+      landUtilization: "كفاءة استغلال الأراضي",
+      landSubtitle: "من أصل {totalArea} كم² إجمالي",
+      economicReturn: "العائد الاقتصادي",
+      returnUnit: "ريال عماني / م²",
+      strategicRadar: "رادار الأداء الاستراتيجي",
+      topPerformers: "أفضل المناطق أداءً",
+      complianceAndImprovement: "حالة الامتثال وخطة التحسين",
+      legislativeCompliance: "الامتثال التشريعي",
       compliant: "ممتثل",
       nonCompliant: "غير ممتثل",
-      improvementStatus: {
-        title: "موقف خطة التحسين"
-      },
-      boardComposition: {
-        title: "تحليل القيادات التنفيذية",
-        independence: "استقلالية القيادة",
-        independent: "أعضاء مستقلون",
-        nonIndependent: "أعضاء غير مستقلين",
-        omanization: "التعمين في المناصب"
-      },
-      icv: {
-          title: "المناقصات والإنفاق المحلي",
-          totalTenders: "الإجمالي",
-          omanizationRate: "نسبة التعمين",
-          smeSpending: "المؤسسات الصغيرة (SMEs)",
-          localSpending: "الشركات المحلية",
-          spending: "قيمة المناقصات",
-          actualSpending: "الإنفاق الفعلي",
-          target: "المستهدف"
-      },
-      financial: {
-        hubTitle: "محور الأداء المالي",
-        netProfit: "عدد الاتفاقيات الموقعة",
-        equity: "المساحة المشغولة (كم²)",
-        freeCashFlow: "المساحة المشغولة (كم²)",
-        roi: "نسبة التعمين"
-      },
+      improvementTasks: "مهام خطة التحسين",
+      executiveOmanization: "تعمين القيادات التنفيذية",
+      nationalLeaders: "قيادات وطنية",
+      expatExpertise: "خبرات وافدة",
+      riskDistributionMap: "خارطة توزيع المخاطر",
+      icvTitle: "المناقصات والإنفاق المحلي",
+      icvTotalTenders: "الإجمالي",
+      icvLocalSpending: "الشركات المحلية",
+      icvSmeSpending: "المؤسسات الصغيرة",
+      icvSpending: "قيمة المناقصات",
+      maturityPath: "مسار النضج الاستراتيجي (التقدم الزمني)",
+      riskMap: "خارطة المخاطر",
       riskLabels: {
-          impact: {
-            minimal: 'ضئيل',
-            minor: 'بسيط',
-            moderate: 'متوسط',
-            major: 'كبير',
-            catastrophic: 'كارثي'
-          },
-          probability: {
-            rare: 'نادر',
-            unlikely: 'غير محتمل',
-            possible: 'ممكن',
-            likely: 'محتمل',
-            certain: 'مؤكد'
-          }
+          impact: { minimal: 'ضئيل', minor: 'بسيط', moderate: 'متوسط', major: 'كبير', catastrophic: 'كارثي' },
+          probability: { rare: 'نادر', unlikely: 'غير محتمل', possible: 'ممكن', likely: 'محتمل', certain: 'مؤكد' }
       },
-      top5: {
-        title: "أفضل 5 مناطق أداءً"
-      }
+      activeRisks: "مخاطر نشطة",
     },
     registry: {
       title: "سجل المناطق والمدن",
       addNew: "إضافة منطقة جديدة",
       searchPlaceholder: "بحث باسم المنطقة أو الكود...",
       riskLevel: "مستوى الخطورة",
-      risks: {
-        low: "منخفض",
-        medium: "متوسط",
-        high: "مرتفع",
-        critical: "حرج"
-      }
+      risks: { low: "منخفض", medium: "متوسط", high: "مرتفع", critical: "حرج" }
     },
     board_directory: {
       title: "سجل القيادات التنفيذية",
@@ -113,16 +83,11 @@ export const translations = {
       expiresSoon: "تنتهي العضوية قريباً",
       summary: {
         total_members: "إجمالي القيادات",
-        independent_members: "الأعضاء المستقلون",
-        of_board: "من القيادة",
         expiring_soon: "عضويات تنتهي قريباً",
         within_3_months: "خلال 3 أشهر",
         total_committees: "لجنة عاملة"
       },
-      tabs: {
-        members: "القيادات والمهارات",
-        minutes: "الاجتماعات والمحاضر"
-      },
+      tabs: { members: "القيادات والمهارات", minutes: "الاجتماعات والمحاضر" },
       minutes: {
         title: "مستودع محاضر الاجتماعات",
         upload: "رفع محضر جديد",
@@ -133,11 +98,7 @@ export const translations = {
         actions: "إجراءات",
         noMinutes: "لا توجد محاضر محفوظة لهذه المنطقة.",
         minuteAdded: "تمت إضافة المحضر بنجاح.",
-        types: {
-            quarterly: "دوري",
-            emergency: "طارئ",
-            committee: "لجنة"
-        }
+        types: { quarterly: "دوري", emergency: "طارئ", committee: "لجنة" }
       },
       roles: {
         ceo: "الرئيس التنفيذي",
@@ -147,11 +108,6 @@ export const translations = {
         'vp_of_business_development': "نائب الرئيس لتطوير الأعمال",
         'investment_director': "مدير الاستثمار"
       },
-      types: { 
-        independent: "مستقل",
-        government: "ممثل حكومي",
-        executive: "تنفيذي"
-      },
       expertise: {
         'smart_city_development': "تطوير المدن الذكية",
         'logistics': "اللوجستيات",
@@ -159,12 +115,7 @@ export const translations = {
         'industrial_management': "الإدارة الصناعية",
         'urban_planning': "التخطيط العمراني"
       },
-      committee_names: {
-        audit: "التدقيق",
-        risk: "المخاطر",
-        hr: "الموارد البشرية",
-        nomination: "الترشيحات والمكافآت"
-      },
+      committee_names: { audit: "التدقيق", risk: "المخاطر", hr: "الموارد البشرية", nomination: "الترشيحات والمكافآت" },
       form: {
         title_add: 'إضافة مسؤول جديد',
         title_edit: 'تعديل بيانات المسؤول',
@@ -179,15 +130,12 @@ export const translations = {
         termEndDate: 'تاريخ انتهاء الدورة',
         qualification: 'المؤهل العلمي',
       },
-      qualifications: {
-        bachelor: 'بكالوريوس',
-        master: 'ماجستير',
-        phd: 'دكتوراه'
-      }
+      qualifications: { bachelor: 'بكالوريوس', master: 'ماجستير', phd: 'دكتوراه' }
     },
     board_evaluation: {
         title: "مؤشرات أداء القيادات",
-        cycle: "دورة التقييم",
+        saveSuccessDesc: "تم حفظ بيانات مؤشرات القيادة بنجاح.",
+        summary: { avgScore: "متوسط أداء القيادة", topPerformer: "المسؤول الأعلى أداءً", reviewRequired: "مسؤولون للمراجعة" },
         memberInfo: "المسؤول التنفيذي",
         projectsCompletion: "نسبة إنجاز المشاريع",
         investmentTargets: "تحقيق مستهدفات الاستثمار",
@@ -199,21 +147,10 @@ export const translations = {
         goodStanding: "وضع جيد",
         save: "حفظ التقييم",
         export: "تصدير التقرير",
-        saveSuccessDesc: "تم حفظ بيانات مؤشرات القيادة بنجاح.",
-        summary: {
-            avgScore: "متوسط أداء القيادة",
-            topPerformer: "المسؤول الأعلى أداءً",
-            reviewRequired: "مسؤولون للمراجعة"
-        },
-        notes: {
-            title: "ملاحظات التقييم",
-            placeholder: "أضف ملاحظات أو مبررات للتقييم...",
-            saved: "تم حفظ الملاحظات."
-        }
+        notes: { title: "ملاحظات التقييم", placeholder: "أضف ملاحظات أو مبررات للتقييم...", saved: "تم حفظ الملاحظات." }
     },
     assessment: {
         title: "محاور التقييم",
-        globalProgress: "التقدم الكلي",
         completed: "مكتمل",
         saveDraft: "حفظ التقييم",
         submitFinal: "اعتماد نهائي",
@@ -231,10 +168,6 @@ export const translations = {
         successTitle: "تم الاعتماد بنجاح!",
         successDesc: "تم حفظ واعتماد التقييم بنجاح.",
         saveSuccessDesc: "تم حفظ بيانات تقييم منطقة",
-        viewResults: "عرض النتائج",
-        stayHere: "البقاء هنا",
-        locked: "التقييم معتمد ومغلق",
-        nextCompliance: "التالي: مراقبة الامتثال والمخاطر",
         addIndicator: "إضافة مؤشر جديد",
         editIndicator: "تعديل المؤشر",
         indicatorTextAr: "نص المؤشر (بالعربية)",
@@ -255,19 +188,18 @@ export const translations = {
         statutoryTitle: "الامتثال النظامي والتشريعي",
         nonCompliant: "غير ممتثل",
         addRisk: "تسجيل خطر جديد",
-        probability: "الاحتمالية",
-        impact: "الأثر",
+        saveSuccessDesc: "تم حفظ بيانات الامتثال والمخاطر للمنطقة",
         questions: {
-            auditor: "هل تم تعيين مدقق حسابات خارجي؟",
-            quorum: "هل اكتمل نصاب اجتماعات المجلس (4 مرات سنوياً)؟",
-            doa: "هل توجد لائحة صلاحيات مالية وإدارية معتمدة؟",
-            conflict: "هل تم الإفصاح عن تعارض المصالح للأعضاء؟",
-            legalStatus: "هل السجل التجاري والشهادات الضريبية سارية المفعول؟",
-            dividends: "هل تم تحويل أرباح جهاز الاستثمار في الموعد المحدد؟",
-            agmApproval: "هل تم اعتماد القوائم المالية من الجمعية العامة السنوية؟",
-            reporting: "هل تم نشر التقرير السنوي المدقق للجمهور؟",
-            legalIssues: "هل تخلو المنطقة من قضايا قانونية جوهرية غير مفصح عنها؟",
-            minutesArchiving: "هل جميع محاضر اجتماعات المجلس واللجان موقعة ومؤرشفة؟"
+          masterPlan: "هل المخطط الشمولي (Master Plan) للمنطقة معتمد ومحدث؟",
+          regulations: "هل جميع اللوائح التنظيمية للمنطقة منشورة في الجريدة الرسمية؟",
+          budget: "هل تم اعتماد الموازنة التشغيلية السنوية من رئاسة الهيئة (أوباز)؟",
+          envLicense: "هل تملك المنطقة ترخيصاً بيئياً سارياً للمردم والمرافق الخطرة؟",
+          insurance: "هل تم تجديد جميع عقود التأمين على الأصول والمرافق الحكومية؟",
+          encroachments: "هل تم رصد وإزالة جميع التعديات على الأراضي (Encroachments)؟",
+          reports: "هل تم رفع التقارير الربع سنوية لرئاسة الهيئة في الموعد المحدد؟",
+          audit: "هل تم الرد وإغلاق جميع ملاحظات جهاز الرقابة المالية والإدارية؟",
+          legalCases: "هل تخلو المنطقة من قضايا قانونية جوهرية مرفوعة من المستثمرين؟",
+          expropriation: "هل جميع قرارات نزع الملكية (إن وجدت) تمت وفق الإجراءات القانونية؟",
         },
         riskForm: {
             description: "وصف الخطر",
@@ -281,9 +213,6 @@ export const translations = {
             operational: "تشغيلي",
             strategic: "استراتيجي",
             cyber: "سيبراني",
-            rare: "نادر",
-            likely: "محتمل",
-            certain: "مؤكد"
         }
     },
     improvement: {
@@ -291,30 +220,17 @@ export const translations = {
         filterPriority: "فلترة حسب الأولوية",
         filterAxis: "فلترة حسب المحور",
         allAxes: "كل المحاور",
-        lanes: {
-            todo: "مهام جديدة",
-            inProgress: "قيد التنفيذ",
-            done: "تم الإنجاز"
-        },
-        priorities: {
-            all: "الكل",
-            critical: "حرجة",
-            high: "عالية",
-            medium: "متوسطة",
-            low: "منخفضة"
-        },
+        lanes: { todo: "مهام جديدة", inProgress: "قيد التنفيذ", done: "تم الإنجاز" },
+        priorities: { all: "الكل", critical: "حرجة", high: "عالية", medium: "متوسطة", low: "منخفضة" },
         linkedIndicator: "مرتبط بالمؤشر",
         start: "بدء المهمة",
         finish: "إنهاء المهمة",
         return: "إرجاع",
         reopen: "إعادة فتح",
-        dueDate: "تاريخ الاستحقاق:",
         assignedTo: "مسند إلى:",
         description: "الوصف",
         placeholderDesc: "هذه المهمة لمعالجة فجوة حوكمية تم تحديدها أثناء تقييم النضج. الهدف الأساسي هو ضمان الامتثال وتحسين إطار الحوكمة.",
         relatedAxis: "المحور المرتبط",
-        comments: "التعليقات",
-        commentsPlaceholder: "مكان مخصص لتعليقات ومناقشات الفريق...",
         saveSuccessDesc: "تم حفظ بيانات خطة التحسين لمنطقة",
         completeTaskTitle: "إنهاء المهمة وتقديم الدليل",
         completeTaskDesc: "يرجى تقديم ملاحظات حول كيفية إنجاز المهمة وإرفاق دليل الإنجاز.",
@@ -340,6 +256,7 @@ export const translations = {
     },
     reports: {
         title: "التقرير الاستراتيجي الشامل",
+        subtitle: "إصدار الوثائق الرسمية والتحليل المالي",
         selectCompanyToView: "يرجى اختيار منطقة لعرض تقريرها التفصيلي.",
         year: "عام",
         export: "تصدير PDF",
@@ -388,41 +305,15 @@ export const translations = {
             impact: "الأثر",
             probability: "الاحتمالية",
             mitigation: "إجراء التخفيف",
+            risk: "خطر",
             noRisks: "لا توجد مخاطر نشطة مسجلة في النظام لهذا العام.",
             review: "قيد المراجعة"
         },
         summary: {
-            maturity: "النضج العام",
-            maturitySub: "+0.2 عن العام الماضي",
-            compliance: "معدل الامتثال",
-            complianceSub: "4 عناصر غير ممتثلة",
             risks: "المخاطر النشطة",
-            risksSub: "في المناطق الحرجة",
-            actions: "إجراءات التحسين",
-            pending: "معلقة",
-            actionsSub: "8 مكتملة هذا العام"
         },
-        maturityAnalysis: "تحليل نضج الحوكمة (المنطقة مقابل المتوسط)",
         companyScore: "نتيجة المنطقة",
         sectorAverage: "متوسط القطاع",
-        riskAnalysis: "تحليل المخاطر حسب الشدة",
-        improvementStatus: "حالة خطة التحسين",
-        actions: "إجراءات",
-        topGaps: "أبرز الفجوات الاستراتيجية",
-        criticalRisks: "المخاطر الحرجة المسجلة",
-        developPolicy: "تطوير واعتماد السياسة",
-        table: {
-            indicator: "المؤشر",
-            axis: "المحور",
-            score: "التقييم",
-            recommendation: "الإجراء الموصى به"
-        },
-        riskLevels: {
-          low: "منخفض",
-          medium: "متوسط",
-          high: "مرتفع",
-          critical: "حرج"
-        },
         improvement: {
           completed: "تم الإنجاز",
           inProgress: "قيد التنفيذ",
@@ -433,10 +324,7 @@ export const translations = {
       title: "الإعدادات",
       subtitle: "إدارة متغيرات النظام والبيانات",
       profile: {
-          title: "الملف الشخصي للمشرف",
           role: "المشرف العام ومهندس النظام",
-          email: "البريد الإلكتروني",
-          phone: "رقم الهاتف",
       },
       preferences: {
           title: "تفضيلات النظام",
@@ -466,27 +354,14 @@ export const translations = {
             title: "البيانات الأساسية",
             companyName: "اسم المنطقة/المدينة",
             code: "الرمز",
-            sector: "القطاع", // Fallback
-            legalForm: "الشكل القانوني", // Fallback, to be replaced
             zoneType: "نوع المنطقة"
         },
         financial: {
             title: "المؤشرات الرئيسية",
-            capital: "رأس المال المصرح به (ر.ع.)", // Fallback
-            yearEnd: "نهاية السنة المالية", // Fallback
-            roi: "آخر عائد على الاستثمار (%)",
-            uso: "التزامات الخدمة الشاملة",
             totalArea: "المساحة الإجمالية (كم²)",
             developedArea: "المساحة المطورة (كم²)",
             cumulativeInvestment: "حجم الاستثمار التراكمي (مليون ر.ع)",
             directJobs: "عدد الوظائف المباشرة"
-        },
-        board: {
-            title: "حوكمة القيادة",
-            appointmentDate: "تاريخ تعيين القيادة",
-            expiryDate: "تاريخ انتهاء الصلاحية",
-            members: "عدد المسؤولين",
-            independent: "الأعضاء المستقلون",
         },
         icv: {
             title: "القيمة المحلية والأثر الوطني",
@@ -509,7 +384,6 @@ export const translations = {
       submissionDate: "تاريخ الإرسال",
       maturityScore: "نتيجة النضج",
       actions: "إجراءات",
-      view: "معاينة",
       return: "إعادة للتعديل",
       approve: "موافقة نهائية",
       returnModalTitle: "إعادة التقييم للمراجعة",
@@ -518,12 +392,7 @@ export const translations = {
       sendFeedback: "إرسال الملاحظات",
       approveConfirmTitle: "هل أنت متأكد؟",
       approveConfirmDesc: "سيتم اعتماد التقييم بشكل نهائي وإصدار الشهادة. لا يمكن التراجع عن هذا الإجراء.",
-      status: {
-        draft: "مسودة",
-        submitted: "قيد المراجعة",
-        returned: "مُعاد للتعديل",
-        approved: "معتمد"
-      }
+      status: { draft: "مسودة", submitted: "قيد المراجعة", returned: "مُعاد للتعديل", approved: "معتمد" }
     },
     review: {
       title: "المراجعة النهائية والإرسال",
@@ -532,10 +401,7 @@ export const translations = {
       profile: "الملف التعريفي للمنطقة",
       assessment: "تقييم الأداء المؤسسي",
       compliance: "الامتثال والمخاطر",
-      status: {
-        complete: "مكتمل",
-        incomplete: "غير مكتمل"
-      },
+      status: { complete: "مكتمل", incomplete: "غير مكتمل" },
       view: "مراجعة",
       submitButton: "إرسال إلى الهيئة",
       submittedTitle: "تم الإرسال بنجاح",
@@ -545,33 +411,40 @@ export const translations = {
       viewNotes: "عرض الملاحظات"
     },
     common: {
-      admin: "مدير النظام",
-      company: "بوابة المنطقة",
-      switchLang: "English",
-      username: "اسم المستخدم",
-      password: "كلمة المرور",
-      login: "تسجيل الدخول",
-      usernamePlaceholder: "أدخل اسم المستخدم",
-      passwordPlaceholder: "أدخل كلمة المرور",
-      back: "العودة للسجل",
-      edit: "تعديل",
-      save: "حفظ التغييرات",
-      selectPlaceholder: "اختر...",
-      pickDate: "اختر تاريخ",
-      cancel: "إلغاء",
-      delete: "حذف",
-      view: "عرض",
-      editingFor: "جاري التعديل لـ",
-      selectAllCompanies: "عرض كل المناطق",
-      selectCompanyToStart: "اختر منطقة للبدء",
-      selectCompanyToStartDesc: "يرجى اختيار منطقة من القائمة أعلاه لعرض أو تعديل بياناتها.",
-      saveSuccessTitle: "تم الحفظ بنجاح",
-      saveSuccessDesc: "تم حفظ بيانات المنطقة:",
-      deleteConfirm: "هل أنت متأكد من رغبتك في حذف هذه المنطقة؟ لا يمكن التراجع عن هذا الإجراء.",
-      deleteSuccessTitle: "تم الحذف بنجاح",
-      errorTitle: "خطأ",
-      fillAllFields: "يرجى تعبئة جميع الحقول المطلوبة.",
-      loading: "جاري التصدير..."
+      admin: "System Admin",
+      company: "Zone Portal",
+      switchLang: "عربي",
+      username: "Username",
+      password: "Password",
+      login: "Login",
+      usernamePlaceholder: "Enter your username",
+      passwordPlaceholder: "Enter your password",
+      back: "Back to Registry",
+      edit: "Edit",
+      save: "Save Changes",
+      selectPlaceholder: "Select...",
+      cancel: "Cancel",
+      delete: "Delete",
+      view: "View",
+      editingFor: "Editing for",
+      selectAllCompanies: "All Zones View",
+      selectCompanyToStart: "Select a Zone to Begin",
+      selectCompanyToStartDesc: "Please select a zone from the dropdown above to view or edit its data.",
+      saveSuccessTitle: "Saved Successfully",
+      saveSuccessDesc: "Zone data has been saved for:",
+      deleteConfirm: "Are you sure you want to delete this zone? This action cannot be undone.",
+      deleteSuccessTitle: "Deleted Successfully",
+      errorTitle: "Error",
+      fillAllFields: "Please fill all required fields.",
+      loading: "Exporting...",
+      exportPdf: "Export PDF",
+      noData: "No data to display.",
+    },
+    demo: {
+      gaps: {
+        "1": { name: "Alignment of strategic plan with Vision 2040", axis: "Governance" },
+        "2": { name: "Clarity and consistency of the investor journey", axis: "Operational Excellence" }
+      }
     }
   },
   en: {
@@ -593,82 +466,52 @@ export const translations = {
       review: "Review & Submit",
       approvals: "Approval Requests"
     },
-    dashboard: {
-      strategicRadar: "Strategic Performance Radar",
-      portfolioHealth: "Total Investment Volume",
+     dashboard: {
+      central_dashboard: "Central Dashboard",
+      title: "Dashboard",
       maturityGauge: "Overall Maturity Gauge",
-      riskMap: "Risk Heatmap",
-      sectorPerf: "Sector Performance",
-      omanization: "Omanization Rate",
-      compliance: "Compliance Status",
-      urgentAlerts: "Urgent Alerts",
-      totalAssets: "Total Investments (OMR M)",
-      nationalWorkforce: "of total workforce",
-      activeRisks: "Active risks logged",
-      overallScore: "Overall assessment score",
-      complianceRisk: "Compliance & Risk",
-      maturityPath: "Strategic Maturity Path",
-      maturityScore: "Maturity Score",
+      totalInvestment: "Total Investment Volume",
+      investmentSubtitle: "Cumulative asset value",
+      annualExports: "Annual Exports Volume",
+      criticalRisks: "Critical Risks",
+      risksSubtitle: "Risks requiring immediate attention",
+      omanizationRate: "Omanization Rate",
+      directJobs: "Direct Jobs",
+      jobsSubtitle: "registered jobs",
+      landUtilization: "Land Utilization Efficiency",
+      landSubtitle: "out of {totalArea} km² total",
+      economicReturn: "Economic Return",
+      returnUnit: "OMR / m²",
+      strategicRadar: "Strategic Performance Radar",
+      topPerformers: "Top Performing Zones",
+      complianceAndImprovement: "Compliance & Improvement Plan",
+      legislativeCompliance: "Legislative Compliance",
       compliant: "Compliant",
       nonCompliant: "Non-Compliant",
-      improvementStatus: {
-        title: "Improvement Plan Status"
-      },
-      boardComposition: {
-        title: "Executive Leadership Analysis",
-        independence: "Leadership Independence",
-        independent: "Independent Members",
-        nonIndependent: "Non-Independent",
-        omanization: "Omanization in Leadership"
-      },
-      icv: {
-          title: "Tenders & Local Spending",
-          totalTenders: "Total Tenders",
-          omanizationRate: "Omanization Rate",
-          smeSpending: "SMEs",
-          localSpending: "Local Companies",
-          spending: "Tender Value",
-          actualSpending: "Actual Spending",
-          target: "Target"
-      },
-      financial: {
-        hubTitle: "Financial Performance Hub",
-        netProfit: "Signed Agreements",
-        equity: "Occupied Area (km²)",
-        freeCashFlow: "Occupied Area (km²)",
-        roi: "Omanization Rate"
-      },
+      improvementTasks: "Improvement Plan Tasks",
+      executiveOmanization: "Executive Leadership Omanization",
+      nationalLeaders: "National Leaders",
+      expatExpertise: "Expat Expertise",
+      riskDistributionMap: "Risk Distribution Heatmap",
+      icvTitle: "Tenders & Local Spending",
+      icvTotalTenders: "Total Tenders",
+      icvLocalSpending: "Local Companies",
+      icvSmeSpending: "SMEs",
+      icvSpending: "Tender Value",
+      maturityPath: "Strategic Maturity Path (Timeline)",
+      riskMap: "Risk Heatmap",
       riskLabels: {
-          impact: {
-            minimal: 'Minimal',
-            minor: 'Minor',
-            moderate: 'Moderate',
-            major: 'Major',
-            catastrophic: 'Catastrophic'
-          },
-          probability: {
-            rare: 'Rare',
-            unlikely: 'Unlikely',
-            possible: 'Possible',
-            likely: 'Likely',
-            certain: 'Certain'
-          }
+          impact: { minimal: 'Minimal', minor: 'Minor', moderate: 'Moderate', major: 'Major', catastrophic: 'Catastrophic' },
+          probability: { rare: 'Rare', unlikely: 'Unlikely', possible: 'Possible', likely: 'Likely', certain: 'Certain' }
       },
-      top5: {
-        title: "Top 5 Performing Zones"
-      }
+      activeRisks: "active risks",
     },
     registry: {
         title: "Zones Registry",
         addNew: "Add New Zone",
         searchPlaceholder: "Search by zone name or code...",
         riskLevel: "Risk Level",
-        risks: {
-            low: "Low",
-            medium: "Medium",
-            high: "High",
-            critical: "Critical"
-        }
+        risks: { low: "Low", medium: "Medium", high: "High", critical: "Critical" }
     },
      board_directory: {
       title: "Executive Leadership Registry",
@@ -687,16 +530,11 @@ export const translations = {
       expiresSoon: "Tenure expires soon",
       summary: {
         total_members: "Total Officials",
-        independent_members: "Independent Members",
-        of_board: "of the leadership team",
         expiring_soon: "Tenures Expiring Soon",
         within_3_months: "within 3 months",
         total_committees: "Active Committees"
       },
-      tabs: {
-        members: "Officials & Skills",
-        minutes: "Meetings & Minutes"
-      },
+      tabs: { members: "Officials & Skills", minutes: "Meetings & Minutes" },
       minutes: {
         title: "Meeting Minutes Repository",
         upload: "Upload Minute",
@@ -707,11 +545,7 @@ export const translations = {
         actions: "Actions",
         noMinutes: "No minutes have been saved for this zone.",
         minuteAdded: "Minute added successfully.",
-        types: {
-            quarterly: "Quarterly",
-            emergency: "Emergency",
-            committee: "Committee"
-        }
+        types: { quarterly: "Quarterly", emergency: "Emergency", committee: "Committee" }
       },
       roles: {
         ceo: "CEO",
@@ -721,11 +555,6 @@ export const translations = {
         'vp_of_business_development': "VP of Business Development",
         'investment_director': "Investment Director"
       },
-      types: { 
-        independent: "Independent",
-        government: "Government Rep.",
-        executive: "Executive"
-      },
       expertise: {
         'smart_city_development': "Smart City Development",
         'logistics': "Logistics",
@@ -733,12 +562,7 @@ export const translations = {
         'industrial_management': "Industrial Management",
         'urban_planning': "Urban Planning"
       },
-      committee_names: {
-        audit: "Audit",
-        risk: "Risk",
-        hr: "Human Resources",
-        nomination: "Nomination"
-      },
+      committee_names: { audit: "Audit", risk: "Risk", hr: "Human Resources", nomination: "Nomination" },
       form: {
         title_add: 'Add New Official',
         title_edit: 'Edit Official Details',
@@ -753,15 +577,12 @@ export const translations = {
         termEndDate: 'Term End Date',
         qualification: 'Academic Qualification',
       },
-      qualifications: {
-        bachelor: 'Bachelor',
-        master: 'Master',
-        phd: 'PhD'
-      }
+      qualifications: { bachelor: 'Bachelor', master: 'Master', phd: 'PhD' }
     },
     board_evaluation: {
         title: "Leadership Performance KPIs",
-        cycle: "Evaluation Cycle",
+        saveSuccessDesc: "Leadership evaluation data has been saved successfully.",
+        summary: { avgScore: "Avg. Leadership Score", topPerformer: "Top Performer", reviewRequired: "Officials to Review" },
         memberInfo: "Executive Official",
         projectsCompletion: "Projects Completion %",
         investmentTargets: "Investment Targets",
@@ -773,21 +594,10 @@ export const translations = {
         goodStanding: "Good Standing",
         save: "Save Evaluation",
         export: "Export Report",
-        saveSuccessDesc: "Leadership evaluation data has been saved successfully.",
-        summary: {
-            avgScore: "Avg. Leadership Score",
-            topPerformer: "Top Performer",
-            reviewRequired: "Officials to Review"
-        },
-        notes: {
-            title: "Evaluation Notes",
-            placeholder: "Add notes or justifications for the evaluation...",
-            saved: "Notes saved."
-        }
+        notes: { title: "Evaluation Notes", placeholder: "Add notes or justifications for the evaluation...", saved: "Notes saved." }
     },
     assessment: {
         title: "Assessment Axes",
-        globalProgress: "Global Progress",
         completed: "Completed",
         saveDraft: "Save Assessment",
         submitFinal: "Submit Final",
@@ -805,10 +615,6 @@ export const translations = {
         successTitle: "Submitted Successfully!",
         successDesc: "Assessment has been saved and submitted successfully.",
         saveSuccessDesc: "Assessment data saved for",
-        viewResults: "View Results",
-        stayHere: "Stay Here",
-        locked: "Assessment Locked",
-        nextCompliance: "Next: Compliance & Risk",
         addIndicator: "Add New Indicator",
         editIndicator: "Edit Indicator",
         indicatorTextAr: "Indicator Text (Arabic)",
@@ -829,19 +635,18 @@ export const translations = {
         statutoryTitle: "Statutory Compliance",
         nonCompliant: "Non-Compliant",
         addRisk: "Add New Risk",
-        probability: "Probability",
-        impact: "Impact",
+        saveSuccessDesc: "Compliance & Risk data has been saved for",
         questions: {
-            auditor: "Has an external auditor been appointed?",
-            quorum: "Has the board meeting quorum been met (4 times annually)?",
-            doa: "Is there an approved Delegation of Authority policy?",
-            conflict: "Have conflicts of interest been disclosed by members?",
-            legalStatus: "Are Commercial Registration & Tax Certificates valid?",
-            dividends: "Were OIA dividends transferred on schedule?",
-            agmApproval: "Were financial statements approved by the AGM?",
-            reporting: "Was the audited Annual Report published to the public?",
-            legalIssues: "Is the zone free from undisclosed material legal cases?",
-            minutesArchiving: "Are all Board & Committee minutes signed and archived?"
+          masterPlan: "Is the zone's Master Plan approved and updated?",
+          regulations: "Are all zone regulations published in the Official Gazette?",
+          budget: "Is the annual operating budget approved by OPAZ presidency?",
+          envLicense: "Does the zone have a valid environmental license for landfills and hazardous facilities?",
+          insurance: "Have all insurance contracts for government assets and facilities been renewed?",
+          encroachments: "Have all land encroachments been monitored and removed?",
+          reports: "Are quarterly reports submitted to the OPAZ presidency on time?",
+          audit: "Have all findings from the State Audit Institution been addressed and closed?",
+          legalCases: "Is the zone free from material legal cases filed by investors?",
+          expropriation: "Have all expropriation decisions (if any) been made in accordance with legal procedures?",
         },
         riskForm: {
             description: "Risk Description",
@@ -855,9 +660,6 @@ export const translations = {
             operational: "Operational",
             strategic: "Strategic",
             cyber: "Cyber",
-            rare: "Rare",
-            likely: "Likely",
-            certain: "Certain"
         }
     },
     improvement: {
@@ -865,30 +667,17 @@ export const translations = {
         filterPriority: "Filter by Priority",
         filterAxis: "Filter by Axis",
         allAxes: "All Axes",
-        lanes: {
-            todo: "Identified Gaps",
-            inProgress: "In Progress",
-            done: "Resolved"
-        },
-        priorities: {
-            all: "All",
-            critical: "Critical",
-            high: "High",
-            medium: "Medium",
-            low: "Low"
-        },
+        lanes: { todo: "Identified Gaps", inProgress: "In Progress", done: "Resolved" },
+        priorities: { all: "All", critical: "Critical", high: "High", medium: "Medium", low: "Low" },
         linkedIndicator: "Linked to Indicator",
         start: "Start Task",
         finish: "Complete Task",
         return: "Return",
         reopen: "Re-open",
-        dueDate: "Due by:",
         assignedTo: "Assigned to:",
         description: "Description",
         placeholderDesc: "This task is to address a governance gap identified during the maturity assessment. The primary goal is to ensure compliance and improve the governance framework.",
         relatedAxis: "Related Axis",
-        comments: "Comments",
-        commentsPlaceholder: "Placeholder for team comments and discussion threads...",
         saveSuccessDesc: "Improvement plan data saved for",
         completeTaskTitle: "Complete Task & Submit Evidence",
         completeTaskDesc: "Please provide notes on how the task was completed and attach the evidence of completion.",
@@ -914,9 +703,9 @@ export const translations = {
     },
     reports: {
         title: "Comprehensive Strategic Report",
+        subtitle: "Generate official documents and financial analysis",
         selectCompanyToView: "Please select a zone to view its detailed report.",
         year: "Year",
-        export: "Export PDF",
         boardAndIcvAnalysis: "Leadership & ICV Analysis",
         comprehensive: "Comprehensive Strategic Report",
         financial: "Financial & Operational Performance Report",
@@ -962,41 +751,15 @@ export const translations = {
             impact: "Impact",
             probability: "Probability",
             mitigation: "Mitigation Action",
+            risk: "Risk",
             noRisks: "No active risks are logged in the system for this year.",
             review: "Under review"
         },
         summary: {
-            maturity: "Overall Maturity",
-            maturitySub: "+0.2 from last year",
-            compliance: "Compliance Rate",
-            complianceSub: "4 non-compliant items",
             risks: "Active Risks",
-            risksSub: "in critical zones",
-            actions: "Improvement Actions",
-            pending: "Pending",
-            actionsSub: "8 Completed this year"
         },
-        maturityAnalysis: "Governance Maturity Analysis (Zone vs. Average)",
         companyScore: "Zone Score",
-        sectorAverage: "Sector Average",
-        riskAnalysis: "Risk Analysis by Severity",
-        improvementStatus: "Improvement Plan Status",
-        actions: "Actions",
-        topGaps: "Top Strategic Gaps",
-        criticalRisks: "Critical Risks Logged",
-        developPolicy: "Develop and approve policy",
-        table: {
-            indicator: "Indicator",
-            axis: "Axis",
-            score: "Score",
-            recommendation: "Recommended Action"
-        },
-        riskLevels: {
-          low: "Low",
-          medium: "Medium",
-          high: "High",
-          critical: "Critical"
-        },
+        sectorAverage: "Sector Avg",
         improvement: {
           completed: "Completed",
           inProgress: "In Progress",
@@ -1007,10 +770,7 @@ export const translations = {
       title: "Settings",
       subtitle: "Manage system variables and data",
       profile: {
-          title: "Supervisor Profile",
           role: "General Supervisor & System Architect",
-          email: "Email",
-          phone: "Phone Number",
       },
       preferences: {
           title: "System Preferences",
@@ -1040,27 +800,14 @@ export const translations = {
             title: "Basic Identity",
             companyName: "Zone/City Name",
             code: "Code",
-            sector: "Sector",
-            legalForm: "Legal Form",
             zoneType: "Zone Type"
         },
         financial: {
             title: "Key Indicators",
-            capital: "Authorized Capital (OMR)",
-            yearEnd: "Financial Year End",
-            roi: "Last ROI (%)",
-            uso: "USO Obligations",
             totalArea: "Total Area (km²)",
             developedArea: "Developed Area (km²)",
             cumulativeInvestment: "Cumulative Investment (OMR M)",
             directJobs: "Direct Jobs Created"
-        },
-        board: {
-            title: "Leadership Governance",
-            appointmentDate: "Leadership Appointment Date",
-            expiryDate: "Expiry Date",
-            members: "No. of Officials",
-            independent: "Independent Members",
         },
         icv: {
             title: "ICV & National Impact",
@@ -1083,7 +830,6 @@ export const translations = {
       submissionDate: "Submission Date",
       maturityScore: "Maturity Score",
       actions: "Actions",
-      view: "View",
       return: "Return for Edits",
       approve: "Final Approve",
       returnModalTitle: "Return Assessment for Review",
@@ -1092,12 +838,7 @@ export const translations = {
       sendFeedback: "Send Feedback",
       approveConfirmTitle: "Are you sure?",
       approveConfirmDesc: "The assessment will be finally approved and the certificate will be issued. This action cannot be undone.",
-      status: {
-        draft: "Draft",
-        submitted: "Submitted",
-        returned: "Returned",
-        approved: "Approved"
-      }
+      status: { draft: "Draft", submitted: "Submitted", returned: "Returned", approved: "Approved" }
     },
     review: {
       title: "Final Review and Submission",
@@ -1106,10 +847,7 @@ export const translations = {
       profile: "Zone Profile Data",
       assessment: "Institutional Performance Assessment",
       compliance: "Compliance & Risk Registry",
-      status: {
-        complete: "Complete",
-        incomplete: "Incomplete"
-      },
+      status: { complete: "Complete", incomplete: "Incomplete" },
       view: "Review",
       submitButton: "Send to Authority",
       submittedTitle: "Successfully Submitted",
@@ -1131,7 +869,6 @@ export const translations = {
       edit: "Edit",
       save: "Save Changes",
       selectPlaceholder: "Select...",
-      pickDate: "Pick a date",
       cancel: "Cancel",
       delete: "Delete",
       view: "View",
@@ -1145,9 +882,15 @@ export const translations = {
       deleteSuccessTitle: "Deleted Successfully",
       errorTitle: "Error",
       fillAllFields: "Please fill all required fields.",
-      loading: "Exporting..."
+      loading: "Exporting...",
+      exportPdf: "Export PDF",
+      noData: "No data to display.",
+    },
+    demo: {
+      gaps: {
+        "1": { name: "Alignment of strategic plan with Vision 2040", axis: "Governance" },
+        "2": { name: "Clarity and consistency of the investor journey", axis: "Operational Excellence" }
+      }
     }
   }
 };
-
-    

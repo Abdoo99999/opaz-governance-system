@@ -20,18 +20,17 @@ import { useToast } from '@/hooks/use-toast';
 import RiskLandscape from './dashboard/RiskLandscape';
 import { useYear } from '@/context/YearContext';
 
-// --- 1. تم تحديث الأسئلة هنا فقط لتناسب أوباز ---
 const complianceItems = [
-    { id: 'masterPlan', question: 'هل المخطط الشمولي (Master Plan) للمنطقة معتمد ومحدث؟' },
-    { id: 'regulations', question: 'هل جميع اللوائح التنظيمية للمنطقة منشورة في الجريدة الرسمية؟' },
-    { id: 'budget', question: 'هل تم اعتماد الموازنة التشغيلية السنوية من رئاسة الهيئة (أوباز)؟' },
-    { id: 'envLicense', question: 'هل تملك المنطقة ترخيصاً بيئياً سارياً للمردم والمرافق الخطرة؟' },
-    { id: 'insurance', question: 'هل تم تجديد جميع عقود التأمين على الأصول والمرافق الحكومية؟' },
-    { id: 'encroachments', question: 'هل تم رصد وإزالة جميع التعديات على الأراضي (Encroachments)؟' },
-    { id: 'reports', question: 'هل تم رفع التقارير الربع سنوية لرئاسة الهيئة في الموعد المحدد؟' },
-    { id: 'audit', question: 'هل تم الرد وإغلاق جميع ملاحظات جهاز الرقابة المالية والإدارية؟' },
-    { id: 'legalCases', question: 'هل تخلو المنطقة من قضايا قانونية جوهرية مرفوعة من المستثمرين؟' },
-    { id: 'expropriation', question: 'هل جميع قرارات نزع الملكية (إن وجدت) تمت وفق الإجراءات القانونية؟' },
+    { id: 'masterPlan' },
+    { id: 'regulations' },
+    { id: 'budget' },
+    { id: 'envLicense' },
+    { id: 'insurance' },
+    { id: 'encroachments' },
+    { id: 'reports' },
+    { id: 'audit' },
+    { id: 'legalCases' },
+    { id: 'expropriation' },
 ];
 
 const riskSchema = z.object({
@@ -48,7 +47,6 @@ interface ComplianceMonitorProps {
 
 type RiskFormValues = z.infer<typeof riskSchema>;
 
-// --- 2. تم تحديث نوع الحالة ليطابق الأسئلة الجديدة ---
 type ComplianceState = {
     masterPlan: boolean;
     regulations: boolean;
@@ -62,7 +60,6 @@ type ComplianceState = {
     expropriation: boolean;
 };
 
-// --- 3. الحالة الابتدائية الجديدة ---
 const initialComplianceState: ComplianceState = {
     masterPlan: true,
     regulations: true,
@@ -83,7 +80,6 @@ const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => 
     const { toast } = useToast();
     const selectedCompany = getSelectedZone();
     
-    // مفتاح التخزين الموحد
     const getStorageKey = (companyId: string, year: number) => `opaz_compliance_${companyId}_${year}`;
 
     const [complianceState, setComplianceState] = useState<ComplianceState>(initialComplianceState);
@@ -106,7 +102,6 @@ const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => 
     }, [risks]);
 
 
-    // RELOAD data when company or year changes
     useEffect(() => {
         if (typeof window === 'undefined' || !selectedCompanyId || selectedCompanyId === 'all') {
             setComplianceState(initialComplianceState);
@@ -140,13 +135,11 @@ const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => 
         localStorage.setItem(storageKey, JSON.stringify(dataToSave));
 
         toast({
-            title: "تم الحفظ بنجاح",
-            description: `تم حفظ بيانات الامتثال والمخاطر للمنطقة ${selectedCompany?.name_ar}`,
+            title: t('common.saveSuccessTitle'),
+            description: `${t('compliance.saveSuccessDesc')} ${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}`,
         });
         
-        // --- هذا هو الرابط بخطة التحسين ---
         refreshData(); 
-        // ----------------------------------
     };
 
     const handleComplianceChange = (id: keyof ComplianceState, value: boolean) => {
@@ -216,8 +209,7 @@ const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => 
                  </div>
             </header>
             
-            {/* Section A: Risk Dashboard - لم يتم المساس به */}
-             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-8">
+            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="mb-8">
                 <Card className="glass">
                     <CardHeader>
                         <CardTitle className="text-2xl font-bold text-gold-400">1 - {t('dashboard.riskMap')}</CardTitle>
@@ -247,8 +239,6 @@ const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => 
                 </Card>
             </motion.div>
 
-
-            {/* Section B: Compliance Checklist - تم تعديل عرض النصوص ليظهر العربي مباشرة */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
                 <Card className="glass">
                     <CardHeader>
@@ -260,8 +250,7 @@ const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => 
                             return (
                                 <div key={item.id} className="border border-white/10 rounded-lg p-4 flex items-center justify-between bg-black/20 min-h-[80px]">
                                     <div className="flex-1 pr-4">
-                                        {/* هنا التغيير المهم: عرض السؤال مباشرة بدلاً من الترجمة */}
-                                        <p className="text-md font-semibold leading-tight">{index + 1}. {item.question}</p>
+                                        <p className="text-md font-semibold leading-tight">{index + 1}. {t(`compliance.questions.${item.id}`)}</p>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2 w-48">
                                         <Button
@@ -296,7 +285,6 @@ const ComplianceMonitor: React.FC<ComplianceMonitorProps> = ({ onNavigate }) => 
                 </Card>
             </motion.div>
 
-            {/* Add Risk Modal - لم يتم المساس به */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent className="glass text-white max-w-2xl">
                     <DialogHeader>
