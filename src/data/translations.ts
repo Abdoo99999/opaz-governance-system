@@ -141,9 +141,11 @@ export const translations = {
       },
       roles: {
         ceo: "الرئيس التنفيذي",
+        coo: "الرئيس التنفيذي للعمليات",
+        cfo: "المدير المالي",
         'vp_operations': "نائب الرئيس للعمليات",
-        'investment_dg': "مدير عام الاستثمار",
-        'planning_dg': "مدير عام التخطيط"
+        'vp_of_business_development': "نائب الرئيس لتطوير الأعمال",
+        'investment_director': "مدير الاستثمار"
       },
       types: { 
         independent: "مستقل",
@@ -694,9 +696,11 @@ export const translations = {
       },
       roles: {
         ceo: "CEO",
-        'vp_operations': "VP Operations",
-        'investment_dg': "Investment DG",
-        'planning_dg': "Planning DG"
+        coo: "COO",
+        cfo: "CFO",
+        'vp_operations': "VP of Operations",
+        'vp_of_business_development': "VP of Business Development",
+        'investment_director': "Investment Director"
       },
       types: { 
         independent: "Independent",

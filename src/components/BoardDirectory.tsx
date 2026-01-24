@@ -56,7 +56,7 @@ const cardVariants = {
 
 const expertiseOptions = ['Smart City Development', 'Logistics', 'FDI Attraction', 'Industrial Management', 'Urban Planning'];
 const committeeOptions = ['Audit', 'Risk', 'HR', 'Nomination'];
-const roleOptions = ['CEO', 'VP Operations', 'Investment DG', 'Planning DG'];
+const roleOptions = ['CEO', 'COO', 'CFO', 'VP of Business Development', 'VP of Operations', 'Investment Director'];
 const qualificationOptions = ['Bachelor', 'Master', 'PhD'] as const;
 
 const memberSchema = z.object({
