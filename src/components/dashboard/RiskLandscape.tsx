@@ -1,4 +1,3 @@
-
 "use client";
 import React from 'react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -43,7 +42,6 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data, onCellClick }) => {
         t('dashboard.riskLabels.probability.certain'),
     ];
 
-    // Group risks by cell
     const riskMatrix = Array(5).fill(null).map(() => Array(5).fill(0));
     data.forEach(risk => {
         if (risk.impact >= 1 && risk.impact <= 5 && risk.probability >= 1 && risk.probability <= 5) {
@@ -56,68 +54,64 @@ const RiskLandscape: React.FC<RiskLandscapeProps> = ({ data, onCellClick }) => {
 
     return (
         <TooltipProvider>
-            <div className="flex flex-col h-full w-full text-xs">
-                 <div className="grid grid-cols-6 gap-1 flex-grow">
-                    {/* Y-Axis Header - Empty Top-Left Cell */}
-                    <div />
-                    
-                    {/* X-Axis Headers (Probability) */}
-                    {probabilityLabels.map((label, i) => (
-                        <div key={i} className="flex items-center justify-center text-center text-gray-400 font-semibold p-1">
-                            {label}
-                        </div>
-                    ))}
+            <div className="flex h-full w-full">
+                {/* Y-Axis Labels */}
+                <div className="flex flex-col-reverse justify-between w-16 text-center text-gray-400 text-xs py-2 pr-2">
+                    {impactLabels.map((label, i) => <div key={i}>{label}</div>)}
+                </div>
 
-                    {/* Y-Axis Labels and Grid Cells */}
-                    {riskMatrix.map((row, rowIndex) => (
-                        <React.Fragment key={rowIndex}>
-                            <div className="flex items-center justify-center text-center -rotate-90 text-gray-400 font-semibold p-1">
-                                {impactLabels[4-rowIndex]}
-                            </div>
-                            {row.map((count, colIndex) => {
-                                const impact = 5 - rowIndex;
-                                const probability = colIndex + 1;
-                                const level = getRiskLevel(impact, probability);
-                                const riskInfo = riskLevels[level];
-                                
-                                const cellContent = (
-                                    <>
+                <div className="flex-1 flex flex-col">
+                    {/* Main Grid */}
+                    <div className="flex-1 grid grid-cols-5 grid-rows-5 gap-1">
+                        {riskMatrix.flat().map((count, i) => {
+                            const rowIndex = Math.floor(i / 5);
+                            const colIndex = i % 5;
+                            const impact = 5 - rowIndex;
+                            const probability = colIndex + 1;
+                            const level = getRiskLevel(impact, probability);
+                            const riskInfo = riskLevels[level];
+
+                            const cellContent = (
+                                <>
                                     {count > 0 && <span className="font-bold text-xl drop-shadow-lg">{count}</span>}
-                                    </>
-                                );
-                                
-                                const tooltipText = `(${impact}) ${impactLabels[impact - 1]} * (${probability}) ${probabilityLabels[probability - 1]}`;
-                                const tooltipCount = count > 0 ? `(${count} ${t('dashboard.activeRisks')})` : `(${t('compliance.addRisk')})`;
+                                </>
+                            );
 
-                                const cell = onCellClick ? (
-                                    <motion.button
-                                        onClick={() => onCellClick(impact, probability)}
-                                        className={`${cellBaseClasses} ${clickableClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
-                                        whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
-                                    >
-                                        {cellContent}
-                                    </motion.button>
-                                ) : (
-                                    <motion.div
-                                        className={`${cellBaseClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
-                                        whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
-                                    >
-                                        {cellContent}
-                                    </motion.div>
-                                );
+                             const tooltipText = `(${impact}) ${impactLabels[impact - 1]} * (${probability}) ${probabilityLabels[probability - 1]}`;
+                             const tooltipCount = count > 0 ? `(${count} ${t('dashboard.activeRisks')})` : `(${t('compliance.addRisk')})`;
 
-                                return (
-                                    <Tooltip key={`${rowIndex}-${colIndex}`}>
-                                        <TooltipTrigger asChild>{cell}</TooltipTrigger>
-                                        <TooltipContent className="glass text-white">
-                                            <p>{tooltipText}</p>
-                                            <p className="text-center text-gray-400 text-xs">{tooltipCount}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                )
-                            })}
-                        </React.Fragment>
-                    ))}
+                             const cell = onCellClick ? (
+                                <motion.button
+                                    onClick={() => onCellClick(impact, probability)}
+                                    className={`${cellBaseClasses} ${clickableClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
+                                    whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
+                                >
+                                    {cellContent}
+                                </motion.button>
+                            ) : (
+                                <motion.div
+                                    className={`${cellBaseClasses} ${count > 0 ? `bg-gradient-to-br ${riskInfo.color} ${riskInfo.borderColor} border shadow-inner shadow-black/20` : 'bg-white/5'}`}
+                                    whileHover={{ scale: 1.1, zIndex: 10, boxShadow: '0 0 15px rgba(255, 255, 255, 0.1)' }}
+                                >
+                                    {cellContent}
+                                </motion.div>
+                            );
+
+                             return (
+                                <Tooltip key={`${rowIndex}-${colIndex}`}>
+                                    <TooltipTrigger asChild>{cell}</TooltipTrigger>
+                                    <TooltipContent className="glass text-white">
+                                        <p>{tooltipText}</p>
+                                        <p className="text-center text-gray-400 text-xs">{tooltipCount}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            )
+                        })}
+                    </div>
+                    {/* X-Axis Labels */}
+                    <div className="grid grid-cols-5 h-8 text-center text-gray-400 text-xs pt-2">
+                       {probabilityLabels.map((label, i) => <div key={i}>{label}</div>)}
+                    </div>
                 </div>
             </div>
         </TooltipProvider>
