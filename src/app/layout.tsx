@@ -11,8 +11,8 @@ const cairo = Cairo({
 
 
 export const metadata: Metadata = {
-  title: 'منظومة إتقان | جهاز الاستثمار العماني',
-  description: 'منظومة إتقان لحوكمة شركات جهاز الاستثمار العماني',
+  title: 'منظومة إتقان | المناطق الاقتصادية والحرة',
+  description: 'منظومة إتقان لحوكمة المناطق الاقتصادية الخاصة والمناطق الحرة',
 };
 
 export default function RootLayout({
