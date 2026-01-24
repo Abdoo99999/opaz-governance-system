@@ -172,9 +172,9 @@ const Reports: React.FC = () => {
         }
         const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { scores: {}, isComplete: false };
         
-        let complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}_${selectedYear}`);
+        let complianceStr = localStorage.getItem(`opaz_compliance_${selectedCompanyId}_${selectedYear}`);
         if(!complianceStr){
-            complianceStr = localStorage.getItem(`oia_compliance_${selectedCompanyId}`);
+            complianceStr = localStorage.getItem(`opaz_compliance_${selectedCompanyId}`);
         }
         const complianceData = complianceStr ? JSON.parse(complianceStr) : { compliance: {}, risks: [] };
 
@@ -325,7 +325,7 @@ const Reports: React.FC = () => {
         }
 
         // 7. Board Composition Chart
-        const independentCount = companyBoardMembers.filter(m => m.type === 'Independent').length;
+        const independentCount = companyBoardMembers.filter(m => (m as any).type === 'Independent').length;
         const nonIndependentCount = companyBoardMembers.length - independentCount;
          if (companyBoardMembers.length > 0) {
             setBoardIndependenceData([
