@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -106,6 +106,13 @@ const Dashboard = () => {
         };
     };
 
+    const allZonesStr = localStorage.getItem('opaz_zones_registry');
+    const allZonesData: Zone[] = allZonesStr ? JSON.parse(allZonesStr) : ZONES;
+    
+    const targetZones = (selectedZoneId && selectedZoneId !== 'all') 
+        ? [allZonesData.find(z => z.id === selectedZoneId)].filter(Boolean) 
+        : allZonesData;
+
     let accMaturity = 0, countMaturity = 0;
     let accInvestment = 0, accExports = 0, accRisks = 0;
     let accOmanization = 0, countOmanization = 0;
@@ -117,13 +124,6 @@ const Dashboard = () => {
     const radarAcc = AXES.map(axis => ({ id: axis.id, score: 0, count: 0 }));
     const zoneScores: any[] = [];
     
-    const allZonesStr = localStorage.getItem('opaz_zones_registry');
-    const allZonesData: Zone[] = allZonesStr ? JSON.parse(allZonesStr) : ZONES;
-    
-    const targetZones = (selectedZoneId && selectedZoneId !== 'all') 
-        ? [allZonesData.find(z => z.id === selectedZoneId)].filter(Boolean) 
-        : allZonesData;
-
     targetZones.forEach((zone: any) => {
         const data = getZoneData(zone.id);
 
@@ -570,5 +570,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
