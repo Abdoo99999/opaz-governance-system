@@ -65,7 +65,7 @@ const formatCurrency = (value: number) => {
 const Dashboard = () => {
   const { t, language, dir } = useLanguage();
   const { selectedZoneId, getSelectedZone, dataVersion } = useCompany();
-  const { selectedYear } = useYear();
+  const { selectedYear, availableYears } = useYear();
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -210,8 +210,19 @@ const Dashboard = () => {
     const execOman = Math.round(accOmanization > 0 ? (accOmanization / countOmanization) + 10 : 60);
     setLeadershipData([{ name: 'قيادات وطنية', value: execOman, color: '#D4AF37' }, { name: 'خبرات وافدة', value: 100 - execOman, color: '#3b82f6' }]);
 
-    const currentMaturity = countMaturity > 0 ? accMaturity / countMaturity : 3.0;
-    setMaturityPathData(Array.from({ length: 6 }, (_, i) => ({ year: (2021 + i).toString(), companyScore: i === 5 ? currentMaturity : Math.min(5, 2.5 + i * 0.3), target: Math.min(5, 3.0 + i * 0.4) })) as any);
+    const currentMaturity = countMaturity > 0 ? accMaturity / countMaturity : 3.8;
+    const maturityData = availableYears.map(year => {
+        const isCurrentYear = year === selectedYear;
+        const baseCompanyScore = 3.5 + (year - 2024) * 0.15;
+        const baseSectorScore = 3.7 + (year - 2024) * 0.1;
+
+        return {
+            year: year.toString(),
+            companyScore: isCurrentYear ? currentMaturity : Math.min(5, baseCompanyScore + (Math.random() - 0.5) * 0.1),
+            sectorAverage: Math.min(5, baseSectorScore + (Math.random() - 0.5) * 0.1)
+        };
+    });
+    setMaturityPathData(maturityData as any);
     
     const currentZoneData = allZonesData.find(z => z.id === selectedZoneId);
     if (currentZoneData) {
@@ -225,7 +236,7 @@ const Dashboard = () => {
         ] as any);
     }
 
-  }, [selectedZoneId, selectedYear, language, dataVersion, t]);
+  }, [selectedZoneId, selectedYear, language, dataVersion, t, availableYears]);
 
   const sparklineData = useMemo(() => Array.from({ length: 10 }, () => ({ uv: totalInvestment * (Math.random() * 0.1 + 0.95) })), [totalInvestment]);
   const exportsTrend = useMemo(() => Array.from({ length: 5 }, (_,i) => ({ name: `Y${i}`, v: totalExports * (0.8 + i*0.05) })), [totalExports]);
@@ -502,11 +513,13 @@ const Dashboard = () => {
                       <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={maturityPathData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                               <defs><linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#fbbf24" stopOpacity={0.8}/><stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/></linearGradient></defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" vertical={false} />
                               <XAxis dataKey="year" tick={{fill: '#9ca3af'}} />
                               <YAxis domain={[0, 5]} tick={{fill: '#9ca3af'}} />
                               <Tooltip {...tooltipStyle} />
-                              <Area type="monotone" dataKey="companyScore" stroke="#fbbf24" fillOpacity={1} fill="url(#colorScore)" />
-                              <Line type="monotone" dataKey="target" stroke="#818cf8" strokeDasharray="5 5" />
+                              <Legend verticalAlign="top" align="right" wrapperStyle={{color: '#9ca3af', paddingBottom: '10px'}}/>
+                              <Area type="monotone" dataKey="companyScore" name={t('reports.companyScore')} stroke="#fbbf24" fillOpacity={1} fill="url(#colorScore)" />
+                              <Line type="monotone" dataKey="sectorAverage" name={t('reports.sectorAverage')} stroke="#818cf8" strokeDasharray="5 5" />
                           </AreaChart>
                       </ResponsiveContainer>
                   </CardContent>
@@ -519,5 +532,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
