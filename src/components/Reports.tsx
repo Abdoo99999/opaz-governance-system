@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
-  Cell, PieChart, Pie
+  Cell, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
@@ -92,6 +92,7 @@ export default function Reports() {
   const [gaps, setGaps] = useState<any[]>([]);
   const [risks, setRisks] = useState<any[]>([]);
   const [icvData, setIcvData] = useState<any>(null);
+  const [radarData, setRadarData] = useState<any[]>([]);
 
   const selectedZone = getSelectedZone();
 
@@ -158,12 +159,53 @@ export default function Reports() {
             }
         });
         setGaps(foundGaps.slice(0, 5)); // Top 5 Gaps
+        
+        // --- START NEW RADAR LOGIC ---
+        const scores = data.scores || {};
+        const radarAcc = AXES.map(axis => ({ id: axis.id, score: 0, count: 0 }));
+        Object.keys(scores).forEach(key => {
+            const indId = parseInt(key);
+            const score = scores[key];
+            const indicator = INDICATORS.find(i => i.id === indId);
+            if (indicator) {
+                const ax = radarAcc.find(a => a.id === indicator.axisId);
+                if (ax) { ax.score += score; ax.count++; }
+            }
+        });
+
+        const processedRadar = AXES.map(axis => {
+            const axData = radarAcc.find(a => a.id === axis.id);
+            const avg = axData && axData.count > 0 ? (axData.score / axData.count) : 0;
+            const title = language === 'ar' ? axis.title_ar : axis.title_en;
+            return {
+                subject: title,
+                company: parseFloat(avg.toFixed(1)),
+                sector: 3.5, // Mock value
+                fullMark: 5
+            };
+        });
+        setRadarData(processedRadar);
+        // --- END NEW RADAR LOGIC ---
+
     } else {
         // Demo Gaps
         setGaps([
             { id: 1, name: 'مدى توافق الخطة الاستراتيجية مع رؤية 2040', axis: 'الحوكمة', score: 2 },
             { id: 2, name: 'وضوح وثبات رحلة المستثمر', axis: 'التميز التشغيلي', score: 1 },
         ]);
+        
+        // --- START DEMO RADAR LOGIC ---
+        const demoRadar = AXES.map(axis => {
+            const title = language === 'ar' ? axis.title_ar : axis.title_en;
+            return {
+              subject: title,
+              company: 3.8 + (Math.random() - 0.5),
+              sector: 3.5,
+              fullMark: 5
+            }
+        });
+        setRadarData(demoRadar);
+        // --- END DEMO RADAR LOGIC ---
     }
 
     // 3. Compliance & Risks
@@ -359,13 +401,38 @@ export default function Reports() {
                   </div>
               </section>
           )}
+          
+          {(reportType === 'comprehensive') && (
+            <section className="mb-12 break-inside-avoid">
+                <div className="flex items-center gap-2 mb-6">
+                    <div className="w-1 h-6 bg-gold-500 rounded-full"></div>
+                    <h3 className="text-xl font-bold text-white">2. تحليل نضج الحوكمة (المنطقة مقابل المتوسط)</h3>
+                </div>
+                <div className="bg-slate-900/50 p-6 rounded-lg border border-white/5 h-[350px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
+                            <PolarGrid stroke="rgba(255,255,255,0.2)" />
+                            <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
+                            <PolarRadiusAxis angle={30} domain={[0, 5]} tick={false} axisLine={false} />
+                            <RechartsTooltip 
+                                contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}}
+                                formatter={(value: any, name: any) => [value, name === 'company' ? (language === 'ar' ? 'نتيجة المنطقة' : 'Zone Score') : (language === 'ar' ? 'متوسط القطاع' : 'Sector Avg')]}
+                            />
+                            <Legend wrapperStyle={{ color: '#fff', paddingTop: '20px' }}/>
+                            <Radar name={language === 'ar' ? "نتيجة المنطقة" : "Zone Score"} dataKey="company" stroke="#D4AF37" strokeWidth={3} fill="#D4AF37" fillOpacity={0.4} />
+                            <Radar name={language === 'ar' ? "متوسط القطاع" : "Sector Avg"} dataKey="sector" stroke="#8b5cf6" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
+                        </RadarChart>
+                    </ResponsiveContainer>
+                </div>
+            </section>
+          )}
 
           {/* 3. STRATEGIC GAPS SECTION */}
           {(reportType === 'comprehensive') && (
               <section className="mb-12 break-inside-avoid">
                   <div className="flex items-center gap-2 mb-6">
                       <div className="w-1 h-6 bg-gold-500 rounded-full"></div>
-                      <h3 className="text-xl font-bold text-white">2. مجالات التحسين (الفجوات)</h3>
+                      <h3 className="text-xl font-bold text-white">3. مجالات التحسين (الفجوات)</h3>
                   </div>
                   
                   {gaps.length > 0 ? (
@@ -406,7 +473,7 @@ export default function Reports() {
               <section className="break-inside-avoid">
                   <div className="flex items-center gap-2 mb-6">
                       <div className="w-1 h-6 bg-red-500 rounded-full"></div>
-                      <h3 className="text-xl font-bold text-white">3. سجل المخاطر الحرجة</h3>
+                      <h3 className="text-xl font-bold text-white">4. سجل المخاطر الحرجة</h3>
                   </div>
 
                   {risks.length > 0 ? (

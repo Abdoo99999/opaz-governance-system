@@ -191,8 +191,15 @@ const Dashboard = () => {
     const processedRadar = AXES.map(axis => {
         const axData = radarAcc.find(a => a.id === axis.id);
         const avg = axData && axData.count > 0 ? (axData.score / axData.count) : 0;
-        return { subject: language === 'ar' ? axis.title_ar : axis.title_en, company: parseFloat(avg.toFixed(1)), fullMark: 5 };
-    });
+        // استخدم العناوين من ملف indicators مباشرة لضمان التطابق
+        const title = language === 'ar' ? axis.title_ar : axis.title_en;
+    return {
+        subject: title,
+        company: parseFloat(avg.toFixed(1)),
+        sector: 3.5, // قيمة افتراضية لمتوسط القطاع للمقارنة
+        fullMark: 5
+    };
+    }); 
     setRadarData(processedRadar);
 
     setTopZones(zoneScores.sort((a,b) => b.score - a.score).slice(0, 3));
@@ -267,6 +274,7 @@ const Dashboard = () => {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         
+        const imgData = canvas.toDataURL('image/png');
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`OPAZ-Dashboard-${selectedYear}.pdf`);
     } finally {
@@ -427,7 +435,9 @@ const Dashboard = () => {
                         <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                         <PolarRadiusAxis angle={30} domain={[0, 5]} tick={false} axisLine={false} />
                         <Tooltip {...tooltipStyle} />
-                        <Radar name="المنطقة" dataKey="company" stroke="#fbbf24" strokeWidth={3} fill="#fbbf24" fillOpacity={0.4} dot={{ r: 4, fill: '#fbbf24' }} />
+                        <Legend wrapperStyle={{ color: '#fff', paddingTop: '10px' }}/>
+                        <Radar name={language === 'ar' ? "نتيجة المنطقة" : "Zone Score"} dataKey="company" stroke="#D4AF37" strokeWidth={3} fill="#D4AF37" fillOpacity={0.4} />
+                        <Radar name={language === 'ar' ? "متوسط القطاع" : "Sector Avg"} dataKey="sector" stroke="#8b5cf6" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
                       </RadarChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -542,5 +552,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
