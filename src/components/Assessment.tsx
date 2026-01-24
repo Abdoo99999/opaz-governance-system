@@ -95,25 +95,29 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
         if (savedDataStr) {
             const { scores: savedScores, isComplete: savedIsComplete } = JSON.parse(savedDataStr);
             
-            // --- DATA VALIDATION LOGIC ---
+             // --- DATA VALIDATION LOGIC ---
             const savedIndicatorCount = Object.keys(savedScores || {}).length;
-            if (savedIndicatorCount > initialIndicators.length) {
+            if (savedIndicatorCount > initialIndicators.length && savedIndicatorCount > 0) {
                 localStorage.removeItem(newKey);
                 if (localStorage.getItem(oldKey)) {
                     localStorage.removeItem(oldKey);
                 }
-                setScores({});
-                setFiles({});
-                setIsAssessmentComplete(false);
+                // Also clear the indicators from local storage to force re-read from file
+                localStorage.removeItem('oia_indicators_data');
+    
                 toast({
                     title: "تم تحديث المؤشرات",
-                    description: "تم اكتشاف بيانات قديمة وتمت إعادة التعيين لاستخدام المؤشرات الجديدة.",
+                    description: "تم اكتشاف بيانات تقييم قديمة وغير متوافقة. سيتم إعادة تعيين التقييم.",
                     variant: "default",
                 });
-            } else {
-                setScores(savedScores || {});
-                setIsAssessmentComplete(savedIsComplete || false);
+                
+                // Force reload to clear state and use new indicators
+                setTimeout(() => window.location.reload(), 1500);
+                return; // Stop processing this render
             }
+
+            setScores(savedScores || {});
+            setIsAssessmentComplete(savedIsComplete || false);
         } else {
             setScores({});
             setIsAssessmentComplete(false);
@@ -157,15 +161,20 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
     const handleResetData = () => {
         if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
         const storageKey = getAssessmentStorageKey(selectedCompanyId, selectedYear);
+        const oldKey = `oia_assessment_${selectedCompanyId}`;
+
+        // مسح البيانات الخاصة بالمنطقة الحالية
         localStorage.removeItem(storageKey);
-        // Also remove old key just in case
-        localStorage.removeItem(`oia_assessment_${selectedCompanyId}`);
-        
+        // مسح أي مفاتيح قديمة قد تكون عالقة
+        localStorage.removeItem(oldKey);
+
         toast({
             title: "تم إعادة التعيين",
             description: "تم مسح بيانات التقييم لهذه المنطقة. سيتم إعادة تحميل الصفحة.",
         });
-        setTimeout(() => window.location.reload(), 1500);
+
+        // إعادة تحميل قوية للصفحة
+        window.location.reload();
     };
     
     const handleSubmit = () => {
