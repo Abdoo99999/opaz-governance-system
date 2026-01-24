@@ -47,7 +47,7 @@ const TopPerformers: React.FC<TopPerformersProps> = ({ data }) => {
     const { t, language } = useLanguage();
 
     return (
-        <Card className="glass h-full">
+        <Card className="glass h-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl border border-purple-500/30 hover:border-purple-500/70 print:shadow-none print:border-gray-200 print:bg-white">
             <CardHeader>
                 <CardTitle className="text-gold-400">{t('dashboard.top5.title')}</CardTitle>
             </CardHeader>

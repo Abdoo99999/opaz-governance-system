@@ -408,7 +408,7 @@ const Dashboard = () => {
 
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8} className="lg:col-span-2">
-            <Card className={"glass h-full"}>
+            <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
                 <CardHeader><CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle></CardHeader>
                 <CardContent className="h-[350px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -430,7 +430,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
-               <Card className={"glass h-full"}>
+               <Card className={cn(cardBaseClasses, "border-emerald-500/30 hover:border-emerald-500/70")}>
                    <CardHeader><CardTitle className="flex items-center gap-2 text-emerald-400"><CheckCircle size={18}/> {t('dashboard.complianceAndImprovement')}</CardTitle></CardHeader>
                    <CardContent className="grid grid-cols-2 gap-4">
                         <div className="h-[200px] flex flex-col items-center">
@@ -455,7 +455,7 @@ const Dashboard = () => {
                </Card>
            </motion.div>
            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11}>
-             <Card className="glass h-full">
+             <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
                 <CardHeader><CardTitle className="text-sm text-blue-200">{t('dashboard.executiveOmanization')}</CardTitle></CardHeader>
                 <CardContent className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -473,7 +473,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={12}>
-             <Card className="glass h-full">
+             <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
                  <CardHeader><CardTitle className="text-red-400 text-sm">{t('dashboard.riskDistributionMap')}</CardTitle></CardHeader>
                  <CardContent>
                      <RiskLandscape data={risksList} />
@@ -482,7 +482,7 @@ const Dashboard = () => {
           </motion.div>
           
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={13}>
-              <Card className="glass h-full">
+              <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
                   <CardHeader><CardTitle className="text-blue-400 text-sm">{t('dashboard.icvTitle')}</CardTitle></CardHeader>
                   <CardContent className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -506,7 +506,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 gap-8">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={14}>
-              <Card className="glass h-full">
+              <Card className={cn(cardBaseClasses, "border-amber-500/30 hover:border-amber-500/70")}>
                   <CardHeader><CardTitle className="text-gold-400 text-sm">{t('dashboard.maturityPath')}</CardTitle></CardHeader>
                   <CardContent className="h-[250px]">
                       <ResponsiveContainer width="100%" height="100%">
