@@ -213,7 +213,7 @@ const Dashboard = () => {
     const currentMaturity = countMaturity > 0 ? accMaturity / countMaturity : 3.0;
     setMaturityPathData(Array.from({ length: 6 }, (_, i) => ({ year: (2021 + i).toString(), companyScore: i === 5 ? currentMaturity : Math.min(5, 2.5 + i * 0.3), target: Math.min(5, 3.0 + i * 0.4) })) as any);
     
-    const currentZoneData = allZonesData.find(z => z.id === selectedCompanyId);
+    const currentZoneData = allZonesData.find(z => z.id === selectedZoneId);
     if (currentZoneData) {
         const totalSpending = currentZoneData.totalSpending || 0;
         const localSpending = currentZoneData.localSpending || 0;
