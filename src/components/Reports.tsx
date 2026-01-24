@@ -6,7 +6,7 @@ import {
   FileText, Download, Printer, Filter, 
   TrendingUp, AlertTriangle, CheckCircle, 
   Building2, PieChart as PieChartIcon, Calendar,
-  ArrowDownRight, ArrowUpRight, Coins
+  ArrowDownRight, ArrowUpRight, Coins, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
