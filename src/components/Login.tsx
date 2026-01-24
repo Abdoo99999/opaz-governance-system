@@ -10,15 +10,19 @@ import { useLanguage } from '@/context/LanguageContext';
 import { UserRole } from '@/app/page';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ZONES } from '@/data/companies';
-import { Send } from 'lucide-react';
+import { Send, Globe } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (role: UserRole, zoneId?: string) => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
-  const { t, dir, language } = useLanguage();
+  const { t, dir, language, setLanguage } = useLanguage();
   const [selectedZone, setSelectedZone] = useState<string | undefined>(undefined);
+
+  const handleLanguageChange = () => {
+    setLanguage(language === 'ar' ? 'en' : 'ar');
+  };
 
   function renderLoginForm(role: UserRole) {
     const handleZoneLogin = (e: React.FormEvent) => {
@@ -85,6 +89,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             boxShadow: '0 0 20px rgba(197, 160, 101, 0.4)'
         }}></div>
 
+        <Button variant="ghost" onClick={handleLanguageChange} className="absolute top-8 left-8 z-50 text-foreground hover:text-gold-400 bg-slate-900/50 hover:bg-slate-800/70">
+            <Globe className="h-5 w-5 ml-2" />
+            <span className="text-sm font-medium">{t('common.switchLang')}</span>
+        </Button>
+
         {/* The Login Form Container - SCALED UP */}
         <div className="relative z-10 w-full max-w-lg transform scale-105"> 
            <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700 p-10 rounded-2xl shadow-2xl">
@@ -118,5 +127,3 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 };
 
 export default Login;
-
-    

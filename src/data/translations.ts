@@ -2,7 +2,7 @@
 export const translations = {
   ar: {
     appTitle: "منظومة إتقان",
-    appSubtitle: "لإدارة المناطق الاقتصادية الخاصة والمناطق الحرة",
+    appSubtitle: "لحوكمة المناطق الاقتصادية الخاصة والمناطق الحرة",
     menu: {
       dashboard: "لوحة القيادة",
       registry: "سجل المناطق والمدن",
