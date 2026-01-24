@@ -1,4 +1,3 @@
-
 export const translations = {
   ar: {
     appTitle: "منظومة إتقان",
@@ -413,7 +412,7 @@ export const translations = {
     common: {
       admin: "System Admin",
       company: "Zone Portal",
-      switchLang: "English",
+      switchLang: "عربي",
       username: "Username",
       password: "Password",
       login: "Login",

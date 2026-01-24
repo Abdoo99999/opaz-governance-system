@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -103,6 +102,17 @@ const BoardDirectory: React.FC = () => {
     const [minutes, setMinutes] = useState<MeetingMinute[]>([]);
     const [isMinuteModalOpen, setIsMinuteModalOpen] = useState(false);
     
+    const handleSaveData = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('oia_board_members', JSON.stringify(boardMembers));
+            toast({
+                title: t('common.saveSuccessTitle'),
+                description: t('board_directory.saveSuccessDesc'),
+            });
+            refreshData();
+        }
+    };
+
     useEffect(() => {
         if (selectedZoneId && selectedZoneId !== 'all' && typeof window !== 'undefined') {
             const savedMinutes = localStorage.getItem(`board_minutes_${selectedZoneId}`);
@@ -274,6 +284,7 @@ const BoardDirectory: React.FC = () => {
                         boardTenure={boardTenure}
                         filteredMembers={filteredMembers}
                         handleOpenForm={handleOpenForm}
+                        handleSaveData={handleSaveData}
                         setIsCycleSettingsOpen={setIsCycleSettingsOpen}
                         t={t}
                         language={language}
@@ -321,18 +332,22 @@ const BoardDirectory: React.FC = () => {
 
 
 // Members Tab Content Component
-const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMembers, handleOpenForm, setIsCycleSettingsOpen, t, language }: any) => {
+const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMembers, handleOpenForm, setIsCycleSettingsOpen, handleSaveData, t, language }: any) => {
 
     return (
         <>
             <div className="flex items-center justify-end gap-4 mb-8">
+                <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
+                    <Plus className="ml-2 h-5 w-5" />
+                    {t('board_directory.addMember')}
+                </Button>
                 <Button onClick={() => setIsCycleSettingsOpen(true)} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">
                     <Calendar className="ml-2 h-5 w-5" />
                     {t('board_directory.form.cycleSettings')}
                 </Button>
-                <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Plus className="ml-2 h-5 w-5" />
-                    {t('board_directory.addMember')}
+                <Button onClick={handleSaveData} variant="outline" className="text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-300">
+                    <Save className="ml-2 h-5 w-5" />
+                    {t('common.save')}
                 </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
