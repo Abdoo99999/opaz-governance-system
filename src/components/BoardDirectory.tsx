@@ -345,7 +345,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                     <Calendar className="ml-2 h-5 w-5" />
                     {t('board_directory.form.cycleSettings')}
                 </Button>
-                <Button onClick={handleSaveData} variant="outline" className="text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-300">
+                <Button onClick={handleSaveData} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10 hover:text-gold-300">
                     <Save className="ml-2 h-5 w-5" />
                     {t('common.save')}
                 </Button>
