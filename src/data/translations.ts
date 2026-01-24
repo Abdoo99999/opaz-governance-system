@@ -103,9 +103,9 @@ export const translations = {
         ceo: "الرئيس التنفيذي",
         coo: "الرئيس التنفيذي للعمليات",
         cfo: "المدير المالي",
-        vp_of_operations: "نائب الرئيس للعمليات",
-        vp_of_business_development: "نائب الرئيس لتطوير الأعمال",
-        investment_director: "مدير الاستثمار"
+        'vp_of_operations': "نائب الرئيس للعمليات",
+        'vp_of_business_development': "نائب الرئيس لتطوير الأعمال",
+        'investment_director': "مدير الاستثمار"
       },
       expertise: {
         'smart_city_development': "تطوير المدن الذكية",
@@ -410,8 +410,8 @@ export const translations = {
       viewNotes: "عرض الملاحظات"
     },
     common: {
-      admin: "System Admin",
-      company: "Zone Portal",
+      admin: "مدير النظام",
+      company: "بوابة المنطقة",
       switchLang: "English",
       username: "اسم المستخدم",
       password: "كلمة المرور",
@@ -420,7 +420,7 @@ export const translations = {
       passwordPlaceholder: "ادخل كلمة المرور",
       back: "العودة للسجل",
       edit: "تعديل",
-      save: "حفظ التغييرات",
+      save: "حفظ",
       selectPlaceholder: "اختر...",
       cancel: "إلغاء",
       delete: "حذف",
@@ -867,7 +867,7 @@ export const translations = {
       passwordPlaceholder: "Enter your password",
       back: "Back to Registry",
       edit: "Edit",
-      save: "Save Changes",
+      save: "Save",
       selectPlaceholder: "Select...",
       cancel: "Cancel",
       delete: "Delete",
