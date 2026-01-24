@@ -104,9 +104,9 @@ export const translations = {
         ceo: "الرئيس التنفيذي",
         coo: "الرئيس التنفيذي للعمليات",
         cfo: "المدير المالي",
-        'vp_operations': "نائب الرئيس للعمليات",
-        'vp_of_business_development': "نائب الرئيس لتطوير الأعمال",
-        'investment_director': "مدير الاستثمار"
+        vp_of_operations: "نائب الرئيس للعمليات",
+        vp_of_business_development: "نائب الرئيس لتطوير الأعمال",
+        investment_director: "مدير الاستثمار"
       },
       expertise: {
         'smart_city_development': "تطوير المدن الذكية",
@@ -413,7 +413,7 @@ export const translations = {
     common: {
       admin: "System Admin",
       company: "Zone Portal",
-      switchLang: "عربي",
+      switchLang: "English",
       username: "Username",
       password: "Password",
       login: "Login",
@@ -551,9 +551,9 @@ export const translations = {
         ceo: "CEO",
         coo: "COO",
         cfo: "CFO",
-        'vp_operations': "VP of Operations",
-        'vp_of_business_development': "VP of Business Development",
-        'investment_director': "Investment Director"
+        vp_of_operations: "VP of Operations",
+        vp_of_business_development: "VP of Business Development",
+        investment_director: "Investment Director"
       },
       expertise: {
         'smart_city_development': "Smart City Development",
@@ -706,6 +706,7 @@ export const translations = {
         subtitle: "Generate official documents and financial analysis",
         selectCompanyToView: "Please select a zone to view its detailed report.",
         year: "Year",
+        export: "Export PDF",
         boardAndIcvAnalysis: "Leadership & ICV Analysis",
         comprehensive: "Comprehensive Strategic Report",
         financial: "Financial & Operational Performance Report",

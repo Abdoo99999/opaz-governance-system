@@ -29,7 +29,7 @@ type Evaluation = {
 };
 
 const BoardEvaluation: React.FC = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { selectedZoneId, refreshData } = useCompany();
     const { selectedYear } = useYear();
     const { toast } = useToast();
@@ -193,7 +193,9 @@ const BoardEvaluation: React.FC = () => {
                                     <AvatarImage src={summaryData.topPerformer.avatar} />
                                     <AvatarFallback>{summaryData.topPerformer.name_en.charAt(0)}</AvatarFallback>
                                 </Avatar>
-                                <span className="font-bold print:text-black">{summaryData.topPerformer.name_en}</span>
+                                <span className="font-bold print:text-black">
+                                    {language === 'ar' ? summaryData.topPerformer.name_ar : summaryData.topPerformer.name_en}
+                                </span>
                             </div>
                         ) : (
                             <div className="text-lg font-bold text-gold-400 print:text-black">-</div>
@@ -240,7 +242,7 @@ const BoardEvaluation: React.FC = () => {
                                                         <AvatarFallback>{member.name_en.charAt(0)}</AvatarFallback>
                                                     </Avatar>
                                                     <div>
-                                                        <p className="font-bold print:text-black">{t(member.name_ar, member.name_en)}</p>
+                                                        <p className="font-bold print:text-black">{language === 'ar' ? member.name_ar : member.name_en}</p>
                                                         <p className="text-sm text-gray-400 print:text-gray-600">{t(`board_directory.roles.${member.role.toLowerCase().replace(/ /g, '_')}`)}</p>
                                                     </div>
                                                 </div>
