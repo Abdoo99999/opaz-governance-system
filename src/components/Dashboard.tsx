@@ -51,7 +51,7 @@ const cardVariants = {
   }),
 };
 
-const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-2xl print:shadow-none print:border-gray-200 print:bg-white";
+const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-xl print:shadow-none print:border-gray-200 print:bg-white border border-transparent hover:border-gold-500";
 
 const Dashboard = () => {
   const { t, language, dir } = useLanguage();
@@ -298,7 +298,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0}>
-              <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
+              <Card className={cardBaseClasses}>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium text-gold-200/80">{t('dashboard.maturityGauge')}</CardTitle>
                       <TrendingUp className="h-4 w-4 text-gold-300/70" />
@@ -311,7 +311,7 @@ const Dashboard = () => {
           </motion.div>
 
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
-              <Card className={cn(cardBaseClasses, "border-green-500/30 hover:border-green-500/70 relative overflow-hidden")}>
+              <Card className={cn(cardBaseClasses, "relative overflow-hidden")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10">
                       <CardTitle className="text-sm font-medium text-green-200/80">{t('dashboard.totalInvestment')}</CardTitle>
                       <Wallet className="h-4 w-4 text-green-300/70" />
@@ -325,7 +325,7 @@ const Dashboard = () => {
           </motion.div>
 
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-             <Card className={cn(cardBaseClasses, "border-blue-900/50 hover:border-blue-700/70 bg-gradient-to-br from-blue-950/50 to-slate-900/50")}>
+             <Card className={cn(cardBaseClasses, "bg-gradient-to-br from-blue-950/50 to-slate-900/50")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium text-blue-200/80">{t('dashboard.annualExports')}</CardTitle>
                        <Anchor className="h-4 w-4 text-blue-300/70" />
@@ -338,7 +338,7 @@ const Dashboard = () => {
           </motion.div>
 
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
-              <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
+              <Card className={cardBaseClasses}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium text-red-200/80">{t('dashboard.criticalRisks')}</CardTitle>
                       <AlertTriangle className="h-4 w-4 text-red-300/70" />
@@ -356,7 +356,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-             <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
+             <Card className={cardBaseClasses}>
                    <CardHeader><CardTitle className="text-sm font-medium text-blue-200/80">{t('dashboard.omanizationRate')}</CardTitle></CardHeader>
                    <CardContent className="flex flex-col items-center justify-center h-[120px]">
                        <div className="w-full h-full relative flex items-end justify-center pb-2">
@@ -375,7 +375,7 @@ const Dashboard = () => {
               </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={5}>
-            <Card className={cn(cardBaseClasses, "border-teal-500/30 hover:border-teal-500/70")}>
+            <Card className={cardBaseClasses}>
                 <CardContent className="flex flex-col justify-between h-full p-4">
                     <div className="flex items-center justify-between"><p className="text-sm font-medium text-teal-200/80">{t('dashboard.directJobs')}</p><Users className="h-4 w-4 text-teal-400" /></div>
                     <div className="text-center my-2"><p className="text-3xl font-bold text-teal-400">{directJobs.toLocaleString()}</p><p className="text-[10px] text-teal-200/50">{t('dashboard.jobsSubtitle')}</p></div>
@@ -384,7 +384,7 @@ const Dashboard = () => {
             </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={6}>
-            <Card className={cn(cardBaseClasses, "border-purple-500/30 hover:border-purple-500/70")}>
+            <Card className={cardBaseClasses}>
                 <CardContent className="flex flex-col justify-between h-full p-4 text-center">
                     <p className="text-sm font-medium text-purple-200/80 self-start">{t('dashboard.landUtilization')}</p>
                     <div className="flex-grow h-20 relative">
@@ -396,7 +396,7 @@ const Dashboard = () => {
             </Card>
           </motion.div>
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={7}>
-            <Card className={cn(cardBaseClasses, "border-amber-500/30 hover:border-amber-500/70")}>
+            <Card className={cardBaseClasses}>
                 <CardContent className="flex flex-col justify-center h-full p-4 text-center space-y-2">
                      <div className="flex justify-between items-center"><p className="text-sm font-medium text-amber-200/80">{t('dashboard.economicReturn')}</p><Building2 className="h-4 w-4 text-amber-400"/></div>
                      <div className="py-2"><p className="text-3xl font-bold text-amber-400">{economicReturn}</p><p className="text-xs text-amber-200/60">{t('dashboard.returnUnit')}</p></div>
@@ -408,7 +408,7 @@ const Dashboard = () => {
 
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8} className="lg:col-span-2">
-            <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
+            <Card className={cardBaseClasses}>
                 <CardHeader><CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle></CardHeader>
                 <CardContent className="h-[350px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -430,7 +430,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
-               <Card className={cn(cardBaseClasses, "border-emerald-500/30 hover:border-emerald-500/70")}>
+               <Card className={cardBaseClasses}>
                    <CardHeader><CardTitle className="flex items-center gap-2 text-emerald-400"><CheckCircle size={18}/> {t('dashboard.complianceAndImprovement')}</CardTitle></CardHeader>
                    <CardContent className="grid grid-cols-2 gap-4">
                         <div className="h-[200px] flex flex-col items-center">
@@ -455,7 +455,7 @@ const Dashboard = () => {
                </Card>
            </motion.div>
            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={11}>
-             <Card className={cn(cardBaseClasses, "border-gold-500/30 hover:border-gold-500/70")}>
+             <Card className={cardBaseClasses}>
                 <CardHeader><CardTitle className="text-sm text-blue-200">{t('dashboard.executiveOmanization')}</CardTitle></CardHeader>
                 <CardContent className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -473,7 +473,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={12}>
-             <Card className={cn(cardBaseClasses, "border-red-500/30 hover:border-red-500/70")}>
+             <Card className={cardBaseClasses}>
                  <CardHeader><CardTitle className="text-red-400 text-sm">{t('dashboard.riskDistributionMap')}</CardTitle></CardHeader>
                  <CardContent>
                      <RiskLandscape data={risksList} />
@@ -482,7 +482,7 @@ const Dashboard = () => {
           </motion.div>
           
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={13}>
-              <Card className={cn(cardBaseClasses, "border-blue-500/30 hover:border-blue-500/70")}>
+              <Card className={cardBaseClasses}>
                   <CardHeader><CardTitle className="text-blue-400 text-sm">{t('dashboard.icvTitle')}</CardTitle></CardHeader>
                   <CardContent className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -506,7 +506,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 gap-8">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={14}>
-              <Card className={cn(cardBaseClasses, "border-amber-500/30 hover:border-amber-500/70")}>
+              <Card className={cardBaseClasses}>
                   <CardHeader><CardTitle className="text-gold-400 text-sm">{t('dashboard.maturityPath')}</CardTitle></CardHeader>
                   <CardContent className="h-[250px]">
                       <ResponsiveContainer width="100%" height="100%">

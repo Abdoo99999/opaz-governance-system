@@ -63,9 +63,9 @@
     }
     .glass {
         backdrop-filter: blur(12px);
-        background-color: rgba(28, 41, 60, 0.4) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 1rem !important;
+        background-color: rgba(28, 41, 60, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
     }
     .custom-scrollbar::-webkit-scrollbar {
         width: 4px;
@@ -84,8 +84,8 @@
     @media print {
       .glass {
         backdrop-filter: none;
-        background-color: #f9fafb !important;
-        border: 1px solid #e5e7eb !important;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
         color: #000;
         box-shadow: none;
       }
