@@ -234,6 +234,18 @@ const Dashboard = () => {
             { name: t('dashboard.icv.localSpending'), value: localSpending },
             { name: t('dashboard.icv.smeSpending'), value: smeSpending },
         ] as any);
+    } else { // Aggregate for 'all'
+        let totalSpend = 0, localSpend = 0, smeSpend = 0;
+        allZonesData.forEach(zone => {
+            totalSpend += zone.totalSpending || (zone.cumulativeInvestment || 0) * 0.1; // fallback logic
+            localSpend += zone.localSpending || totalSpend * 0.4;
+            smeSpend += zone.smeSpending || totalSpend * 0.1;
+        });
+        setIcvBarData([
+            { name: t('dashboard.icv.totalTenders'), value: totalSpend },
+            { name: t('dashboard.icv.localSpending'), value: localSpend },
+            { name: t('dashboard.icv.smeSpending'), value: smeSpend },
+        ] as any);
     }
 
   }, [selectedZoneId, selectedYear, language, dataVersion, t, availableYears]);
@@ -250,8 +262,6 @@ const Dashboard = () => {
             backgroundColor: '#001220',
             useCORS: true 
         });
-        
-        const imgData = canvas.toDataURL('image/png');
         
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -270,7 +280,7 @@ const Dashboard = () => {
       labelStyle: { color: '#D4AF37' }
   };
 
-  if (!selectedZoneId || selectedZoneId === 'all') {
+  if (!selectedZoneId) {
     return (
        <div className="flex items-center justify-center h-full p-8 text-white">
            <div className="text-center p-8 glass">
@@ -532,3 +542,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    
