@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -7,7 +6,7 @@ import { AXES, INDICATORS as initialIndicators, Indicator } from '@/data/indicat
 import IndicatorCard from './IndicatorCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle, ArrowRight, Save, Plus, Pencil, Trash2, Send } from 'lucide-react';
+import { CheckCircle, AlertTriangle, ArrowRight, Save, Plus, Pencil, Trash2, Send, RefreshCw } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,15 +94,33 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
 
         if (savedDataStr) {
             const { scores: savedScores, isComplete: savedIsComplete } = JSON.parse(savedDataStr);
-            setScores(savedScores || {});
-            setIsAssessmentComplete(savedIsComplete || false);
+            
+            // --- DATA VALIDATION LOGIC ---
+            const savedIndicatorCount = Object.keys(savedScores || {}).length;
+            if (savedIndicatorCount > initialIndicators.length) {
+                localStorage.removeItem(newKey);
+                if (localStorage.getItem(oldKey)) {
+                    localStorage.removeItem(oldKey);
+                }
+                setScores({});
+                setFiles({});
+                setIsAssessmentComplete(false);
+                toast({
+                    title: "تم تحديث المؤشرات",
+                    description: "تم اكتشاف بيانات قديمة وتمت إعادة التعيين لاستخدام المؤشرات الجديدة.",
+                    variant: "default",
+                });
+            } else {
+                setScores(savedScores || {});
+                setIsAssessmentComplete(savedIsComplete || false);
+            }
         } else {
             setScores({});
             setIsAssessmentComplete(false);
         }
         setFiles({}); // Files are not persisted in localStorage
 
-    }, [selectedCompanyId, selectedYear]);
+    }, [selectedCompanyId, selectedYear, toast]);
     
     // Save indicators whenever they change
     useEffect(() => {
@@ -135,6 +152,20 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
             description: `${t('assessment.saveSuccessDesc')} ${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en): ''}`,
         });
         refreshData();
+    };
+
+    const handleResetData = () => {
+        if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
+        const storageKey = getAssessmentStorageKey(selectedCompanyId, selectedYear);
+        localStorage.removeItem(storageKey);
+        // Also remove old key just in case
+        localStorage.removeItem(`oia_assessment_${selectedCompanyId}`);
+        
+        toast({
+            title: "تم إعادة التعيين",
+            description: "تم مسح بيانات التقييم لهذه المنطقة. سيتم إعادة تحميل الصفحة.",
+        });
+        setTimeout(() => window.location.reload(), 1500);
     };
     
     const handleSubmit = () => {
@@ -291,6 +322,29 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                             </div>
                         </div>
                         <div className="flex gap-2">
+                             <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                     <Button variant="destructive" size="sm" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
+                                        <RefreshCw className="ml-2 h-4 w-4"/>
+                                        إعادة تعيين
+                                     </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="glass text-white">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>إعادة تعيين بيانات التقييم؟</AlertDialogTitle>
+                                        <AlertDialogDescription className="text-gray-300 pt-2">
+                                           سيتم حذف جميع درجات هذا التقييم للمنطقة الحالية والعام المحدد فقط. هل أنت متأكد؟
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel className="text-white border-white/20">{t('common.cancel')}</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleResetData} className="bg-destructive hover:bg-destructive/90">
+                                            نعم، قم بإعادة التعيين
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
                              <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
                                  <Save className="ml-2 h-4 w-4"/>
                                  {t('assessment.saveDraft')}
@@ -467,5 +521,3 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
-
-    
