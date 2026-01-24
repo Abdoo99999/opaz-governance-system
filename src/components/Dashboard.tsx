@@ -231,17 +231,26 @@ const Dashboard = () => {
   const exportsTrend = useMemo(() => Array.from({ length: 5 }, (_,i) => ({ name: `Y${i}`, v: totalExports * (0.8 + i*0.05) })), [totalExports]);
 
   const handleExport = async () => {
-      if (!dashboardRef.current) return;
-      setIsExporting(true);
-      try {
-          const canvas = await html2canvas(dashboardRef.current, { scale: 2, useCORS: true, backgroundColor: '#001220' });
-          const imgData = canvas.toDataURL('image/png');
-          const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm' });
-          const pdfWidth = pdf.internal.pageSize.getWidth();
-          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-          pdf.save(`OPAZ-Dashboard-${selectedYear}.pdf`);
-      } finally { setIsExporting(false); }
+    if (!dashboardRef.current) return;
+    setIsExporting(true);
+    try {
+        const canvas = await html2canvas(dashboardRef.current, { 
+            scale: 2, 
+            backgroundColor: '#001220',
+            useCORS: true 
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`OPAZ-Dashboard-${selectedYear}.pdf`);
+    } finally {
+        setIsExporting(false);
+    }
   };
 
   const tooltipStyle = {
@@ -510,5 +519,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
