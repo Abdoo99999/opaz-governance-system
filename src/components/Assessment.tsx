@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -335,20 +336,20 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                                 <AlertDialogTrigger asChild>
                                      <Button variant="destructive" size="sm" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
                                         <RefreshCw className="ml-2 h-4 w-4"/>
-                                        إعادة تعيين
+                                        {t('assessment.resetData')}
                                      </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="glass text-white">
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>إعادة تعيين بيانات التقييم؟</AlertDialogTitle>
+                                        <AlertDialogTitle>{t('assessment.resetConfirmTitle')}</AlertDialogTitle>
                                         <AlertDialogDescription className="text-gray-300 pt-2">
-                                           سيتم حذف جميع درجات هذا التقييم للمنطقة الحالية والعام المحدد فقط. هل أنت متأكد؟
+                                           {t('assessment.resetConfirmDesc')}
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel className="text-white border-white/20">{t('common.cancel')}</AlertDialogCancel>
                                         <AlertDialogAction onClick={handleResetData} className="bg-destructive hover:bg-destructive/90">
-                                            نعم، قم بإعادة التعيين
+                                            {t('assessment.resetConfirmAction')}
                                         </AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -530,3 +531,5 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
+
+    

@@ -244,7 +244,11 @@ export const translations = {
         indicatorUpdated: "تم تحديث المؤشر بنجاح.",
         indicatorDeleted: "تم حذف المؤشر.",
         deleteIndicatorTitle: "هل أنت متأكد؟",
-        deleteIndicatorDesc: "سيتم حذف هذا المؤشر بشكل نهائي. لا يمكن التراجع عن هذا الإجراء."
+        deleteIndicatorDesc: "سيتم حذف هذا المؤشر بشكل نهائي. لا يمكن التراجع عن هذا الإجراء.",
+        resetData: "إعادة تعيين",
+        resetConfirmTitle: "إعادة تعيين بيانات التقييم؟",
+        resetConfirmDesc: "سيتم حذف جميع درجات هذا التقييم للمنطقة الحالية والعام المحدد فقط. هل أنت متأكد؟",
+        resetConfirmAction: "نعم، قم بإعادة التعيين"
     },
     compliance: {
         saveButton: "حفظ سجل الامتثال والمخاطر",
@@ -323,41 +327,16 @@ export const translations = {
         attachedEvidence: "الدليل المرفق"
     },
     financials: {
-      title: "المؤشرات الاقتصادية",
-      auditorPlaceholder: "اسم مكتب التدقيق الخارجي...",
-      saveSuccessDesc: "تم حفظ المؤشرات الاقتصادية لمنطقة",
-      position: {
-        title: "حجم الاستثمار",
-        assets: "إجمالي الأصول والاستثمارات",
-        liabilities: "إجمالي الالتزامات",
-        equity: "صافي قيمة الأصول"
-      },
-      performance: {
-        title: "الأداء التشغيلي",
-        revenue: "الإيرادات التشغيلية",
-        expenses: "المصروفات التشغيلية",
-        netProfit: "صافي الدخل"
-      },
-      cashflow: {
-        title: "السيولة والتدفق النقدي",
-        operating: "النقد التشغيلي",
-        capex: "الإنفاق الرأسمالي (CAPEX)",
-        fcf: "التدفق النقدي الحر (FCF)",
-        fcfPositive: "متاح للتوزيعات/سداد الديون",
-        fcfNegative: "إحتراق نقدي"
-      },
-      kpi: {
-        title: "مؤشرات الأداء",
-        dividends: "توزيعات الأرباح المعلنة",
-        roi: "العائد على الاستثمار (ROI)"
-      },
-      declaration: {
-        title: "المرفقات والإقرار",
-        uploadDesc: "قم بسحب وإفلات تقرير المدقق المالي (PDF) هنا، أو اضغط للاختيار",
-        uploadHint: "حجم الملف الأقصى: 10MB",
-        checkbox: "أقر بصحة البيانات المقدمة",
-        saveButton: "حفظ المؤشرات الاقتصادية"
-      }
+      title: "المؤشرات الاقتصادية والاستثمارية",
+      auditor: "اسم المدقق المالي / الجهة الرقابية",
+      declaration: "أقر بصحة البيانات الاقتصادية والتشغيلية أعلاه",
+      save: "حفظ واعتماد المؤشرات",
+      card1: { title: "الأصول والاستثمار", label1: "قيمة البنية الأساسية (OMR)", label2: "الالتزامات للمطورين (OMR)", result: "إجمالي الاستثمار التراكمي" },
+      card2: { title: "الإيرادات والمصروفات", label1: "إيرادات حق الانتفاع (OMR)", label2: "المصروفات التشغيلية (OMR)", result: "الفائض/العجز التشغيلي" },
+      card3: { title: "الإنفاق الحكومي والتطوير", label1: "الميزانية المعتمدة (OMR)", label2: "الإنفاق على البنية الأساسية (OMR)", result: "قيمة الصادرات (OMR)" },
+      card4: { title: "كفاءة الاستثمار", label1: "المحول للخزينة العامة (OMR)", label2: "العائد الاقتصادي (ريال/م²)", result: "مؤشر العائد الاقتصادي" },
+      upload: "اسحب وأفلت التقرير السنوي المدقق (PDF) هنا",
+      saveSuccessDesc: "تم تحديث المؤشرات الاقتصادية للمنطقة"
     },
     reports: {
         title: "التقرير الاستراتيجي الشامل",
@@ -365,6 +344,53 @@ export const translations = {
         year: "عام",
         export: "تصدير PDF",
         boardAndIcvAnalysis: "تحليل القيادة والقيمة المحلية",
+        comprehensive: "التقرير الاستراتيجي الشامل",
+        financial: "تقرير الأداء المالي والتشغيلي",
+        compliance: "سجل الامتثال والمخاطر",
+        reportType: "نوع التقرير",
+        reportDate: "تاريخ التقرير",
+        generatedBy: "معتمد من النظام",
+        pageOf: "صفحة {currentPage} من {totalPages}",
+        version: "النسخة {version}",
+        footer: "تم إصدار هذا التقرير إلكترونياً عبر منظومة إتقان لحوكمة المناطق الاقتصادية.",
+        financialSection: "1. الأداء المالي (قائمة الدخل المصغرة)",
+        financialChartTitle: "مقارنة الإيرادات والمصروفات (ر.ع)",
+        netSurplus: "صافي الفائض التشغيلي",
+        positivePerformance: "أداء إيجابي",
+        economicReturn: "العائد الاقتصادي",
+        financialTable: {
+            item: "البند المالي",
+            value: "القيمة (ر.ع)",
+            statement: "البيان",
+            revenue: "إيرادات حق الانتفاع",
+            revenueDesc: "الإيرادات التشغيلية المباشرة",
+            expenses: "المصروفات التشغيلية",
+            expensesDesc: "تكاليف التشغيل والصيانة",
+            assets: "الأصول (البنية الأساسية)",
+            assetsDesc: "إجمالي الأصول الثابتة",
+            capex: "الإنفاق الرأسمالي (Capex)",
+            capexDesc: "مشاريع التطوير الجديدة"
+        },
+        maturitySection: "2. تحليل نضج الحوكمة (المنطقة مقابل المتوسط)",
+        improvementSection: "3. مجالات التحسين (الفجوات)",
+        gapsTable: {
+            indicator: "المؤشر / المعيار",
+            axis: "المحور",
+            score: "التقييم الحالي",
+            recommendation: "الإجراء الموصى به",
+            noGaps: "لا توجد فجوات حرجة مسجلة (جميع النتائج أعلى من 3).",
+            action: "مطلوب إعداد خطة تصحيحية عاجلة لرفع الامتثال"
+        },
+        riskSection: "4. سجل المخاطر الحرجة",
+        risksTable: {
+            description: "وصف الخطر",
+            category: "التصنيف",
+            impact: "الأثر",
+            probability: "الاحتمالية",
+            mitigation: "إجراء التخفيف",
+            noRisks: "لا توجد مخاطر نشطة مسجلة في النظام لهذا العام.",
+            review: "قيد المراجعة"
+        },
         summary: {
             maturity: "النضج العام",
             maturitySub: "+0.2 عن العام الماضي",
@@ -401,13 +427,6 @@ export const translations = {
           completed: "تم الإنجاز",
           inProgress: "قيد التنفيذ",
           notStarted: "قيد الانتظار"
-        },
-        financial: {
-            title: "ملخص الأداء الاقتصادي",
-            performance: "الأداء",
-            revenue: "الإيرادات",
-            expenses: "المصروفات",
-            netProfit: "صافي الدخل"
         }
     },
     settings: {
@@ -557,7 +576,7 @@ export const translations = {
   },
   en: {
     appTitle: "ITQAN Platform",
-    appSubtitle: "For OPAZ Governance Management",
+    appSubtitle: "For Governance of Special Economic Zones and Free Zones",
     menu: {
       dashboard: "Dashboard",
       registry: "Zones Registry",
@@ -578,7 +597,7 @@ export const translations = {
       strategicRadar: "Strategic Performance Radar",
       portfolioHealth: "Total Investment Volume",
       maturityGauge: "Overall Maturity Gauge",
-      riskMap: "Risk Map",
+      riskMap: "Risk Heatmap",
       sectorPerf: "Sector Performance",
       omanization: "Omanization Rate",
       compliance: "Compliance Status",
@@ -799,7 +818,11 @@ export const translations = {
         indicatorUpdated: "Indicator updated successfully.",
         indicatorDeleted: "Indicator deleted.",
         deleteIndicatorTitle: "Are you sure?",
-        deleteIndicatorDesc: "This will permanently delete the indicator. This action cannot be undone."
+        deleteIndicatorDesc: "This will permanently delete the indicator. This action cannot be undone.",
+        resetData: "Reset Data",
+        resetConfirmTitle: "Reset Assessment Data?",
+        resetConfirmDesc: "This will delete all assessment scores for the current zone and selected year only. Are you sure?",
+        resetConfirmAction: "Yes, Reset Data"
     },
     compliance: {
         saveButton: "Save Compliance & Risks",
@@ -878,48 +901,70 @@ export const translations = {
         attachedEvidence: "Attached Evidence"
     },
     financials: {
-      title: "Economic Indicators",
-      auditorPlaceholder: "External Auditor's Office Name...",
-      saveSuccessDesc: "Economic indicators have been saved for",
-      position: {
-        title: "Investment Volume",
-        assets: "Total Assets & Investments",
-        liabilities: "Total Liabilities",
-        equity: "Net Asset Value"
-      },
-      performance: {
-        title: "Operational Performance",
-        revenue: "Operating Revenue",
-        expenses: "Operating Expenses",
-        netProfit: "Net Income"
-      },
-      cashflow: {
-        title: "Liquidity & Cash Flow",
-        operating: "Operating Cash",
-        capex: "Capital Expenditure (CAPEX)",
-        fcf: "Free Cash Flow (FCF)",
-        fcfPositive: "Available for distribution/debt repayment",
-        fcfNegative: "Cash Burn"
-      },
-      kpi: {
-        title: "Performance Indicators",
-        dividends: "Declared Dividends",
-        roi: "Return on Investment (ROI)"
-      },
-      declaration: {
-        title: "Attachments & Declaration",
-        uploadDesc: "Drag and drop the financial auditor's report (PDF) here, or click to select",
-        uploadHint: "Maximum file size: 10MB",
-        checkbox: "I hereby declare the provided data is accurate",
-        saveButton: "Save Economic Indicators"
-      }
+      title: "Economic & Investment Indicators",
+      auditor: "Financial Auditor / Regulatory Body Name",
+      declaration: "I declare that the economic and operational data provided above is accurate.",
+      save: "Save and Finalize Indicators",
+      card1: { title: "Assets & Investment", label1: "Infrastructure Value (OMR)", label2: "Liabilities to Developers (OMR)", result: "Total Cumulative Investment" },
+      card2: { title: "Revenue & Expenses", label1: "Usufruct Revenue (OMR)", label2: "Operating Expenses (OMR)", result: "Operating Surplus/Deficit" },
+      card3: { title: "Government & Development Spending", label1: "Approved Budget (OMR)", label2: "Infrastructure Spending (OMR)", result: "Value of Exports (OMR)" },
+      card4: { title: "Investment Efficiency", label1: "Transferred to Treasury (OMR)", label2: "Economic Return (OMR/m²)", result: "Economic Return Index" },
+      upload: "Drag and drop the audited annual report (PDF) here",
+      saveSuccessDesc: "The economic indicators for the zone have been updated"
     },
     reports: {
         title: "Comprehensive Strategic Report",
         selectCompanyToView: "Please select a zone to view its detailed report.",
         year: "Year",
         export: "Export PDF",
-        boardAndIcvAnalysis: "Leadership & National Value Analysis",
+        boardAndIcvAnalysis: "Leadership & ICV Analysis",
+        comprehensive: "Comprehensive Strategic Report",
+        financial: "Financial & Operational Performance Report",
+        compliance: "Compliance & Risk Register",
+        reportType: "Report Type",
+        reportDate: "Report Date",
+        generatedBy: "System Generated",
+        pageOf: "Page {currentPage} of {totalPages}",
+        version: "Version {version}",
+        footer: "This report was generated electronically via the ITQAN platform for governance of economic zones.",
+        financialSection: "1. Financial Performance (Mini Income Statement)",
+        financialChartTitle: "Revenue vs. Expenses Comparison (OMR)",
+        netSurplus: "Net Operating Surplus",
+        positivePerformance: "Positive Performance",
+        economicReturn: "Economic Return",
+        financialTable: {
+            item: "Financial Item",
+            value: "Value (OMR)",
+            statement: "Statement",
+            revenue: "Usufruct Revenue",
+            revenueDesc: "Direct operating revenues",
+            expenses: "Operating Expenses",
+            expensesDesc: "Operating and maintenance costs",
+            assets: "Assets (Infrastructure)",
+            assetsDesc: "Total fixed assets",
+            capex: "Capital Expenditure (Capex)",
+            capexDesc: "New development projects"
+        },
+        maturitySection: "2. Governance Maturity Analysis (Zone vs. Average)",
+        improvementSection: "3. Areas for Improvement (Gaps)",
+        gapsTable: {
+            indicator: "Indicator / Standard",
+            axis: "Axis",
+            score: "Current Score",
+            recommendation: "Recommended Action",
+            noGaps: "No critical gaps recorded (all scores are above 3).",
+            action: "A corrective action plan is required to raise compliance."
+        },
+        riskSection: "4. Critical Risk Register",
+        risksTable: {
+            description: "Risk Description",
+            category: "Category",
+            impact: "Impact",
+            probability: "Probability",
+            mitigation: "Mitigation Action",
+            noRisks: "No active risks are logged in the system for this year.",
+            review: "Under review"
+        },
         summary: {
             maturity: "Overall Maturity",
             maturitySub: "+0.2 from last year",
@@ -956,13 +1001,6 @@ export const translations = {
           completed: "Completed",
           inProgress: "In Progress",
           notStarted: "Not Started"
-        },
-        financial: {
-            title: "Economic Performance Snapshot",
-            performance: "Performance",
-            revenue: "Revenue",
-            expenses: "Expenses",
-            netProfit: "Net Income"
         }
     },
     settings: {
@@ -1002,14 +1040,14 @@ export const translations = {
             title: "Basic Identity",
             companyName: "Zone/City Name",
             code: "Code",
-            sector: "Sector", // Fallback
-            legalForm: "Legal Form", // Fallback, to be replaced
+            sector: "Sector",
+            legalForm: "Legal Form",
             zoneType: "Zone Type"
         },
         financial: {
             title: "Key Indicators",
-            capital: "Authorized Capital (OMR)", // Fallback
-            yearEnd: "Financial Year End", // Fallback
+            capital: "Authorized Capital (OMR)",
+            yearEnd: "Financial Year End",
             roi: "Last ROI (%)",
             uso: "USO Obligations",
             totalArea: "Total Area (km²)",
@@ -1111,3 +1149,5 @@ export const translations = {
     }
   }
 };
+
+    

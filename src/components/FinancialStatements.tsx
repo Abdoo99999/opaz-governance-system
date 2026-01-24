@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -40,7 +41,7 @@ interface FinancialStatementsProps {
 }
 
 const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate }) => {
-  const { language, dir } = useLanguage();
+  const { language, dir, t } = useLanguage();
   const { toast } = useToast();
   const { selectedZoneId: selectedCompanyId, getSelectedZone, refreshData } = useCompany();
   const { selectedYear } = useYear();
@@ -67,7 +68,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
 
   // --- Load Data with DEMO VALUES ---
   useEffect(() => {
-    // هذه الدالة تضع أرقاماً وهمية "للعرض" إذا لم توجد بيانات حقيقية
+    // This function provides mock data if no real data is found.
     const setDemoData = () => {
         setInfraAssets(450000000);   // 450 Million (Assets)
         setDevLiabilities(12500000); // 12.5 Million (Liabilities)
@@ -79,7 +80,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
         setTreasuryTransfer(5000000); // 5 Million (Transfer)
         setEconomicReturn(12.5);      // 12.5 Return
         setIsDeclared(true);
-        setAuditorName('مكتب ديلويت آند توش (Deloitte)');
+        setAuditorName('Deloitte & Touche');
     };
 
     const resetState = () => {
@@ -90,7 +91,6 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
     };
 
     if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
-        // If no company selected, show blank
         resetState();
         return;
     }
@@ -114,7 +114,6 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
             return;
         }
         
-        // If NO saved data exists, load the DEMO data for presentation
         setDemoData();
     };
     
@@ -132,7 +131,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
   
   const handleSave = () => {
     if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') {
-        toast({ title: "خطأ", description: "يرجى اختيار المنطقة أولاً", variant: 'destructive'});
+        toast({ title: t('common.errorTitle'), description: t('common.selectCompanyToStart'), variant: 'destructive'});
         return;
     }
     
@@ -154,8 +153,8 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
     localStorage.setItem(storageKey, JSON.stringify(financialData));
 
     toast({
-      title: "تم الحفظ بنجاح",
-      description: `تم تحديث المؤشرات الاقتصادية للمنطقة`,
+      title: t('financials.saveSuccessDesc'),
+      description: `${t('common.saveSuccessDesc')} ${selectedCompany ? (language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en) : ''}`,
     });
     
     refreshData();
@@ -178,22 +177,12 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
 
   const inputStyles = 'h-14 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white text-lg text-center';
   
-  const labels = {
-    card1: { title: "الأصول والاستثمار", label1: "قيمة البنية الأساسية (OMR)", label2: "الالتزامات للمطورين (OMR)", result: "إجمالي الاستثمار التراكمي" },
-    card2: { title: "الإيرادات والمصروفات", label1: "إيرادات حق الانتفاع (OMR)", label2: "المصروفات التشغيلية (OMR)", result: "الفائض/العجز التشغيلي" },
-    card3: { title: "الإنفاق الحكومي والتطوير", label1: "الميزانية المعتمدة (OMR)", label2: "الإنفاق على البنية الأساسية (OMR)", result: "قيمة الصادرات (OMR)" },
-    card4: { title: "كفاءة الاستثمار", label1: "المحول للخزينة العامة (OMR)", label2: "العائد الاقتصادي (ريال/م²)", result: "مؤشر العائد الاقتصادي" },
-    header: "المؤشرات الاقتصادية والاستثمارية",
-    auditor: "اسم المدقق المالي / الجهة الرقابية",
-    declaration: "أقر بصحة البيانات الاقتصادية والتشغيلية أعلاه"
-  };
-
   if (!selectedCompanyId || selectedCompanyId === 'all') {
     return (
        <div className="flex items-center justify-center h-full p-8 text-white">
            <div className="text-center p-8 glass">
-               <h3 className="text-2xl font-bold text-gold-400">يرجى اختيار المنطقة</h3>
-               <p className="text-gray-400 mt-2">يجب اختيار المنطقة من القائمة العلوية لبدء إدخال البيانات</p>
+               <h3 className="text-2xl font-bold text-gold-400">{t('common.selectCompanyToStart')}</h3>
+               <p className="text-gray-400 mt-2">{t('common.selectCompanyToStartDesc')}</p>
            </div>
        </div>
     );
@@ -205,13 +194,13 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
         <div className="flex justify-center mb-4">
              {selectedCompany && (
                 <Badge className="bg-blue-900/50 border-blue-600 text-blue-300 text-lg">
-                    تعديل بيانات: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
+                    {t('common.editingFor')}: {language === 'ar' ? selectedCompany.name_ar : selectedCompany.name_en}
                 </Badge>
             )}
         </div>
-        <h1 className="text-3xl font-bold text-center mb-4 text-gold-400">{labels.header}</h1>
+        <h1 className="text-3xl font-bold text-center mb-4 text-gold-400">{t('financials.title')}</h1>
         <Input
-          placeholder={labels.auditor}
+          placeholder={t('financials.auditor')}
           value={auditorName}
           onChange={(e) => setAuditorName(e.target.value)}
           className="h-12 bg-royal-900/50 border-white/10 focus:border-gold-500 rounded-lg text-white text-center"
@@ -220,97 +209,93 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
         
-        {/* Card 1 */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={1}>
           <Card className="glass h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <Building2 className="w-7 h-7 text-gold-500" />
-              <CardTitle className="text-2xl">{labels.card1.title}</CardTitle>
+              <CardTitle className="text-2xl">{t('financials.card1.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 pt-4">
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">{labels.card1.label1}</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.card1.label1')}</label>
                 <Input type="text" value={infraAssets === '' ? '' : formatNumber(Number(infraAssets))} onChange={handleNumericInput(setInfraAssets)} className={inputStyles} />
               </div>
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">{labels.card1.label2}</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.card1.label2')}</label>
                 <Input type="text" value={devLiabilities === '' ? '' : formatNumber(Number(devLiabilities))} onChange={handleNumericInput(setDevLiabilities)} className={inputStyles} />
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-gold-500/30 text-center mt-4">
-                <p className="text-gray-400 text-sm">{labels.card1.result}</p>
+                <p className="text-gray-400 text-sm">{t('financials.card1.result')}</p>
                 <p className="text-3xl font-bold text-gold-400 tracking-wider">{formatNumber(cumulativeInvestment)}</p>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Card 2 */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
           <Card className="glass h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <TrendingUp className="w-7 h-7 text-gold-500" />
-              <CardTitle className="text-2xl">{labels.card2.title}</CardTitle>
+              <CardTitle className="text-2xl">{t('financials.card2.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 pt-4">
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">{labels.card2.label1}</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.card2.label1')}</label>
                 <Input type="text" value={usufructRevenue === '' ? '' : formatNumber(Number(usufructRevenue))} onChange={handleNumericInput(setUsufructRevenue)} className={inputStyles} />
               </div>
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">{labels.card2.label2}</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.card2.label2')}</label>
                 <Input type="text" value={operatingExpenses === '' ? '' : formatNumber(Number(operatingExpenses))} onChange={handleNumericInput(setOperatingExpenses)} className={inputStyles} />
               </div>
               <div className={cn('p-4 bg-black/30 rounded-lg border text-center mt-4', operatingSurplus >= 0 ? 'border-emerald-500/30' : 'border-red-500/30')}>
-                <p className="text-gray-400 text-sm">{labels.card2.result}</p>
+                <p className="text-gray-400 text-sm">{t('financials.card2.result')}</p>
                 <p className={cn('text-3xl font-bold tracking-wider', operatingSurplus >= 0 ? 'text-emerald-400' : 'text-red-500')}>{formatNumber(operatingSurplus)}</p>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Card 3 */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={3}>
             <Card className="glass h-full">
                 <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
                     <Coins className="w-7 h-7 text-gold-500" />
-                    <CardTitle className="text-2xl">{labels.card3.title}</CardTitle>
+                    <CardTitle className="text-2xl">{t('financials.card3.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-5 pt-4">
                     <div className="space-y-2">
-                        <label className="text-right block pr-2 text-gray-300">{labels.card3.label1}</label>
+                        <label className="text-right block pr-2 text-gray-300">{t('financials.card3.label1')}</label>
                         <Input type="text" value={govtBudget === '' ? '' : formatNumber(Number(govtBudget))} onChange={handleNumericInput(setGovtBudget)} className={inputStyles} />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-right block pr-2 text-gray-300">{labels.card3.label2}</label>
+                        <label className="text-right block pr-2 text-gray-300">{t('financials.card3.label2')}</label>
                         <Input type="text" value={infraCapex === '' ? '' : formatNumber(Number(infraCapex))} onChange={handleNumericInput(setInfraCapex)} className={inputStyles} />
                     </div>
                     <div className="p-4 bg-black/30 rounded-lg border border-blue-500/30 text-center mt-4">
-                        <p className="text-gray-400 text-sm mb-2">{labels.card3.result}</p>
+                        <p className="text-gray-400 text-sm mb-2">{t('financials.card3.result')}</p>
                          <Input type="text" value={exportsValue === '' ? '' : formatNumber(Number(exportsValue))} onChange={handleNumericInput(setExportsValue)} className="h-10 bg-transparent border-none text-3xl font-bold text-blue-400 text-center focus:ring-0 placeholder:text-blue-900/50" placeholder="0" />
                     </div>
                 </CardContent>
             </Card>
         </motion.div>
 
-        {/* Card 4 */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
           <Card className="glass h-full">
             <CardHeader className="flex flex-row items-center justify-center gap-4 text-center">
               <Target className="w-7 h-7 text-gold-500" />
-              <CardTitle className="text-2xl">{labels.card4.title}</CardTitle>
+              <CardTitle className="text-2xl">{t('financials.card4.title')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-5 pt-4">
               <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">{labels.card4.label1}</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.card4.label1')}</label>
                 <Input type="text" value={treasuryTransfer === '' ? '' : formatNumber(Number(treasuryTransfer))} onChange={handleNumericInput(setTreasuryTransfer)} className={inputStyles} />
               </div>
                <div className="space-y-2">
-                <label className="text-right block pr-2 text-gray-300">{labels.card4.label2}</label>
+                <label className="text-right block pr-2 text-gray-300">{t('financials.card4.label2')}</label>
                 <Input type="text" value={economicReturn === '' ? '' : Number(economicReturn)} onChange={handleNumericInput(setEconomicReturn)} className={inputStyles} placeholder="0.0" />
               </div>
               <div className="p-4 bg-black/30 rounded-lg border border-emerald-500/30 mt-4 space-y-3">
                 <div className="flex justify-between items-center text-lg">
-                    <span className="text-gray-300">{labels.card4.result}</span>
+                    <span className="text-gray-300">{t('financials.card4.result')}</span>
                     <span className="font-bold text-emerald-400">{Number(economicReturn).toFixed(1)}</span>
                 </div>
                 <Progress value={Math.min(Number(economicReturn) * 10, 100)} className="h-3 [&>div]:bg-emerald-500" />
@@ -323,22 +308,22 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
       <motion.div className="max-w-7xl mx-auto mt-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.5 }}>
         <Card className="glass">
           <CardHeader>
-            <CardTitle className="text-center text-xl text-gold-400">{labels.declaration}</CardTitle>
+            <CardTitle className="text-center text-xl text-gold-400">{t('financials.declaration')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="relative border-2 border-dashed border-gray-500 rounded-lg p-8 flex flex-col items-center justify-center text-center">
               <UploadCloud className="w-12 h-12 text-gray-400 mb-4" />
-              <p className="text-gray-300 mb-2">اسحب وأفلت التقرير السنوي المدقق (PDF) هنا</p>
+              <p className="text-gray-300 mb-2">{t('financials.upload')}</p>
               <Input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
             </div>
             <div className="flex items-center space-x-3 space-x-reverse justify-center">
               <Checkbox id="declaration" checked={isDeclared} onCheckedChange={(checked) => setIsDeclared(checked as boolean)} className="data-[state=checked]:bg-gold-500 data-[state=checked]:border-gold-400" />
-              <label htmlFor="declaration" className="text-lg font-medium">أقر بأن جميع البيانات المالية والاقتصادية المدخلة صحيحة ومدققة</label>
+              <label htmlFor="declaration" className="text-lg font-medium">{t('financials.declaration')}</label>
             </div>
             <div className="flex justify-center pt-4">
               <Button size="lg" className="bg-gold-500 text-royal-900 hover:bg-gold-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed w-1/2 h-16 text-xl font-bold" disabled={!isDeclared} onClick={handleSave}>
                 <Save className="ml-2" />
-                حفظ واعتماد المؤشرات
+                {t('financials.save')}
               </Button>
             </div>
           </CardContent>
@@ -349,3 +334,5 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
 };
 
 export default FinancialStatements;
+
+    
