@@ -273,7 +273,7 @@ const Dashboard = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8 text-white space-y-8" ref={dashboardRef}>
        <header className="flex items-center justify-between print:hidden">
-          <h1 className="text-3xl font-bold font-cairo">
+          <h1 className="text-3xl font-bold">
               {selectedZoneId === 'all' ? 'لوحة القيادة المركزية' : `لوحة قيادة: ${language==='ar'?selectedZone?.name_ar:selectedZone?.name_en}`}
           </h1>
            <Button onClick={handleExport} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isExporting}>
@@ -519,3 +519,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    
