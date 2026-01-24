@@ -186,20 +186,20 @@ const CompanyRegistry: React.FC<CompanyRegistryProps> = ({ userRole, onNavigate 
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="text-sm text-gray-400 mb-4">{zone.type}</div>
+                                        <div className="text-sm text-gray-400 mb-4">{zone.type || ''}</div>
                                         
                                         <div className="space-y-3 text-sm">
                                             <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
                                                 <span className="text-gray-400 flex items-center gap-2"><Map size={14}/> {t('companyForm.financial.totalArea')}</span>
-                                                <Badge variant="outline" className="border-purple-400/30 text-purple-300">{zone.totalArea} كم²</Badge>
+                                                <Badge variant="outline" className="border-purple-400/30 text-purple-300">{zone.totalArea ?? '-'} كم²</Badge>
                                             </div>
                                             <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
                                                 <span className="text-gray-400 flex items-center gap-2"><Briefcase size={14}/> {t('companyForm.financial.cumulativeInvestment')}</span>
-                                                <Badge variant="outline" className="border-blue-400/30 text-blue-300">{zone.cumulativeInvestment} مليون</Badge>
+                                                <Badge variant="outline" className="border-blue-400/30 text-blue-300">{zone.cumulativeInvestment ?? '-'} مليون</Badge>
                                             </div>
                                             <div className="flex justify-between items-center bg-black/20 p-2 rounded-md">
                                                 <span className="text-gray-400 flex items-center gap-2"><Users size={14}/> {t('companyForm.financial.directJobs')}</span>
-                                                <Badge variant="outline" className="border-green-400/30 text-green-300">{zone.directJobs}</Badge>
+                                                <Badge variant="outline" className="border-green-400/30 text-green-300">{zone.directJobs ?? '-'}</Badge>
                                             </div>
                                         </div>
                                     </CardContent>

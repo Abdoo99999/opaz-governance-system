@@ -59,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
                   <SelectValue placeholder="Select Zone" />
                 </SelectTrigger>
                 <SelectContent className="bg-royal-900 text-white border-white/20">
-                  <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'All Zones'}</SelectItem>
+                  <SelectItem value="all">{language === 'ar' ? 'عرض الجميع' : 'Show All'}</SelectItem>
                   {ZONES.map((zone) => (
                     <SelectItem key={zone.id} value={zone.id}>
                       {language === 'ar' ? zone.name_ar : zone.name_en}
@@ -125,5 +125,3 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
 };
 
 export default Header;
-
-    
