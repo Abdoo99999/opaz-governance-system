@@ -26,13 +26,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Check, Send, X, Eye, FileText } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
-import type { Company, SubmissionStatus } from '@/data/companies';
+import type { Zone, SubmissionStatus } from '@/data/companies';
 import { format, parseISO } from 'date-fns';
 import { useCompany } from '@/context/CompanyContext';
 
@@ -45,29 +44,17 @@ const ApprovalRequests: React.FC<ApprovalRequestsProps> = ({ onNavigate }) => {
     const { toast } = useToast();
     const { setSelectedCompanyId } = useCompany();
     
-    // MOCK DATA: In a real app, this would come from a global state/API
-    const [companies, setCompanies] = useState<any[]>([]);
-    const [selectedCompany, setSelectedCompany] = useState<any | null>(null);
+    const [companies, setCompanies] = useState<Zone[]>([]);
+    const [selectedCompany, setSelectedCompany] = useState<Zone | null>(null);
     const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
     const [returnNotes, setReturnNotes] = useState('');
 
     useEffect(() => {
          if (typeof window === 'undefined') return;
-         const savedCompanies = localStorage.getItem('oia_companies_registry');
+         const savedCompanies = localStorage.getItem('opaz_zones_registry');
          if(savedCompanies){
              const parsed = JSON.parse(savedCompanies);
-             // Add mock data for submitted companies
-             const updatedCompanies = parsed.map((c: any, index: number) => {
-                if ([1, 2, 4].includes(index)) {
-                    return {
-                        ...c,
-                        submissionStatus: c.submissionStatus === 'draft' ? 'submitted' : c.submissionStatus,
-                        submissionDate: c.submissionDate || new Date().toISOString()
-                    };
-                }
-                return c;
-             });
-             setCompanies(updatedCompanies);
+             setCompanies(parsed);
          }
     }, []);
     
@@ -76,7 +63,7 @@ const ApprovalRequests: React.FC<ApprovalRequestsProps> = ({ onNavigate }) => {
     const updateCompanyStatus = (companyId: string, status: SubmissionStatus, notes?: string) => {
         const updatedCompanies = companies.map(c => c.id === companyId ? { ...c, submissionStatus: status, notes: notes || c.notes } : c);
         setCompanies(updatedCompanies);
-        localStorage.setItem('oia_companies_registry', JSON.stringify(updatedCompanies));
+        localStorage.setItem('opaz_zones_registry', JSON.stringify(updatedCompanies));
     };
     
     const handleReturn = () => {
@@ -144,14 +131,17 @@ const ApprovalRequests: React.FC<ApprovalRequestsProps> = ({ onNavigate }) => {
                                                         <TooltipContent className="glass text-white"><p>{t('reports.title')}</p></TooltipContent>
                                                     </Tooltip>
 
-                                                    <Dialog>
+                                                    <Dialog open={isReturnModalOpen && selectedCompany?.id === company.id} onOpenChange={(isOpen) => {
+                                                        if (!isOpen) {
+                                                            setIsReturnModalOpen(false);
+                                                            setSelectedCompany(null);
+                                                        }
+                                                    }}>
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
-                                                                <DialogTrigger asChild>
-                                                                   <Button variant="outline" size="icon" className="text-yellow-400 border-yellow-400/50 hover:bg-yellow-400/10 hover:text-yellow-300" onClick={() => { setSelectedCompany(company); setIsReturnModalOpen(true); }}>
-                                                                        <Send className="h-5 w-5"/>
-                                                                    </Button>
-                                                                </DialogTrigger>
+                                                               <Button variant="outline" size="icon" className="text-yellow-400 border-yellow-400/50 hover:bg-yellow-400/10 hover:text-yellow-300" onClick={() => { setSelectedCompany(company); setIsReturnModalOpen(true); }}>
+                                                                    <Send className="h-5 w-5"/>
+                                                                </Button>
                                                             </TooltipTrigger>
                                                             <TooltipContent className="glass text-white"><p>{t('approvals.return')}</p></TooltipContent>
                                                         </Tooltip>
@@ -208,12 +198,9 @@ const ApprovalRequests: React.FC<ApprovalRequestsProps> = ({ onNavigate }) => {
                     </Card>
                 </motion.div>
                 
-                {/* Return for Edits Modal - Now part of the Dialog above */}
             </div>
         </TooltipProvider>
     );
 };
 
 export default ApprovalRequests;
-
-    
