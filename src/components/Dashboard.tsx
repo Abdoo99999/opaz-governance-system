@@ -52,7 +52,7 @@ const cardVariants = {
   }),
 };
 
-const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-xl print:shadow-none print:border-gray-200 print:bg-white hover:border-gold-500";
+const cardBaseClasses = "glass h-full transition-all duration-300 ease-in-out transform hover:scale-[1.02] hover:shadow-xl print:shadow-none print:border-gray-200 print:bg-white border border-transparent hover:border-gold-500";
 
 const Dashboard = () => {
   const { t, language, dir } = useLanguage();
@@ -68,7 +68,7 @@ const Dashboard = () => {
   const [omanizationRate, setOmanizationRate] = useState(0);
   const [directJobs, setDirectJobs] = useState(0);
   const [developedArea, setDevelopedArea] = useState(0);
-  const [totalArea, setTotalArea] = useState(2000); 
+  const [totalArea, setTotalArea] = useState(0); 
   const [economicReturn, setEconomicReturn] = useState(0);
   const [radarData, setRadarData] = useState<any[]>([]);
   const [leadershipData, setLeadershipData] = useState<any[]>([]);
@@ -143,15 +143,15 @@ const Dashboard = () => {
         }
 
         const financials = data.financial || zone;
-        accInvestment += Number(financials.cumulativeInvestment) || 450000000;
-        accExports += Number(financials.exportsValue) || 1200000000;
-        accJobs += Number(financials.directJobs) || 8000;
-        accDevArea += Number(financials.developedArea) || 350;
-        accTotalArea += Number(financials.totalArea) || 2000;
-        accEcoReturn += Number(financials.economicReturn) || 12.5;
+        accInvestment += Number(financials.cumulativeInvestment) || 0;
+        accExports += Number(financials.exportsValue) || 0;
+        accJobs += Number(financials.directJobs) || 0;
+        accDevArea += Number(financials.developedArea) || 0;
+        accTotalArea += Number(financials.totalArea) || 0;
+        accEcoReturn += Number(financials.economicReturn) || 0;
         countEcoReturn++;
 
-        const omanRate = (zone.omaniEmployees && zone.totalEmployees) ? (zone.omaniEmployees / zone.totalEmployees) * 100 : 45;
+        const omanRate = (zone.totalEmployees > 0) ? (Number(zone.omaniEmployees || 0) / zone.totalEmployees) * 100 : 0;
         accOmanization += omanRate;
         countOmanization++;
 
@@ -212,10 +212,10 @@ const Dashboard = () => {
     setComplianceRate(avgComp);
     setCompliancePieData([{ name: t('dashboard.compliant'), value: avgComp, color: '#00E096' }, { name: t('dashboard.nonCompliant'), value: 100 - avgComp, color: '#ef4444' }]);
 
-    const execOman = Math.round(accOmanization > 0 ? (accOmanization / countOmanization) + 10 : 60);
+    const execOman = Math.round(countOmanization > 0 ? accOmanization / countOmanization : 0);
     setLeadershipData([{ name: t('dashboard.nationalLeaders'), value: execOman, color: '#D4AF37' }, { name: t('dashboard.expatExpertise'), value: 100 - execOman, color: '#3b82f6' }]);
 
-    const currentMaturity = countMaturity > 0 ? accMaturity / countMaturity : 3.8;
+    const currentMaturity = countMaturity > 0 ? accMaturity / countMaturity : 0;
     const maturityData = availableYears.map(year => {
         const isCurrentYear = year === selectedYear;
         const baseCompanyScore = 3.5 + (year - 2024) * 0.15;
@@ -532,3 +532,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+    
