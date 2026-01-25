@@ -141,19 +141,28 @@ const Dashboard = () => {
                 }
             });
         }
+        
+        // FIX: Combine base zone data with specific financial data to ensure all fields are available.
+        const combinedData = { ...zone, ...(data.financial || {}) };
+        
+        accInvestment += Number(combinedData.cumulativeInvestment) || 0;
+        accExports += Number(combinedData.exportsValue) || 0;
+        accJobs += Number(combinedData.directJobs) || 0;
+        accDevArea += Number(combinedData.developedArea) || 0;
+        accTotalArea += Number(combinedData.totalArea) || 0;
+        
+        // FIX: More robust averaging for economic return.
+        if (combinedData.economicReturn !== undefined && combinedData.economicReturn !== null) {
+            accEcoReturn += Number(combinedData.economicReturn);
+            countEcoReturn++;
+        }
 
-        const financials = data.financial || zone;
-        accInvestment += Number(financials.cumulativeInvestment) || 0;
-        accExports += Number(financials.exportsValue) || 0;
-        accJobs += Number(financials.directJobs) || 0;
-        accDevArea += Number(financials.developedArea) || 0;
-        accTotalArea += Number(financials.totalArea) || 0;
-        accEcoReturn += Number(financials.economicReturn) || 0;
-        countEcoReturn++;
-
-        const omanRate = (zone.totalEmployees > 0) ? (Number(zone.omaniEmployees || 0) / zone.totalEmployees) * 100 : 0;
-        accOmanization += omanRate;
-        countOmanization++;
+        // FIX: More robust averaging for Omanization rate.
+        if (combinedData.totalEmployees !== undefined && combinedData.totalEmployees !== null) {
+            const omanRate = (combinedData.totalEmployees > 0) ? (Number(combinedData.omaniEmployees || 0) / combinedData.totalEmployees) * 100 : 0;
+            accOmanization += omanRate;
+            countOmanization++;
+        }
 
         if (data.compliance) {
             const compList = Object.values(data.compliance.compliance || {});
@@ -231,9 +240,10 @@ const Dashboard = () => {
     
     let totalSpend = 0, localSpend = 0, smeSpend = 0;
     targetZones.forEach(zone => {
-        totalSpend += zone.totalSpending || (zone.cumulativeInvestment || 0) * 0.1;
-        localSpend += zone.localSpending || totalSpend * 0.4;
-        smeSpend += zone.smeSpending || totalSpend * 0.1;
+        const combinedData = { ...zone, ...(getZoneData(zone.id).financial || {}) };
+        totalSpend += Number(combinedData.totalSpending) || (Number(combinedData.cumulativeInvestment) || 0) * 0.1;
+        localSpend += Number(combinedData.localSpending) || totalSpend * 0.4;
+        smeSpend += Number(combinedData.smeSpending) || totalSpend * 0.1;
     });
     setIcvBarData([
         { name: t('dashboard.icvTotalTenders'), value: totalSpend },
@@ -532,5 +542,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    
