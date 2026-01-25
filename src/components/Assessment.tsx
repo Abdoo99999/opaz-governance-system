@@ -332,29 +332,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                     <Button variant="destructive" size="sm" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
-                                        <RefreshCw className="ml-2 h-4 w-4"/>
-                                        {t('assessment.resetData')}
-                                     </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="glass text-white">
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>{t('assessment.resetConfirmTitle')}</AlertDialogTitle>
-                                        <AlertDialogDescription className="text-gray-300 pt-2">
-                                           {t('assessment.resetConfirmDesc')}
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel className="text-white border-white/20">{t('common.cancel')}</AlertDialogCancel>
-                                        <AlertDialogAction onClick={handleResetData} className="bg-destructive hover:bg-destructive/90">
-                                            {t('assessment.resetConfirmAction')}
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-
                              <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
                                  <Save className="ml-2 h-4 w-4"/>
                                  {t('assessment.saveDraft')}
