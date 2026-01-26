@@ -1,6 +1,6 @@
 export const translations = {
   ar: {
-    appTitle: "منظومة إتقان",
+    appTitle: "منظومة مدار",
     appSubtitle: "لحوكمة المناطق الاقتصادية الخاصة والمناطق الحرة",
     menu: {
       dashboard: "لوحة القيادة",
@@ -268,7 +268,7 @@ export const translations = {
         generatedBy: "معتمد من النظام",
         pageOf: "صفحة {currentPage} من {totalPages}",
         version: "النسخة {version}",
-        footer: "تم إصدار هذا التقرير إلكترونياً عبر منظومة إتقان لحوكمة المناطق الاقتصادية.",
+        footer: "تم إصدار هذا التقرير إلكترونياً عبر منظومة مدار لحوكمة المناطق الاقتصادية.",
         financialSection: "1. الأداء المالي (قائمة الدخل المصغرة)",
         financialChartTitle: "مقارنة الإيرادات والمصروفات (ر.ع)",
         netSurplus: "صافي الفائض التشغيلي",
@@ -447,7 +447,7 @@ export const translations = {
     }
   },
   en: {
-    appTitle: "ITQAN Platform",
+    appTitle: "MADAR Platform",
     appSubtitle: "For Governance of Special Economic Zones and Free Zones",
     menu: {
       dashboard: "Dashboard",
@@ -715,7 +715,7 @@ export const translations = {
         generatedBy: "System Generated",
         pageOf: "Page {currentPage} of {totalPages}",
         version: "Version {version}",
-        footer: "This report was generated electronically via the ITQAN platform for governance of economic zones.",
+        footer: "This report was generated electronically via the MADAR platform for governance of economic zones.",
         financialSection: "1. Financial Performance (Mini Income Statement)",
         financialChartTitle: "Revenue vs. Expenses Comparison (OMR)",
         netSurplus: "Net Operating Surplus",

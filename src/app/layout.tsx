@@ -11,8 +11,8 @@ const cairo = Cairo({
 
 
 export const metadata: Metadata = {
-  title: 'منظومة إتقان | المناطق الاقتصادية والحرة',
-  description: 'منظومة إتقان لحوكمة المناطق الاقتصادية الخاصة والمناطق الحرة',
+  title: 'منظومة مدار | المناطق الاقتصادية والحرة',
+  description: 'منظومة مدار لحوكمة المناطق الاقتصادية الخاصة والمناطق الحرة',
 };
 
 export default function RootLayout({
