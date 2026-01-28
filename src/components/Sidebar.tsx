@@ -260,7 +260,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
             </ul>
           </nav>
           <div className="px-4 pb-4">
-              <Separator className="my-4 bg-white/10" />
                <button
                     onClick={onLogout}
                     className="flex items-center w-full py-3 px-4 rounded-md transition-colors duration-200 text-gray-400 hover:text-red-500 hover:bg-red-500/10"
