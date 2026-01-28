@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { useCompany } from '@/context/CompanyContext';
 import type { SubmissionStatus, Zone } from '@/data/companies';
 import { useYear } from '@/context/YearContext';
+import { ASSESSMENT_DATA } from '@/data/assessmentData';
 
 const allMenuItems = [
   { name: 'dashboard', icon: LayoutDashboard, view: 'dashboard', roles: ['admin'], requiredStatus: 'none' },
@@ -44,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
   const { selectedYear } = useYear();
 
   const [completion, setCompletion] = useState({
-      profile: false, board: false, evaluation: false, assessment: false, compliance: false, financials: false
+      profile: false, board: false, evaluation: false, assessment: false, operationalAssessment: false, compliance: false, financials: false
   });
 
   const [pendingApprovals, setPendingApprovals] = useState(0);
@@ -87,6 +88,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
             const assessmentData = assessmentStr ? JSON.parse(assessmentStr) : { isComplete: false };
             const assessmentComplete = assessmentData.isComplete === true;
             
+            const opAssessKey = `opaz_operational_assessment_${selectedZoneId}_${selectedYear}`;
+            const opAssessStr = localStorage.getItem(opAssessKey);
+            const opAssessData = opAssessStr ? JSON.parse(opAssessStr) : { inputs: {} };
+            const totalOpIndicators = ASSESSMENT_DATA.reduce((acc, cat) => acc + cat.indicators.length, 0);
+            const operationalAssessmentComplete = Object.keys(opAssessData.inputs || {}).length >= totalOpIndicators;
+
             let complianceStr = localStorage.getItem(`opaz_compliance_${selectedZoneId}_${selectedYear}`);
              if (!complianceStr) {
                  complianceStr = localStorage.getItem(`oia_compliance_${selectedZoneId}`);
@@ -106,6 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                 board: boardComplete,
                 evaluation: evaluationComplete,
                 assessment: assessmentComplete,
+                operationalAssessment: operationalAssessmentComplete,
                 compliance: complianceComplete,
                 financials: financialsComplete,
             });
@@ -140,10 +148,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
           case 'board-evaluation': return !completion.profile || !completion.board;
           case 'maturity-assessment': return !completion.profile || !completion.board || !completion.evaluation;
           case 'new-assessment': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment;
-          case 'compliance-monitor': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment;
-          case 'financial-statements': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment || !completion.compliance;
+          case 'compliance-monitor': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment || !completion.operationalAssessment;
+          case 'financial-statements': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment || !completion.operationalAssessment || !completion.compliance;
           case 'improvement-plan': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment;
-          case 'review-submit': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment || !completion.compliance || !completion.financials;
+          case 'review-submit': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment || !completion.operationalAssessment || !completion.compliance || !completion.financials;
           default: return false;
       }
   };
@@ -160,7 +168,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                 case 'board-evaluation': requiredStep = t('menu.board_directory'); break;
                 case 'maturity-assessment': requiredStep = t('menu.board_evaluation'); break;
                 case 'new-assessment': requiredStep = t('menu.assessment'); break;
-                case 'compliance-monitor': requiredStep = t('menu.assessment'); break;
+                case 'compliance-monitor': requiredStep = t('menu.zone_assessment'); break;
                 case 'financial-statements': requiredStep = t('menu.compliance'); break;
                 case 'improvement-plan': requiredStep = t('menu.assessment'); break;
                 case 'review-submit': requiredStep = t('menu.financials'); break;

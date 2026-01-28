@@ -194,7 +194,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
           <Card key={category.id} className="glass transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:border-gold-500 overflow-hidden">
             <CardHeader className="bg-black/20 border-b border-white/5 pb-4">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg text-white flex items-center gap-2">
+                <CardTitle className="text-xl font-bold text-gold-400">
                   {category.title}
                 </CardTitle>
                 <div className="flex items-center gap-2">
@@ -289,18 +289,19 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
                             )}
                         </div>
                     </div>
-
-                    <div className="mt-2 pt-3 border-t border-white/5">
-                        <Label className="text-xs text-gray-400 mb-2 flex items-center gap-1">
-                            <FileText className="w-3 h-3" /> ملاحظات المقيم
-                        </Label>
-                        <Textarea 
-                          placeholder="أضف ملاحظات أو مبررات التقييم هنا..." 
-                          className="bg-black/20 border-white/10 text-gray-300 min-h-[60px] focus:border-gold-500/30 resize-none text-sm"
-                          value={notes[indicator.id] || ''}
-                          onChange={(e) => handleNoteChange(indicator.id, e.target.value)}
-                        />
-                    </div>
+                    {userRole === 'admin' && (
+                      <div className="mt-2 pt-3 border-t border-white/5">
+                          <Label className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                              <FileText className="w-3 h-3" /> ملاحظات المقيم
+                          </Label>
+                          <Textarea 
+                            placeholder="أضف ملاحظات أو مبررات التقييم هنا..." 
+                            className="bg-black/20 border-white/10 text-gray-300 min-h-[60px] focus:border-gold-500/30 resize-none text-sm"
+                            value={notes[indicator.id] || ''}
+                            onChange={(e) => handleNoteChange(indicator.id, e.target.value)}
+                          />
+                      </div>
+                    )}
                   </div>
                 );
               })}
