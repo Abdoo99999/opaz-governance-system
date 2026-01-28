@@ -178,10 +178,9 @@ export const translations = {
         indicatorDeleted: "تم حذف المؤشر.",
         deleteIndicatorTitle: "هل أنت متأكد؟",
         deleteIndicatorDesc: "سيتم حذف هذا المؤشر بشكل نهائي. لا يمكن التراجع عن هذا الإجراء.",
-        resetData: "إعادة تعيين",
-        resetConfirmTitle: "إعادة تعيين بيانات التقييم؟",
-        resetConfirmDesc: "سيتم حذف جميع درجات هذا التقييم للمنطقة الحالية والعام المحدد فقط. هل أنت متأكد؟",
-        resetConfirmAction: "نعم، قم بإعادة التعيين"
+        modifyAssessment: "تعديل التقييم",
+        reopenedTitle: "تم فتح التقييم",
+        reopenedDesc: "يمكنك الآن تعديل درجات التقييم مرة أخرى."
     },
     compliance: {
         saveButton: "حفظ سجل الامتثال والمخاطر",
@@ -626,10 +625,9 @@ export const translations = {
         indicatorDeleted: "Indicator deleted.",
         deleteIndicatorTitle: "Are you sure?",
         deleteIndicatorDesc: "This will permanently delete the indicator. This action cannot be undone.",
-        resetData: "Reset Data",
-        resetConfirmTitle: "Reset Assessment Data?",
-        resetConfirmDesc: "This will delete all assessment scores for the current zone and selected year only. Are you sure?",
-        resetConfirmAction: "Yes, Reset Data"
+        modifyAssessment: "Modify Assessment",
+        reopenedTitle: "Assessment Re-opened",
+        reopenedDesc: "You can now edit the assessment scores again."
     },
     compliance: {
         saveButton: "Save Compliance & Risks",

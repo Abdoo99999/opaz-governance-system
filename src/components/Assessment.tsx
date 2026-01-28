@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -7,7 +6,7 @@ import { AXES, INDICATORS as initialIndicators, Indicator } from '@/data/indicat
 import IndicatorCard from './IndicatorCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, AlertTriangle, ArrowRight, Save, Plus, Pencil, Trash2, Send, RefreshCw } from 'lucide-react';
+import { CheckCircle, AlertTriangle, ArrowRight, Save, Plus, Pencil, Trash2, Send } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -158,25 +157,6 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
         });
         refreshData();
     };
-
-    const handleResetData = () => {
-        if (!selectedCompanyId || selectedCompanyId === 'all' || typeof window === 'undefined') return;
-        const storageKey = getAssessmentStorageKey(selectedCompanyId, selectedYear);
-        const oldKey = `oia_assessment_${selectedCompanyId}`;
-
-        // مسح البيانات الخاصة بالمنطقة الحالية
-        localStorage.removeItem(storageKey);
-        // مسح أي مفاتيح قديمة قد تكون عالقة
-        localStorage.removeItem(oldKey);
-
-        toast({
-            title: "تم إعادة التعيين",
-            description: "تم مسح بيانات التقييم لهذه المنطقة. سيتم إعادة تحميل الصفحة.",
-        });
-
-        // إعادة تحميل قوية للصفحة
-        window.location.reload();
-    };
     
     const handleSubmit = () => {
         if (!selectedCompanyId || selectedCompanyId === 'all') return;
@@ -194,6 +174,14 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
             refreshData();
             onNavigate('compliance-monitor');
         }
+    };
+
+    const handleReopenAssessment = () => {
+        setIsAssessmentComplete(false);
+        toast({
+            title: t('assessment.reopenedTitle'),
+            description: t('assessment.reopenedDesc'),
+        });
     };
 
     const handleOpenIndicatorModal = (indicator: Indicator | null) => {
@@ -332,13 +320,22 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                             </div>
                         </div>
                         <div className="flex gap-2">
-                             <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
-                                 <Save className="ml-2 h-4 w-4"/>
-                                 {t('assessment.saveDraft')}
-                             </Button>
-                            <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
-                                <Send /> {t('assessment.submitFinal')}
-                            </Button>
+                             {isAssessmentComplete && userRole === 'admin' ? (
+                                <Button onClick={handleReopenAssessment} variant="outline" className="text-yellow-400 border-yellow-500/50 hover:bg-yellow-500/10">
+                                    <Pencil className="ml-2 h-4 w-4"/>
+                                    {t('assessment.modifyAssessment')}
+                                 </Button>
+                            ) : (
+                                <>
+                                    <Button onClick={handleSave} variant="outline" className="text-white border-white/20 hover:bg-white/10" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
+                                        <Save className="ml-2 h-4 w-4"/>
+                                        {t('assessment.saveDraft')}
+                                    </Button>
+                                    <Button onClick={handleSubmit} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isAssessmentComplete || !selectedCompanyId || selectedCompanyId === 'all'}>
+                                        <Send /> {t('assessment.submitFinal')}
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </header>
@@ -508,5 +505,3 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
-
-    
