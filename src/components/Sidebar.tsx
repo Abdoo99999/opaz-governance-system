@@ -20,9 +20,7 @@ const allMenuItems = [
   { name: 'board_directory', icon: Users, view: 'board-directory', roles: ['admin', 'company'], requiredStatus: 'board' },
   { name: 'board_evaluation', icon: ClipboardEdit, view: 'board-evaluation', roles: ['admin', 'company'], requiredStatus: 'evaluation' },
   { name: 'assessment', icon: Star, view: 'maturity-assessment', roles: ['admin', 'company'], requiredStatus: 'assessment' },
-  // --- تم إضافة الصفحة الجديدة هنا ---
   { name: 'zone_assessment', icon: Target, view: 'new-assessment', roles: ['admin', 'company'], requiredStatus: 'assessment' },
-  // ----------------------------------
   { name: 'compliance', icon: ShieldAlert, view: 'compliance-monitor', roles: ['admin', 'company'], requiredStatus: 'compliance' },
   { name: 'financials', icon: FileText, view: 'financial-statements', roles: ['admin', 'company'], requiredStatus: 'financials' },
   { name: 'improvement', icon: Kanban, view: 'improvement-plan', roles: ['admin', 'company'], requiredStatus: 'improvement' },
@@ -141,9 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
           case 'board-directory': return !completion.profile;
           case 'board-evaluation': return !completion.profile || !completion.board;
           case 'maturity-assessment': return !completion.profile || !completion.board || !completion.evaluation;
-          // --- شرط فتح الصفحة الجديدة (تفتح بعد إكمال التقييم السابق) ---
           case 'new-assessment': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment;
-          // -------------------------------------------------------------
           case 'compliance-monitor': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment;
           case 'financial-statements': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment || !completion.compliance;
           case 'improvement-plan': return !completion.profile || !completion.board || !completion.evaluation || !completion.assessment;
@@ -163,9 +159,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                 case 'board-directory': requiredStep = t('menu.company_profile'); break;
                 case 'board-evaluation': requiredStep = t('menu.board_directory'); break;
                 case 'maturity-assessment': requiredStep = t('menu.board_evaluation'); break;
-                // --- رسالة التنبيه للصفحة الجديدة ---
                 case 'new-assessment': requiredStep = t('menu.assessment'); break;
-                // -----------------------------------
                 case 'compliance-monitor': requiredStep = t('menu.assessment'); break;
                 case 'financial-statements': requiredStep = t('menu.compliance'); break;
                 case 'improvement-plan': requiredStep = t('menu.assessment'); break;
@@ -202,22 +196,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                 const isDisabled = isMenuItemDisabled(item);
                 const tooltipContent = getDisabledTooltip(item);
                 
-                // تحديد اسم الصفحة
                 let label = t(`menu.${item.name}`);
                 if (userRole === 'company' && item.name === 'registry') {
                      label = t('menu.company_profile');
                 }
-                // --- اسم الصفحة الجديدة (يدوياً حتى لا تحتاج لملفات الترجمة) ---
-                if (item.name === 'zone_assessment') {
-                    label = "تقييم المنطقة (الجديد)";
-                }
-                // -------------------------------------------------------------
 
                 const menuItemContent = (
                     <button
                       onClick={() => !isDisabled && onNavigate(item.view)}
                       className={cn(
                         "flex items-center w-full py-3 px-4 rounded-md transition-colors duration-200",
+                        "transition-all duration-300 border border-transparent hover:border-gold-500/50 hover:scale-[1.02]",
                         currentView === item.view
                           ? "text-gold-400 bg-white/5"
                           : "text-gray-300 hover:text-white hover:bg-white/5",
@@ -237,7 +226,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, currentView, onNavigate, onLo
                 );
 
                 return (
-                  <li key={item.name} className="relative mb-2 transition-all duration-200 ease-in-out hover:scale-105 rounded-md border border-transparent hover:border-gold-500/50">
+                  <li key={item.name} className="relative mb-2 transition-all duration-200 ease-in-out">
                       <Tooltip>
                         <TooltipTrigger asChild>
                             {menuItemContent}

@@ -8,20 +8,50 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Info, Save, RotateCcw, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Info, Save, RotateCcw, Plus, Pencil, Trash2, FileText } from 'lucide-react';
 import { ASSESSMENT_DATA, AssessmentCategory, AssessmentIndicator } from '@/data/assessmentData'; 
 import { cn } from '@/lib/utils';
 import { UserRole } from '@/app/page';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { useLanguage } from '@/context/LanguageContext';
+import { useCompany } from '@/context/CompanyContext';
+import { useYear } from '@/context/YearContext';
+
 
 const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
+  const { t } = useLanguage();
+  const { selectedZoneId, refreshData } = useCompany();
+  const { selectedYear } = useYear();
   const [assessmentData, setAssessmentData] = useState<AssessmentCategory[]>(ASSESSMENT_DATA);
   const [inputs, setInputs] = useState<Record<string, number>>({});
+  const [notes, setNotes] = useState<Record<string, string>>({});
   const { toast } = useToast();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingState, setEditingState] = useState<{ categoryId: string; indicator: AssessmentIndicator | null } | null>(null);
+
+  const getStorageKey = (companyId: string, year: number) => `opaz_operational_assessment_${companyId}_${year}`;
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !selectedZoneId || selectedZoneId === 'all') {
+        setInputs({});
+        setNotes({});
+        return;
+    }
+    
+    const storageKey = getStorageKey(selectedZoneId, selectedYear);
+    const savedDataStr = localStorage.getItem(storageKey);
+    
+    if (savedDataStr) {
+        const { inputs: savedInputs, notes: savedNotes } = JSON.parse(savedDataStr);
+        setInputs(savedInputs || {});
+        setNotes(savedNotes || {});
+    } else {
+        setInputs({});
+        setNotes({});
+    }
+  }, [selectedZoneId, selectedYear]);
 
   const handleSelectChange = (indicatorId: string, valueStr: string) => {
     const value = parseFloat(valueStr);
@@ -37,25 +67,29 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
     setInputs(prev => ({ ...prev, [indicatorId]: numValue }));
   };
 
+  const handleNoteChange = (indicatorId: string, text: string) => {
+    setNotes(prev => ({ ...prev, [indicatorId]: text }));
+  };
+
   const totalScore = useMemo(() => {
     let total = 0;
     assessmentData.forEach(cat => {
       cat.indicators.forEach(ind => {
         const val = inputs[ind.id] || 0;
         if (ind.type === 'select') {
-          total += val * ind.weight;
+          total += val;
         } else {
           const max = ind.maxScore || 100;
           total += (val / max) * ind.weight;
         }
       });
     });
-    return parseFloat(total.toFixed(1));
+    return parseFloat(total.toFixed(2));
   }, [inputs, assessmentData]);
 
   const calculateIndicatorScore = (ind: any, val: number) => {
     if (ind.type === 'select') {
-      return (val * ind.weight).toFixed(1);
+      return val.toFixed(1);
     } else {
       const max = ind.maxScore || 100;
       return ((val / max) * ind.weight).toFixed(1);
@@ -63,10 +97,26 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
   };
 
   const handleSave = () => {
+    if (!selectedZoneId || selectedZoneId === 'all') {
+        toast({
+            title: t('common.errorTitle'),
+            description: t('common.selectCompanyToStart'),
+            variant: 'destructive',
+        });
+        return;
+    }
+    const storageKey = getStorageKey(selectedZoneId, selectedYear);
+    const dataToSave = {
+        inputs: inputs,
+        notes: notes,
+    };
+    localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+
     toast({
       title: "تم حفظ التقييم بنجاح",
       description: `تم تحديث البيانات. النتيجة الحالية: ${totalScore} / 100`,
     });
+    refreshData();
   };
   
   const handleOpenModal = (categoryId: string, indicator: AssessmentIndicator | null) => {
@@ -113,7 +163,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
     );
     setIsModalOpen(false);
     setEditingState(null);
-};
+  };
 
 
   return (
@@ -121,7 +171,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gold-400">التقييم السنوي للمنطقة</h1>
+          <h1 className="text-2xl font-bold text-gold-400">{t('menu.zone_assessment')}</h1>
           <p className="text-gray-400 text-sm mt-1">نموذج قياس الأداء المؤسسي والمؤشرات التشغيلية</p>
         </div>
         
@@ -167,78 +217,90 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
                 const isEven = index % 2 === 0;
 
                 return (
-                  <div key={indicator.id} className={`grid grid-cols-1 md:grid-cols-12 gap-4 items-center p-6 border-b border-white/5 last:border-0 ${!isEven ? 'bg-white/[0.02]' : ''}`}>
-                    
-                    <div className="md:col-span-5 space-y-2">
-                      <Label className="text-base font-medium text-gray-100 leading-relaxed block">
-                        {indicator.text}
-                      </Label>
-                      <div className="flex items-start gap-2 text-sm text-gray-400 bg-slate-800/50 p-2 rounded border border-white/5">
-                        <Info className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-                        <span className="leading-relaxed">{indicator.subText}</span>
-                      </div>
-                    </div>
+                  <div key={indicator.id} className={`p-6 border-b border-white/5 last:border-0 ${!isEven ? 'bg-white/[0.02]' : ''}`}>
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center mb-4">
+                        <div className="md:col-span-5 space-y-2">
+                          <Label className="text-base font-medium text-gray-100 leading-relaxed block">
+                            {indicator.text}
+                          </Label>
+                          <div className="flex items-start gap-2 text-sm text-gray-400 bg-slate-800/50 p-2 rounded border border-white/5">
+                            <Info className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                            <span className="leading-relaxed">{indicator.subText}</span>
+                          </div>
+                        </div>
 
-                    <div className="md:col-span-4 flex flex-col justify-center gap-2">
-                      <div className="flex justify-between text-xs text-gray-500 px-1">
-                        <span>قيمة المؤشر</span>
-                        <span>الوزن: {indicator.weight}</span>
-                      </div>
+                        <div className="md:col-span-4 flex flex-col justify-center gap-2">
+                          <div className="flex justify-between text-xs text-gray-500 px-1">
+                            <span>قيمة المؤشر</span>
+                            <span>الوزن: {indicator.weight}</span>
+                          </div>
 
-                      {indicator.type === 'select' ? (
-                        <Select 
-                          onValueChange={(val) => handleSelectChange(indicator.id, val)} 
-                          value={inputs[indicator.id]?.toString()}
-                        >
-                          <SelectTrigger className="w-full bg-royal-900 border-white/10 text-white focus:ring-gold-500/50 h-11">
-                            <SelectValue placeholder="اختر من القائمة..." />
-                          </SelectTrigger>
-                          <SelectContent className="bg-royal-800 border-white/10 text-white">
-                            {indicator.options?.map((opt, idx) => (
-                              <SelectItem key={idx} value={opt.score.toString()} className="text-right">
-                                {opt.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            min="0"
-                            max={indicator.maxScore || 100}
-                            value={currentValue === 0 ? '' : currentValue}
-                            onChange={(e) => handleNumberChange(indicator.id, e.target.value, indicator.maxScore)}
-                            className="text-center font-bold text-lg bg-royal-900 border-white/10 text-white focus:border-gold-500 h-11 placeholder:text-gray-600 pl-8"
-                            placeholder="0"
-                          />
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">
-                            {indicator.unit || '%'}
+                          {indicator.type === 'select' ? (
+                            <Select 
+                              onValueChange={(val) => handleSelectChange(indicator.id, val)} 
+                              value={inputs[indicator.id]?.toString()}
+                            >
+                              <SelectTrigger className="w-full bg-royal-900 border-white/10 text-white focus:ring-gold-500/50 h-11">
+                                <SelectValue placeholder="اختر من القائمة..." />
+                              </SelectTrigger>
+                              <SelectContent className="bg-royal-800 border-white/10 text-white">
+                                {indicator.options?.map((opt, idx) => (
+                                  <SelectItem key={idx} value={opt.score.toString()} className="text-right hover:!bg-gold-500 !bg-gold-500">
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                min="0"
+                                max={indicator.maxScore || 100}
+                                value={currentValue === 0 ? '' : currentValue}
+                                onChange={(e) => handleNumberChange(indicator.id, e.target.value, indicator.maxScore)}
+                                className="text-center font-bold text-lg bg-royal-900 border-white/10 text-white focus:border-gold-500 h-11 placeholder:text-gray-600 pr-8"
+                                placeholder="0"
+                              />
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">
+                                {indicator.unit || '%'}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className={cn("md:col-span-2 flex flex-col items-center justify-center p-3 rounded-lg border transition-colors", Number(earnedPoints) > 0 ? "bg-gold-500/5 border-gold-500/20" : "bg-black/20 border-white/5")}>
+                          <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">النقاط</span>
+                          <span className={cn("text-2xl font-bold", Number(earnedPoints) > 0 ? 'text-gold-400' : 'text-gray-600')}>
+                            {earnedPoints}
                           </span>
                         </div>
-                      )}
-                    </div>
-                    
-                    <div className={cn("md:col-span-2 flex flex-col items-center justify-center p-3 rounded-lg border transition-colors", Number(earnedPoints) > 0 ? "bg-gold-500/5 border-gold-500/20" : "bg-black/20 border-white/5")}>
-                      <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">النقاط</span>
-                      <span className={cn("text-2xl font-bold", Number(earnedPoints) > 0 ? 'text-gold-400' : 'text-gray-600')}>
-                        {earnedPoints}
-                      </span>
+
+                        <div className="md:col-span-1 flex items-center justify-center gap-1">
+                            {userRole === 'admin' && (
+                                <>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenModal(category.id, indicator)}>
+                                        <Pencil className="w-4 h-4 text-gray-400 hover:text-gold-400"/>
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteIndicator(category.id, indicator.id)}>
+                                        <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500"/>
+                                    </Button>
+                                </>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="md:col-span-1 flex items-center justify-center gap-1">
-                        {userRole === 'admin' && (
-                            <>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenModal(category.id, indicator)}>
-                                    <Pencil className="w-4 h-4 text-gray-400 hover:text-gold-400"/>
-                                </Button>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleDeleteIndicator(category.id, indicator.id)}>
-                                    <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500"/>
-                                </Button>
-                            </>
-                        )}
+                    <div className="mt-2 pt-3 border-t border-white/5">
+                        <Label className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                            <FileText className="w-3 h-3" /> ملاحظات المقيم
+                        </Label>
+                        <Textarea 
+                          placeholder="أضف ملاحظات أو مبررات التقييم هنا..." 
+                          className="bg-black/20 border-white/10 text-gray-300 min-h-[60px] focus:border-gold-500/30 resize-none text-sm"
+                          value={notes[indicator.id] || ''}
+                          onChange={(e) => handleNoteChange(indicator.id, e.target.value)}
+                        />
                     </div>
-
                   </div>
                 );
               })}
@@ -268,7 +330,6 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
   );
 };
 
-
 interface IndicatorFormModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -284,7 +345,7 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
     useEffect(() => {
         if (editingState?.indicator) {
             setText(editingState.indicator.text);
-            setSubText(editingState.indicator.subText);
+            setSubText(editingState.indicator.subText || '');
             setWeight(editingState.indicator.weight);
         } else {
             setText('');
@@ -300,7 +361,7 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
             text,
             subText,
             weight,
-            type: editingState?.indicator?.type || 'number', // Simplified for now
+            type: editingState?.indicator?.type || 'number', 
         };
         onSave(indicatorData);
     };
@@ -336,7 +397,4 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
     );
 };
 
-
 export default ZoneAssessmentPage;
-
-    

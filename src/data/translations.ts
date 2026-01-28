@@ -9,14 +9,15 @@ export const translations = {
       board_directory: "سجل القيادات التنفيذية",
       board_evaluation: "مؤشرات القيادة",
       assessment: "تقييم الأداء المؤسسي",
-      compliance: "الامتثال والمخاطر",
+      compliance: "سجل المخاطر والالتزام",
       improvement: "خطة التحسين",
       financials: "المؤشرات الاقتصادية",
       reports: "التقارير",
       settings: "الإعدادات",
       logout: "تسجيل الخروج",
       review: "المراجعة والإرسال",
-      approvals: "طلبات الموافقة"
+      approvals: "طلبات الموافقة",
+      zone_assessment: "تقييم الامتثال التشغيلي"
     },
     dashboard: {
       central_dashboard: "لوحة القيادة المركزية",
@@ -456,14 +457,15 @@ export const translations = {
       board_directory: "Executive Leadership",
       board_evaluation: "Leadership KPIs",
       assessment: "Institutional Performance",
-      compliance: "Compliance & Risk",
+      compliance: "Risk & Compliance Register",
       improvement: "Improvement Plan",
       financials: "Economic Indicators",
       reports: "Reports",
       settings: "Settings",
       logout: "Logout",
       review: "Review & Submit",
-      approvals: "Approval Requests"
+      approvals: "Approval Requests",
+      zone_assessment: "Operational Compliance Assessment"
     },
      dashboard: {
       central_dashboard: "Central Dashboard",
