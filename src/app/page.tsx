@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -20,6 +19,8 @@ import { useToast } from '@/hooks/use-toast';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ZoneProvider, useCompany } from '@/context/CompanyContext';
 import { YearProvider } from '@/context/YearContext';
+// استيراد الصفحة الجديدة التي قمت بإنشائها
+import ZoneAssessmentPage from './assessment/page';
 
 export type UserRole = 'admin' | 'company';
 
@@ -96,6 +97,10 @@ const AppContent = () => {
         return <BoardEvaluation />;
       case 'maturity-assessment':
         return <Assessment onNavigate={handleNavigate} userRole={userRole} />;
+      // --- هنا تم إضافة الصفحة الجديدة ---
+      case 'new-assessment':
+        return <ZoneAssessmentPage />; 
+      // ----------------------------------
       case 'compliance-monitor':
         return <ComplianceMonitor onNavigate={handleNavigate} />;
       case 'improvement-plan':
@@ -141,5 +146,3 @@ export default function Home() {
     </LanguageProvider>
   );
 }
-
-    
