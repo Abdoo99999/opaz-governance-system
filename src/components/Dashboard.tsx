@@ -346,7 +346,7 @@ const Dashboard = () => {
               {selectedZoneId === 'all' ? t('dashboard.central_dashboard') : `${t('dashboard.title')}: ${language==='ar'?selectedZone?.name_ar:selectedZone?.name_en}`}
           </h1>
            <Button onClick={handleExport} className="bg-gold-500 text-royal-900 hover:bg-gold-400 font-bold" disabled={isExporting}>
-               {isExporting ? <Loader2 className="ml-2 h-5 w-5 animate-spin" /> : <FileDown className="ml-2 h-5 w-5" />}
+               {isExporting ? <Loader2 className="animate-spin" /> : <FileDown />}
                {isExporting ? t('common.loading') : t('common.exportPdf')}
            </Button>
       </header>

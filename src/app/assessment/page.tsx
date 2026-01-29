@@ -211,7 +211,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
                   </Badge>
                    {userRole === 'admin' && (
                         <Button variant="ghost" size="sm" onClick={() => handleOpenModal(category.id, null)}>
-                            <Plus className="w-4 h-4 ml-2" />
+                            <Plus />
                             {t('zone_assessment.addIndicator')}
                         </Button>
                     )}
@@ -346,11 +346,11 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-white/10 mt-8">
-        <Button variant="ghost" className="text-gray-400 hover:text-white hover:bg-white/5 gap-2">
+        <Button variant="ghost" className="text-gray-400 hover:text-white hover:bg-white/5">
             <RotateCcw className="w-4 h-4" />
             {t('zone_assessment.reset')}
         </Button>
-        <Button onClick={handleSave} className="bg-gold-500 hover:bg-gold-600 text-royal-900 font-bold px-8 shadow-lg shadow-gold-500/10 gap-2">
+        <Button onClick={handleSave} className="bg-gold-500 hover:bg-gold-600 text-royal-900 font-bold px-8 shadow-lg shadow-gold-500/10">
             <Save className="w-4 h-4" />
             {t('common.save')}
         </Button>

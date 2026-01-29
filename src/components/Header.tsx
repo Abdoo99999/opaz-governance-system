@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -48,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
             </Button>
           ) : (
             <Button variant="outline" onClick={() => onNavigate('dashboard')} className="text-gold-400 border-gold-500/50 hover:bg-gold-500/10 hover:text-gold-300">
-                <LayoutDashboard className="h-5 w-5 ml-2"/>
+                <LayoutDashboard/>
                 {t('menu.dashboard')}
             </Button>
           )}
@@ -108,7 +107,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={handleLanguageChange} className="text-foreground hover:text-gold-400">
-            <Globe className="h-5 w-5 ml-2" />
+            <Globe className="h-5 w-5" />
             <span className="text-sm font-medium">{t('common.switchLang')}</span>
           </Button>
           <div className="flex items-center gap-3">
@@ -116,7 +115,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onToggleSidebar, onNavigat
               <AvatarImage src={userRole === 'admin' ? "https://picsum.photos/seed/admin/100/100" : "https://picsum.photos/seed/company/100/100" } alt="User" data-ai-hint="person portrait" />
               <AvatarFallback>{userRole === 'admin' ? 'A' : 'Z'}</AvatarFallback>
             </Avatar>
-            <span className="text-sm font-medium hidden md:block">{userRole === 'admin' ? t('common.admin') : t('common.company')}</span>
+            <span className="text-sm font-medium hidden md:block">{t(`common.${userRole}`)}</span>
           </div>
         </div>
       </div>

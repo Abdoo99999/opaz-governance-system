@@ -347,7 +347,7 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
                     {t('board_directory.form.cycleSettings')}
                 </Button>
                 <Button onClick={handleSaveData} variant="outline" className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Save className="h-5 w-5" />
+                    <Save />
                     {t('common.save')}
                 </Button>
             </div>

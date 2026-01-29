@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -19,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   Cell, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 import { useLanguage } from '@/context/LanguageContext';
@@ -349,7 +348,7 @@ export default function Reports() {
                                 <PolarGrid stroke="rgba(255,255,255,0.1)" />
                                 <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                                 <PolarRadiusAxis angle={30} domain={[0, 5]} tick={false} axisLine={false} />
-                                <RechartsTooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}} />
+                                <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}} />
                                 <Radar name='reports.companyScore' dataKey="company" stroke="#D4AF37" strokeWidth={3} fill="#D4AF37" fillOpacity={0.4} />
                                 <Radar name='reports.sectorAverage' dataKey="sector" stroke="#8b5cf6" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
                             </RadarChart>
@@ -379,7 +378,7 @@ export default function Reports() {
                                 <PolarGrid stroke="rgba(255,255,255,0.1)" />
                                 <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                                <RechartsTooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}} formatter={(v: number) => `${v.toFixed(1)}%`} />
+                                <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}} formatter={(v: number) => `${v.toFixed(1)}%`} />
                                 <Radar name='Zone Performance' dataKey="company" stroke="#A57C5B" strokeWidth={3} fill="url(#radarFillCopperRep)" fillOpacity={0.7} />
                                 <Radar name='Sector Average' dataKey="sector" stroke="#8B5CF6" strokeWidth={2} strokeDasharray="6 6" fill="transparent" />
                             </RadarChart>
@@ -406,7 +405,7 @@ export default function Reports() {
                                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
                                       <XAxis dataKey="name" tick={{fill: '#9ca3af'}} axisLine={false} tickLine={false} />
                                       <YAxis tickFormatter={(val) => `${val/1000000}M`} tick={{fill: '#9ca3af'}} axisLine={false} tickLine={false} />
-                                      <RechartsTooltip contentStyle={{backgroundColor: '#1e293b', border: 'none'}} formatter={(val: number) => formatCurrency(val)} />
+                                      <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none'}} formatter={(val: number) => formatCurrency(val)} />
                                       <Bar dataKey="value" radius={[4, 4, 0, 0]} />
                                   </BarChart>
                               </ResponsiveContainer>

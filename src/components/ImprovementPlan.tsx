@@ -255,7 +255,7 @@ const KanbanLane = ({ title, tasks, status, onMove, onComplete, onOpenDetails, u
                         <TaskCard 
                             key={task.id} 
                             task={task} 
-                            onMove={onMove} 
+                            onMove={handleMoveTask} 
                             onComplete={onComplete} 
                             onOpenDetails={onOpenDetails} 
                             userRole={userRole}
@@ -678,11 +678,11 @@ export default function ImprovementPlan({ userRole, onNavigate }: { userRole: Us
                     </Select>
                     {userRole === 'admin' && (
                         <Button className="bg-gold-500 text-royal-900 hover:bg-gold-400 font-bold" disabled={!selectedCompanyId || selectedCompanyId === 'all'}>
-                            <Plus className="h-5 w-5" /> {t('improvement.addTask')}
+                            <Plus /> {t('improvement.addTask')}
                         </Button>
                     )}
                      <Button onClick={handleSave} className="bg-emerald-600 text-white hover:bg-emerald-500 font-bold" disabled={!selectedCompanyId || selectedCompanyId === 'all'}>
-                        <Save className="h-5 w-5"/>{t('common.save')}
+                        <Save />{t('common.save')}
                      </Button>
                 </div>
             </header>
