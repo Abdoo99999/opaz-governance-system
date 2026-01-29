@@ -129,22 +129,22 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
             <div className="flex w-full mt-0 border-t border-white/10">
                 {task.status === 'todo' && (
                     <button className={cn(btnBase, "bg-slate-800 hover:bg-emerald-600 hover:text-white")} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
-                        {t('improvement.start')} <ArrowRight className="ml-2 h-4 w-4" />
+                        {t('improvement.start')} <ArrowRight />
                     </button>
                 )}
                 
                 {task.status === 'in-progress' && (
                     <>
                         <button className={cn(btnBase, "bg-slate-800 border-r border-white/10 hover:bg-slate-700 text-gray-400")} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'todo'); }}>
-                           <ArrowLeft className="mr-2 h-4 w-4" /> {t('improvement.return')}
+                           <ArrowLeft /> {t('improvement.return')}
                         </button>
                         {userRole === 'company' ? (
                              <button className={cn(btnBase, "bg-slate-800 hover:bg-emerald-600 hover:text-white text-emerald-400")} onClick={(e) => { e.stopPropagation(); setIsCompleteModalOpen(true); }}>
-                                {t('improvement.finish')} <Check className="ml-2 h-4 w-4" />
+                                {t('improvement.finish')} <Check />
                              </button>
                         ) : (
                             <button className={cn(btnBase, "bg-slate-800 hover:bg-emerald-600 hover:text-white")} onClick={(e) => { e.stopPropagation(); onMove(task.id, 'done'); }}>
-                                {t('improvement.finish')} <Check className="ml-2 h-4 w-4" />
+                                {t('improvement.finish')} <Check />
                             </button>
                         )}
                     </>
@@ -152,7 +152,7 @@ const TaskCard = ({ task, onMove, onComplete, onOpenDetails, userRole, setDragge
 
                 {task.status === 'done' && (
                     <div className="flex-1 flex items-center justify-center h-10 bg-emerald-900/20 text-emerald-500 font-bold text-sm cursor-default">
-                        <CheckCircle className="mr-2 h-4 w-4" /> {t('improvement.lanes.done')}
+                        <CheckCircle /> {t('improvement.lanes.done')}
                         {userRole === 'admin' && (
                              <button className="ml-4 text-xs underline text-gray-400 hover:text-white" onClick={(e) => { e.stopPropagation(); onMove(task.id, 'in-progress'); }}>
                                 {t('improvement.reopen')}
@@ -255,7 +255,7 @@ const KanbanLane = ({ title, tasks, status, onMove, onComplete, onOpenDetails, u
                         <TaskCard 
                             key={task.id} 
                             task={task} 
-                            onMove={handleMoveTask} 
+                            onMove={onMove} 
                             onComplete={onComplete} 
                             onOpenDetails={onOpenDetails} 
                             userRole={userRole}
