@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Info, Save, RotateCcw, Plus, Pencil, Trash2, FileText } from 'lucide-react';
+import { Info, Save, RotateCcw, Plus, Pencil, Trash2, FileText, Paperclip } from 'lucide-react';
 import { ASSESSMENT_DATA, AssessmentCategory, AssessmentIndicator } from '@/data/assessmentData'; 
 import { cn } from '@/lib/utils';
 import { UserRole } from '@/app/page';
@@ -26,6 +26,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
   const [assessmentData, setAssessmentData] = useState<AssessmentCategory[]>(ASSESSMENT_DATA);
   const [inputs, setInputs] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [files, setFiles] = useState<Record<string, File | null>>({});
   const { toast } = useToast();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,6 +38,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
     if (typeof window === 'undefined' || !selectedZoneId || selectedZoneId === 'all') {
         setInputs({});
         setNotes({});
+        setFiles({});
         return;
     }
     
@@ -51,6 +53,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
         setInputs({});
         setNotes({});
     }
+    setFiles({});
   }, [selectedZoneId, selectedYear]);
 
   const handleSelectChange = (indicatorId: string, valueStr: string) => {
@@ -69,6 +72,10 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
 
   const handleNoteChange = (indicatorId: string, text: string) => {
     setNotes(prev => ({ ...prev, [indicatorId]: text }));
+  };
+
+  const handleFileChange = (indicatorId: string, file: File | null) => {
+    setFiles(prev => ({ ...prev, [indicatorId]: file }));
   };
 
   const totalScore = useMemo(() => {
@@ -289,19 +296,45 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
                             )}
                         </div>
                     </div>
-                    {userRole === 'admin' && (
-                      <div className="mt-2 pt-3 border-t border-white/5">
-                          <Label className="text-xs text-gray-400 mb-2 flex items-center gap-1">
-                              <FileText className="w-3 h-3" /> ملاحظات المقيم
-                          </Label>
-                          <Textarea 
-                            placeholder="أضف ملاحظات أو مبررات التقييم هنا..." 
-                            className="bg-black/20 border-white/10 text-gray-300 min-h-[60px] focus:border-gold-500/30 resize-none text-sm"
-                            value={notes[indicator.id] || ''}
-                            onChange={(e) => handleNoteChange(indicator.id, e.target.value)}
-                          />
-                      </div>
-                    )}
+                     <div className="mt-4 pt-4 border-t border-white/5">
+                        <div className={cn("grid grid-cols-1 gap-6", userRole === 'admin' && 'md:grid-cols-2')}>
+                            <div className={cn(userRole !== 'admin' && 'md:col-span-2')}>
+                                <Label className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                                    <Paperclip className="w-3 h-3" /> {t('assessment.attachEvidence')}
+                                </Label>
+                                <div className="relative mt-2">
+                                    <Input 
+                                        id={`file-input-${indicator.id}`}
+                                        type="file"
+                                        className="hidden"
+                                        onChange={(e) => handleFileChange(indicator.id, e.target.files?.[0] || null)} 
+                                    />
+                                    <label htmlFor={`file-input-${indicator.id}`} className="cursor-pointer w-full flex items-center justify-between p-3 bg-black/20 rounded-lg border border-white/10 hover:border-gold-500/50 transition-colors">
+                                        <span className="text-sm text-gray-400 truncate">
+                                            {files[indicator.id] ? files[indicator.id].name : t('assessment.noEvidenceAttached')}
+                                        </span>
+                                        <span className="flex-shrink-0 text-xs font-bold bg-gold-500 text-royal-900 px-3 py-1 rounded-md">
+                                            {t('assessment.browse')}
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {userRole === 'admin' && (
+                                <div>
+                                    <Label className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                                        <FileText className="w-3 h-3" /> ملاحظات المقيم
+                                    </Label>
+                                    <Textarea 
+                                        placeholder="أضف ملاحظات أو مبررات التقييم هنا..." 
+                                        className="bg-black/20 border-white/10 text-gray-300 min-h-[60px] focus:border-gold-500/30 resize-none text-sm mt-2"
+                                        value={notes[indicator.id] || ''}
+                                        onChange={(e) => handleNoteChange(indicator.id, e.target.value)}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                   </div>
                 );
               })}
@@ -399,3 +432,5 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 };
 
 export default ZoneAssessmentPage;
+
+    
