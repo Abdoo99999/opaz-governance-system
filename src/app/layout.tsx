@@ -2,6 +2,9 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { Cairo } from 'next/font/google';
+import { LanguageProvider } from '@/context/LanguageContext';
+import { ZoneProvider } from '@/context/CompanyContext';
+import { YearProvider } from '@/context/YearContext';
 
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
@@ -23,8 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${cairo.variable} font-body antialiased`}>
-        {children}
-        <Toaster />
+        <LanguageProvider>
+          <YearProvider>
+            <ZoneProvider>
+              {children}
+              <Toaster />
+            </ZoneProvider>
+          </YearProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

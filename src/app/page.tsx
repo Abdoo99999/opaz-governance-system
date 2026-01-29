@@ -16,9 +16,7 @@ import Login from "@/components/Login";
 import ReviewSubmit from '@/components/ReviewSubmit';
 import ApprovalRequests from '@/components/ApprovalRequests';
 import { useToast } from '@/hooks/use-toast';
-import { LanguageProvider } from '@/context/LanguageContext';
-import { ZoneProvider, useCompany } from '@/context/CompanyContext';
-import { YearProvider } from '@/context/YearContext';
+import { useCompany } from '@/context/CompanyContext';
 // استيراد الصفحة الجديدة التي قمت بإنشائها
 import ZoneAssessmentPage from './assessment/page';
 
@@ -137,12 +135,6 @@ const AppContent = () => {
 
 export default function Home() {
   return (
-    <LanguageProvider>
-      <YearProvider>
-        <ZoneProvider>
-          <AppContent />
-        </ZoneProvider>
-      </YearProvider>
-    </LanguageProvider>
+      <AppContent />
   );
 }
