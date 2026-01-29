@@ -1,3 +1,4 @@
+
 export const translations = {
   ar: {
     appTitle: "منظومة مدار",
@@ -412,34 +413,34 @@ export const translations = {
       viewNotes: "عرض الملاحظات"
     },
     common: {
-      admin: "System Admin",
-      company: "Zone Portal",
-      switchLang: "عربي",
-      username: "Username",
-      password: "Password",
-      login: "Login",
-      usernamePlaceholder: "Enter your username",
-      passwordPlaceholder: "Enter your password",
-      back: "Back to Registry",
-      edit: "Edit",
-      save: "Save",
-      selectPlaceholder: "Select...",
-      cancel: "Cancel",
-      delete: "Delete",
-      view: "View",
-      editingFor: "Editing for",
-      selectAllCompanies: "All Zones View",
-      selectCompanyToStart: "Select a Zone to Begin",
-      selectCompanyToStartDesc: "Please select a zone from the dropdown above to view or edit its data.",
-      saveSuccessTitle: "Saved Successfully",
-      saveSuccessDesc: "Zone data has been saved for:",
-      deleteConfirm: "Are you sure you want to delete this zone? This action cannot be undone.",
-      deleteSuccessTitle: "Deleted Successfully",
-      errorTitle: "Error",
-      fillAllFields: "Please fill all required fields.",
-      loading: "Exporting...",
-      exportPdf: "Export PDF",
-      noData: "No data to display.",
+      admin: "المشرف العام",
+      company: "بوابة المنطقة",
+      switchLang: "English",
+      username: "اسم المستخدم",
+      password: "كلمة المرور",
+      login: "تسجيل الدخول",
+      usernamePlaceholder: "أدخل اسم المستخدم",
+      passwordPlaceholder: "أدخل كلمة المرور",
+      back: "عودة للسجل",
+      edit: "تعديل",
+      save: "حفظ",
+      selectPlaceholder: "اختر...",
+      cancel: "إلغاء",
+      delete: "حذف",
+      view: "عرض",
+      editingFor: "التعديل لمنطقة",
+      selectAllCompanies: "عرض جميع المناطق",
+      selectCompanyToStart: "اختر منطقة للبدء",
+      selectCompanyToStartDesc: "الرجاء اختيار منطقة من القائمة أعلاه لعرض أو تعديل بياناتها.",
+      saveSuccessTitle: "تم الحفظ بنجاح",
+      saveSuccessDesc: "تم حفظ بيانات المنطقة:",
+      deleteConfirm: "هل أنت متأكد من حذف هذه المنطقة؟ لا يمكن التراجع عن هذا الإجراء.",
+      deleteSuccessTitle: "تم الحذف بنجاح",
+      errorTitle: "خطأ",
+      fillAllFields: "يرجى تعبئة جميع الحقول المطلوبة.",
+      loading: "جاري التصدير...",
+      exportPdf: "تصدير PDF",
+      noData: "لا توجد بيانات للعرض.",
     },
     demo: {
       gaps: {
@@ -898,5 +899,3 @@ export const translations = {
     }
   }
 };
-
-    

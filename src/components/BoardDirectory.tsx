@@ -339,15 +339,15 @@ const MembersContent = ({ summaryData, skillsMatrixData, boardTenure, filteredMe
         <>
             <div className="flex items-center justify-end gap-4 mb-8">
                 <Button onClick={() => handleOpenForm(null)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Plus className="ml-2 h-5 w-5" />
+                    <Plus className="h-5 w-5" />
                     {t('board_directory.addMember')}
                 </Button>
                 <Button onClick={() => setIsCycleSettingsOpen(true)} variant="outline" className="text-gold-400 border-gold-500/30 hover:bg-gold-500/10">
-                    <Calendar className="ml-2 h-5 w-5" />
+                    <Calendar className="h-5 w-5" />
                     {t('board_directory.form.cycleSettings')}
                 </Button>
                 <Button onClick={handleSaveData} variant="outline" className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Save className="ml-2 h-5 w-5" />
+                    <Save className="h-5 w-5" />
                     {t('common.save')}
                 </Button>
             </div>
@@ -505,7 +505,7 @@ const MinutesContent = ({ minutes, setIsMinuteModalOpen, t }: any) => {
         <>
             <div className="flex justify-end mb-8">
                  <Button onClick={() => setIsMinuteModalOpen(true)} className="bg-gold-500 text-royal-900 hover:bg-gold-400">
-                    <Upload className="ml-2 h-5 w-5" />
+                    <Upload className="h-5 w-5" />
                     {t('board_directory.minutes.upload')}
                 </Button>
             </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -197,8 +198,8 @@ const Dashboard = () => {
                         indicatorScore = (val / max) * ind.weight;
                     }
                     earnedPoints += indicatorScore;
-                    zoneTotalScore += indicatorScore;
                 });
+                zoneTotalScore += earnedPoints;
                 const percentageScore = category.weight > 0 ? (earnedPoints / category.weight) * 100 : 0;
                 opComplianceCategoryScores[index].score += percentageScore;
                 opComplianceCategoryScores[index].count++;
@@ -340,7 +341,7 @@ const Dashboard = () => {
               {selectedZoneId === 'all' ? t('dashboard.central_dashboard') : `${t('dashboard.title')}: ${language==='ar'?selectedZone?.name_ar:selectedZone?.name_en}`}
           </h1>
            <Button onClick={handleExport} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isExporting}>
-               {isExporting ? <Loader2 className="ml-2 h-5 w-5 animate-spin" /> : <FileDown className="ml-2 h-5 w-5" />}
+               {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />}
                {t('common.exportPdf')}
            </Button>
       </header>

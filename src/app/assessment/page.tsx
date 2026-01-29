@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -120,8 +121,8 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
     localStorage.setItem(storageKey, JSON.stringify(dataToSave));
 
     toast({
-      title: "تم حفظ التقييم بنجاح",
-      description: `تم تحديث البيانات. النتيجة الحالية: ${totalScore} / 100`,
+      title: t('common.saveSuccessTitle'),
+      description: `${t('assessment.saveSuccessDesc')} ${totalScore} / 100`,
     });
     refreshData();
   };
@@ -350,7 +351,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
         </Button>
         <Button onClick={handleSave} className="bg-gold-500 hover:bg-gold-600 text-royal-900 font-bold px-8 shadow-lg shadow-gold-500/10 gap-2">
             <Save className="w-4 h-4" />
-            حفظ التقييم
+            {t('common.save')}
         </Button>
       </div>
 
@@ -372,6 +373,7 @@ interface IndicatorFormModalProps {
 }
 
 const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose, onSave, editingState }) => {
+    const { t } = useLanguage();
     const [text, setText] = useState('');
     const [subText, setSubText] = useState('');
     const [weight, setWeight] = useState(0);
@@ -422,8 +424,8 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
                         <Input type="number" value={weight} onChange={(e) => setWeight(Number(e.target.value))} className="bg-royal-900/50 border-white/10 mt-2" />
                     </div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose} className="text-white border-white/20">إلغاء</Button>
-                        <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400"><Save /> حفظ</Button>
+                        <Button type="button" variant="outline" onClick={onClose} className="text-white border-white/20">{t('common.cancel')}</Button>
+                        <Button type="submit" className="bg-gold-500 text-royal-900 hover:bg-gold-400"><Save /> {t('common.save')}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -432,5 +434,3 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 };
 
 export default ZoneAssessmentPage;
-
-    

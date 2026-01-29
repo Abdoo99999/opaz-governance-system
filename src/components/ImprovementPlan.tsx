@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -677,11 +678,11 @@ export default function ImprovementPlan({ userRole, onNavigate }: { userRole: Us
                     </Select>
                     {userRole === 'admin' && (
                         <Button className="bg-gold-500 text-royal-900 hover:bg-gold-400 font-bold" disabled={!selectedCompanyId || selectedCompanyId === 'all'}>
-                            <Plus className="ml-2 h-5 w-5" /> {t('improvement.addTask')}
+                            <Plus className="h-5 w-5" /> {t('improvement.addTask')}
                         </Button>
                     )}
                      <Button onClick={handleSave} className="bg-emerald-600 text-white hover:bg-emerald-500 font-bold" disabled={!selectedCompanyId || selectedCompanyId === 'all'}>
-                        <Save className="ml-2 h-5 w-5"/>{t('common.save')}
+                        <Save className="h-5 w-5"/>{t('common.save')}
                      </Button>
                 </div>
             </header>

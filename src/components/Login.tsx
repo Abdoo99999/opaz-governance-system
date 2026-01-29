@@ -90,7 +90,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         }}></div>
 
         <Button variant="ghost" onClick={handleLanguageChange} className="absolute top-8 left-8 z-50 text-foreground hover:text-gold-400 bg-slate-900/50 hover:bg-slate-800/70">
-            <Globe className="h-5 w-5 ml-2" />
+            <Globe className="h-5 w-5" />
             <span className="text-sm font-medium">{t('common.switchLang')}</span>
         </Button>
 

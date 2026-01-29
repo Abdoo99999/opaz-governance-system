@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -290,7 +291,7 @@ export default function Reports() {
                 </SelectContent>
             </Select>
             <Button onClick={handleExport} className="bg-gold-500 text-black hover:bg-gold-400 font-bold" disabled={isExporting}>
-                {isExporting ? <Loader2 className="animate-spin mr-2"/> : <Download size={18} className="mr-2"/>}
+                {isExporting ? <Loader2 className="animate-spin"/> : <Download size={18} />}
                 {isExporting ? t('common.loading') : t('common.exportPdf')}
             </Button>
         </div>

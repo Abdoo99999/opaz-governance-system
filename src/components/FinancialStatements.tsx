@@ -322,7 +322,7 @@ const FinancialStatements: React.FC<FinancialStatementsProps> = ({ onNavigate })
             </div>
             <div className="flex justify-center pt-4">
               <Button size="lg" className="bg-gold-500 text-royal-900 hover:bg-gold-400 disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed w-1/2 h-16 text-xl font-bold" disabled={!isDeclared} onClick={handleSave}>
-                <Save className="ml-2" />
+                <Save />
                 {t('financials.save')}
               </Button>
             </div>
