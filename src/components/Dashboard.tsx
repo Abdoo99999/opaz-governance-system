@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -31,7 +30,7 @@ import {
   YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, AlertTriangle, CheckCircle, Wallet, FileDown, Loader2, Users, Building2, Anchor, Award } from 'lucide-react';
+import { TrendingUp, AlertTriangle, CheckCircle, Wallet, FileDown, Loader2, Users, Building2, Anchor, Target, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
 import { useCompany } from '@/context/CompanyContext';
@@ -39,7 +38,6 @@ import { INDICATORS, AXES } from '@/data/indicators';
 import RiskLandscape from './dashboard/RiskLandscape';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
-import TopPerformers from './dashboard/TopPerformers';
 import { RadarCustomTick } from './Reports';
 import { ZONES, type Zone } from '@/data/companies';
 
@@ -72,7 +70,6 @@ const Dashboard = () => {
   const [economicReturn, setEconomicReturn] = useState(0);
   const [radarData, setRadarData] = useState<any[]>([]);
   const [leadershipData, setLeadershipData] = useState<any[]>([]);
-  const [topZones, setTopZones] = useState<any[]>([]);
   const [improvementPlanData, setImprovementPlanData] = useState([]);
   const [complianceRate, setComplianceRate] = useState(0);
   const [compliancePieData, setCompliancePieData] = useState<any[]>([]);
@@ -81,6 +78,17 @@ const Dashboard = () => {
   const [icvBarData, setIcvBarData] = useState([]);
 
   const selectedZone = getSelectedZone();
+
+  // --- بيانات الرادار الجديد (الامتثال التشغيلي) ---
+  const complianceRadarData = useMemo(() => [
+    { subject: language === 'ar' ? 'الاستجابة للملاحظات' : 'Response to Notes', company: 92, sector: 80 },
+    { subject: language === 'ar' ? 'الامتثال البيئي' : 'Environmental Compliance', company: 78, sector: 80 },
+    { subject: language === 'ar' ? 'التقارير الدورية' : 'Periodic Reports', company: 95, sector: 80 },
+    { subject: language === 'ar' ? 'سياسة الإشراف' : 'Oversight Policy', company: 88, sector: 80 },
+    { subject: language === 'ar' ? 'الرقابة على المشاريع' : 'Project Monitoring', company: 82, sector: 80 },
+    { subject: language === 'ar' ? 'الإبلاغ عن الحوادث' : 'Incident Reporting', company: 100, sector: 80 },
+    { subject: language === 'ar' ? 'المبادرات النوعية' : 'Strategic Initiatives', company: 70, sector: 80 },
+  ], [language]);
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000000) return (value / 1000000000).toFixed(1) + (language === 'ar' ? ' مليار' : 'B');
@@ -112,7 +120,6 @@ const Dashboard = () => {
     let allRisksDetail: any[] = [];
     let accTasks = { todo: 0, inProgress: 0, done: 0 };
     const radarAcc = AXES.map(axis => ({ id: axis.id, score: 0, count: 0 }));
-    const zoneScores: any[] = [];
     
     const allZonesStr = localStorage.getItem('opaz_zones_registry');
     const allZonesData: Zone[] = allZonesStr ? JSON.parse(allZonesStr) : ZONES;
@@ -129,7 +136,6 @@ const Dashboard = () => {
             const zoneAvg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
             accMaturity += zoneAvg;
             countMaturity++;
-            zoneScores.push({ name_ar: zone.name_ar, name_en: zone.name_en, score: zoneAvg });
 
             Object.keys(data.assessment.scores).forEach(key => {
                 const indId = parseInt(key);
@@ -142,7 +148,6 @@ const Dashboard = () => {
             });
         }
         
-        // FIX: Combine base zone data with specific financial data to ensure all fields are available.
         const combinedData = { ...zone, ...(data.financial || {}) };
         
         accInvestment += Number(combinedData.cumulativeInvestment) || 0;
@@ -151,13 +156,11 @@ const Dashboard = () => {
         accDevArea += Number(combinedData.developedArea) || 0;
         accTotalArea += Number(combinedData.totalArea) || 0;
         
-        // FIX: More robust averaging for economic return.
         if (combinedData.economicReturn !== undefined && combinedData.economicReturn !== null) {
             accEcoReturn += Number(combinedData.economicReturn);
             countEcoReturn++;
         }
 
-        // FIX: More robust averaging for Omanization rate.
         if (combinedData.totalEmployees !== undefined && combinedData.totalEmployees !== null) {
             const omanRate = (combinedData.totalEmployees > 0) ? (Number(combinedData.omaniEmployees || 0) / combinedData.totalEmployees) * 100 : 0;
             accOmanization += omanRate;
@@ -208,8 +211,6 @@ const Dashboard = () => {
         };
     }); 
     setRadarData(processedRadar);
-
-    setTopZones(zoneScores.sort((a,b) => b.score - a.score).slice(0, 3));
 
     setImprovementPlanData([
         { name: t('reports.improvement.completed'), value: accTasks.done, color: '#00E096' },
@@ -307,6 +308,7 @@ const Dashboard = () => {
            </Button>
       </header>
 
+      {/* KPI Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={0}>
               <Card className={cardBaseClasses}>
@@ -336,7 +338,7 @@ const Dashboard = () => {
           </motion.div>
 
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={2}>
-             <Card className={cn(cardBaseClasses, "bg-gradient-to-br from-blue-950/50 to-slate-900/50")}>
+              <Card className={cn(cardBaseClasses, "bg-gradient-to-br from-blue-950/50 to-slate-900/50")}>
                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium text-blue-200/80">{t('dashboard.annualExports')}</CardTitle>
                        <Anchor className="h-4 w-4 text-blue-300/70" />
@@ -367,7 +369,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={4}>
-             <Card className={cardBaseClasses}>
+              <Card className={cardBaseClasses}>
                    <CardHeader><CardTitle className="text-sm font-medium text-blue-200/80">{t('dashboard.omanizationRate')}</CardTitle></CardHeader>
                    <CardContent className="flex flex-col items-center justify-center h-[120px]">
                        <div className="w-full h-full relative flex items-end justify-center pb-2">
@@ -417,28 +419,83 @@ const Dashboard = () => {
           </motion.div>
       </div>
 
-       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8} className="lg:col-span-2">
+      {/* Row: Dual Radars (Strategic vs Operational Compliance) */}
+       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Strategic Performance Radar (Right) */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
             <Card className={cardBaseClasses}>
-                <CardHeader><CardTitle className="text-gold-400">{t('dashboard.strategicRadar')}</CardTitle></CardHeader>
-                <CardContent className="h-[350px]">
+                <CardHeader><CardTitle className="text-gold-400 flex items-center gap-2"><Anchor size={18} /> {t('dashboard.strategicRadar')}</CardTitle></CardHeader>
+                <CardContent className="h-[380px]">
                     <ResponsiveContainer width="100%" height="100%">
                        <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
-                        <PolarGrid stroke="rgba(255,255,255,0.2)" />
+                        <PolarGrid stroke="rgba(255,255,255,0.1)" />
                         <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                         <PolarRadiusAxis angle={30} domain={[0, 5]} tick={false} axisLine={false} />
                         <Tooltip {...tooltipStyle} />
                         <Legend wrapperStyle={{ color: '#fff', paddingTop: '10px' }}/>
-                        <Radar name={t('reports.companyScore')} dataKey="company" stroke="#D4AF37" strokeWidth={3} fill="#D4AF37" fillOpacity={0.4} />
-                        <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#8b5cf6" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
+                        <Radar name={t('reports.companyScore')} dataKey="company" stroke="#fbbf24" strokeWidth={3} fill="#fbbf24" fillOpacity={0.4} />
+                        <Radar name={t('reports.sectorAverage')} dataKey="sector" stroke="#818cf8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
                       </RadarChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
         </motion.div>
-        <div className="lg:col-span-1"><motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9} className="h-full"><TopPerformers data={topZones} /></motion.div></div>
+
+        {/* Operational Compliance Radar (Left) - FIXES APPLIED HERE */}
+        <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
+            <Card className={cardBaseClasses}>
+                <CardHeader>
+                    <CardTitle className="text-gold-400 flex items-center gap-2">
+                        <ShieldCheck size={18} className="text-gold-500" />
+                        {/* FIX 1: Removed '(مدار)' from title */}
+                        {language === 'ar' ? 'الامتثال التشغيلي' : 'Operational Compliance'}
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="h-[380px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                        {/* FIX 2: Reduced outerRadius from 75% to 70% to prevent overlap */}
+                        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={complianceRadarData}>
+                            <defs>
+                                <radialGradient id="radarFillCopper">
+                                    <stop offset="0%" stopColor="#A57C5B" stopOpacity={0.5}/>
+                                    <stop offset="100%" stopColor="#A57C5B" stopOpacity={0.1}/>
+                                </radialGradient>
+                            </defs>
+                            <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                            {/* FIX 3: Used RadarCustomTick to handle text spacing smartly */}
+                            <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
+                            <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                            <Tooltip {...tooltipStyle} formatter={(v: number) => `${v}%`} />
+                            <Legend wrapperStyle={{ color: '#fff', paddingTop: '10px' }} />
+                            
+                            <Radar 
+                                name={language === 'ar' ? 'أداء المنطقة' : 'Zone Performance'} 
+                                dataKey="company" 
+                                stroke="#A57C5B" 
+                                strokeWidth={3} 
+                                fill="url(#radarFillCopper)" 
+                                fillOpacity={0.7}
+                                dot={{ r: 4, fill: '#A57C5B', stroke: '#001220', strokeWidth: 2 }}
+                            />
+                            
+                            <Radar 
+                                name={language === 'ar' ? 'متوسط المناطق' : 'Sector Average'} 
+                                dataKey="sector" 
+                                stroke="#94A3B8" 
+                                strokeDasharray="6 6" 
+                                strokeWidth={2} 
+                                fill="transparent" 
+                                dot={{ r: 3, fill: '#94A3B8' }}
+                            />
+                        </RadarChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </motion.div>
       </div>
 
+      {/* Rest of the Dashboard (Risks, Compliance, ICV, etc.) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
            <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={10}>
                <Card className={cardBaseClasses}>
@@ -484,12 +541,12 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={12}>
-             <Card className={cardBaseClasses}>
-                 <CardHeader><CardTitle className="text-red-400 text-sm">{t('dashboard.riskDistributionMap')}</CardTitle></CardHeader>
-                 <CardContent>
-                     <RiskLandscape data={risksList} />
-                 </CardContent>
-             </Card>
+              <Card className={cardBaseClasses}>
+                  <CardHeader><CardTitle className="text-red-400 text-sm">{t('dashboard.riskDistributionMap')}</CardTitle></CardHeader>
+                  <CardContent>
+                      <RiskLandscape data={risksList} />
+                  </CardContent>
+              </Card>
           </motion.div>
           
           <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={13}>

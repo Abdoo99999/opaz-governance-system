@@ -172,7 +172,7 @@ const Assessment: React.FC<AssessmentProps> = ({ onNavigate, userRole }) => {
                 description: t('assessment.successDesc'),
             });
             refreshData();
-            onNavigate('compliance-monitor');
+            onNavigate('new-assessment');
         }
     };
 
@@ -505,3 +505,5 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
 
 
 export default Assessment;
+
+    
