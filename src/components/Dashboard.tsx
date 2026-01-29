@@ -19,7 +19,6 @@ import { INDICATORS, AXES } from '@/data/indicators';
 import RiskLandscape from './dashboard/RiskLandscape';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
-import { RadarCustomTick } from './Reports';
 import { ZONES, type Zone } from '@/data/companies';
 import { ASSESSMENT_DATA } from '@/data/assessmentData';
 
@@ -44,6 +43,45 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, val
       <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="text-[10px] font-bold">
         {value}
       </text>
+    );
+};
+
+export const RadarCustomTick = (props: any) => {
+    const { x, y, payload } = props;
+    const words = payload.value.split(' ');
+    const maxChars = 20;
+  
+    if (words.length === 1 || payload.value.length < maxChars) {
+      return (
+        <g transform={`translate(${x},${y})`}>
+          <text x={0} y={0} dy={4} textAnchor="middle" fill="#9ca3af" fontSize={11} className="print:text-gray-600 print:text-xs">
+            {payload.value}
+          </text>
+        </g>
+      );
+    }
+    
+    let line = '';
+    const lines = [];
+    for (let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + ' ';
+      if (testLine.length > maxChars) {
+        lines.push(line);
+        line = words[n] + ' ';
+      } else {
+        line = testLine;
+      }
+    }
+    lines.push(line);
+  
+    return (
+      <g transform={`translate(${x},${y})`}>
+        {lines.map((l, i) => (
+          <text key={i} x={0} y={i * 12} dy={4} textAnchor="middle" fill="#9ca3af" fontSize={10} className="print:text-gray-600 print:text-xs">
+            {l.trim()}
+          </text>
+        ))}
+      </g>
     );
 };
 
@@ -72,6 +110,7 @@ const Dashboard = () => {
   const [maturityPathData, setMaturityPathData] = useState([]);
   const [icvBarData, setIcvBarData] = useState([]);
   const [operationalComplianceRadarData, setOperationalComplianceRadarData] = useState<any[]>([]);
+  const [operationalTotalScore, setOperationalTotalScore] = useState(0);
 
   const selectedZone = getSelectedZone();
 
@@ -81,12 +120,6 @@ const Dashboard = () => {
     const sum = radarData.reduce((acc, item) => acc + item.company, 0);
     return (sum / radarData.length).toFixed(1);
   }, [radarData]);
-
-  const complianceTotal = useMemo(() => {
-    if (operationalComplianceRadarData.length === 0) return 0;
-    const sum = operationalComplianceRadarData.reduce((acc, item) => acc + item.company, 0);
-    return Math.round(sum / operationalComplianceRadarData.length);
-  }, [operationalComplianceRadarData]);
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000000) return (value / 1000000000).toFixed(1) + (language === 'ar' ? ' مليار' : 'B');
@@ -120,6 +153,8 @@ const Dashboard = () => {
     let accTasks = { todo: 0, inProgress: 0, done: 0 };
     const radarAcc = AXES.map(axis => ({ id: axis.id, score: 0, count: 0 }));
     const opComplianceCategoryScores = ASSESSMENT_DATA.map(c => ({ id: c.id, score: 0, count: 0 }));
+    let accOperationalTotalScore = 0;
+    let opScoreZonesCount = 0;
     
     const allZonesStr = localStorage.getItem('opaz_zones_registry');
     const allZonesData: Zone[] = allZonesStr ? JSON.parse(allZonesStr) : ZONES;
@@ -149,21 +184,27 @@ const Dashboard = () => {
         
         if (data.opAssessment) {
             const inputs = data.opAssessment.inputs || {};
+            let zoneTotalScore = 0;
             ASSESSMENT_DATA.forEach((category, index) => {
                 let earnedPoints = 0;
                 category.indicators.forEach(ind => {
                     const val = inputs[ind.id] || 0;
+                    let indicatorScore = 0;
                     if (ind.type === 'select') {
-                        earnedPoints += val;
+                       indicatorScore = val;
                     } else {
                         const max = ind.maxScore || 100;
-                        earnedPoints += (val / max) * ind.weight;
+                        indicatorScore = (val / max) * ind.weight;
                     }
+                    earnedPoints += indicatorScore;
+                    zoneTotalScore += indicatorScore;
                 });
                 const percentageScore = category.weight > 0 ? (earnedPoints / category.weight) * 100 : 0;
                 opComplianceCategoryScores[index].score += percentageScore;
                 opComplianceCategoryScores[index].count++;
             });
+            accOperationalTotalScore += zoneTotalScore;
+            opScoreZonesCount++;
         }
         
         const legacyCompliance = data.compliance;
@@ -209,9 +250,11 @@ const Dashboard = () => {
         return { subject: language === 'ar' ? axis.title_ar : axis.title_en, company: parseFloat(avg.toFixed(1)), sector: 3.5, fullMark: 5 };
     }));
     
+    setOperationalTotalScore(opScoreZonesCount > 0 ? accOperationalTotalScore / opScoreZonesCount : 0);
+
     setOperationalComplianceRadarData(ASSESSMENT_DATA.map((category, index) => {
         const { score, count } = opComplianceCategoryScores[index];
-        const avgScore = count > 0 ? Math.round(score / count) : 0;
+        const avgScore = count > 0 ? (score / count) : 0;
         const titleAr = category.title.substring(category.title.indexOf('.') + 2);
         const titleEn = category.title_en.substring(category.title_en.indexOf('.') + 2);
         return {
@@ -220,6 +263,10 @@ const Dashboard = () => {
             sector: 80,
         };
     }));
+    
+    const finalOpScore = opScoreZonesCount > 0 ? accOperationalTotalScore / opScoreZonesCount : 0;
+    setComplianceRate(finalOpScore);
+    setCompliancePieData([{ name: t('dashboard.compliant'), value: finalOpScore, color: '#00E096' }, { name: t('dashboard.nonCompliant'), value: 100 - finalOpScore, color: '#ef4444' }]);
     
     const tasksSum = accTasks.done + accTasks.inProgress + accTasks.todo;
     const finalPlanData = tasksSum > 0 ? [
@@ -232,12 +279,6 @@ const Dashboard = () => {
         { name: t('reports.improvement.notStarted'), value: 3, color: '#6b7280' },
     ];
     setImprovementPlanData(finalPlanData as any);
-    
-    const compRate = opComplianceCategoryScores.length > 0
-        ? Math.round(opComplianceCategoryScores.reduce((acc, item) => acc + (item.count > 0 ? item.score/item.count : 0), 0) / opComplianceCategoryScores.filter(i => i.count > 0).length) || 0
-        : 75;
-    setComplianceRate(compRate);
-    setCompliancePieData([{ name: t('dashboard.compliant'), value: compRate, color: '#00E096' }, { name: t('dashboard.nonCompliant'), value: 100 - compRate, color: '#ef4444' }]);
 
     const execOman = Math.round(countOmanization > 0 ? accOmanization / countOmanization : 65);
     setLeadershipData([{ name: t('dashboard.nationalLeaders'), value: execOman, color: '#D4AF37' }, { name: t('dashboard.expatExpertise'), value: 100 - execOman, color: '#3b82f6' }]);
@@ -421,7 +462,7 @@ const Dashboard = () => {
             <Card className={cn(cardBaseClasses, "relative")}>
                 <div className="absolute top-4 right-4 z-10 flex flex-col items-center bg-slate-950/60 backdrop-blur-md border border-purple-500/30 p-2 rounded-xl min-w-[70px] shadow-2xl">
                     <span className="text-[10px] text-purple-400/80 font-bold uppercase tracking-wider">{language === 'ar' ? 'الامتثال' : 'COMPLIANCE'}</span>
-                    <span className="text-2xl font-black text-white leading-tight">{complianceTotal}%</span>
+                    <span className="text-2xl font-black text-white leading-tight">{operationalTotalScore.toFixed(1)}</span>
                 </div>
                 <CardHeader><CardTitle className="text-gold-400 flex items-center gap-2 justify-center"><ShieldCheck size={18} className="text-gold-500" /> {language === 'ar' ? 'الامتثال التشغيلي' : 'Operational Compliance'}</CardTitle></CardHeader>
                 <CardContent className="h-[380px]">
@@ -429,15 +470,9 @@ const Dashboard = () => {
                         <RadarChart cx="50%" cy="50%" outerRadius="65%" data={operationalComplianceRadarData}>
                             <defs><radialGradient id="radarFillCopperDashboard"><stop offset="0%" stopColor="#A57C5B" stopOpacity={0.5}/><stop offset="100%" stopColor="#A57C5B" stopOpacity={0.1}/></radialGradient></defs>
                             <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                            <PolarAngleAxis dataKey="subject" tick={({ payload, x, y, textAnchor, index, ...rest }) => {
-                                    const angle = (index * 360) / operationalComplianceRadarData.length;
-                                    const radiusOffset = 25; 
-                                    const dx = Math.cos((angle - 90) * (Math.PI / 180)) * radiusOffset;
-                                    const dy = Math.sin((angle - 90) * (Math.PI / 180)) * radiusOffset;
-                                    return <text {...rest} x={x + dx} y={y + dy} textAnchor={textAnchor} fill="#A0A0A0" fontSize={10} fontWeight="500">{payload.value}</text>;
-                            }} />
+                            <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                             <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                            <Tooltip {...tooltipStyle} formatter={(v: number) => `${v}%`} />
+                            <Tooltip {...tooltipStyle} formatter={(v: number) => `${v.toFixed(1)}%`} />
                             <Legend wrapperStyle={{ color: '#fff', paddingTop: '10px' }} />
                             <Radar name={language === 'ar' ? 'أداء المنطقة' : 'Zone Performance'} dataKey="company" stroke="#A57C5B" strokeWidth={3} fill="url(#radarFillCopperDashboard)" fillOpacity={0.7} dot={{ r: 4, fill: '#A57C5B', stroke: '#001220', strokeWidth: 2 }} />
                             <Radar name={language === 'ar' ? 'متوسط المناطق' : 'Sector Average'} dataKey="sector" stroke="#8b5cf6" strokeDasharray="6 6" strokeWidth={2} fill="transparent" dot={{ r: 3, fill: '#8b5cf6' }} />
@@ -459,7 +494,7 @@ const Dashboard = () => {
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie data={compliancePieData} dataKey="value" innerRadius={40} outerRadius={60} paddingAngle={5}><Cell fill="#00E096" /><Cell fill="#ef4444" /></Pie>
-                                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-lg font-bold">{complianceRate}%</text>
+                                    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-lg font-bold">{complianceRate.toFixed(1)}%</text>
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>

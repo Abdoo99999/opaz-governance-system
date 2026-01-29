@@ -93,6 +93,7 @@ export default function Reports() {
   const [icvData, setIcvData] = useState<any>(null);
   const [radarData, setRadarData] = useState<any[]>([]);
   const [operationalComplianceRadarData, setOperationalComplianceRadarData] = useState<any[]>([]);
+  const [operationalTotalScore, setOperationalTotalScore] = useState(0);
 
   const selectedZone = getSelectedZone();
 
@@ -102,12 +103,6 @@ export default function Reports() {
     const sum = radarData.reduce((acc, item) => acc + item.company, 0);
     return (sum / radarData.length).toFixed(1);
   }, [radarData]);
-
-  const complianceTotal = useMemo(() => {
-    if (operationalComplianceRadarData.length === 0) return 0;
-    const sum = operationalComplianceRadarData.reduce((acc, item) => acc + item.company, 0);
-    return Math.round(sum / operationalComplianceRadarData.length);
-  }, [operationalComplianceRadarData]);
 
   useEffect(() => {
     if (!selectedZoneId || selectedZoneId === 'all') return;
@@ -202,6 +197,7 @@ export default function Reports() {
     if (opAssessStr) {
         const opAssessData = JSON.parse(opAssessStr);
         const inputs = opAssessData.inputs || {};
+        let totalScore = 0;
 
         const newOpRadarData = ASSESSMENT_DATA.map(category => {
             let earnedPoints = 0;
@@ -214,7 +210,8 @@ export default function Reports() {
                     earnedPoints += (val / max) * ind.weight;
                 }
             });
-            const percentageScore = category.weight > 0 ? Math.round((earnedPoints / category.weight) * 100) : 0;
+            totalScore += earnedPoints;
+            const percentageScore = category.weight > 0 ? (earnedPoints / category.weight) * 100 : 0;
             const titleAr = category.title.substring(category.title.indexOf('.') + 2);
             const titleEn = category.title_en.substring(category.title_en.indexOf('.') + 2);
     
@@ -225,6 +222,7 @@ export default function Reports() {
             };
         });
         setOperationalComplianceRadarData(newOpRadarData);
+        setOperationalTotalScore(totalScore);
     }
 
     // Risks
@@ -362,7 +360,7 @@ export default function Reports() {
                         {/* FLOATING SCORE BADGE */}
                         <div className="absolute top-4 right-4 z-10 flex flex-col items-center bg-slate-950/80 backdrop-blur-md border border-purple-500/30 p-2 rounded-xl min-w-[70px] shadow-lg">
                             <span className="text-[10px] text-purple-400/70 font-bold uppercase tracking-wider">{language === 'ar' ? 'الامتثال' : 'COMPLIANCE'}</span>
-                            <span className="text-2xl font-black text-purple-400 leading-tight">{complianceTotal}%</span>
+                            <span className="text-2xl font-black text-purple-400 leading-tight">{operationalTotalScore.toFixed(1)}</span>
                         </div>
 
                         <h4 className="text-center text-sm font-bold text-slate-400 mb-2 flex items-center justify-center gap-2">
@@ -378,22 +376,9 @@ export default function Reports() {
                                     </radialGradient>
                                 </defs>
                                 <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                                <PolarAngleAxis
-                                    dataKey="subject"
-                                    tick={({ payload, x, y, textAnchor, index, ...rest }) => {
-                                        const angle = (index * 360) / operationalComplianceRadarData.length;
-                                        const radiusOffset = 25; 
-                                        const dx = Math.cos((angle - 90) * (Math.PI / 180)) * radiusOffset;
-                                        const dy = Math.sin((angle - 90) * (Math.PI / 180)) * radiusOffset;
-                                        return (
-                                            <text {...rest} x={x + dx} y={y + dy} textAnchor={textAnchor} fill="#94A3B8" fontSize={9} fontWeight="500">
-                                                {payload.value}
-                                            </text>
-                                        );
-                                    }}
-                                />
+                                <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
                                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                                <RechartsTooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}} />
+                                <RechartsTooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}} formatter={(v: number) => `${v.toFixed(1)}%`} />
                                 <Radar name='Zone Performance' dataKey="company" stroke="#A57C5B" strokeWidth={3} fill="url(#radarFillCopperRep)" fillOpacity={0.7} />
                                 <Radar name='Sector Average' dataKey="sector" stroke="#8B5CF6" strokeWidth={2} strokeDasharray="6 6" fill="transparent" />
                             </RadarChart>
