@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -20,6 +19,7 @@ import { INDICATORS, AXES } from '@/data/indicators';
 import RiskLandscape from './dashboard/RiskLandscape';
 import { cn } from '@/lib/utils';
 import { useYear } from '@/context/YearContext';
+import { RadarCustomTick } from './Reports';
 import { ZONES, type Zone } from '@/data/companies';
 import { ASSESSMENT_DATA } from '@/data/assessmentData';
 
@@ -44,45 +44,6 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, val
       <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="text-[10px] font-bold">
         {value}
       </text>
-    );
-};
-
-export const RadarCustomTick = (props: any) => {
-    const { x, y, payload } = props;
-    const words = payload.value.split(' ');
-    const maxChars = 20;
-  
-    if (words.length === 1 || payload.value.length < maxChars) {
-      return (
-        <g transform={`translate(${x},${y})`}>
-          <text x={0} y={0} dy={4} textAnchor="middle" fill="#9ca3af" fontSize={11} className="print:text-gray-600 print:text-xs">
-            {payload.value}
-          </text>
-        </g>
-      );
-    }
-    
-    let line = '';
-    const lines = [];
-    for (let n = 0; n < words.length; n++) {
-      const testLine = line + words[n] + ' ';
-      if (testLine.length > maxChars) {
-        lines.push(line);
-        line = words[n] + ' ';
-      } else {
-        line = testLine;
-      }
-    }
-    lines.push(line);
-  
-    return (
-      <g transform={`translate(${x},${y})`}>
-        {lines.map((l, i) => (
-          <text key={i} x={0} y={i * 12} dy={4} textAnchor="middle" fill="#9ca3af" fontSize={10} className="print:text-gray-600 print:text-xs">
-            {l.trim()}
-          </text>
-        ))}
-      </g>
     );
 };
 
@@ -304,7 +265,7 @@ const Dashboard = () => {
     let totalSpend = 0, localSpend = 0, smeSpend = 0;
     targetZones.forEach(zone => {
         const combinedData = { ...zone, ...(getZoneData(zone.id).financial || {}) };
-        totalSpend += Number(combinedData.totalSpending) || (Number(combinedData.cumulativeInvestment) || 150000000) * 0.1;
+        totalSpend += Number(combinedData.totalSpending) || 150000000 * 0.1;
         localSpend += Number(combinedData.localSpending) || totalSpend * 0.4;
         smeSpend += Number(combinedData.smeSpending) || totalSpend * 0.1;
     });
@@ -315,17 +276,51 @@ const Dashboard = () => {
   const sparklineData = useMemo(() => Array.from({ length: 10 }, () => ({ uv: totalInvestment * (Math.random() * 0.1 + 0.95) })), [totalInvestment]);
   const exportsTrend = useMemo(() => Array.from({ length: 5 }, (_,i) => ({ name: `Y${i}`, v: totalExports * (0.8 + i*0.05) })), [totalExports]);
 
+  // --- دالة التصدير المعدلة جذرياً (إصلاح اللغة العربية وتغطية كامل الصفحة) ---
   const handleExport = async () => {
     if (!dashboardRef.current) return;
     setIsExporting(true);
     try {
-        const canvas = await html2canvas(dashboardRef.current, { scale: 2, backgroundColor: '#001220', useCORS: true });
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`OPAZ-Dashboard-${selectedYear}.pdf`);
-    } finally { setIsExporting(false); }
+        const canvas = await html2canvas(dashboardRef.current, { 
+            scale: 2.5, 
+            backgroundColor: '#001220',
+            useCORS: true,
+            logging: false,
+            onclone: (documentClone) => {
+                // فرض خط Arial وإلغاء مسافات الحروف لضمان اتصال الحروف العربية
+                const allElements = documentClone.querySelectorAll('*');
+                allElements.forEach((el: any) => {
+                    el.style.fontFamily = 'Arial, sans-serif'; 
+                    el.style.letterSpacing = '0px'; 
+                });
+                // معالجة نصوص الرسوم البيانية SVG لضمان اتجاه النص الصحيح
+                const svgTexts = documentClone.querySelectorAll('text');
+                svgTexts.forEach((el: any) => {
+                    el.style.fontFamily = 'Arial, sans-serif';
+                    el.style.direction = 'rtl';
+                });
+            }
+        });
+        
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        
+        // حساب الأبعاد لتغطية كامل محتوى الداش بورد في صفحة واحدة ممتدة
+        const imgWidth = 210; // عرض A4 القياسي (mm)
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: [imgWidth, imgHeight] // جعل طول صفحة الـ PDF مطابقاً لطول المحتوى
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save(`OPAZ-Executive-Dashboard-${selectedYear}.pdf`);
+    } catch (error) {
+        console.error("Export Error:", error);
+    } finally { 
+        setIsExporting(false); 
+    }
   };
 
   const tooltipStyle = {
@@ -351,7 +346,7 @@ const Dashboard = () => {
               {selectedZoneId === 'all' ? t('dashboard.central_dashboard') : `${t('dashboard.title')}: ${language==='ar'?selectedZone?.name_ar:selectedZone?.name_en}`}
           </h1>
            <Button onClick={handleExport} className="bg-gold-500 text-royal-900 hover:bg-gold-400 font-bold" disabled={isExporting}>
-               {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown />}
+               {isExporting ? <Loader2 className="ml-2 h-5 w-5 animate-spin" /> : <FileDown className="ml-2 h-5 w-5" />}
                {isExporting ? t('common.loading') : t('common.exportPdf')}
            </Button>
       </header>
@@ -441,10 +436,8 @@ const Dashboard = () => {
           </motion.div>
       </div>
 
-      {/* Row: Dual Radars (Strategic vs Operational Compliance) */}
+      {/* Row: Dual Radars */}
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Strategic Performance Radar */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={8}>
             <Card className={cn(cardBaseClasses, "relative")}>
                 <div className="absolute top-4 left-4 z-10 flex flex-col items-center bg-slate-950/60 backdrop-blur-md border border-gold-500/30 p-2 rounded-xl min-w-[70px] shadow-2xl">
@@ -468,7 +461,6 @@ const Dashboard = () => {
             </Card>
         </motion.div>
 
-        {/* Operational Compliance Radar */}
         <motion.div variants={cardVariants} initial="hidden" animate="visible" custom={9}>
             <Card className={cn(cardBaseClasses, "relative")}>
                 <div className="absolute top-4 right-4 z-10 flex flex-col items-center bg-slate-950/60 backdrop-blur-md border border-purple-500/30 p-2 rounded-xl min-w-[70px] shadow-2xl">
@@ -509,24 +501,16 @@ const Dashboard = () => {
                                           <Cell key={`cell-${index}`} fill={entry.color} />
                                         ))}
                                     </Pie>
-                                    <Tooltip {...tooltipStyle} formatter={(value, name) => [value, name]}/>
+                                    <Tooltip {...tooltipStyle} />
                                     <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-lg font-bold">{complianceRate.toFixed(1)}%</text>
                                 </PieChart>
                             </ResponsiveContainer>
                         </div>
-                        {/* تحسين دائرة مهام التحسين (إضافة أرقام افتراضية وتسميات) */}
                         <div className="h-[250px] flex flex-col items-center">
                             <p className="text-xs mb-4 text-gray-400">{t('dashboard.improvementTasks')}</p>
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie 
-                                      data={improvementPlanData} 
-                                      dataKey="value" 
-                                      innerRadius={0} 
-                                      outerRadius={60} 
-                                      labelLine={false}
-                                      label={renderCustomizedLabel} // إظهار الرقم فوق اللون
-                                    >
+                                    <Pie data={improvementPlanData} dataKey="value" innerRadius={0} outerRadius={60} labelLine={false} label={renderCustomizedLabel}>
                                         {improvementPlanData.map((entry: any, index: number) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                                     </Pie>
                                     <Tooltip {...tooltipStyle}/>
@@ -569,5 +553,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-    

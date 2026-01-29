@@ -36,7 +36,7 @@ export const translations = {
       landSubtitle: "من أصل {totalArea} كم² إجمالي",
       economicReturn: "العائد الاقتصادي",
       returnUnit: "ريال عماني / م²",
-      strategicRadar: "رادار الأداء الاستراتيجي",
+      strategicRadar: "الأداء المؤسسي",
       topPerformers: "أفضل المناطق أداءً",
       complianceAndImprovement: "حالة الالتزام وخطة التحسين",
       legislativeCompliance: "حالة الالتزام التشريعي",
@@ -485,7 +485,7 @@ export const translations = {
       landSubtitle: "out of {totalArea} km² total",
       economicReturn: "Economic Return",
       returnUnit: "OMR / m²",
-      strategicRadar: "Strategic Performance Radar",
+      strategicRadar: "Institutional Performance",
       topPerformers: "Top Performing Zones",
       complianceAndImprovement: "Compliance Status & Improvement Plan",
       legislativeCompliance: "Legislative Compliance Status",
@@ -865,11 +865,11 @@ export const translations = {
       admin: "System Admin",
       company: "Zone Portal",
       switchLang: "عربي",
-      username: "اسم المستخدم",
-      password: "كلمة المرور",
-      login: "تسجيل الدخول",
-      usernamePlaceholder: "أدخل اسم المستخدم",
-      passwordPlaceholder: "أدخل كلمة المرور",
+      username: "Username",
+      password: "Password",
+      login: "Login",
+      usernamePlaceholder: "Enter username",
+      passwordPlaceholder: "Enter password",
       back: "Back to Registry",
       edit: "Edit",
       save: "Save",
@@ -899,3 +899,5 @@ export const translations = {
     }
   }
 };
+
+    
