@@ -19,6 +19,7 @@ export interface AssessmentIndicator {
 export interface AssessmentCategory {
   id: string;
   title: string;
+  title_en: string;
   weight: number;
   indicators: AssessmentIndicator[];
 }
@@ -27,6 +28,7 @@ export const ASSESSMENT_DATA: AssessmentCategory[] = [
   {
     id: 'std_1',
     title: '1. الاستجابة لملاحظات الهيئة',
+    title_en: '1. Response to OPAZ Feedback',
     weight: 20,
     indicators: [
       {
@@ -55,6 +57,7 @@ export const ASSESSMENT_DATA: AssessmentCategory[] = [
   {
     id: 'std_2',
     title: '2. الامتثال بقرارات الإدارة البيئية',
+    title_en: '2. Compliance with Environmental Decisions',
     weight: 10,
     indicators: [
       {
@@ -100,6 +103,7 @@ export const ASSESSMENT_DATA: AssessmentCategory[] = [
   {
     id: 'std_3',
     title: '3. استلام التقارير الدورية',
+    title_en: '3. Submission of Periodic Reports',
     weight: 15,
     indicators: [
       {
@@ -132,6 +136,7 @@ export const ASSESSMENT_DATA: AssessmentCategory[] = [
   {
     id: 'std_4',
     title: '4. الامتثال لسياسة الإشراف والرقابة',
+    title_en: '4. Compliance with Supervision Policy',
     weight: 15,
     indicators: [
       {
@@ -175,6 +180,7 @@ export const ASSESSMENT_DATA: AssessmentCategory[] = [
   {
     id: 'std_5',
     title: '5. الرقابة على المشاريع',
+    title_en: '5. Project Monitoring',
     weight: 15,
     indicators: [
       {
@@ -206,6 +212,7 @@ export const ASSESSMENT_DATA: AssessmentCategory[] = [
   {
     id: 'std_6',
     title: '6. الإبلاغ عن الحوادث',
+    title_en: '6. Incident Reporting',
     weight: 10,
     indicators: [
       {
@@ -225,6 +232,7 @@ export const ASSESSMENT_DATA: AssessmentCategory[] = [
   {
     id: 'std_7',
     title: '7. المبادرات النوعية',
+    title_en: '7. Qualitative Initiatives',
     weight: 15,
     indicators: [
       {
