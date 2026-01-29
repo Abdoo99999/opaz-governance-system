@@ -156,6 +156,8 @@ const Dashboard = () => {
     const opComplianceCategoryScores = ASSESSMENT_DATA.map(c => ({ id: c.id, score: 0, count: 0 }));
     let accOperationalTotalScore = 0;
     let opScoreZonesCount = 0;
+    let accLegislativeCompliant = 0;
+    let accLegislativeTotal = 0;
     
     const allZonesStr = localStorage.getItem('opaz_zones_registry');
     const allZonesData: Zone[] = allZonesStr ? JSON.parse(allZonesStr) : ZONES;
@@ -211,6 +213,10 @@ const Dashboard = () => {
         const legacyCompliance = data.compliance;
         if(legacyCompliance) {
           const compList = Object.values(legacyCompliance.compliance || {});
+          if (compList.length > 0) {
+              accLegislativeCompliant += compList.filter(c => c === true).length;
+              accLegislativeTotal += compList.length;
+          }
           allRisksDetail.push(...(legacyCompliance.risks || []));
           accRisks += (legacyCompliance.risks || []).filter((r: any) => (r.impact * r.probability) >= 15).length;
         }
@@ -265,9 +271,13 @@ const Dashboard = () => {
         };
     }));
     
-    const finalOpScore = opScoreZonesCount > 0 ? accOperationalTotalScore / opScoreZonesCount : 0;
-    setComplianceRate(finalOpScore);
-    setCompliancePieData([{ name: t('dashboard.compliant'), value: finalOpScore, color: '#00E096' }, { name: t('dashboard.nonCompliant'), value: 100 - finalOpScore, color: '#ef4444' }]);
+    const finalLegislativeComplianceRate = accLegislativeTotal > 0 ? (accLegislativeCompliant / accLegislativeTotal) * 100 : 0;
+    const nonCompliantCount = accLegislativeTotal - accLegislativeCompliant;
+    setComplianceRate(finalLegislativeComplianceRate);
+    setCompliancePieData([
+        { name: t('dashboard.compliant'), value: accLegislativeCompliant, color: '#00E096' },
+        { name: t('dashboard.nonCompliant'), value: nonCompliantCount, color: '#ef4444' }
+    ]);
     
     const tasksSum = accTasks.done + accTasks.inProgress + accTasks.todo;
     const finalPlanData = tasksSum > 0 ? [
@@ -340,7 +350,7 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold">
               {selectedZoneId === 'all' ? t('dashboard.central_dashboard') : `${t('dashboard.title')}: ${language==='ar'?selectedZone?.name_ar:selectedZone?.name_en}`}
           </h1>
-           <Button onClick={handleExport} className="bg-gold-500 text-royal-900 hover:bg-gold-400" disabled={isExporting}>
+           <Button onClick={handleExport} className="bg-gold-500 text-royal-900 hover:bg-gold-400 font-bold" disabled={isExporting}>
                {isExporting ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />}
                {t('common.exportPdf')}
            </Button>
@@ -468,7 +478,7 @@ const Dashboard = () => {
                 <CardHeader><CardTitle className="text-gold-400 flex items-center gap-2 justify-center"><ShieldCheck size={18} className="text-gold-500" /> {language === 'ar' ? 'الامتثال التشغيلي' : 'Operational Compliance'}</CardTitle></CardHeader>
                 <CardContent className="h-[380px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart cx="50%" cy="50%" outerRadius="65%" data={operationalComplianceRadarData}>
+                        <RadarChart cx="50%" cy="50%" outerRadius="60%" data={operationalComplianceRadarData}>
                             <defs><radialGradient id="radarFillCopperDashboard"><stop offset="0%" stopColor="#A57C5B" stopOpacity={0.5}/><stop offset="100%" stopColor="#A57C5B" stopOpacity={0.1}/></radialGradient></defs>
                             <PolarGrid stroke="rgba(255,255,255,0.1)" />
                             <PolarAngleAxis dataKey="subject" tick={<RadarCustomTick />} />
@@ -494,7 +504,12 @@ const Dashboard = () => {
                             <p className="text-xs mb-4 text-gray-400">{t('dashboard.legislativeCompliance')}</p>
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
-                                    <Pie data={compliancePieData} dataKey="value" innerRadius={40} outerRadius={60} paddingAngle={5}><Cell fill="#00E096" /><Cell fill="#ef4444" /></Pie>
+                                    <Pie data={compliancePieData} dataKey="value" innerRadius={40} outerRadius={60} paddingAngle={5}>
+                                        {compliancePieData.map((entry, index) => (
+                                          <Cell key={`cell-${index}`} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <RechartsTooltip formatter={(value, name) => [value, name]}/>
                                     <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-white text-lg font-bold">{complianceRate.toFixed(1)}%</text>
                                 </PieChart>
                             </ResponsiveContainer>
