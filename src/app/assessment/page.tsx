@@ -21,7 +21,7 @@ import { useYear } from '@/context/YearContext';
 
 
 const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { selectedZoneId, refreshData } = useCompany();
   const { selectedYear } = useYear();
   const [assessmentData, setAssessmentData] = useState<AssessmentCategory[]>(ASSESSMENT_DATA);
@@ -133,7 +133,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
   };
   
   const handleDeleteIndicator = (categoryId: string, indicatorId: string) => {
-      if (confirm('هل أنت متأكد من حذف هذا المؤشر؟')) {
+      if (confirm(t('assessment.deleteIndicatorTitle'))) {
           setAssessmentData(prevData =>
               prevData.map(cat =>
                   cat.id === categoryId
@@ -175,18 +175,18 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
 
 
   return (
-    <div className="space-y-6 pb-20 p-4 md:p-6 lg:p-8" dir="rtl">
+    <div className="space-y-6 pb-20 p-4 md:p-6 lg:p-8" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gold-400">{t('menu.zone_assessment')}</h1>
-          <p className="text-gray-400 text-sm mt-1">نموذج قياس الأداء المؤسسي والمؤشرات التشغيلية</p>
+          <p className="text-gray-400 text-sm mt-1">{t('zone_assessment.subtitle')}</p>
         </div>
         
         <div className="glass p-4 flex items-center gap-4">
           <div className="text-right">
-            <div className="text-xs text-gray-400 font-medium uppercase">النتيجة النهائية</div>
-            <div className="text-xs text-gold-500">من أصل 100 نقطة</div>
+            <div className="text-xs text-gray-400 font-medium uppercase">{t('zone_assessment.finalScore')}</div>
+            <div className="text-xs text-gold-500">{t('zone_assessment.outOf100')}</div>
           </div>
           <div className="h-10 w-px bg-white/10"></div>
           <div className="flex items-baseline gap-1">
@@ -203,16 +203,16 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
             <CardHeader className="bg-black/20 border-b border-white/5 pb-4">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-xl font-bold text-gold-400">
-                  {category.title}
+                  {language === 'ar' ? category.title : category.title_en}
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-gold-500/10 text-gold-400 border-gold-500/20 px-3">
-                    الوزن: {category.weight}%
+                    {t('zone_assessment.weight')}: {category.weight}%
                   </Badge>
                    {userRole === 'admin' && (
                         <Button variant="ghost" size="sm" onClick={() => handleOpenModal(category.id, null)}>
                             <Plus className="w-4 h-4 ml-2" />
-                            إضافة مؤشر
+                            {t('zone_assessment.addIndicator')}
                         </Button>
                     )}
                 </div>
@@ -229,32 +229,33 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center mb-4">
                         <div className="md:col-span-5 space-y-2">
                           <Label className="text-base font-medium text-gray-100 leading-relaxed block">
-                            {indicator.text}
+                            {language === 'ar' ? indicator.text : indicator.text_en}
                           </Label>
                           <div className="flex items-start gap-2 text-sm text-gray-400 bg-slate-800/50 p-2 rounded border border-white/5">
                             <Info className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-                            <span className="leading-relaxed">{indicator.subText}</span>
+                            <span className="leading-relaxed">{language === 'ar' ? indicator.subText : indicator.subText_en}</span>
                           </div>
                         </div>
 
                         <div className="md:col-span-4 flex flex-col justify-center gap-2">
                           <div className="flex justify-between text-xs text-gray-500 px-1">
-                            <span>قيمة المؤشر</span>
-                            <span>الوزن: {indicator.weight}</span>
+                            <span>{t('zone_assessment.indicatorValue')}</span>
+                            <span>{t('zone_assessment.weight')}: {indicator.weight}</span>
                           </div>
 
                           {indicator.type === 'select' ? (
                             <Select 
                               onValueChange={(val) => handleSelectChange(indicator.id, val)} 
                               value={inputs[indicator.id]?.toString()}
+                              dir={language === 'ar' ? 'rtl' : 'ltr'}
                             >
                               <SelectTrigger className="w-full bg-royal-900 border-white/10 text-white focus:ring-gold-500/50 h-11">
-                                <SelectValue placeholder="اختر من القائمة..." />
+                                <SelectValue placeholder={t('common.selectPlaceholder')} />
                               </SelectTrigger>
                               <SelectContent className="bg-royal-800 border-white/10 text-white">
                                 {indicator.options?.map((opt, idx) => (
                                   <SelectItem key={idx} value={opt.score.toString()} className="text-right hover:!bg-gold-500 !bg-gold-500">
-                                    {opt.label}
+                                    {language === 'ar' ? opt.label : opt.label_en}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -278,7 +279,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
                         </div>
                         
                         <div className={cn("md:col-span-2 flex flex-col items-center justify-center p-3 rounded-lg border transition-colors", Number(earnedPoints) > 0 ? "bg-gold-500/5 border-gold-500/20" : "bg-black/20 border-white/5")}>
-                          <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">النقاط</span>
+                          <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-1">{t('zone_assessment.points')}</span>
                           <span className={cn("text-2xl font-bold", Number(earnedPoints) > 0 ? 'text-gold-400' : 'text-gray-600')}>
                             {earnedPoints}
                           </span>
@@ -324,10 +325,10 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
                             {userRole === 'admin' && (
                                 <div>
                                     <Label className="text-xs text-gray-400 mb-2 flex items-center gap-1">
-                                        <FileText className="w-3 h-3" /> ملاحظات المقيم
+                                        <FileText className="w-3 h-3" /> {t('zone_assessment.assessorNotes')}
                                     </Label>
                                     <Textarea 
-                                        placeholder="أضف ملاحظات أو مبررات التقييم هنا..." 
+                                        placeholder={t('zone_assessment.assessorNotesPlaceholder')} 
                                         className="bg-black/20 border-white/10 text-gray-300 min-h-[60px] focus:border-gold-500/30 resize-none text-sm mt-2"
                                         value={notes[indicator.id] || ''}
                                         onChange={(e) => handleNoteChange(indicator.id, e.target.value)}
@@ -347,7 +348,7 @@ const ZoneAssessmentPage = ({ userRole }: { userRole: UserRole }) => {
       <div className="flex justify-end gap-3 pt-4 border-t border-white/10 mt-8">
         <Button variant="ghost" className="text-gray-400 hover:text-white hover:bg-white/5 gap-2">
             <RotateCcw className="w-4 h-4" />
-            إعادة تعيين
+            {t('zone_assessment.reset')}
         </Button>
         <Button onClick={handleSave} className="bg-gold-500 hover:bg-gold-600 text-royal-900 font-bold px-8 shadow-lg shadow-gold-500/10 gap-2">
             <Save className="w-4 h-4" />
@@ -373,29 +374,31 @@ interface IndicatorFormModalProps {
 }
 
 const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose, onSave, editingState }) => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [text, setText] = useState('');
     const [subText, setSubText] = useState('');
     const [weight, setWeight] = useState(0);
 
     useEffect(() => {
         if (editingState?.indicator) {
-            setText(editingState.indicator.text);
-            setSubText(editingState.indicator.subText || '');
+            setText(language === 'ar' ? editingState.indicator.text : editingState.indicator.text_en);
+            setSubText(language === 'ar' ? (editingState.indicator.subText || '') : (editingState.indicator.subText_en || ''));
             setWeight(editingState.indicator.weight);
         } else {
             setText('');
             setSubText('');
             setWeight(0);
         }
-    }, [editingState, isOpen]);
+    }, [editingState, isOpen, language]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const indicatorData: AssessmentIndicator = {
             id: editingState?.indicator?.id || `custom-${Date.now()}`,
-            text,
-            subText,
+            text: editingState?.indicator?.text || text,
+            text_en: editingState?.indicator?.text_en || text,
+            subText: editingState?.indicator?.subText || subText,
+            subText_en: editingState?.indicator?.subText_en || subText,
             weight,
             type: editingState?.indicator?.type || 'number', 
         };
@@ -407,20 +410,20 @@ const IndicatorFormModal: React.FC<IndicatorFormModalProps> = ({ isOpen, onClose
             <DialogContent className="glass text-white">
                 <DialogHeader>
                     <DialogTitle className="text-gold-400 text-2xl">
-                        {editingState?.indicator ? "تعديل المؤشر" : "إضافة مؤشر جديد"}
+                        {editingState?.indicator ? t('zone_assessment.editIndicator') : t('zone_assessment.addIndicatorTitle')}
                     </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-6 pt-4">
                     <div>
-                        <Label>نص المؤشر</Label>
-                        <Input value={text} onChange={(e) => setText(e.target.value)} className="bg-royal-900/50 border-white/10 mt-2" dir="rtl" />
+                        <Label>{t('zone_assessment.indicatorText')}</Label>
+                        <Input value={text} onChange={(e) => setText(e.target.value)} className="bg-royal-900/50 border-white/10 mt-2" dir={language === 'ar' ? 'rtl' : 'ltr'} />
                     </div>
                      <div>
-                        <Label>آلية القياس</Label>
-                        <Textarea value={subText} onChange={(e) => setSubText(e.target.value)} className="bg-royal-900/50 border-white/10 mt-2" dir="rtl" />
+                        <Label>{t('zone_assessment.measurementMechanism')}</Label>
+                        <Textarea value={subText} onChange={(e) => setSubText(e.target.value)} className="bg-royal-900/50 border-white/10 mt-2" dir={language === 'ar' ? 'rtl' : 'ltr'} />
                     </div>
                     <div>
-                        <Label>الوزن (الدرجة القصوى)</Label>
+                        <Label>{t('zone_assessment.maxWeight')}</Label>
                         <Input type="number" value={weight} onChange={(e) => setWeight(Number(e.target.value))} className="bg-royal-900/50 border-white/10 mt-2" />
                     </div>
                     <DialogFooter>
