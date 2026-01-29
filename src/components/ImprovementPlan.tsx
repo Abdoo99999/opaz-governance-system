@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
@@ -30,6 +29,8 @@ import { UserRole } from '@/app/page';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { useYear } from '@/context/YearContext';
+import { ASSESSMENT_DATA } from '@/data/assessmentData';
+
 
 type Status = 'todo' | 'in-progress' | 'done';
 type Priority = 'Critical' | 'High' | 'Medium' | 'Low';
@@ -539,6 +540,53 @@ export default function ImprovementPlan({ userRole, onNavigate }: { userRole: Us
             });
         }
         
+        // 4. Generate tasks from Operational Compliance Assessment
+        const opAssessKey = `opaz_operational_assessment_${selectedCompanyId}_${selectedYear}`;
+        const opAssessStr = localStorage.getItem(opAssessKey);
+        if (opAssessStr) {
+            const opAssessData = JSON.parse(opAssessStr);
+            const inputs = opAssessData.inputs || {};
+            let opIndicatorIndex = 0;
+
+            ASSESSMENT_DATA.forEach(category => {
+                category.indicators.forEach(indicator => {
+                    const numericIndicatorId = 4000 + opIndicatorIndex;
+                    opIndicatorIndex++;
+
+                    if (!existingTasks.some(t => t.indicatorId === numericIndicatorId)) {
+                        const value = inputs[indicator.id] || 0;
+                        let achievementPercentage = 0;
+
+                        if (indicator.type === 'select' && indicator.options) {
+                            const maxScore = Math.max(...indicator.options.map(o => o.score));
+                            if (maxScore > 0) {
+                                achievementPercentage = (value / indicator.weight) * 100;
+                            }
+                        } else if (indicator.type === 'number' && indicator.maxScore) {
+                            const earnedPoints = (value / indicator.maxScore) * indicator.weight;
+                            achievementPercentage = (earnedPoints / indicator.weight) * 100;
+                        }
+
+                        if (achievementPercentage < 60) { // Threshold for weakness
+                            generatedTasks.push({
+                                id: nextId++,
+                                title_en: `Operational Gap: ${category.title_en}`,
+                                title_ar: `فجوة تشغيلية: ${indicator.text}`,
+                                indicatorId: numericIndicatorId,
+                                dueDate: '2026-05-30',
+                                priority: achievementPercentage < 30 ? 'High' : 'Medium',
+                                source: 'Compliance', // Re-using 'Compliance' source
+                                assignedTo: 'Operations Lead',
+                                avatar: '',
+                                status: 'todo',
+                                axisId: 3 // Defaulting to Operational Excellence axis
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
         const allTasks = [...existingTasks, ...generatedTasks];
         setTasks(allTasks);
 
