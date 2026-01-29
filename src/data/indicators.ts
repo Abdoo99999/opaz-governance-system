@@ -13,7 +13,7 @@ export const AXES: Axis[] = [
   { id: 5, title_ar: 'القيمة المحلية والأثر الوطني', title_en: 'ICV & National Impact' }
 ];
 export const INDICATORS: Indicator[] = [ // المحور 1 
-{ id: 1, axisId: 1, text_ar: 'مدى توافق الخطة الاستراتيجية للمنطقة مع رؤية "أوباز" وأهداف 2040.', text_en: 'Alignment of zone strategic plan with OPAZ vision.' }, 
+{ id: 1, axisId: 1, text_ar: 'مدى توافق الخطة الاستراتيجية للمنطقة مع رؤية "الهيئة" وأهداف 2040.', text_en: 'Alignment of zone strategic plan with OPAZ vision.' }, 
 { id: 2, axisId: 1, text_ar: 'فاعلية مصفوفة الصلاحيات (DoA) في تسريع القرارات التشغيلية والاستثمارية.', text_en: 'Effectiveness of Delegation of Authority (DoA).' }, 
 { id: 3, axisId: 1, text_ar: 'وجود هيكل تنظيمي معتمد وواضح يحدد الأدوار والمسؤوليات بدقة.', text_en: 'Approved organizational structure defining roles.' }, 
 { id: 4, axisId: 1, text_ar: 'كفاءة الإدارة التنفيذية في تحقيق مؤشرات الأداء الرئيسية (KPIs).', text_en: 'Efficiency of executive management in achieving KPIs.' }, 
